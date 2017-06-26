@@ -1,0 +1,299 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\test.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\test.ico"
+IDI_ICON1               ICON                    "res\\Shell16_001.ico"
+IDI_ICON2               ICON                    "res\\Shell16_002.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 291, 124
+STYLE DS_SETFONT | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "关于 test"
+FONT 9, "宋体", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_STATIC_PICTURE,"Static",SS_GRAYRECT,45,21,198,78
+END
+
+IDD_TEST_DIALOG DIALOGEX 0, 0, 323, 241
+STYLE DS_SETFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "test"
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",0x0,7,7,309,227
+END
+
+IDD_DIALOG1 DIALOGEX 0, 0, 310, 213
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 9, "宋体", 400, 0, 0x86
+BEGIN
+    GROUPBOX        "",IDC_STATIC,4,1,300,102
+    PUSHBUTTON      "Button1",IDC_BUTTON1,10,15,50,14
+    PUSHBUTTON      "Button2",IDC_BUTTON2,10,43,50,14
+    PUSHBUTTON      "Button3",IDC_BUTTON3,10,71,50,14
+    PUSHBUTTON      "Button4",IDC_BUTTON4,81,15,50,14
+    PUSHBUTTON      "Button5",IDC_BUTTON5,81,43,50,14
+    PUSHBUTTON      "Button6",IDC_BUTTON6,81,71,50,14
+    LTEXT           "Static",IDC_STATIC_PREVIEW,164,9,135,87
+    GROUPBOX        "",IDC_STATIC,5,104,298,105
+    PUSHBUTTON      "Button7",IDC_BUTTON7,247,116,50,14
+    EDITTEXT        IDC_EDIT_PATH,10,114,126,18,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_NEWNAME,137,114,66,18,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_SPANSTR,204,114,39,18,ES_AUTOHSCROLL
+END
+
+IDD_DIALOG2 DIALOGEX 0, 0, 310, 213
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 9, "宋体", 400, 0, 0x86
+BEGIN
+    LISTBOX         IDC_LIST_TEST,0,99,308,113,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "",IDC_STATIC,0,0,308,96
+    CTEXT           "",IDC_STATIC_TEXT,5,10,298,81,SS_CENTERIMAGE
+END
+
+IDD_DIALOG3 DIALOGEX 0, 0, 310, 213
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 9, "宋体", 400, 0, 0x86
+BEGIN
+    COMBOBOX        IDC_COMBO_ENUMDEVICE,2,2,170,48,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_STATIC_VIDEO,"Static",SS_BLACKRECT,2,20,304,190
+    PUSHBUTTON      "测试",IDC_BUTTON2,240,2,51,16
+    PUSHBUTTON      "视频截图",IDC_BTN_CAPTUREIMAGE,182,2,51,16
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,2
+ PRODUCTVERSION 1,0,0,2
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404B0"
+        BEGIN
+            VALUE "FileDescription", "test Microsoft 基础类应用程序"
+            VALUE "FileVersion", "1, 0, 0, 2"
+            VALUE "InternalName", "test"
+            VALUE "LegalCopyright", "版权所有 (C) 2013"
+            VALUE "OriginalFilename", "test.EXE"
+            VALUE "ProductName", "test 应用程序"
+            VALUE "ProductVersion", "1, 0, 0, 2"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        RIGHTMARGIN, 289
+    END
+
+    IDD_TEST_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 316
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+        HORZGUIDE, 21
+    END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        RIGHTMARGIN, 308
+        VERTGUIDE, 5
+        VERTGUIDE, 10
+        BOTTOMMARGIN, 212
+    END
+
+    IDD_DIALOG2, DIALOG
+    BEGIN
+        RIGHTMARGIN, 308
+        BOTTOMMARGIN, 212
+    END
+
+    IDD_DIALOG3, DIALOG
+    BEGIN
+        RIGHTMARGIN, 308
+        VERTGUIDE, 2
+        VERTGUIDE, 306
+        BOTTOMMARGIN, 212
+        HORZGUIDE, 2
+        HORZGUIDE, 210
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "AFX_MENU1"
+    BEGIN
+        POPUP "图像处理"
+        BEGIN
+            MENUITEM "图像全局二值化",                     ID_MENU_GLOBALTHRESHOLD
+            MENUITEM "图像局部二值化",                     ID_MENU_LOCALTHRESHOLD
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "图像分割测试",                      ID_MENU_GRABCUT_TEST
+        MENUITEM "图像轮廓测试",                      ID_MENU_CONTOUR_TEST
+        MENUITEM SEPARATOR
+        MENUITEM "KNN-OCR",                     ID_MENU_KNN_OCR
+        MENUITEM "Tesseract-OCR",               ID_MENU_TESSERACT_OCR
+        MENUITEM "Barcode-Demo",                ID_MENU_BARCODE_DEMO
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BACKGROUND          BITMAP                  "res\\bk.bmp"
+IDB_BITMAP1             BITMAP                  "res\\1.bmp"
+IDB_BITMAP2             BITMAP                  "res\\2.bmp"
+IDB_BITMAP3             BITMAP                  "res\\3.bmp"
+IDB_BITMAP4             BITMAP                  "res\\4.bmp"
+IDB_BITMAP5             BITMAP                  "res\\5.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "关于 test(&A)..."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_MENU_GLOBALTHRESHOLD "全局二值化"
+END
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\test.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,3 @@
+xcopy $(SolutionDir)lib\leptonica\dll\liblept168.dll  $(SolutionDir)bin /d
+xcopy $(SolutionDir)lib\tesseract\dll\libtesseract302.dll  $(SolutionDir)bin /d
+xcopy $(SolutionDir)lib\opencv\dll\*.dll $(SolutionDir)bin /d
