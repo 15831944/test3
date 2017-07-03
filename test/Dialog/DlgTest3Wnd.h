@@ -26,7 +26,6 @@ protected:
 	afx_msg void					OnBnClickedBtnDrawtest();
 
 protected:
-	CCaptureWndVideo				m_CameraVideo;
 	opengl_texture_draw_video		m_openglDrawVideo;
 
 private:

@@ -33,7 +33,6 @@
 #include "Base64.h"
 #include "CBase64.h"
 #include "Character.h"
-#include "CaptureWndVideo.h"
 
 #define	DEVICE_NAME_LEN_MAX		 256
 

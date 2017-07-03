@@ -1,12 +1,6 @@
 #include "stdafx.h"
 #include "opengl_texture_draw_video.h"
 
-int opengl_texture_draw_video::m_nPosX = 100;
-int opengl_texture_draw_video::m_nPosY = 100;
-
-int opengl_texture_draw_video::m_nWndWidth  = 500;
-int opengl_texture_draw_video::m_nWndHeight = 500;
-
 const GLchar* VERTEX_SHADER = 
 {
 	"attribute vec4 vertexIn;	\n" 
@@ -41,9 +35,8 @@ const GLchar* FRAG_SHADER =
 
 opengl_texture_draw_video::opengl_texture_draw_video()
 {
-	m_argc = 1;
-	m_argv = "test.exe";
-	
+	m_nPixelWidth = 320;
+	m_nPixelHeight = 188;
 	m_pBuffer = new unsigned char[m_nPixelWidth*m_nPixelHeight*3/2];
 	if (m_pBuffer == NULL)
 	{
@@ -54,9 +47,6 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 	m_pPlane[0] = m_pBuffer;
 	m_pPlane[1] = m_pPlane[0] + m_nPixelWidth*m_nPixelHeight;
 	m_pPlane[2] = m_pPlane[1] + m_nPixelWidth*m_nPixelHeight/4;
-	
-	m_file = NULL;
-	m_pszWndTitle = "this is a test!";
 }
 
 opengl_texture_draw_video::~opengl_texture_draw_video()
@@ -74,101 +64,40 @@ opengl_texture_draw_video& opengl_texture_draw_video::Instance()
 	return inst;
 }
 
-void opengl_texture_draw_video::mouse(int button, int state, int x, int y)
+//////////////////////////////////////////////////////////////////////////
+//
+GLuint opengl_texture_draw_video::init_context(HDC hDC)
 {
-}
-
-void opengl_texture_draw_video::mousemove(int x, int y)
-{
-}
-
-void opengl_texture_draw_video::keyboard(unsigned char key, int x , int y)
-{
-	switch(key)
+	if(set_wnd_pixel_format(hDC) == GL_FALSE)
 	{
-	case 27:
-			exit(0);
-		break;
+		return GL_FALSE;
 	}
-}
-
-void opengl_texture_draw_video::display()
-{
-	opengl_texture_draw_video::Instance().renderframe();
-}
-
-void opengl_texture_draw_video::timeFunc(int value)
-{
-	display();
-	glutTimerFunc(40, timeFunc, 1);
+	
+	if(create_gl_context(hDC) == GL_FALSE)
+	{
+		return GL_FALSE;
+	}
+	
+	InitScene();
+	
+/*	
+	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
+	if(m_nProgramId == GL_FALSE)
+	{
+		return GL_FALSE;
+	}
+	
+	glUseProgram(m_nProgramId);
+	
+	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
+	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
+	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
+*/	
+	return GL_TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
-GLuint opengl_texture_draw_video::init_context(OPENGL_WND_TYPE hWndType)
-{
-	switch(hWndType)
-	{
-	case OPENGL_CONSOLE_TYPE:
-		{
-			if (!opengl_init())
-			{
-				return GL_FALSE;
-			}
-		}
-		break;
-
-	case OPENGL_WIN32_TYPE:
-		{
-
-		}
-		break;
-
-	default:
-		break;
-	}
-}
-
-GLuint opengl_texture_draw_video::opengl_init()
-{
-	GLint  nWndHandle = -1;	
-	
-	glutInit(&m_argc, &m_argv);
-	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-	glutInitWindowPosition(m_nPosX,m_nPosY);
-	glutInitWindowSize(m_nWndWidth,m_nWndHeight);
-	
-	nWndHandle = glutCreateWindow(m_pszWndTitle);
-	if(nWndHandle < 1)
-	{
-		printf("glutCreateWindow failed!\n");
-		return GL_FALSE;
-	}
-	
-	return GL_TRUE;
-}
-
-GLuint opengl_texture_draw_video::opengl_init_wnd(int nWndWidth, int nWndHeight)
-{
-	glClearColor(0.0,0.0,0.0,0.0);
-	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0,0.0,nWndWidth,nWndHeight,-1.0,1.0);
-	
-	return GL_TRUE;
-}
-
-GLuint opengl_texture_draw_video::opengl_func_event()
-{
-	glutDisplayFunc(display);
-	glutKeyboardFunc(keyboard);
-	glutMouseFunc(mouse);
-	glutMotionFunc(mousemove);
-	
-	return GL_TRUE;
-}
-
 GLuint opengl_texture_draw_video::buildshader(const char* pszsource, GLenum shaderType)
 {
 	GLint nCompiled = 0;
@@ -254,27 +183,6 @@ GLuint opengl_texture_draw_video::buildprogram(const char* vertexShaderSource, c
 	return programHandle;
 }
 
-void opengl_texture_draw_video::renderframe()
-{
-
-}
-
-GLuint opengl_texture_draw_video::init_context()
-{
-	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
-	if(m_nProgramId == GL_FALSE)
-	{
-		return GL_FALSE;
-	}
-	
-	glUseProgram(m_nProgramId);
-	
-	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
-	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
-	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
-	
-	return GL_TRUE;
-}
 
 GLuint opengl_texture_draw_video::set_wnd_pixel_format(HDC hDC)
 {
@@ -286,8 +194,7 @@ GLuint opengl_texture_draw_video::set_wnd_pixel_format(HDC hDC)
 		1,									// nVersion 
 		PFD_DRAW_TO_WINDOW|					// dwFlags
 		PFD_SUPPORT_OPENGL|
-		PFD_DRAW_TO_BITMAP|
-		PFD_SUPPORT_GDI|
+		PFD_DOUBLEBUFFER|
 		PFD_STEREO_DONTCARE,
 		PFD_TYPE_RGBA,						// iPixelType 
 		24,									// cColorBits
@@ -324,19 +231,58 @@ GLuint opengl_texture_draw_video::set_wnd_pixel_format(HDC hDC)
 
 GLuint opengl_texture_draw_video::create_gl_context(HDC hDC)
 {
-	m_hRC = wglCreateContext(hDC);
-	if (m_hRC == NULL)
+	HGLRC hRC = NULL;
+	int OpenGLVersion[2];
+	GLenum GlewInitResult;
+	
+	int attribs[] =
+    {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+        WGL_CONTEXT_FLAGS_ARB, 0,
+        0
+    };
+		
+	hRC = wglCreateContext(hDC);
+	if (hRC == NULL)
 	{
 		return GL_FALSE;
 	}
 
-	if (wglMakeCurrent(hDC, m_hRC) == FALSE)
+	if (wglMakeCurrent(hDC, hRC) == FALSE)
 	{
 		return GL_FALSE;
 	}
 
-	glClearDepth(1.0f);
-	glEnable(GL_DEPTH_TEST); 
+	glewExperimental = GL_TRUE;
+	GlewInitResult = glewInit();
+	if(GlewInitResult != GLEW_OK)
+	{
+		return GL_FALSE;
+	}
+	
+	if(wglewIsSupported("WGL_ARB_create_context"))
+	{
+		m_hRC = wglCreateContextAttribsARB(hDC, 0, attribs);
+		wglMakeCurrent(NULL,NULL);
+		
+		wglDeleteContext(hRC);
+		wglMakeCurrent(hDC, m_hRC);
+	}
+	else
+	{
+		m_hRC = hRC;
+	}
+	
+	const GLubyte *GLVersionString = glGetString(GL_VERSION);
+	
+	glGetIntegerv(GL_MAJOR_VERSION, &OpenGLVersion[0]);
+	glGetIntegerv(GL_MINOR_VERSION, &OpenGLVersion[1]);
+	
+	if(m_hRC == NULL)
+	{
+		return GL_FALSE;
+	}
 
 	return GL_TRUE;
 }
@@ -344,7 +290,7 @@ GLuint opengl_texture_draw_video::create_gl_context(HDC hDC)
 GLuint opengl_texture_draw_video::destroy_gl_context()
 {
 	m_hRC = ::wglGetCurrentContext();
-	if (::wglMakeCurrent (0,0) == FALSE)
+	if (::wglMakeCurrent (NULL, NULL) == FALSE)
 	{
 		return GL_FALSE;
 	}
@@ -360,5 +306,28 @@ GLuint opengl_texture_draw_video::destroy_gl_context()
 	return GL_TRUE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//
+void opengl_texture_draw_video::InitScene()
+{
+	//启用阴影平滑
+	glShadeModel(GL_SMOOTH);
+	//黑色背景
+	glClearColor(0.0, 0.0, 0.0, 0.0); 
+	//设置深度缓存
+	glClearDepth(1.0);  
+	//启用深度测试  
+	glEnable(GL_DEPTH_TEST);
+	//所作深度测试的类型 
+	glDepthFunc(GL_LEQUAL);
+	//告诉系统对透视进行修正
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	glEnable(GL_TEXTURE_2D); 
+}
+
+void opengl_texture_draw_video::drawScene(HDC hDC)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+    glLoadIdentity(); 
+    glTranslatef(0.0f  ,0.0f  ,-5.0f ); 
+
+	SwapBuffers(hDC);
+}

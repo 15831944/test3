@@ -701,14 +701,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Inc\CaptureWndVideo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\CaptureWndVideo.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Inc\Character.cpp"
 				>
 			</File>

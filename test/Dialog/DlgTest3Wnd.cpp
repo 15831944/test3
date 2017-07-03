@@ -10,8 +10,6 @@ CDlgTest3Wnd::CDlgTest3Wnd(CWnd* pParent /*=NULL*/)
 {
 	m_strDefaultPath = _T("");
 	m_strAppPath = _T("");
-
-	m_bCameraOpen = FALSE;
 }
 
 CDlgTest3Wnd::~CDlgTest3Wnd()
@@ -41,136 +39,28 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 	HRESULT hr = S_FALSE;
 	DWORD dwIndex = 0;
 
-	std::list<DeviceName> listDeviceName;
-	std::list<DeviceName>::iterator iter;
-
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
 	{
 		return FALSE;
 	}
 
-	if (m_openglDrawVideo.opengl_init() == GL_FALSE)
-	{
-		return FALSE;
-	}
-
-	if (m_openglDrawVideo.opengl_init_wnd(500, 500) == GL_FALSE)
-	{
-		return FALSE;
-	}
-
-// 	if (m_openglDrawVideo.opengl_func_event() == GL_FALSE)
-// 	{
-// 		return FALSE;
-// 	}
-// 
-// 	if (m_openglDrawVideo.init_context() == GL_FALSE)
-// 	{
-// 		return FALSE;
-// 	}
-
-	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
-	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
-	{
-		m_strDefaultPath = lpszDesktopPath;
-	}
-	else
-	{
-		m_strDefaultPath = _T("C:\\");
-	}
-
-	m_strAppPath = pGlobal->GetAppPath();
-
-	GetDlgItem(IDC_COMBO_ENUMDEVICE)->EnableWindow(FALSE);
-
-	if (CCaptureWndVideo::EnumDevices(listDeviceName))
-	{
-		GetDlgItem(IDC_COMBO_ENUMDEVICE)->EnableWindow(TRUE);
-
-		for (dwIndex=0,iter=listDeviceName.begin(); iter!=listDeviceName.end(); ++iter, ++dwIndex)
-		{
-			((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->InsertString(dwIndex, iter->FriendlyName);
-			((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->SetItemData(dwIndex,  iter->nDeviceID);	
-		}
-
-		((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->SetCurSel(0);
-
-//		OnCbnSelchangeComboEnumdevice();
-	}
+	HDC hDC = GetDlgItem(IDC_STATIC_VIDEO)->GetDC()->m_hDC;
+	m_openglDrawVideo.init_context(hDC);
 
 	return TRUE;  
 }
 
 void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 {
-	int nCurSel = -1;
-	static int nPreSel = -1;
-
-	DWORD dwCaptureID = 0;
-	CString strText;
-
-	if (((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->GetCount() <= 0)
-	{
-		return;
-	}
-
-	nCurSel = ((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->GetCurSel();
-	if (nCurSel < 0)
-	{
-		return;
-	}
-
-	if (nCurSel == nPreSel)
-	{
-		return;
-	}
-
-	if (nPreSel != -1)
-	{
-		m_CameraVideo.CloseCamera();
-	}
-
-	((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->GetLBText(nCurSel, strText);
-	if (strText == _T(""))
-	{
-		return;
-	}
-
-	dwCaptureID = ((CComboBox*)GetDlgItem(IDC_COMBO_ENUMDEVICE))->GetItemData(nCurSel);
-
-	if (!m_CameraVideo.OpenCamera(dwCaptureID, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd()))
-	{
-		return;
-	}
-
-	m_bCameraOpen = TRUE;
-	nPreSel = nCurSel;
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 {
-	if (!m_bCameraOpen)
-	{
-		return;
-	}
-
-	CFileDialog dlg(FALSE, "bmp", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, "位图文件(*.bmp)|*.bmp|All Files(*.*)|*.*||", this);
-	dlg.m_ofn.lpstrInitialDir = m_strDefaultPath;
-
-	if (dlg.DoModal() != IDOK)
-	{
-		return;
-	}
-
-	if (!m_CameraVideo.CaptureImages(dlg.GetPathName()))
-	{
-		MessageBox(_T("视频截图失败, 请检查!"), _T("警告!"), MB_ICONERROR|MB_OK);
-		return;
-	}
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 {
-	
+	HDC hDC = GetDlgItem(IDC_STATIC_VIDEO)->GetDC()->m_hDC;
+	m_openglDrawVideo.drawScene(hDC);	
 }
