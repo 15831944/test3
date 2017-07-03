@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\common&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\common&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				GeneratePreprocessedFile="0"
 				KeepComments="false"
@@ -93,7 +93,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;"
 				UACExecutionLevel="0"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -746,6 +746,14 @@
 			</File>
 			<File
 				RelativePath=".\Inc\NodeTree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\opengl_texture_draw_video.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\opengl_texture_draw_video.h"
 				>
 			</File>
 			<File

@@ -26,6 +26,7 @@ void CDlgTest3Wnd::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgTest3Wnd, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_ENUMDEVICE,	OnCbnSelchangeComboEnumdevice)
 	ON_BN_CLICKED(IDC_BTN_CAPTUREIMAGE,		OnBnClickedBtnCaptureimage)
+	ON_BN_CLICKED(IDC_BTN_DRAWTEST,			OnBnClickedBtnDrawtest)
 END_MESSAGE_MAP()
 
 
@@ -48,6 +49,26 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 	{
 		return FALSE;
 	}
+
+	if (m_openglDrawVideo.opengl_init() == GL_FALSE)
+	{
+		return FALSE;
+	}
+
+	if (m_openglDrawVideo.opengl_init_wnd(500, 500) == GL_FALSE)
+	{
+		return FALSE;
+	}
+
+// 	if (m_openglDrawVideo.opengl_func_event() == GL_FALSE)
+// 	{
+// 		return FALSE;
+// 	}
+// 
+// 	if (m_openglDrawVideo.init_context() == GL_FALSE)
+// 	{
+// 		return FALSE;
+// 	}
 
 	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
 	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
@@ -147,4 +168,9 @@ void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 		MessageBox(_T("ÊÓÆµ½ØÍ¼Ê§°Ü, Çë¼ì²é!"), _T("¾¯¸æ!"), MB_ICONERROR|MB_OK);
 		return;
 	}
+}
+
+void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
+{
+	
 }

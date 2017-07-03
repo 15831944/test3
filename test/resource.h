@@ -37,6 +37,7 @@
 #define ID_MENU_LOCALTHRESHOLD          0x0403
 #define IDC_STATIC_PREVIEW              1027
 #define ID_MENU_GRABCUT_TEST            0x0404
+#define IDC_BTN_DRAWTEST                1028
 #define ID_MENU_CONTOUR_TEST            0x0405
 #define ID_MENU_KNN_TEST                0x0406
 #define ID_MENU_LINE_OCR                0x0407
@@ -57,7 +58,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        153
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

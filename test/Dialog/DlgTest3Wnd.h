@@ -2,6 +2,7 @@
 #include "afxwin.h"
 #include <atlconv.h>
 
+#include "../inc/opengl_texture_draw_video.h"
 
 using namespace std;
 class CDlgTest3Wnd : public CDialog
@@ -22,14 +23,15 @@ protected:
 
 	afx_msg void					OnCbnSelchangeComboEnumdevice();
 	afx_msg void					OnBnClickedBtnCaptureimage();
+	afx_msg void					OnBnClickedBtnDrawtest();
 
 protected:
 	CCaptureWndVideo				m_CameraVideo;
+	opengl_texture_draw_video		m_openglDrawVideo;
 
 private:
 	CString							m_strDefaultPath;
 	CString							m_strAppPath;
 
-	BOOL							m_bCameraOpen;
-	
+	BOOL							m_bCameraOpen;	
 };
