@@ -26,7 +26,8 @@ protected:
 	afx_msg void					OnBnClickedBtnDrawtest();
 
 protected:
-	opengl_texture_draw_video		m_openglDrawVideo;
+	opengl_texture_draw_video		m_openglDrawVideo1;
+	opengl_texture_draw_video		m_openglDrawVideo2;
 
 private:
 	CString							m_strDefaultPath;

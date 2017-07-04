@@ -35,8 +35,21 @@ const GLchar* FRAG_SHADER =
 
 opengl_texture_draw_video::opengl_texture_draw_video()
 {
-	m_nPixelWidth = 320;
-	m_nPixelHeight = 188;
+	m_hRC = NULL;
+	m_hDC = NULL;
+
+	m_bIsMaximized = FALSE;
+
+	m_nWndWidth	   = 0;
+	m_nWndHeight   = 0;
+
+	m_nPixelWidth  = 320;
+	m_nPixelHeight = 180;
+
+	m_rect.SetRectEmpty();
+	m_oldWindow.SetRectEmpty();
+	m_originalRect.SetRectEmpty();
+
 	m_pBuffer = new unsigned char[m_nPixelWidth*m_nPixelHeight*3/2];
 	if (m_pBuffer == NULL)
 	{
@@ -56,6 +69,8 @@ opengl_texture_draw_video::~opengl_texture_draw_video()
 		delete[] m_pBuffer;
 		m_pBuffer = NULL;
 	}
+
+	destroy_gl_context();
 }
 
 opengl_texture_draw_video& opengl_texture_draw_video::Instance()
@@ -64,35 +79,153 @@ opengl_texture_draw_video& opengl_texture_draw_video::Instance()
 	return inst;
 }
 
+BEGIN_MESSAGE_MAP(opengl_texture_draw_video, CWnd)
+	ON_WM_PAINT()
+	ON_WM_SIZE()
+	ON_WM_TIMER()
+END_MESSAGE_MAP()
+
+void opengl_texture_draw_video::OnPaint()
+{
+	ValidateRect(NULL);
+}
+
+void opengl_texture_draw_video::OnSize(UINT nType, int cx, int cy)
+{
+	CWnd::OnSize(nType, cx, cy);
+	if (0 >= cx || 0 >= cy || nType == SIZE_MINIMIZED) 
+		return;
+
+	//
+	glViewport(0, 0, cx, cy);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(35.0f, (float)cx / (float)cy, 0.01f, 2000.0f);
+	glMatrixMode(GL_MODELVIEW);
+
+	switch (nType)
+	{
+	case SIZE_MAXIMIZED:
+		{
+			GetWindowRect(m_rect);
+			MoveWindow(6, 6, cx - 14, cy - 14);
+			GetWindowRect(m_rect);
+			m_oldWindow = m_rect;
+		}
+		break;
+
+	case SIZE_RESTORED:
+		{
+			if (m_bIsMaximized)
+			{
+				GetWindowRect(m_rect);
+				MoveWindow(m_oldWindow.left, m_oldWindow.top - 18, m_originalRect.Width() - 4, m_originalRect.Height() - 4);
+				GetWindowRect(m_rect);
+				m_oldWindow = m_rect;
+			}
+		}
+		break;
+	}
+}
+
+void opengl_texture_draw_video::OnDraw(CDC *pDC)
+{
+	return;
+}
+
+void opengl_texture_draw_video::OnTimer(UINT nIDEvent)
+{
+	switch(nIDEvent)
+	{
+	case ID_DRAW_SCENE:
+		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
+			drawscene();
+			SwapBuffers(m_hDC);
+		}
+		break;
+	default:
+		break;
+	}
+
+	CWnd::OnTimer(nIDEvent);
+}
 //////////////////////////////////////////////////////////////////////////
 //
-GLuint opengl_texture_draw_video::init_context(HDC hDC)
+BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
 {
-	if(set_wnd_pixel_format(hDC) == GL_FALSE)
+	BOOL bRet = FALSE;
+	CString strClassName;
+
+	if (pParent == NULL)
+	{
+		return FALSE;
+	}
+
+	if (rect.IsRectEmpty())
+	{
+		return FALSE;
+	}
+
+	strClassName = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_OWNDC, NULL, (HBRUSH)GetStockObject(WHITE_BRUSH), NULL);
+
+	bRet = CreateEx(NULL, strClassName, _T("OpenGL with MFC/CDialog"), WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN, rect, pParent, NULL);
+	if (!bRet)
+	{
+		return FALSE;
+	}
+
+	if (InitContext() == GL_FALSE)
+	{
+		return FALSE;
+	}
+
+//	SetTimer(ID_DRAW_SCENE,1,0);
+
+	m_oldWindow	   = rect;
+	m_originalRect = rect;
+
+	return TRUE;
+}
+
+GLuint opengl_texture_draw_video::InitContext()
+{
+	m_hDC = GetDC()->GetSafeHdc();
+	if (m_hDC == NULL)
+	{
+		return GL_FALSE;
+	}
+
+	if(set_wnd_pixel_format() == GL_FALSE)
 	{
 		return GL_FALSE;
 	}
 	
-	if(create_gl_context(hDC) == GL_FALSE)
+	if(create_gl_context() == GL_FALSE)
 	{
 		return GL_FALSE;
 	}
-	
-	InitScene();
-	
-/*	
+
 	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
 	if(m_nProgramId == GL_FALSE)
 	{
 		return GL_FALSE;
 	}
 	
-	glUseProgram(m_nProgramId);
+ 	glUseProgram(m_nProgramId);
 	
 	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
 	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
 	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
-*/	
+
+	if (!createsurface())
+	{
+		return GL_FALSE;
+	}
+
+	initscene();
 	return GL_TRUE;
 }
 
@@ -183,10 +316,89 @@ GLuint opengl_texture_draw_video::buildprogram(const char* vertexShaderSource, c
 	return programHandle;
 }
 
+GLuint opengl_texture_draw_video::createsurface()
+{
+	//顶点数组(物体表面坐标取值范围是-1到1，数组坐标：做下,右下,左下,右下)
+#if TEXTURE_ROTATE
+	static const GLfloat vertexVertices[] = {
+		-1.0f, -0.5f,
+		0.5f, -1.0f,
+		-0.5f,  1.0f,
+		1.0f,  0.5f,
+	};    
+#else
+	static const GLfloat vertexVertices[] = {
+		-1.0f, -1.0f,
+		1.0f, -1.0f,
+		-1.0f,  1.0f,
+		1.0f,  1.0f,
+	};    
+#endif
 
-GLuint opengl_texture_draw_video::set_wnd_pixel_format(HDC hDC)
+	//像素,纹理数组(纹理坐标取值范围是0-1,坐标原点位于左下角,数组坐标:左下,右下,左下,右下, 如果先左下,图像会倒过来)
+#if TEXTURE_HALF
+	static const GLfloat textureVertices[] = {
+		0.0f,  1.0f,
+		0.5f,  1.0f,
+		0.0f,  0.0f,
+		0.5f,  0.0f,
+	}; 
+#else
+	static const GLfloat textureVertices[] = {
+		0.0f,  1.0f,
+		1.0f,  1.0f,
+		0.0f,  0.0f,
+		1.0f,  0.0f,
+	}; 
+#endif
+
+	//定义顶点数组
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0, vertexVertices);
+	//启用属性数组
+	glEnableVertexAttribArray(ATTRIB_VERTEX);
+	//定义像素纹理数组
+	glVertexAttribPointer(ATTRIB_TEXTURE, 2, GL_FLOAT, 0, 0, textureVertices);
+	//启用属性数组
+	glEnableVertexAttribArray(ATTRIB_TEXTURE);
+
+	//初始化纹理
+	glGenTextures(1, &m_nTextureIdY);
+	//绑定纹理
+	glBindTexture(GL_TEXTURE_2D, m_nTextureIdY);
+
+	//设置此纹理的一些属性
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//3
+	glGenTextures(1, &m_nTextureIdU);
+	glBindTexture(GL_TEXTURE_2D, m_nTextureIdU);   
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//4
+	glGenTextures(1, &m_nTextureIdV); 
+	glBindTexture(GL_TEXTURE_2D, m_nTextureIdV);    
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	return GL_TRUE;
+}
+
+GLuint opengl_texture_draw_video::set_wnd_pixel_format()
 {
 	int nPixelFormat = 0;
+
+	if (m_hDC == NULL)
+	{
+		return GL_FALSE;
+	}
 
 	static PIXELFORMATDESCRIPTOR pixelDesc=
 	{
@@ -198,30 +410,30 @@ GLuint opengl_texture_draw_video::set_wnd_pixel_format(HDC hDC)
 		PFD_STEREO_DONTCARE,
 		PFD_TYPE_RGBA,						// iPixelType 
 		24,									// cColorBits
-		8,16,8,8,8,0,						// cRGB Color Bits and shift 
+		0,0,0,0,0,0,						// cRGB Color Bits and shift 
 		0,									// cAlphaBits  
 		0,									// cAlphaShift  
-		64,									// cAccumBits  
-		16,16,16,0,							// RGB Alpha Accum Bits 
-		32,									// cDepthBits 
-		8,									// cStencilBits 
+		0,									// cAccumBits  
+		0,0,0,0,							// RGB Alpha Accum Bits 
+		16,									// cDepthBits 
+		0,									// cStencilBits 
 		0,									// cAuxBuffers
 		PFD_MAIN_PLANE,						// iLayerType 
 		0,									// bReserved 
 		0,0,0								// Layer, Visible, Damage Mask 
 	};
 
-	nPixelFormat = ChoosePixelFormat(hDC, &pixelDesc);
+	nPixelFormat = ChoosePixelFormat(m_hDC, &pixelDesc);
 	if (nPixelFormat == 0)
 	{
 		nPixelFormat = 1;
-		if (DescribePixelFormat(hDC, nPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pixelDesc) == 0)
+		if (DescribePixelFormat(m_hDC, nPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pixelDesc) == 0)
 		{
 			return GL_FALSE;
 		}
 	}
 
-	if (SetPixelFormat(hDC, nPixelFormat, &pixelDesc) == FALSE)
+	if (SetPixelFormat(m_hDC, nPixelFormat, &pixelDesc) == FALSE)
 	{
 		return GL_FALSE;
 	}
@@ -229,27 +441,32 @@ GLuint opengl_texture_draw_video::set_wnd_pixel_format(HDC hDC)
 	return GL_TRUE;
 }
 
-GLuint opengl_texture_draw_video::create_gl_context(HDC hDC)
+GLuint opengl_texture_draw_video::create_gl_context()
 {
 	HGLRC hRC = NULL;
 	int OpenGLVersion[2];
 	GLenum GlewInitResult;
+
+	if (m_hDC == NULL)
+	{
+		return GL_FALSE;
+	}
 	
 	int attribs[] =
     {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
         WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-        WGL_CONTEXT_FLAGS_ARB, 0,
+        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
         0
     };
 		
-	hRC = wglCreateContext(hDC);
+	hRC = wglCreateContext(m_hDC);
 	if (hRC == NULL)
 	{
 		return GL_FALSE;
 	}
 
-	if (wglMakeCurrent(hDC, hRC) == FALSE)
+	if (wglMakeCurrent(m_hDC, hRC) == FALSE)
 	{
 		return GL_FALSE;
 	}
@@ -260,12 +477,13 @@ GLuint opengl_texture_draw_video::create_gl_context(HDC hDC)
 	{
 		return GL_FALSE;
 	}
-	
-	if(wglewIsSupported("WGL_ARB_create_context"))
+
+#if 0
+	if(wglewIsSupported("WGL_ARB_create_context") == 1)
 	{
 		m_hRC = wglCreateContextAttribsARB(hDC, 0, attribs);
 		wglMakeCurrent(NULL,NULL);
-		
+
 		wglDeleteContext(hRC);
 		wglMakeCurrent(hDC, m_hRC);
 	}
@@ -273,7 +491,9 @@ GLuint opengl_texture_draw_video::create_gl_context(HDC hDC)
 	{
 		m_hRC = hRC;
 	}
-	
+#endif
+
+	m_hRC = hRC;
 	const GLubyte *GLVersionString = glGetString(GL_VERSION);
 	
 	glGetIntegerv(GL_MAJOR_VERSION, &OpenGLVersion[0]);
@@ -306,7 +526,7 @@ GLuint opengl_texture_draw_video::destroy_gl_context()
 	return GL_TRUE;
 }
 
-void opengl_texture_draw_video::InitScene()
+void opengl_texture_draw_video::initscene()
 {
 	//启用阴影平滑
 	glShadeModel(GL_SMOOTH);
@@ -321,13 +541,160 @@ void opengl_texture_draw_video::InitScene()
 	//告诉系统对透视进行修正
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glEnable(GL_TEXTURE_2D); 
+
+	glClearColor(0.5f, 0.6f, 0.9f, 0.0f);
+//	glClearColor(0.0, 0.0, 1.0, 0.0);
 }
 
-void opengl_texture_draw_video::drawScene(HDC hDC)
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
-    glLoadIdentity(); 
-    glTranslatef(0.0f  ,0.0f  ,-5.0f ); 
+void opengl_texture_draw_video::drawscene()
+{//https://open.gl/geometry	//http://colabug.com/174582.html	//http://www.tuicool.com/articles/A7zQvmy
+//http://www.roxlu.com/2014/028/opengl-instanced-rendering
+	//glViewport(0, 0, rect.Width(), rect.Height());
+ 	
+#if 0
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();  
+	gluLookAt(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);  
 
-	SwapBuffers(hDC);
+	glMatrixMode(GL_PROJECTION);  
+	glLoadIdentity();  
+	gluPerspective(45.0, 1.0, 0.1, 500.0);  
+	glMatrixMode(GL_MODELVIEW); 
+
+	glColor3f(1.0, 0.0, 0.0);  
+	glBegin(GL_TRIANGLES);  
+		glVertex3f(0.0, 25.0, 0.0);  
+		glVertex3f(-25.0, -25.0, 0.0);  
+		glVertex3f(25.0, -25.0, 0.0);  
+	glEnd(); 
+#elif 0
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(50.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+//	glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+
+	glBegin(GL_TRIANGLES);
+		glColor4ub(200,0,180,255);
+		glVertex3f(0,0,-100.0f); 
+		glVertex3f(10.0f, 0, -100.0f); 
+		glVertex3f(0, 10.0f, -100.0f);
+	glEnd();
+#elif 0
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+// 	gluPerspective(50.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
+// 	glMatrixMode(GL_MODELVIEW);
+// 	glLoadIdentity();
+
+	const GLfloat factor = 0.1f;//让正弦函数比例放大 
+	GLfloat x;  
+
+	//画x,y坐标  
+	glEnable(GL_LINE_STIPPLE);//启动虚线  
+	glLineStipple(2,0x0F0F);//设置虚线样式  
+	glLineWidth(2.0f);    //设置线宽  
+
+	glBegin(GL_LINES);  
+		glVertex2f(-1.0f,0.0f);  
+		glVertex2f(1.0f,0.0f);  
+		glVertex2f(0.0f,-1.0f);  
+		glVertex2f(0.0f,1.0f);  
+	glEnd();  
+
+	//画正弦函数曲线  
+	glDisable(GL_LINE_STIPPLE);//禁止虚线  
+	glBegin(GL_LINE_STRIP);  
+		for (x=-1.0f/factor;x<1.0f/factor;x+=0.01f)  
+		{  
+			glVertex2f(x*factor,sin(x)*factor);  
+		}  
+	glEnd(); 
+#elif 0
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(50.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glBegin(GL_QUADS);
+		// Front Side
+		glVertex3f( 1.0f,  1.0f, 1.0f);
+		glVertex3f(-1.0f,  1.0f, 1.0f);
+		glVertex3f(-1.0f, -1.0f, 1.0f);
+		glVertex3f( 1.0f, -1.0f, 1.0f);
+
+		// Back Side
+		glVertex3f(-1.0f, -1.0f, -1.0f);
+		glVertex3f(-1.0f,  1.0f, -1.0f);
+		glVertex3f( 1.0f,  1.0f, -1.0f);
+		glVertex3f( 1.0f, -1.0f, -1.0f);
+
+		// Top Side
+		glVertex3f( 1.0f, 1.0f,  1.0f);
+		glVertex3f( 1.0f, 1.0f, -1.0f);
+		glVertex3f(-1.0f, 1.0f, -1.0f);
+		glVertex3f(-1.0f, 1.0f,  1.0f);
+
+		// Bottom Side
+		glVertex3f(-1.0f, -1.0f, -1.0f);
+		glVertex3f( 1.0f, -1.0f, -1.0f);
+		glVertex3f( 1.0f, -1.0f,  1.0f);
+		glVertex3f(-1.0f, -1.0f,  1.0f);
+
+		// Right Side
+		glVertex3f( 1.0f,  1.0f,  1.0f);
+		glVertex3f( 1.0f, -1.0f,  1.0f);
+		glVertex3f( 1.0f, -1.0f, -1.0f);
+		glVertex3f( 1.0f,  1.0f, -1.0f);
+
+		// Left Side
+		glVertex3f(-1.0f, -1.0f, -1.0f);
+		glVertex3f(-1.0f, -1.0f,  1.0f);
+		glVertex3f(-1.0f,  1.0f,  1.0f);
+		glVertex3f(-1.0f,  1.0f, -1.0f);
+	glEnd();
+#elif 1
+//	fseek(m_file, 0, SEEK_SET);
+//	memset(m_pBuffer, 0x0, m_nPixelWidth*m_nPixelHeight*3/2);
+
+	if (fread(m_pBuffer, 1, m_nPixelWidth*m_nPixelHeight*3/2, m_file) != m_nPixelWidth*m_nPixelHeight*3/2)
+	{
+		fseek(m_file, 0, SEEK_SET);
+		fread(m_pBuffer, 1, m_nPixelWidth*m_nPixelHeight*3/2, m_file);
+	}
+	
+	glClearColor(0.0,0.0,0.0,0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glActiveTexture(GL_TEXTURE0);
+	//允许建立一个绑定到目标纹理的有名称纹理
+	glBindTexture(GL_TEXTURE_2D, m_nTextureIdY);
+	//根据指定参数,生成一个2D纹理(Texture),相似函数还有glTexImage1D、glTexImage3D
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth, m_nPixelHeight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[0]);	//GL_RED
+	//设置纹理,安装签名设置的规则讲图像或者纹理贴上(参数和选择的活跃纹理单元对应GL_TEXTURE0)
+	glUniform1i(m_nTextureUniformY, 0);    
+
+	//U
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_nTextureIdU);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth/2, m_nPixelHeight/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[1]);       
+	glUniform1i(m_nTextureUniformU, 1);
+	//V
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_nTextureIdV);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth/2, m_nPixelHeight/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[2]);    
+	glUniform1i(m_nTextureUniformV, 2);  
+
+	//绘制
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+//	glutSwapBuffers();
+#endif
 }

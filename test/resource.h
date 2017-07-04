@@ -47,6 +47,7 @@
 #define IDC_STATIC_VERSION              0x0500
 #define IDC_STATIC_VIDEO                0x0501
 #define IDC_STATIC_TEXT                 0x0502
+#define IDC_STATIC_VIDEO2               1282
 #define IDC_STATIC_PICTURE              0x0503
 #define IDC_TAB1                        0x0510
 #define IDC_CHECK1                      0x0511

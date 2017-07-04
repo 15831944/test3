@@ -33,11 +33,7 @@ END_MESSAGE_MAP()
 BOOL CDlgTest3Wnd::OnInitDialog()
 {
 	USES_CONVERSION;
-
 	CDialog::OnInitDialog();
-
-	HRESULT hr = S_FALSE;
-	DWORD dwIndex = 0;
 
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
@@ -45,8 +41,9 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 		return FALSE;
 	}
 
-	HDC hDC = GetDlgItem(IDC_STATIC_VIDEO)->GetDC()->m_hDC;
-	m_openglDrawVideo.init_context(hDC);
+	CRect rect1;
+	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
+	m_openglDrawVideo1.CreateGLContext(rect1, GetDlgItem(IDC_STATIC_VIDEO));
 
 	return TRUE;  
 }
@@ -61,6 +58,5 @@ void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 
 void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 {
-	HDC hDC = GetDlgItem(IDC_STATIC_VIDEO)->GetDC()->m_hDC;
-	m_openglDrawVideo.drawScene(hDC);	
+	GetDlgItem(IDC_STATIC_VIDEO)->ShowWindow(SW_HIDE);
 }

@@ -15,8 +15,9 @@
 
 #define ATTRIB_VERTEX	3
 #define ATTRIB_TEXTURE	4
+#define ID_DRAW_SCENE	WM_USER + 0x1001
 
-class opengl_texture_draw_video
+class opengl_texture_draw_video : public CWnd
 {
 public:
 	opengl_texture_draw_video();
@@ -25,22 +26,41 @@ public:
 public:
 	static opengl_texture_draw_video& Instance();
 
+protected:
+	afx_msg  void			OnPaint();
+	afx_msg	 void			OnSize(UINT nType, int cx, int cy);
+	afx_msg	 void			OnDraw(CDC *pDC);
+	afx_msg	 void			OnTimer(UINT nIDEvent);
+
+	DECLARE_MESSAGE_MAP()
+
 public:
-	GLuint					init_context(HDC hDC);
-	void					drawScene(HDC hDC);
+	BOOL					CreateGLContext(CRect rect, CWnd* pParent);
+	GLuint					InitContext();
 	
-protected:	
+protected:
 	GLuint					buildshader(const char* pszsource, GLenum shaderType);
 	GLuint					buildprogram(const char* vertexShaderSource, const char* fragmentShaderSource);
+
+	GLuint					createsurface();
 	
-	GLuint					set_wnd_pixel_format(HDC hDC);
-	GLuint					create_gl_context(HDC hDC);
+	void					initscene();
+	void					drawscene();
+	
+	GLuint					set_wnd_pixel_format();
+	GLuint					create_gl_context();
 	GLuint					destroy_gl_context();
 	
-	void					InitScene();
-	
-	
+protected:
+	HDC						m_hDC;
+	HGLRC					m_hRC;
+
+	CRect					m_rect;
+	CRect					m_oldWindow;
+	CRect					m_originalRect;
+
 private:
+	BOOL					m_bIsMaximized;
 	GLuint					m_nProgramId;
 	
 	GLuint					m_nTextureUniformY;
@@ -54,11 +74,13 @@ private:
 	GLuint					m_nPixelWidth;
 	GLuint					m_nPixelHeight;
 
-	HGLRC					m_hRC;
-	HDC						m_hDC;
-	
+	int						m_nWndWidth;
+	int						m_nWndHeight;
+
 	unsigned char*			m_pBuffer;
 	unsigned char*  		m_pPlane[3];
+
+	FILE*			m_file;
 };
 
 #endif
