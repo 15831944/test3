@@ -58,5 +58,4 @@ void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 
 void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 {
-	GetDlgItem(IDC_STATIC_VIDEO)->ShowWindow(SW_HIDE);
 }

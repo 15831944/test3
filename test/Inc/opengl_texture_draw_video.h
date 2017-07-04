@@ -25,6 +25,7 @@ public:
 	
 public:
 	static opengl_texture_draw_video& Instance();
+	static DWORD WINAPI DrawSceneThreadProc(LPVOID lpParam);
 
 protected:
 	afx_msg  void			OnPaint();
@@ -37,6 +38,8 @@ protected:
 public:
 	BOOL					CreateGLContext(CRect rect, CWnd* pParent);
 	GLuint					InitContext();
+
+	void					DisplayVideo();
 	
 protected:
 	GLuint					buildshader(const char* pszsource, GLenum shaderType);
@@ -52,6 +55,11 @@ protected:
 	GLuint					destroy_gl_context();
 	
 protected:
+	HANDLE					m_hThread;
+	
+	HANDLE					m_hStartEvent;
+	HANDLE					m_hEndEvent;
+	
 	HDC						m_hDC;
 	HGLRC					m_hRC;
 
@@ -60,6 +68,8 @@ protected:
 	CRect					m_originalRect;
 
 private:
+	BOOL					m_bExit;
+
 	BOOL					m_bIsMaximized;
 	GLuint					m_nProgramId;
 	
@@ -76,6 +86,8 @@ private:
 
 	int						m_nWndWidth;
 	int						m_nWndHeight;
+	
+	DWORD					m_dwThreadID;
 
 	unsigned char*			m_pBuffer;
 	unsigned char*  		m_pPlane[3];

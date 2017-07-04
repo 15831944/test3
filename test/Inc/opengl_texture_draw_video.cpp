@@ -38,6 +38,7 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 	m_hRC = NULL;
 	m_hDC = NULL;
 
+	m_bExit = FALSE;
 	m_bIsMaximized = FALSE;
 
 	m_nWndWidth	   = 0;
@@ -60,6 +61,9 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 	m_pPlane[0] = m_pBuffer;
 	m_pPlane[1] = m_pPlane[0] + m_nPixelWidth*m_nPixelHeight;
 	m_pPlane[2] = m_pPlane[1] + m_nPixelWidth*m_nPixelHeight/4;
+
+	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 opengl_texture_draw_video::~opengl_texture_draw_video()
@@ -77,6 +81,17 @@ opengl_texture_draw_video& opengl_texture_draw_video::Instance()
 {
 	static opengl_texture_draw_video inst;
 	return inst;
+}
+
+DWORD opengl_texture_draw_video::DrawSceneThreadProc(LPVOID lpParam)
+{
+	opengl_texture_draw_video* pDrawSceneProc = (opengl_texture_draw_video*)lpParam;
+	if (pDrawSceneProc != NULL)
+	{
+		pDrawSceneProc->DisplayVideo();
+	}
+	
+	return 0;
 }
 
 BEGIN_MESSAGE_MAP(opengl_texture_draw_video, CWnd)
@@ -152,6 +167,31 @@ void opengl_texture_draw_video::OnTimer(UINT nIDEvent)
 
 	CWnd::OnTimer(nIDEvent);
 }
+
+void opengl_texture_draw_video::DisplayVideo()
+{
+	if (InitContext() == GL_FALSE)
+	{
+		return;
+	}
+	
+	InitContext();
+	while(WaitForSingleObject(m_hEndEvent, 500) != WAIT_OBJECT_0)
+	{
+		if (!m_bExit)
+		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
+			drawscene();
+			SwapBuffers(m_hDC);
+		}
+		else
+		{
+			SetEvent(m_hEndEvent);
+		}
+	}
+
+	ResetEvent(m_hStartEvent);
+}
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
@@ -168,26 +208,38 @@ BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
 	{
 		return FALSE;
 	}
-
-	strClassName = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_OWNDC, NULL, (HBRUSH)GetStockObject(WHITE_BRUSH), NULL);
-
-	bRet = CreateEx(NULL, strClassName, _T("OpenGL with MFC/CDialog"), WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN, rect, pParent, NULL);
-	if (!bRet)
+	
+	if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 	{
-		return FALSE;
+		SetEvent(m_hStartEvent);
+		ResetEvent(m_hEndEvent);
+		
+		strClassName = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_OWNDC, NULL, (HBRUSH)GetStockObject(WHITE_BRUSH), NULL);
+		if (!CreateEx(NULL, strClassName, _T("OpenGL with MFC/CDialog"), WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN, rect, pParent, NULL))
+		{
+			ResetEvent(m_hStartEvent);
+			return FALSE;
+		}
+		
+		m_hThread = CreateThread(NULL, 0, DrawSceneThreadProc, (LPVOID)this, 0, &m_dwThreadID);
+		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
+		{
+			ResetEvent(m_hStartEvent);
+			return FALSE;
+		}
+
+//		SetTimer(ID_DRAW_SCENE,1,0);
+		bRet = TRUE;
+		m_bExit = FALSE;
+		
+		m_oldWindow	   = rect;
+		m_originalRect = rect;
+		
+		CloseHandle(m_hThread);
+		m_hThread = NULL;
 	}
 
-	if (InitContext() == GL_FALSE)
-	{
-		return FALSE;
-	}
-
-//	SetTimer(ID_DRAW_SCENE,1,0);
-
-	m_oldWindow	   = rect;
-	m_originalRect = rect;
-
-	return TRUE;
+	return bRet;
 }
 
 GLuint opengl_texture_draw_video::InitContext()
@@ -208,22 +260,22 @@ GLuint opengl_texture_draw_video::InitContext()
 		return GL_FALSE;
 	}
 
-	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
-	if(m_nProgramId == GL_FALSE)
-	{
-		return GL_FALSE;
-	}
-	
- 	glUseProgram(m_nProgramId);
-	
-	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
-	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
-	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
-
-	if (!createsurface())
-	{
-		return GL_FALSE;
-	}
+// 	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
+// 	if(m_nProgramId == GL_FALSE)
+// 	{
+// 		return GL_FALSE;
+// 	}
+// 	
+//  	glUseProgram(m_nProgramId);
+// 	
+// 	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
+// 	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
+// 	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
+// 
+// 	if (!createsurface())
+// 	{
+// 		return GL_FALSE;
+// 	}
 
 	initscene();
 	return GL_TRUE;
@@ -567,6 +619,8 @@ void opengl_texture_draw_video::drawscene()
 		glVertex3f(-25.0, -25.0, 0.0);  
 		glVertex3f(25.0, -25.0, 0.0);  
 	glEnd(); 
+
+	glFlush();
 #elif 0
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -583,7 +637,7 @@ void opengl_texture_draw_video::drawscene()
 		glVertex3f(10.0f, 0, -100.0f); 
 		glVertex3f(0, 10.0f, -100.0f);
 	glEnd();
-#elif 0
+#elif 1
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -661,7 +715,7 @@ void opengl_texture_draw_video::drawscene()
 		glVertex3f(-1.0f,  1.0f,  1.0f);
 		glVertex3f(-1.0f,  1.0f, -1.0f);
 	glEnd();
-#elif 1
+#elif 0
 //	fseek(m_file, 0, SEEK_SET);
 //	memset(m_pBuffer, 0x0, m_nPixelWidth*m_nPixelHeight*3/2);
 
