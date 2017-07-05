@@ -144,7 +144,7 @@ void opengl_texture_draw_video::DisplayVideo()
 		return;
 	}
 	
-	while(WaitForSingleObject(m_hEndEvent, 50) != WAIT_OBJECT_0)
+	while(WaitForSingleObject(m_hEndEvent, 500) != WAIT_OBJECT_0)
 	{
 		if (!m_bExit)
 		{
@@ -840,6 +840,7 @@ void opengl_texture_draw_video::drawscene()
 	glUniform1i(m_nTextureUniformV, 2);  
 
 	//»æÖÆ
+	glFlush();
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 //	glutSwapBuffers();
 #endif

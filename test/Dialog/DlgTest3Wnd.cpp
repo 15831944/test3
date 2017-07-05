@@ -67,11 +67,11 @@ void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 	unsigned long uBlockLen = 0;
 	unsigned long ulRemainLen = 0;
 	
-	unsigned long ulPixelWidth = 1280;
-	unsigned long ulPixelHeight = 720;
+	unsigned long ulPixelWidth = 320;
+	unsigned long ulPixelHeight = 180;
 
 	//
-	FILE* file = fopen("720p.yuv", "rb+");
+	FILE* file = fopen("test_yuv420p_320x180.yuv", "rb+");
 	if (file == NULL)
 	{
 		return;
