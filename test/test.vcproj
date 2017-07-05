@@ -752,6 +752,10 @@
 				RelativePath=".\Inc\PubClass.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Inc\thread_queue.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Control"

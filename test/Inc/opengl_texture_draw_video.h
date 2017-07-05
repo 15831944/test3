@@ -7,6 +7,8 @@
 #include <wglew.h>
 #include <windows.h>
 
+#include "thread_queue.h"
+
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "glew32s.lib")
 
@@ -15,7 +17,13 @@
 
 #define ATTRIB_VERTEX	3
 #define ATTRIB_TEXTURE	4
-#define ID_DRAW_SCENE	WM_USER + 0x1001
+
+typedef struct tagFrame_data_buffer{
+	char*			pFrameData;
+	unsigned long	uFrameDataLen;
+	unsigned long   uPixelWidth;
+	unsigned long   uPixelHeight;
+}FRAME_DATA_BUFFER;
 
 class opengl_texture_draw_video : public CWnd
 {
@@ -31,21 +39,19 @@ protected:
 	afx_msg  void			OnPaint();
 	afx_msg	 void			OnSize(UINT nType, int cx, int cy);
 	afx_msg	 void			OnDraw(CDC *pDC);
-	afx_msg	 void			OnTimer(UINT nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
 
 public:
-	BOOL					CreateGLContext(CRect rect, CWnd* pParent);
-	GLuint					InitContext();
-
-	void					DisplayVideo();
+	BOOL					CreateGLContext(CRect rect, CWnd* pParent);	
+	GLuint					setframedata(const unsigned char* pFrameData, unsigned long ulDataLen, unsigned long ulVideoWidth, unsigned long ulVideoHeight);
 	
 protected:
 	GLuint					buildshader(const char* pszsource, GLenum shaderType);
 	GLuint					buildprogram(const char* vertexShaderSource, const char* fragmentShaderSource);
 
 	GLuint					createsurface();
+	GLuint					initcontext();
 	
 	void					initscene();
 	void					drawscene();
@@ -53,6 +59,9 @@ protected:
 	GLuint					set_wnd_pixel_format();
 	GLuint					create_gl_context();
 	GLuint					destroy_gl_context();
+
+	GLuint					getframedata();
+	void					DisplayVideo();
 	
 protected:
 	HANDLE					m_hThread;
@@ -88,11 +97,12 @@ private:
 	int						m_nWndHeight;
 	
 	DWORD					m_dwThreadID;
+	GLuint					m_nBufferLen;
 
 	unsigned char*			m_pBuffer;
 	unsigned char*  		m_pPlane[3];
 
-	FILE*			m_file;
+	thread_queue<FRAME_DATA_BUFFER*> m_threadFrameQueue;
 };
 
 #endif

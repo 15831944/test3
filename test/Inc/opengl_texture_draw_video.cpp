@@ -41,26 +41,21 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 	m_bExit = FALSE;
 	m_bIsMaximized = FALSE;
 
-	m_nWndWidth	   = 0;
-	m_nWndHeight   = 0;
+	m_dwThreadID = 0;
+	m_nBufferLen = 0;
 
-	m_nPixelWidth  = 320;
-	m_nPixelHeight = 180;
+	m_nWndWidth	= 0;
+	m_nWndHeight = 0;
+
+	m_nPixelWidth = 0;
+	m_nPixelHeight = 0;
 
 	m_rect.SetRectEmpty();
 	m_oldWindow.SetRectEmpty();
 	m_originalRect.SetRectEmpty();
 
-	m_pBuffer = new unsigned char[m_nPixelWidth*m_nPixelHeight*3/2];
-	if (m_pBuffer == NULL)
-	{
-		exit(0);
-	}
-	memset(m_pBuffer, 0x0, m_nPixelWidth*m_nPixelHeight*3/2);
-	
-	m_pPlane[0] = m_pBuffer;
-	m_pPlane[1] = m_pPlane[0] + m_nPixelWidth*m_nPixelHeight;
-	m_pPlane[2] = m_pPlane[1] + m_nPixelWidth*m_nPixelHeight/4;
+	m_pBuffer = NULL;
+	memset(&m_pPlane, 0x0, sizeof(m_pPlane));
 
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -68,13 +63,6 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 
 opengl_texture_draw_video::~opengl_texture_draw_video()
 {
-	if (m_pBuffer != NULL)
-	{
-		delete[] m_pBuffer;
-		m_pBuffer = NULL;
-	}
-
-	destroy_gl_context();
 }
 
 opengl_texture_draw_video& opengl_texture_draw_video::Instance()
@@ -97,7 +85,6 @@ DWORD opengl_texture_draw_video::DrawSceneThreadProc(LPVOID lpParam)
 BEGIN_MESSAGE_MAP(opengl_texture_draw_video, CWnd)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
-	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 void opengl_texture_draw_video::OnPaint()
@@ -150,33 +137,14 @@ void opengl_texture_draw_video::OnDraw(CDC *pDC)
 	return;
 }
 
-void opengl_texture_draw_video::OnTimer(UINT nIDEvent)
-{
-	switch(nIDEvent)
-	{
-	case ID_DRAW_SCENE:
-		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
-			drawscene();
-			SwapBuffers(m_hDC);
-		}
-		break;
-	default:
-		break;
-	}
-
-	CWnd::OnTimer(nIDEvent);
-}
-
 void opengl_texture_draw_video::DisplayVideo()
 {
-	if (InitContext() == GL_FALSE)
+	if (initcontext() == GL_FALSE)
 	{
 		return;
 	}
 	
-	InitContext();
-	while(WaitForSingleObject(m_hEndEvent, 500) != WAIT_OBJECT_0)
+	while(WaitForSingleObject(m_hEndEvent, 50) != WAIT_OBJECT_0)
 	{
 		if (!m_bExit)
 		{
@@ -191,6 +159,7 @@ void opengl_texture_draw_video::DisplayVideo()
 	}
 
 	ResetEvent(m_hStartEvent);
+	destroy_gl_context();
 }
 //////////////////////////////////////////////////////////////////////////
 //
@@ -228,7 +197,6 @@ BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
 			return FALSE;
 		}
 
-//		SetTimer(ID_DRAW_SCENE,1,0);
 		bRet = TRUE;
 		m_bExit = FALSE;
 		
@@ -242,43 +210,135 @@ BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
 	return bRet;
 }
 
-GLuint opengl_texture_draw_video::InitContext()
+GLuint opengl_texture_draw_video::setframedata(const unsigned char* pFrameData, unsigned long ulDataLen, unsigned long ulVideoWidth, unsigned long ulVideoHeight)
 {
-	m_hDC = GetDC()->GetSafeHdc();
-	if (m_hDC == NULL)
+	if (pFrameData == NULL || ulDataLen == 0)
 	{
 		return GL_FALSE;
 	}
 
-	if(set_wnd_pixel_format() == GL_FALSE)
-	{
-		return GL_FALSE;
-	}
-	
-	if(create_gl_context() == GL_FALSE)
+	if (ulVideoWidth == 0 || ulVideoHeight == 0)
 	{
 		return GL_FALSE;
 	}
 
-// 	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
-// 	if(m_nProgramId == GL_FALSE)
-// 	{
-// 		return GL_FALSE;
-// 	}
-// 	
-//  	glUseProgram(m_nProgramId);
-// 	
-// 	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
-// 	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
-// 	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
-// 
-// 	if (!createsurface())
-// 	{
-// 		return GL_FALSE;
-// 	}
+	FRAME_DATA_BUFFER* pFrameBuffer = new FRAME_DATA_BUFFER;
+	if (pFrameBuffer == NULL)
+	{
+		return GL_FALSE;
+	}
+	memset(pFrameBuffer, 0x0, sizeof(FRAME_DATA_BUFFER));
 
-	initscene();
+	pFrameBuffer->pFrameData = new char[ulDataLen];
+	if (pFrameBuffer->pFrameData == NULL)
+	{
+		if (pFrameBuffer != NULL)
+		{
+			delete pFrameBuffer;
+			pFrameBuffer = NULL;
+		}
+		return GL_FALSE;
+	}
+	memset(pFrameBuffer->pFrameData, 0x0, ulDataLen);
+
+	pFrameBuffer->uFrameDataLen = ulDataLen;
+	pFrameBuffer->uPixelWidth   = ulVideoWidth;
+	pFrameBuffer->uPixelHeight  = ulVideoHeight;
+	memcpy(pFrameBuffer->pFrameData, pFrameData, ulDataLen);
+
+	m_threadFrameQueue.Push(pFrameBuffer);
 	return GL_TRUE;
+}
+
+GLuint opengl_texture_draw_video::getframedata()
+{
+	GLuint uRet = GL_FALSE;
+
+	unsigned long uPixelWidth  = 0;
+	unsigned long uPixelHeight = 0;
+	unsigned long ulDataLen    = 0;
+
+	FRAME_DATA_BUFFER* pFrameBuffer = NULL;
+
+	if (m_threadFrameQueue.IsEmpty())
+	{
+		return GL_FALSE;
+	}
+
+	pFrameBuffer = (FRAME_DATA_BUFFER*)m_threadFrameQueue.Front();
+	if (pFrameBuffer == NULL)
+	{
+		return GL_FALSE;
+	}
+
+	if (pFrameBuffer->pFrameData == NULL || pFrameBuffer->uFrameDataLen == 0 || pFrameBuffer->uPixelWidth == 0 || pFrameBuffer->uPixelHeight == 0)
+	{
+		uRet = GL_FALSE;
+		goto part1;
+	}
+
+	uPixelWidth  = pFrameBuffer->uPixelWidth;
+	uPixelHeight = pFrameBuffer->uPixelHeight;
+
+	if (uPixelWidth != m_nPixelWidth || uPixelHeight != m_nPixelHeight)
+	{
+		if (m_pBuffer != NULL)
+		{
+			delete[] m_pBuffer;
+			m_pBuffer = NULL;
+		}
+
+		m_nBufferLen = uPixelWidth*uPixelHeight*3/2;
+		m_pBuffer = new unsigned char[m_nBufferLen];
+		if (m_pBuffer == NULL)
+		{
+			uRet = GL_FALSE;
+			goto part1;
+		}
+		memset(m_pBuffer, 0x0, m_nBufferLen);
+
+		m_pPlane[0] = m_pBuffer;
+		m_pPlane[1] = m_pPlane[0] + uPixelWidth*uPixelHeight;
+		m_pPlane[2] = m_pPlane[1] + uPixelWidth*uPixelHeight/4;
+
+		m_nPixelWidth  = uPixelWidth;
+		m_nPixelHeight = uPixelHeight;
+	}
+
+	if (m_pBuffer == NULL)
+	{
+		uRet = GL_FALSE;
+		goto part1;
+	}
+	else
+	{
+		memset(m_pBuffer, 0x0, m_nBufferLen);
+	}
+
+	if (m_nBufferLen < pFrameBuffer->uFrameDataLen)
+	{
+		uRet = GL_FALSE;
+		goto part1;
+	}
+
+	uRet = GL_TRUE;
+	memcpy(m_pBuffer, pFrameBuffer->pFrameData, pFrameBuffer->uFrameDataLen);
+
+part1:
+	if (pFrameBuffer != NULL)
+	{
+		if (pFrameBuffer->pFrameData != NULL)
+		{
+			delete[] pFrameBuffer->pFrameData;
+			pFrameBuffer->pFrameData = NULL;
+		}
+
+		delete pFrameBuffer;
+		pFrameBuffer = NULL;
+	}
+
+	m_threadFrameQueue.Pop();
+	return uRet;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -578,6 +638,45 @@ GLuint opengl_texture_draw_video::destroy_gl_context()
 	return GL_TRUE;
 }
 
+GLuint opengl_texture_draw_video::initcontext()
+{
+	m_hDC = GetDC()->GetSafeHdc();
+	if (m_hDC == NULL)
+	{
+		return GL_FALSE;
+	}
+
+	if(set_wnd_pixel_format() == GL_FALSE)
+	{
+		return GL_FALSE;
+	}
+
+	if(create_gl_context() == GL_FALSE)
+	{
+		return GL_FALSE;
+	}
+
+	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
+	if(m_nProgramId == GL_FALSE)
+	{
+		return GL_FALSE;
+	}
+
+	glUseProgram(m_nProgramId);
+
+	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
+	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
+	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
+
+	if (!createsurface())
+	{
+		return GL_FALSE;
+	}
+
+	initscene();
+	return GL_TRUE;
+}
+
 void opengl_texture_draw_video::initscene()
 {
 	//∆Ù”√“ı”∞∆Ωª¨
@@ -599,10 +698,7 @@ void opengl_texture_draw_video::initscene()
 }
 
 void opengl_texture_draw_video::drawscene()
-{//https://open.gl/geometry	//http://colabug.com/174582.html	//http://www.tuicool.com/articles/A7zQvmy
-//http://www.roxlu.com/2014/028/opengl-instanced-rendering
-	//glViewport(0, 0, rect.Width(), rect.Height());
- 	
+{
 #if 0
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();  
@@ -637,7 +733,7 @@ void opengl_texture_draw_video::drawscene()
 		glVertex3f(10.0f, 0, -100.0f); 
 		glVertex3f(0, 10.0f, -100.0f);
 	glEnd();
-#elif 1
+#elif 0
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -715,14 +811,10 @@ void opengl_texture_draw_video::drawscene()
 		glVertex3f(-1.0f,  1.0f,  1.0f);
 		glVertex3f(-1.0f,  1.0f, -1.0f);
 	glEnd();
-#elif 0
-//	fseek(m_file, 0, SEEK_SET);
-//	memset(m_pBuffer, 0x0, m_nPixelWidth*m_nPixelHeight*3/2);
-
-	if (fread(m_pBuffer, 1, m_nPixelWidth*m_nPixelHeight*3/2, m_file) != m_nPixelWidth*m_nPixelHeight*3/2)
+#elif 1
+	if (getframedata() == GL_FALSE)
 	{
-		fseek(m_file, 0, SEEK_SET);
-		fread(m_pBuffer, 1, m_nPixelWidth*m_nPixelHeight*3/2, m_file);
+		return;
 	}
 	
 	glClearColor(0.0,0.0,0.0,0.0);

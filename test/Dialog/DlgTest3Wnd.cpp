@@ -50,6 +50,7 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 
 void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 {
+	
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
@@ -58,4 +59,83 @@ void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 
 void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 {
+	unsigned char* pBlockBuf = NULL;
+	unsigned long BLOCK_SIZE_IN = 0;
+	unsigned long BLOCK_SIZE_OUT = 0;
+	
+	unsigned long ulFileLen = 0;
+	unsigned long uBlockLen = 0;
+	unsigned long ulRemainLen = 0;
+	
+	unsigned long ulPixelWidth = 1280;
+	unsigned long ulPixelHeight = 720;
+
+	//
+	FILE* file = fopen("720p.yuv", "rb+");
+	if (file == NULL)
+	{
+		return;
+	}
+
+	//
+	fseek(file, 0, SEEK_END);
+	ulFileLen = ftell(file);
+	if (ulFileLen == 0)
+	{
+		if(file)
+		{
+			fclose(file);
+			file = NULL;
+		}		
+		return;
+	}
+	
+	BLOCK_SIZE_IN = ulPixelWidth*ulPixelHeight*3/2;
+	BLOCK_SIZE_OUT = BLOCK_SIZE_IN * 3;
+	
+	pBlockBuf = new unsigned char[BLOCK_SIZE_OUT];
+	if(pBlockBuf == NULL)
+	{
+		if(file)
+		{
+			fclose(file);
+			file = NULL;
+		}	
+		return;
+	}
+	memset(pBlockBuf, 0x0, BLOCK_SIZE_OUT);
+
+	ulRemainLen = ulFileLen;
+	fseek(file, 0, SEEK_SET);
+
+	while(ulRemainLen > 0)
+	{
+		if(ulRemainLen >= BLOCK_SIZE_IN)
+		{
+			uBlockLen    = BLOCK_SIZE_IN;
+			ulRemainLen -= BLOCK_SIZE_IN;
+		}
+		else
+		{
+			uBlockLen    = ulRemainLen;
+			ulRemainLen -= ulRemainLen;
+		}
+		
+		memset(pBlockBuf, 0x0, BLOCK_SIZE_OUT);
+		
+		fread(pBlockBuf, 1, uBlockLen, file);
+		m_openglDrawVideo1.setframedata(pBlockBuf, uBlockLen, ulPixelWidth, ulPixelHeight);
+	}
+
+	if(file)
+	{
+		fclose(file);
+		file = NULL;
+	}
+	
+	if (pBlockBuf)
+	{
+		delete[] pBlockBuf;
+		pBlockBuf = NULL;
+	}
 }
