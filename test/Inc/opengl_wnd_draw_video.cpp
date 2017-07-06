@@ -92,12 +92,22 @@ DWORD opengl_wnd_draw_video::DrawSceneThreadProc(LPVOID lpParam)
 
 void opengl_wnd_draw_video::displayvideo()
 {
+	if (m_hWnd == NULL)
+	{
+		return;
+	}
+
+	if (m_hDC == NULL)
+	{
+		return;
+	}
+	
 	if (initcontext() == GL_FALSE)
 	{
 		return;
 	}
 	
-	while(WaitForSingleObject(m_hEndEvent, 500) != WAIT_OBJECT_0)
+	while(WaitForSingleObject(m_hEndEvent, m_nProcTimeOver) != WAIT_OBJECT_0)
 	{
 		if (!m_bExit)
 		{
@@ -120,7 +130,7 @@ void opengl_wnd_draw_video::displayvideo()
 BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rect, HWND hWnd)
 {
 	BOOL bRet = FALSE;
-	CString strClassName;
+	HDC hDC = NULL;
 
 	if (rect.IsRectEmpty())
 	{
@@ -132,16 +142,23 @@ BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rec
 		return FALSE;
 	}
 
-	::SetWindowLong(hWnd, GWL_STYLE, ::GetWindowLong(hWnd, GWL_STYLE) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CS_HREDRAW | CS_VREDRAW | CS_OWNDC);
+	hDC = ::GetDC(hWnd);
+	if (hDC == NULL)
+	{
+		return FALSE;
+	}
 	
 	if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 	{
 		SetEvent(m_hStartEvent);
 		ResetEvent(m_hEndEvent);
 		
+		m_hDC = hDC;
 		m_hWnd = hWnd;
-		m_hDC = ::GetDC(hWnd);
+		
 		m_hDataType = hDataType;
+
+		::SetWindowLong(hWnd, GWL_STYLE, ::GetWindowLong(hWnd, GWL_STYLE) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CS_HREDRAW | CS_VREDRAW | CS_OWNDC);
 
 		m_hThread = CreateThread(NULL, 0, DrawSceneThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
@@ -169,17 +186,11 @@ BOOL opengl_wnd_draw_video::CloseGLProc()
 		return FALSE;
 	}
 
-// 	if (m_hDC != NULL)
-// 	{
-// 		::ReleaseDC(m_hWnd, m_hDC);
-// 		m_hDC = NULL;
-// 	}
-// 
-// 	if (m_hWnd != NULL)
-// 	{
-// 		DestroyWindow();
-// 		m_hWnd = NULL;
-// 	}
+	if (m_hDC != NULL)
+	{
+		::ReleaseDC(m_hWnd, m_hDC);
+		m_hDC = NULL;
+	}
 
 	while(!m_threadFrameQueue.IsEmpty())
 	{
@@ -505,6 +516,11 @@ GLuint opengl_wnd_draw_video::set_wnd_pixel_format()
 {
 	int nPixelFormat = 0;
 
+	if (m_hWnd == NULL)
+	{
+		return GL_FALSE;
+	}
+
 	if (m_hDC == NULL)
 	{
 		return GL_FALSE;
@@ -554,8 +570,14 @@ GLuint opengl_wnd_draw_video::set_wnd_pixel_format()
 GLuint opengl_wnd_draw_video::create_gl_context()
 {
 	HGLRC hRC = NULL;
+
 	int OpenGLVersion[2];
 	GLenum GlewInitResult;
+
+	if (m_hWnd == NULL)
+	{
+		return GL_FALSE;
+	}
 
 	if (m_hDC == NULL)
 	{
@@ -591,11 +613,11 @@ GLuint opengl_wnd_draw_video::create_gl_context()
 #if 0
 	if(wglewIsSupported("WGL_ARB_create_context") == 1)
 	{
-		m_hRC = wglCreateContextAttribsARB(hDC, 0, attribs);
+		m_hRC = wglCreateContextAttribsARB(m_hDC, 0, attribs);
 		wglMakeCurrent(NULL,NULL);
 
 		wglDeleteContext(hRC);
-		wglMakeCurrent(hDC, m_hRC);
+		wglMakeCurrent(m_hDC, m_hRC);
 	}
 	else
 	{
@@ -638,12 +660,6 @@ GLuint opengl_wnd_draw_video::destroy_gl_context()
 
 GLuint opengl_wnd_draw_video::initcontext()
 {
-// 	m_hDC = GetDC()->GetSafeHdc();
-	if (m_hDC == NULL)
-	{
-		return GL_FALSE;
-	}
-
 	if(set_wnd_pixel_format() == GL_FALSE)
 	{
 		return GL_FALSE;
@@ -820,13 +836,23 @@ void opengl_wnd_draw_video::drawscene()
 		glVertex3f(-1.0f,  1.0f, -1.0f);
 	glEnd();
 #elif 0
+	if (m_hWnd == NULL)
+	{
+		return;
+	}
+
+	if (m_hDC == NULL)
+	{
+		return;
+	}
+	
 	if (getframedata() == GL_FALSE)
 	{
 		return;
 	}
 	
-//	wglMakeCurrent(NULL, NULL);
-//	wglMakeCurrent(m_hDC, m_hRC);
+	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(m_hDC, m_hRC);
 
 	glClearColor(0.0f,0.0f,0.0f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -863,6 +889,6 @@ void opengl_wnd_draw_video::drawscene()
 	glFlush();
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-//	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(NULL, NULL);
 #endif
 }

@@ -127,7 +127,7 @@ void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 		memset(pBlockBuf, 0x0, BLOCK_SIZE_OUT);
 		
 		fread(pBlockBuf, 1, uBlockLen, file);
-//		m_openglDrawVideo1.SetFrameData(pBlockBuf, uBlockLen, ulPixelWidth, ulPixelHeight);
+		m_openglDrawVideo.SetFrameData(pBlockBuf, uBlockLen, ulPixelWidth, ulPixelHeight);
 
 		Sleep(50);
 	}
