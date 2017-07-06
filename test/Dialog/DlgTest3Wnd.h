@@ -2,7 +2,7 @@
 #include "afxwin.h"
 #include <atlconv.h>
 
-#include "../inc/opengl_texture_draw_video.h"
+#include "../inc/opengl_wnd_draw_video.h"
 
 using namespace std;
 class CDlgTest3Wnd : public CDialog
@@ -26,8 +26,7 @@ protected:
 	afx_msg void					OnBnClickedBtnDrawtest();
 
 protected:
-	opengl_texture_draw_video		m_openglDrawVideo1;
-	opengl_texture_draw_video		m_openglDrawVideo2;
+	opengl_wnd_draw_video			m_openglDrawVideo;
 
 private:
 	CString							m_strDefaultPath;

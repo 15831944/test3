@@ -1,5 +1,5 @@
-#ifndef __OPENGL_TEXTURE_DRAW_VIDEO_H__
-#define __OPENGL_TEXTURE_DRAW_VIDEO_H__
+#ifndef __OPENGL_WND_DRAW_VIDEO_H__
+#define __OPENGL_WND_DRAW_VIDEO_H__
 
 #include <glew.h>
 #include <glut.h>
@@ -31,25 +31,18 @@ typedef struct tagFrame_data_buffer{
 	unsigned long   uPixelHeight;
 }FRAME_DATA_BUFFER;
 
-class opengl_texture_draw_video : public CWnd
+class opengl_wnd_draw_video
 {
 public:
-	opengl_texture_draw_video();
-	~opengl_texture_draw_video();
+	opengl_wnd_draw_video();
+	~opengl_wnd_draw_video();
 	
 public:
-	static opengl_texture_draw_video& Instance();
+	static opengl_wnd_draw_video& Instance();
 	static DWORD WINAPI DrawSceneThreadProc(LPVOID lpParam);
 
-protected:
-	afx_msg  void			OnPaint();
-	afx_msg	 void			OnSize(UINT nType, int cx, int cy);
-	afx_msg	 void			OnDraw(CDC *pDC);
-
-	DECLARE_MESSAGE_MAP()
-
 public:
-	BOOL					CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rect, CWnd* pParent);	
+	BOOL					CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rect, HWND hWnd);	
 	BOOL					CloseGLProc();
 
 	void					SetProcTimeOver(GLuint nProcTime, GLuint nCloseTime = 500);
@@ -81,12 +74,10 @@ protected:
 	HANDLE					m_hEndEvent;
 	
 	HDC						m_hDC;
+	HWND					m_hWnd;
 	HGLRC					m_hRC;
 
 	CRect					m_rect;
-	CRect					m_oldWindow;
-	CRect					m_originalRect;
-	
 	FRAME_DATA_TYPE			m_hDataType;
 
 private:

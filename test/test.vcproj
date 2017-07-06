@@ -749,6 +749,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Inc\opengl_wnd_draw_video.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\opengl_wnd_draw_video.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Inc\PubClass.h"
 				>
 			</File>

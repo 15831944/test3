@@ -43,7 +43,8 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 
 	CRect rect1;
 	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
-	m_openglDrawVideo1.CreateGLContext(rect1, GetDlgItem(IDC_STATIC_VIDEO));
+
+	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PTORGB24_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
 
 	return TRUE;  
 }
@@ -55,6 +56,8 @@ void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 
 void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 {
+//	m_openglDrawVideo1.CloseGLProc();
+	GetDlgItem(IDC_STATIC_VIDEO)->ShowWindow(SW_HIDE);
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
@@ -124,7 +127,9 @@ void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 		memset(pBlockBuf, 0x0, BLOCK_SIZE_OUT);
 		
 		fread(pBlockBuf, 1, uBlockLen, file);
-		m_openglDrawVideo1.setframedata(pBlockBuf, uBlockLen, ulPixelWidth, ulPixelHeight);
+//		m_openglDrawVideo1.SetFrameData(pBlockBuf, uBlockLen, ulPixelWidth, ulPixelHeight);
+
+		Sleep(50);
 	}
 
 	if(file)

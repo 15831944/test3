@@ -8,8 +8,8 @@ const GLchar* VERTEX_SHADER =
 	"varying vec2 textureOut;	\n"
 	"void main(void)			\n"
 	"{							\n"
-	"gl_Position = vertexIn;	\n" 
-	"textureOut = textureIn;	\n"
+	"  gl_Position = vertexIn;	\n" 
+	"  textureOut = textureIn;	\n"
 	"}							\n"
 };
 
@@ -41,6 +41,9 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 	m_bExit = FALSE;
 	m_bIsMaximized = FALSE;
 
+	m_nProcTimeOver = 80;
+	m_nCloseTimeOver = 500;
+
 	m_dwThreadID = 0;
 	m_nBufferLen = 0;
 
@@ -63,6 +66,10 @@ opengl_texture_draw_video::opengl_texture_draw_video()
 
 opengl_texture_draw_video::~opengl_texture_draw_video()
 {
+	if (!CloseGLProc())
+	{
+		return;
+	}
 }
 
 opengl_texture_draw_video& opengl_texture_draw_video::Instance()
@@ -76,7 +83,7 @@ DWORD opengl_texture_draw_video::DrawSceneThreadProc(LPVOID lpParam)
 	opengl_texture_draw_video* pDrawSceneProc = (opengl_texture_draw_video*)lpParam;
 	if (pDrawSceneProc != NULL)
 	{
-		pDrawSceneProc->DisplayVideo();
+		pDrawSceneProc->displayvideo();
 	}
 	
 	return 0;
@@ -137,18 +144,18 @@ void opengl_texture_draw_video::OnDraw(CDC *pDC)
 	return;
 }
 
-void opengl_texture_draw_video::DisplayVideo()
+void opengl_texture_draw_video::displayvideo()
 {
 	if (initcontext() == GL_FALSE)
 	{
 		return;
 	}
 	
-	while(WaitForSingleObject(m_hEndEvent, 500) != WAIT_OBJECT_0)
+	while(WaitForSingleObject(m_hEndEvent, m_nProcTimeOver) != WAIT_OBJECT_0)
 	{
 		if (!m_bExit)
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); 
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//GL_STENCIL_BUFFER_BIT
 			drawscene();
 			SwapBuffers(m_hDC);
 		}
@@ -158,12 +165,12 @@ void opengl_texture_draw_video::DisplayVideo()
 		}
 	}
 
-	ResetEvent(m_hStartEvent);
 	destroy_gl_context();
+	ResetEvent(m_hStartEvent);
 }
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
+BOOL opengl_texture_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rect, CWnd* pParent)
 {
 	BOOL bRet = FALSE;
 	CString strClassName;
@@ -182,6 +189,8 @@ BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
 	{
 		SetEvent(m_hStartEvent);
 		ResetEvent(m_hEndEvent);
+		
+		m_hDataType = hDataType;
 		
 		strClassName = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_OWNDC, NULL, (HBRUSH)GetStockObject(WHITE_BRUSH), NULL);
 		if (!CreateEx(NULL, strClassName, _T("OpenGL with MFC/CDialog"), WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN, rect, pParent, NULL))
@@ -210,7 +219,55 @@ BOOL opengl_texture_draw_video::CreateGLContext(CRect rect, CWnd* pParent)
 	return bRet;
 }
 
-GLuint opengl_texture_draw_video::setframedata(const unsigned char* pFrameData, unsigned long ulDataLen, unsigned long ulVideoWidth, unsigned long ulVideoHeight)
+BOOL opengl_texture_draw_video::CloseGLProc()
+{
+	m_bExit = TRUE;
+
+	if (destroy_gl_context() == GL_FALSE)
+	{
+		return FALSE;
+	}
+
+	if (m_hDC != NULL)
+	{
+		::ReleaseDC(m_hWnd, m_hDC);
+		m_hDC = NULL;
+	}
+
+	if (m_hWnd != NULL)
+	{
+		DestroyWindow();
+		m_hWnd = NULL;
+	}
+
+	while(!m_threadFrameQueue.IsEmpty())
+	{
+		FRAME_DATA_BUFFER* pFrameBuffer = (FRAME_DATA_BUFFER*)m_threadFrameQueue.Front();
+		if (pFrameBuffer != NULL)
+		{
+			if (pFrameBuffer->pFrameData != NULL)
+			{
+				delete[] pFrameBuffer->pFrameData;
+				pFrameBuffer->pFrameData = NULL;
+			}
+
+			delete pFrameBuffer;
+			pFrameBuffer = NULL;
+		}
+
+		m_threadFrameQueue.Pop();
+	}
+	
+	return TRUE;
+}
+
+void opengl_texture_draw_video::SetProcTimeOver(GLuint nProcTime, GLuint nCloseTime)
+{
+	m_nProcTimeOver = nProcTime;
+	m_nCloseTimeOver = nCloseTime;
+}
+
+GLuint opengl_texture_draw_video::SetFrameData(const unsigned char* pFrameData, unsigned long ulDataLen, unsigned long ulVideoWidth, unsigned long ulVideoHeight)
 {
 	if (pFrameData == NULL || ulDataLen == 0)
 	{
@@ -622,14 +679,14 @@ GLuint opengl_texture_draw_video::create_gl_context()
 GLuint opengl_texture_draw_video::destroy_gl_context()
 {
 	m_hRC = ::wglGetCurrentContext();
-	if (::wglMakeCurrent (NULL, NULL) == FALSE)
+	if (m_hRC != NULL)
 	{
-		return GL_FALSE;
-	}
+		if (::wglMakeCurrent(NULL, NULL) == FALSE)
+		{
+			return GL_FALSE;
+		}
 
-	if (m_hRC)
-	{
-		if(::wglDeleteContext(m_hRC)==FALSE)
+		if(::wglDeleteContext(m_hRC) == FALSE)
 		{
 			return GL_FALSE;
 		}
@@ -656,19 +713,29 @@ GLuint opengl_texture_draw_video::initcontext()
 		return GL_FALSE;
 	}
 
-	m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
-	if(m_nProgramId == GL_FALSE)
+	if(m_hDataType == FRAME_YUV420PDRAW_TYPE)
 	{
-		return GL_FALSE;
+		m_nProgramId = buildprogram(VERTEX_SHADER, FRAG_SHADER);
+		if(m_nProgramId == GL_FALSE)
+		{
+			return GL_FALSE;
+		}
+
+		glUseProgram(m_nProgramId);
+
+		m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
+		m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
+		m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
+
+		if (!createsurface())
+		{
+			return GL_FALSE;
+		}
 	}
-
-	glUseProgram(m_nProgramId);
-
-	m_nTextureUniformY = glGetUniformLocation(m_nProgramId, "tex_y");
-	m_nTextureUniformU = glGetUniformLocation(m_nProgramId, "tex_u");
-	m_nTextureUniformV = glGetUniformLocation(m_nProgramId, "tex_v");
-
-	if (!createsurface())
+	else if(m_hDataType == FRAME_YUV420PTORGB24_TYPE)
+	{
+	}
+	else
 	{
 		return GL_FALSE;
 	}
@@ -682,9 +749,9 @@ void opengl_texture_draw_video::initscene()
 	//启用阴影平滑
 	glShadeModel(GL_SMOOTH);
 	//黑色背景
-	glClearColor(0.0, 0.0, 0.0, 0.0); 
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); 
 	//设置深度缓存
-	glClearDepth(1.0);  
+	glClearDepth(1.0f);
 	//启用深度测试  
 	glEnable(GL_DEPTH_TEST);
 	//所作深度测试的类型 
@@ -817,31 +884,44 @@ void opengl_texture_draw_video::drawscene()
 		return;
 	}
 	
-	glClearColor(0.0,0.0,0.0,0.0);
+//	wglMakeCurrent(NULL, NULL);
+//	wglMakeCurrent(m_hDC, m_hRC);
+
+	glClearColor(0.0f,0.0f,0.0f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glActiveTexture(GL_TEXTURE0);
-	//允许建立一个绑定到目标纹理的有名称纹理
-	glBindTexture(GL_TEXTURE_2D, m_nTextureIdY);
-	//根据指定参数,生成一个2D纹理(Texture),相似函数还有glTexImage1D、glTexImage3D
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth, m_nPixelHeight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[0]);	//GL_RED
-	//设置纹理,安装签名设置的规则讲图像或者纹理贴上(参数和选择的活跃纹理单元对应GL_TEXTURE0)
-	glUniform1i(m_nTextureUniformY, 0);    
+	if(m_hDataType == FRAME_YUV420PDRAW_TYPE)
+	{
+		//Y
+		glActiveTexture(GL_TEXTURE0);
+		//允许建立一个绑定到目标纹理的有名称纹理
+		glBindTexture(GL_TEXTURE_2D, m_nTextureIdY);
+		//根据指定参数,生成一个2D纹理(Texture),相似函数还有glTexImage1D、glTexImage3D
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth, m_nPixelHeight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[0]);	//GL_RED
+		//设置纹理,安装签名设置的规则讲图像或者纹理贴上(参数和选择的活跃纹理单元对应GL_TEXTURE0)
+		glUniform1i(m_nTextureUniformY, 0); 
 
-	//U
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_nTextureIdU);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth/2, m_nPixelHeight/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[1]);       
-	glUniform1i(m_nTextureUniformU, 1);
-	//V
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_nTextureIdV);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth/2, m_nPixelHeight/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[2]);    
-	glUniform1i(m_nTextureUniformV, 2);  
-
+		//U
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_nTextureIdU);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth/2, m_nPixelHeight/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[1]);       
+		glUniform1i(m_nTextureUniformU, 1);
+		
+		//V
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, m_nTextureIdV);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_nPixelWidth/2, m_nPixelHeight/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pPlane[2]);    
+		glUniform1i(m_nTextureUniformV, 2);  		
+	}
+	else if(m_hDataType == FRAME_YUV420PTORGB24_TYPE)
+	{
+		
+	}
+	 
 	//绘制
 	glFlush();
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//	glutSwapBuffers();
+
+//	wglMakeCurrent(NULL, NULL);
 #endif
 }

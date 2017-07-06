@@ -20,7 +20,7 @@
 #include <windows.h>
 
 #pragma comment(lib, "version.lib")
-#pragma warning(disable : 4275,4786,4996)
+#pragma warning(disable : 4275 4786 4996)
 
 
 #include "Inc/PubClass.h"
