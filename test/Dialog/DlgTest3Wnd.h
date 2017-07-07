@@ -23,7 +23,9 @@ protected:
 
 	afx_msg void					OnCbnSelchangeComboEnumdevice();
 	afx_msg void					OnBnClickedBtnCaptureimage();
-	afx_msg void					OnBnClickedBtnDrawtest();
+
+	afx_msg void					OnBnClickedBtnTest1();
+	afx_msg void					OnBnClickedBtnTest2();
 
 protected:
 	opengl_wnd_draw_video			m_openglDrawVideo;
@@ -32,5 +34,5 @@ private:
 	CString							m_strDefaultPath;
 	CString							m_strAppPath;
 
-	BOOL							m_bCameraOpen;	
+	BOOL							m_bCameraOpen;		
 };

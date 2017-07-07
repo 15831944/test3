@@ -38,7 +38,10 @@
 #define IDC_STATIC_PREVIEW              1027
 #define ID_MENU_GRABCUT_TEST            0x0404
 #define IDC_BTN_DRAWTEST                1028
+#define IDC_BTN_TEST1                   1028
 #define ID_MENU_CONTOUR_TEST            0x0405
+#define IDC_BTN_TEST                    1029
+#define IDC_BTN_TEST2                   1029
 #define ID_MENU_KNN_TEST                0x0406
 #define ID_MENU_LINE_OCR                0x0407
 #define ID_MENU_TESSERACT_OCR           0x0408

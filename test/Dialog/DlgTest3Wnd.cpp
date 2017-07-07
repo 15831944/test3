@@ -24,7 +24,8 @@ void CDlgTest3Wnd::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgTest3Wnd, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_ENUMDEVICE,	OnCbnSelchangeComboEnumdevice)
 	ON_BN_CLICKED(IDC_BTN_CAPTUREIMAGE,		OnBnClickedBtnCaptureimage)
-	ON_BN_CLICKED(IDC_BTN_DRAWTEST,			OnBnClickedBtnDrawtest)
+	ON_BN_CLICKED(IDC_BTN_TEST1,			OnBnClickedBtnTest1)
+	ON_BN_CLICKED(IDC_BTN_TEST2,			OnBnClickedBtnTest2)
 END_MESSAGE_MAP()
 
 
@@ -40,12 +41,7 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 	{
 		return FALSE;
 	}
-
-	CRect rect1;
-	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
-
-	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PTORGB24_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
-
+	
 	return TRUE;  
 }
 
@@ -56,20 +52,29 @@ void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 
 void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 {
-//	m_openglDrawVideo1.CloseGLProc();
-	GetDlgItem(IDC_STATIC_VIDEO)->ShowWindow(SW_HIDE);
+	CRect rect1;
+	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
+
+	m_openglDrawVideo.SetProcTimeOver(50);
+	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PDRAW_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
 }
 
-void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
+void CDlgTest3Wnd::OnBnClickedBtnTest1()
+{
+	m_openglDrawVideo.CloseGLProc();
+	GetDlgItem(IDC_STATIC_VIDEO)->Invalidate(TRUE);
+}
+
+void CDlgTest3Wnd::OnBnClickedBtnTest2()
 {
 	unsigned char* pBlockBuf = NULL;
 	unsigned long BLOCK_SIZE_IN = 0;
 	unsigned long BLOCK_SIZE_OUT = 0;
-	
+
 	unsigned long ulFileLen = 0;
 	unsigned long uBlockLen = 0;
 	unsigned long ulRemainLen = 0;
-	
+
 	unsigned long ulPixelWidth = 320;
 	unsigned long ulPixelHeight = 180;
 
@@ -92,10 +97,10 @@ void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 		}		
 		return;
 	}
-	
+
 	BLOCK_SIZE_IN = ulPixelWidth*ulPixelHeight*3/2;
 	BLOCK_SIZE_OUT = BLOCK_SIZE_IN * 3;
-	
+
 	pBlockBuf = new unsigned char[BLOCK_SIZE_OUT];
 	if(pBlockBuf == NULL)
 	{
@@ -123,9 +128,9 @@ void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 			uBlockLen    = ulRemainLen;
 			ulRemainLen -= ulRemainLen;
 		}
-		
+
 		memset(pBlockBuf, 0x0, BLOCK_SIZE_OUT);
-		
+
 		fread(pBlockBuf, 1, uBlockLen, file);
 		m_openglDrawVideo.SetFrameData(pBlockBuf, uBlockLen, ulPixelWidth, ulPixelHeight);
 
@@ -137,7 +142,7 @@ void CDlgTest3Wnd::OnBnClickedBtnDrawtest()
 		fclose(file);
 		file = NULL;
 	}
-	
+
 	if (pBlockBuf)
 	{
 		delete[] pBlockBuf;

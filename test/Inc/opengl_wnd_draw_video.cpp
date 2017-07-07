@@ -40,7 +40,6 @@ opengl_wnd_draw_video::opengl_wnd_draw_video()
 	m_hWnd = NULL;
 
 	m_bExit = FALSE;
-	m_bIsMaximized = FALSE;
 
 	m_nProcTimeOver = 80;
 	m_nCloseTimeOver = 500;
@@ -111,8 +110,17 @@ void opengl_wnd_draw_video::displayvideo()
 	{
 		if (!m_bExit)
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//GL_STENCIL_BUFFER_BIT
-			drawscene();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);		//GL_STENCIL_BUFFER_BIT
+
+//			glMatrixMode(GL_PROJECTION);
+//			glLoadIdentity();
+
+ 			if (drawscene() == GL_FALSE)
+ 			{
+				m_nProcTimeOver = 50;
+ 				continue;
+ 			}
+
 			SwapBuffers(m_hDC);
 		}
 		else
@@ -147,6 +155,9 @@ BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rec
 	{
 		return FALSE;
 	}
+
+	//WS_CLIPSIBLINGS : 创建父窗口使用的Windows风格，用于重绘时裁剪子窗口所覆盖的区域;
+	//WS_CLIPCHILDREN : 创建子窗口使用的Windows风格，用于重绘时剪裁其他子窗口所覆盖的区域;
 	
 	if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 	{
@@ -158,7 +169,7 @@ BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rec
 		
 		m_hDataType = hDataType;
 
-		::SetWindowLong(hWnd, GWL_STYLE, ::GetWindowLong(hWnd, GWL_STYLE) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CS_HREDRAW | CS_VREDRAW | CS_OWNDC);
+		::SetWindowLong(hWnd, GWL_STYLE, ::GetWindowLong(hWnd, GWL_STYLE) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN );	//CS_HREDRAW | CS_VREDRAW | CS_OWNDC
 
 		m_hThread = CreateThread(NULL, 0, DrawSceneThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
@@ -180,6 +191,26 @@ BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rec
 BOOL opengl_wnd_draw_video::CloseGLProc()
 {
 	m_bExit = TRUE;
+
+	WaitForSingleObject(m_hEndEvent, m_nCloseTimeOver);
+
+	m_nProgramId = 0;
+
+	m_nTextureUniformY = 0;
+	m_nTextureUniformU = 0;
+	m_nTextureUniformV = 0;
+
+	m_nTextureIdY = 0;
+	m_nTextureIdU = 0;
+	m_nTextureIdV = 0;
+
+	m_nPixelWidth = 0;
+	m_nPixelHeight = 0;
+
+	m_nWndWidth = 0;
+	m_nWndHeight = 0;
+
+	m_nBufferLen = 0;
 
 	if (destroy_gl_context() == GL_FALSE)
 	{
@@ -209,7 +240,7 @@ BOOL opengl_wnd_draw_video::CloseGLProc()
 
 		m_threadFrameQueue.Pop();
 	}
-	
+
 	return TRUE;
 }
 
@@ -530,10 +561,12 @@ GLuint opengl_wnd_draw_video::set_wnd_pixel_format()
 	{
 		sizeof(PIXELFORMATDESCRIPTOR),
 		1,									// nVersion 
-		PFD_DRAW_TO_WINDOW|					// dwFlags
-		PFD_SUPPORT_OPENGL|
-		PFD_DOUBLEBUFFER|
-		PFD_STEREO_DONTCARE,
+		PFD_DRAW_TO_WINDOW |				// dwFlags
+		PFD_SUPPORT_OPENGL |	
+		PFD_DOUBLEBUFFER,
+//		PFD_DRAW_TO_BITMAP |
+//		PFD_SUPPORT_GDI	   | 
+//		PFD_STEREO_DONTCARE,
 		PFD_TYPE_RGBA,						// iPixelType 
 		24,									// cColorBits
 		0,0,0,0,0,0,						// cRGB Color Bits and shift 
@@ -570,8 +603,8 @@ GLuint opengl_wnd_draw_video::set_wnd_pixel_format()
 GLuint opengl_wnd_draw_video::create_gl_context()
 {
 	HGLRC hRC = NULL;
-
 	int OpenGLVersion[2];
+
 	GLenum GlewInitResult;
 
 	if (m_hWnd == NULL)
@@ -584,14 +617,29 @@ GLuint opengl_wnd_draw_video::create_gl_context()
 		return GL_FALSE;
 	}
 	
-	int attribs[] =
+	const int iPixelFormatAttributeList[] = 
+	{
+		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,                        // 绘制到窗口
+		WGL_SUPPORT_OPENGL_ARB,GL_TRUE,							// 支持OpenGL
+		WGL_ACCELERATION_ARB ,WGL_FULL_ACCELERATION_ARB,		// 硬件加速
+		WGL_DOUBLE_BUFFER_ARB,GL_TRUE,							// 双缓冲
+		WGL_PIXEL_TYPE_ARB,WGL_TYPE_RGBA_ARB,					// RGBA
+		WGL_COLOR_BITS_ARB,32,									// 颜色位数32
+		WGL_DEPTH_BITS_ARB,24,									// 深度位数24
+		WGL_STENCIL_BITS_ARB,8,									// 模板位数8
+		WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,				// 双缓冲swap方式直接交换
+		WGL_SAMPLES_ARB, 4,										// 4倍抗锯齿
+		0
+	};
+
+	const int iContextAttributeList[] =
     {
         WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
         WGL_CONTEXT_MINOR_VERSION_ARB, 3,
         WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
         0
     };
-		
+
 	hRC = wglCreateContext(m_hDC);
 	if (hRC == NULL)
 	{
@@ -609,8 +657,21 @@ GLuint opengl_wnd_draw_video::create_gl_context()
 	{
 		return GL_FALSE;
 	}
-
+	
 #if 0
+	wglChoosePixelFormatARB(m_hDC, iPixelFormatAttributeList, NULL, 1, &iPixelFormat,(UINT *)&iNumFormat);
+	if (!SetPixelFormat(m_hDC,iPixelFormat,&pfd))
+	{
+		return GL_FALSE;
+	}
+
+	hRC = wglCreateContextAttribsARB(m_hDC,NULL,iContextAttributeList);
+	if (hRC == NULL)
+	{
+		::wglMakeCurrent(m_hDC,hRC);
+		return GL_FALSE;
+	}
+
 	if(wglewIsSupported("WGL_ARB_create_context") == 1)
 	{
 		m_hRC = wglCreateContextAttribsARB(m_hDC, 0, attribs);
@@ -721,9 +782,12 @@ void opengl_wnd_draw_video::initscene()
 //	glClearColor(0.0, 0.0, 1.0, 0.0);
 }
 
-void opengl_wnd_draw_video::drawscene()
+GLuint opengl_wnd_draw_video::drawscene()
 {
-#if 1
+#if 0
+	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(m_hDC, m_hRC);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();  
 	gluLookAt(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);  
@@ -741,7 +805,11 @@ void opengl_wnd_draw_video::drawscene()
 	glEnd(); 
 
 	glFlush();
+	wglMakeCurrent(NULL, NULL);
 #elif 0
+	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(m_hDC, m_hRC);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -757,7 +825,13 @@ void opengl_wnd_draw_video::drawscene()
 		glVertex3f(10.0f, 0, -100.0f); 
 		glVertex3f(0, 10.0f, -100.0f);
 	glEnd();
+
+	glFlush();
+	wglMakeCurrent(NULL, NULL);
 #elif 0
+	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(m_hDC, m_hRC);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -788,6 +862,9 @@ void opengl_wnd_draw_video::drawscene()
 			glVertex2f(x*factor,sin(x)*factor);  
 		}  
 	glEnd(); 
+
+	glFlush();
+	wglMakeCurrent(NULL, NULL);
 #elif 0
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -835,20 +912,20 @@ void opengl_wnd_draw_video::drawscene()
 		glVertex3f(-1.0f,  1.0f,  1.0f);
 		glVertex3f(-1.0f,  1.0f, -1.0f);
 	glEnd();
-#elif 0
+#elif 1
 	if (m_hWnd == NULL)
 	{
-		return;
+		return GL_FALSE;
 	}
 
 	if (m_hDC == NULL)
 	{
-		return;
+		return GL_FALSE;
 	}
 	
 	if (getframedata() == GL_FALSE)
 	{
-		return;
+		return GL_FALSE;
 	}
 	
 	wglMakeCurrent(NULL, NULL);
@@ -891,4 +968,5 @@ void opengl_wnd_draw_video::drawscene()
 
 	wglMakeCurrent(NULL, NULL);
 #endif
+	return GL_TRUE;
 }

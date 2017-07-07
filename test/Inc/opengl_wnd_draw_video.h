@@ -56,7 +56,7 @@ protected:
 	GLuint					initcontext();
 	
 	void					initscene();
-	void					drawscene();
+	GLuint					drawscene();
 	
 	GLuint					set_wnd_pixel_format();
 	GLuint					create_gl_context();
@@ -83,7 +83,6 @@ protected:
 private:
 	BOOL					m_bExit;
 
-	BOOL					m_bIsMaximized;
 	GLuint					m_nProgramId;
 	GLuint					m_nProcTimeOver;
 	GLuint					m_nCloseTimeOver;
