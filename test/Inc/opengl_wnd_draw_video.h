@@ -83,9 +83,12 @@ protected:
 private:
 	BOOL					m_bExit;
 
-	GLuint					m_nProgramId;
 	GLuint					m_nProcTimeOver;
 	GLuint					m_nCloseTimeOver;
+
+	GLuint					m_nProgramId;
+	GLuint					m_nVertexShader;
+	GLuint					m_nFragmentShader;
 	
 	GLuint					m_nTextureUniformY;
 	GLuint					m_nTextureUniformU;

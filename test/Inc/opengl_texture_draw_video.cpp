@@ -481,7 +481,7 @@ GLuint opengl_texture_draw_video::buildprogram(const char* vertexShaderSource, c
 			programHandle = 0;  
 		}
 	}
-	
+
 	return programHandle;
 }
 

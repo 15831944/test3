@@ -194,23 +194,20 @@ BOOL opengl_wnd_draw_video::CloseGLProc()
 
 	WaitForSingleObject(m_hEndEvent, m_nCloseTimeOver);
 
-	m_nProgramId = 0;
-
-	m_nTextureUniformY = 0;
-	m_nTextureUniformU = 0;
-	m_nTextureUniformV = 0;
-
-	m_nTextureIdY = 0;
-	m_nTextureIdU = 0;
-	m_nTextureIdV = 0;
-
-	m_nPixelWidth = 0;
-	m_nPixelHeight = 0;
-
-	m_nWndWidth = 0;
-	m_nWndHeight = 0;
-
-	m_nBufferLen = 0;
+// 	if (m_nTextureIdY != 0)
+// 	{
+// 		glDeleteTextures(1, &m_nTextureIdY);
+// 	}
+// 
+// 	if (m_nTextureIdU != 0)
+// 	{
+// 		glDeleteTextures(1, &m_nTextureIdU);
+// 	}
+// 
+// 	if (m_nTextureIdV != 0)
+// 	{
+// 		glDeleteTextures(1, &m_nTextureIdV);
+// 	}
 
 	if (destroy_gl_context() == GL_FALSE)
 	{
@@ -465,6 +462,9 @@ GLuint opengl_wnd_draw_video::buildprogram(const char* vertexShaderSource, const
 		}
 	}
 	
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
 	return programHandle;
 }
 
