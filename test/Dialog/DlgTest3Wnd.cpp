@@ -56,7 +56,7 @@ void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
 
 	m_openglDrawVideo.SetProcTimeOver(50);
-	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PDRAW_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
+	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PTORGB24_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnTest1()

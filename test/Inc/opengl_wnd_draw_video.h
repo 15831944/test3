@@ -25,7 +25,7 @@ typedef enum tagFrame_data_type{
 }FRAME_DATA_TYPE;
 
 typedef struct tagFrame_data_buffer{
-	char*			pFrameData;
+	unsigned char*	pFrameData;
 	unsigned long	uFrameDataLen;
 	unsigned long   uPixelWidth;
 	unsigned long   uPixelHeight;
@@ -65,7 +65,7 @@ protected:
 	GLuint					getframedata();
 	void					displayvideo();
 	
-	void					CONVERT_YUV420PtoRGB24(unsigned char* yuv_src,unsigned char* rgb_dst,int nWidth,int nHeight);
+	GLuint					CONVERT_YUV420PtoRGB24(unsigned char* yuv_src,unsigned char* rgb_dst,int nWidth,int nHeight);
 	
 protected:
 	HANDLE					m_hThread;

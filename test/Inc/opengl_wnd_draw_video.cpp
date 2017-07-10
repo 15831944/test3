@@ -133,6 +133,93 @@ void opengl_wnd_draw_video::displayvideo()
 	ResetEvent(m_hStartEvent);
 }
 
+static inline unsigned char CONVERT_ADJUST(double tmp)  
+{
+	return (unsigned char)((tmp >= 0 && tmp <= 255)?tmp:(tmp < 0 ? 0 : 255));  
+}
+
+GLuint opengl_wnd_draw_video::CONVERT_YUV420PtoRGB24(unsigned char* yuv_src,unsigned char* rgb_dst,int nWidth, int nHeight)
+{
+	int ypSize = 0;
+	int upSize = 0;
+	int offSet = 0;
+
+	int rgb_width = 0;
+	int u_width = 0;
+
+	unsigned char Y,U,V,R,G,B;
+
+	unsigned char* y_planar = NULL;
+	unsigned char* u_planar = NULL;
+	unsigned char* v_planar = NULL;
+
+	if (yuv_src == NULL || rgb_dst == NULL)
+	{
+		return GL_FALSE;
+	}
+
+	if (nWidth == 0 || nHeight == 0)
+	{
+		return GL_FALSE;
+	}
+
+	rgb_width = nWidth * 3; 
+	u_width = (nWidth >> 1);
+
+	ypSize = nWidth * nHeight;
+	upSize = (ypSize>>2);
+	offSet = 0;  
+
+	y_planar = yuv_src;  
+	u_planar = yuv_src + ypSize;  
+	v_planar = u_planar + upSize;
+
+	for(int i = 0; i < nHeight; i++) 
+	{
+		for(int j = 0; j < nWidth; j ++)  
+		{
+			// Get the Y value from the y planar  
+			Y = *(y_planar + nWidth * i + j); 
+
+			// Get the V value from the u planar  
+			offSet = (i>>1) * (u_width) + (j>>1);
+
+			V = *(u_planar + offSet);  
+			U = *(v_planar + offSet);  
+
+			
+			// Cacular the R,G,B values  
+			// Method 1  
+			R = CONVERT_ADJUST((Y + (1.4075 * (V - 128))));  
+			G = CONVERT_ADJUST((Y - (0.3455 * (U - 128) - 0.7169 * (V - 128))));  
+			B = CONVERT_ADJUST((Y + (1.7790 * (U - 128))));  
+
+			/* 
+            // The following formulas are from MicroSoft' MSDN 
+            int C,D,E; 
+            // Method 2 
+            C = Y - 16; 
+            D = U - 128; 
+            E = V - 128; 
+            R = CONVERT_ADJUST(( 298 * C + 409 * E + 128) >> 8); 
+            G = CONVERT_ADJUST(( 298 * C - 100 * D - 208 * E + 128) >> 8); 
+            B = CONVERT_ADJUST(( 298 * C + 516 * D + 128) >> 8); 
+            R = ((R - 128) * .6 + 128 )>255?255:(R - 128) * .6 + 128;  
+            G = ((G - 128) * .6 + 128 )>255?255:(G - 128) * .6 + 128;  
+            B = ((B - 128) * .6 + 128 )>255?255:(B - 128) * .6 + 128;  
+            */ 
+
+			offSet = rgb_width * i + j * 3; 
+
+			rgb_dst[offSet] = B;  
+			rgb_dst[offSet + 1] = G;  
+			rgb_dst[offSet + 2] = R; 
+		}
+	}
+
+	return GL_TRUE;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rect, HWND hWnd)
@@ -167,9 +254,10 @@ BOOL opengl_wnd_draw_video::CreateGLContext(FRAME_DATA_TYPE hDataType, CRect rec
 		m_hDC = hDC;
 		m_hWnd = hWnd;
 		
+		m_rect = rect;
 		m_hDataType = hDataType;
 
-		::SetWindowLong(hWnd, GWL_STYLE, ::GetWindowLong(hWnd, GWL_STYLE) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN );	//CS_HREDRAW | CS_VREDRAW | CS_OWNDC
+		::SetWindowLong(hWnd, GWL_STYLE, ::GetWindowLong(hWnd, GWL_STYLE) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CS_HREDRAW | CS_VREDRAW | CS_OWNDC);
 
 		m_hThread = CreateThread(NULL, 0, DrawSceneThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
@@ -266,7 +354,7 @@ GLuint opengl_wnd_draw_video::SetFrameData(const unsigned char* pFrameData, unsi
 	}
 	memset(pFrameBuffer, 0x0, sizeof(FRAME_DATA_BUFFER));
 
-	pFrameBuffer->pFrameData = new char[ulDataLen];
+	pFrameBuffer->pFrameData = new unsigned char[ulDataLen];
 	if (pFrameBuffer->pFrameData == NULL)
 	{
 		if (pFrameBuffer != NULL)
@@ -296,7 +384,7 @@ GLuint opengl_wnd_draw_video::getframedata()
 	unsigned long ulDataLen    = 0;
 
 	FRAME_DATA_BUFFER* pFrameBuffer = NULL;
-
+	
 	if (m_threadFrameQueue.IsEmpty())
 	{
 		return GL_FALSE;
@@ -325,18 +413,37 @@ GLuint opengl_wnd_draw_video::getframedata()
 			m_pBuffer = NULL;
 		}
 
-		m_nBufferLen = uPixelWidth*uPixelHeight*3/2;
-		m_pBuffer = new unsigned char[m_nBufferLen];
-		if (m_pBuffer == NULL)
+		if (m_hDataType == FRAME_YUV420PDRAW_TYPE)
+		{
+			m_nBufferLen = uPixelWidth*uPixelHeight*3/2;
+			m_pBuffer = new unsigned char[m_nBufferLen];
+			if (m_pBuffer == NULL)
+			{
+				uRet = GL_FALSE;
+				goto part1;
+			}
+			memset(m_pBuffer, 0x0, m_nBufferLen);
+
+			m_pPlane[0] = m_pBuffer;
+			m_pPlane[1] = m_pPlane[0] + uPixelWidth*uPixelHeight;
+			m_pPlane[2] = m_pPlane[1] + uPixelWidth*uPixelHeight/4;
+		}
+		else if (m_hDataType == FRAME_YUV420PTORGB24_TYPE)
+		{
+			m_nBufferLen = uPixelWidth*uPixelHeight*3;
+			m_pBuffer = new unsigned char[m_nBufferLen];
+			if (m_pBuffer == NULL)
+			{
+				uRet = GL_FALSE;
+				goto part1;
+			}
+			memset(m_pBuffer, 0x0, m_nBufferLen);
+		}
+		else
 		{
 			uRet = GL_FALSE;
 			goto part1;
 		}
-		memset(m_pBuffer, 0x0, m_nBufferLen);
-
-		m_pPlane[0] = m_pBuffer;
-		m_pPlane[1] = m_pPlane[0] + uPixelWidth*uPixelHeight;
-		m_pPlane[2] = m_pPlane[1] + uPixelWidth*uPixelHeight/4;
 
 		m_nPixelWidth  = uPixelWidth;
 		m_nPixelHeight = uPixelHeight;
@@ -358,8 +465,20 @@ GLuint opengl_wnd_draw_video::getframedata()
 		goto part1;
 	}
 
-	uRet = GL_TRUE;
-	memcpy(m_pBuffer, pFrameBuffer->pFrameData, pFrameBuffer->uFrameDataLen);
+	if (m_hDataType == FRAME_YUV420PDRAW_TYPE)
+	{
+		uRet = GL_TRUE;
+		memcpy(m_pBuffer, pFrameBuffer->pFrameData, pFrameBuffer->uFrameDataLen);
+	}
+	else if (m_hDataType == FRAME_YUV420PTORGB24_TYPE)
+	{
+		if (CONVERT_YUV420PtoRGB24(pFrameBuffer->pFrameData, m_pBuffer, uPixelWidth, uPixelHeight) == GL_FALSE)
+		{
+			uRet = GL_FALSE;
+		}
+
+		uRet = GL_TRUE;
+	}
 
 part1:
 	if (pFrameBuffer != NULL)
@@ -959,7 +1078,9 @@ GLuint opengl_wnd_draw_video::drawscene()
 	}
 	else if(m_hDataType == FRAME_YUV420PTORGB24_TYPE)
 	{
-		
+		glRasterPos3f(-1.0f,1.0f,0);
+		glPixelZoom((float)m_rect.Width()/(float)m_nPixelWidth, -(float)m_rect.Height()/(float)m_nPixelHeight);
+		glDrawPixels(m_nPixelWidth, m_nPixelHeight, GL_RGB, GL_UNSIGNED_BYTE, m_pBuffer);
 	}
 	 
 	//»æÖÆ
