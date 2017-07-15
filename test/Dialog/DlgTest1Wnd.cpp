@@ -655,7 +655,7 @@ void CDlgTest1Wnd::OnBnClickedButton3()
 
 void CDlgTest1Wnd::OnBnClickedButton4()
 {
-
+	m_hWavPlayer.CreatePlayerProc("D:\\My Soul.wav", 1, 1);
 }
 
 void CDlgTest1Wnd::OnBnClickedButton5()

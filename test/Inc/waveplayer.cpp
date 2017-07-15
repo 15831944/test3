@@ -1,232 +1,327 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 #include "waveplayer.h"
+
 #pragma comment(lib,"Winmm")
 
-#define SLEEP_STEP        100       //睡眠100ms
-
-DWORD WINAPI PlayThreadFunc(void* pParam)
+WavePlayer::WavePlayer()
 {
-	CWavePlayer* pThis = (CWavePlayer*)pParam;
-	pThis->PlayFunc();
+	m_bExit = FALSE;
+	m_nDevID = 0;
+	m_nCount = 0;
+	
+	m_hFormat = NULL;
+	m_dwFmtSize = 0;
+	
+	m_hThread = NULL;
+	m_hMmioFile = NULL;
+	m_strWavFilePath = _T("");
+	
+	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
+}
+
+WavePlayer::~WavePlayer()
+{
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+WavePlayer& WavePlayer::Instance()
+{
+	static WavePlayer inst;
+	return inst;
+}
+
+DWORD WavePlayer::WavePlayerThreadProc(LPVOID lpParam)
+{
+	WavePlayer* pWavePlayerProc = (WavePlayer*)lpParam;
+	if(pWavePlayerProc != NULL)
+	{
+		pWavePlayerProc->PlayWavInfo();
+	}
+	
 	return 0;
 }
 
-CWavePlayer::CWavePlayer()
+void WavePlayer::PlayWavInfo()
 {
-	m_hWaveOut              = NULL;
-	m_lpWaveBuf             = NULL;
-	m_iWaveBufSize          = 0;
-	m_bPlaying              = FALSE;
-	InitializeCriticalSection(&m_critiSec);
-}
-
-CWavePlayer::~CWavePlayer()
-{
-	DeleteCriticalSection(&m_critiSec);
-	if(m_lpWaveBuf)
-		delete [] m_lpWaveBuf;
-}
-
-BOOL CWavePlayer::PlayFile(CString szFile, int iDevID, int iPlayCount)
-{
-    WorkThreadClose();
-	MMCKINFO      mmckinfoParent;
-	MMCKINFO      mmckinfoSubChunk;
-	DWORD         dwFmtSize   = 0, dwDataSize = 0, dwDataOffset = 0;
-	HMMIO         hmmio       = NULL;        //音频文件句柄
-	int           SoundOffset = 0, SoundLong = 0;
-	//打开波形文件
-	if(!(hmmio = mmioOpen(szFile.GetBuffer(), NULL, MMIO_READ|MMIO_ALLOCBUF)))
+	if(!OpenWavFile())
 	{
-		//File open Error
-		printf("Failed to open the file.");//错误处理函数
-		return FALSE;
-	}
-	//检查打开文件是否是声音文件
-	mmckinfoParent.fccType =mmioFOURCC('W','A','V','E');
-	if(mmioDescend(hmmio, (LPMMCKINFO)&mmckinfoParent, NULL, MMIO_FINDRIFF))
-	{
-		printf("NOT WAVE FILE AND QUIT");
-		goto _EXIT;
-	}
-	//寻找 'fmt ' 块
-	mmckinfoSubChunk.ckid = mmioFOURCC('f','m','t',' ');
-	if(mmioDescend(hmmio, &mmckinfoSubChunk, &mmckinfoParent, MMIO_FINDCHUNK))
-	{
-		printf("Can't find [fmt ] chunk");
-		goto _EXIT;
-	}
-	//获得 'fmt ' 块的大小，申请内存
-	dwFmtSize = mmckinfoSubChunk.cksize;
-	memset(&m_waveFrm, 0, sizeof(m_waveFrm));
-	if(mmioRead(hmmio, (HPSTR)&m_waveFrm, dwFmtSize) != dwFmtSize)
-	{
-		printf("failed to read format chunk");
-		goto _EXIT;
-	}
-	//离开 fmt 块
-	mmioAscend(hmmio, &mmckinfoSubChunk, 0);
-	//寻找 'data' 块
-	mmckinfoSubChunk.ckid = mmioFOURCC('d','a','t','a');
-	if(mmioDescend(hmmio, &mmckinfoSubChunk, &mmckinfoParent, MMIO_FINDCHUNK))
-	{
-		printf("Can't find [data] chunk");
-		goto _EXIT;
-	}
-	//获得 'data'块的大小
-	dwDataSize   = mmckinfoSubChunk.cksize ;
-	dwDataOffset = mmckinfoSubChunk.dwDataOffset ;
-	if(0 == dwDataSize)
-	{
-		printf("no data in the ’data’ chunk");
-		goto _EXIT;
-	}
-	//为音频数据分配内存
-	if(m_iWaveBufSize < dwDataSize)
-	{
-		m_lpWaveBuf=new char[dwDataSize];
-		if(!m_lpWaveBuf)
-		{
-			printf("\ncan not alloc mem");
-			goto _EXIT;
-		}
-		m_iWaveBufSize = dwDataSize;
-	}
-	memset(m_lpWaveBuf, 0, m_iWaveBufSize);
-	if(mmioSeek(hmmio, dwDataOffset, SEEK_SET) < 0)
-	{
-		printf("Failed to read the data chunk");
-		goto _EXIT;
-	}
-	int iReadDataLen = mmioRead(hmmio, m_lpWaveBuf, dwDataSize);
-	if(iReadDataLen < 0)
-	{
-		printf("Failed to read the data chunk");
-		goto _EXIT;
-	}
-	mmioClose(hmmio, 0);
-	hmmio       = NULL;
-	m_iWaveTime = (float)iReadDataLen / m_waveFrm.nAvgBytesPerSec * 1000 + 0.5;//取整
-	int iDevCount  = waveOutGetNumDevs();
-	if (iDevCount - 1 < iDevID)
-	{
-		iDevID = 0;
-	}
-	//检查音频输出设备是否能播放指定的音频文件
-	if(waveOutOpen(&m_hWaveOut, iDevID, &m_waveFrm, NULL, NULL, CALLBACK_NULL) != 0)
-	{
-		printf("Failed to OPEN the wave out device [%d]\n", iDevID);
-		return FALSE;
-	}
-	//准备待播放的数据
-	m_waveOutHdr.lpData          = (HPSTR)m_lpWaveBuf;
-	m_waveOutHdr.dwBufferLength  = iReadDataLen;
-	m_waveOutHdr.dwFlags         = 0;
-	m_waveOutHdr.dwBytesRecorded = 0;
-	m_waveOutHdr.dwUser          = NULL;
-	m_waveOutHdr.dwLoops         = 0;
-	m_waveOutHdr.lpNext          = NULL;
-	m_waveOutHdr.reserved        = NULL;
-	if(waveOutPrepareHeader(m_hWaveOut, &m_waveOutHdr, sizeof(WAVEHDR)) != 0)
-	{
-		waveOutClose(m_hWaveOut);
-		printf("Failed to prepare the wave data buffer");
-		return FALSE;
-	}
-	m_bPlaying    = TRUE;
-	m_iPlayCount  = iPlayCount;
-	m_hWorkThread = CreateThread(NULL, 0, PlayThreadFunc, this, 0, 0);
-	return TRUE;
-
-_EXIT:
-	mmioClose(hmmio, 0);
-	hmmio = NULL;
-	return FALSE;
-}
-void CWavePlayer::clear()
-{
-	m_iPlayCount  = 0;
-	m_bPlaying    = FALSE;
-	waveOutSetVolume(m_hWaveOut, m_dwVolOld);
-	waveOutReset(m_hWaveOut);
-	waveOutUnprepareHeader(m_hWaveOut, &m_waveOutHdr, sizeof(WAVEHDR));
-	waveOutClose(m_hWaveOut);
-	m_hWaveOut    = NULL;
-	CloseHandle(m_hWorkThread);
-	m_hWorkThread = NULL;
-}
-void CWavePlayer::PlayFunc()
-{
-	waveOutGetVolume(m_hWaveOut, &m_dwVolOld);
-
-	//响铃音量为100
-	DWORD dwLeftVol  = 65535;
-	DWORD dwRightVol = dwLeftVol << 16;
-	DWORD dwVol      = dwLeftVol + dwRightVol;
-	waveOutSetVolume(m_hWaveOut,dwVol);
-
-	int iElapseTime = m_iWaveTime, iRemainTime = m_iWaveTime, iWantSleep = 0;
-	int iCount = 0;
-	while (1)
-	{
-		EnterCriticalSection(&m_critiSec);
-		if(FALSE == m_bPlaying)			
-		{
-			clear();
-			LeaveCriticalSection(&m_critiSec);
-			return;
-		}
-		if(iElapseTime >= m_iWaveTime)
-		{	
-			if(iCount == m_iPlayCount)	
-			{
-				clear();
-				LeaveCriticalSection(&m_critiSec);
-				return;
-			}
-			waveOutReset(m_hWaveOut);
-			//播放音频数据文件
-			if(0 != waveOutWrite(m_hWaveOut, &m_waveOutHdr, sizeof(WAVEHDR)))
-			{
-				printf("Failed to write the wave data buffer");
-			}
-			iElapseTime = 0;
-			iCount++;
-		}
-        LeaveCriticalSection(&m_critiSec);
-
-		iRemainTime = m_iWaveTime - iElapseTime;
-		iWantSleep = SLEEP_STEP < iRemainTime ? SLEEP_STEP : iRemainTime;
-		Sleep(iWantSleep);
-		iElapseTime += iWantSleep;
-	}
-}
-
-void CWavePlayer::StopPlay()
-{
-	WorkThreadClose();
-}
-
-void CWavePlayer::WorkThreadClose()
-{
-	EnterCriticalSection(&m_critiSec);
-	if(FALSE == m_bPlaying)
-	{
-		LeaveCriticalSection(&m_critiSec);
 		return;
 	}
-	m_bPlaying = FALSE;
-	LeaveCriticalSection(&m_critiSec);
-
-	DWORD dwStatus = 0;
-	int iWantSleep = SLEEP_STEP < m_iWaveTime ? SLEEP_STEP : m_iWaveTime;
-	int iCount = 1;
-    while(WAIT_TIMEOUT == WaitForSingleObject(m_hWorkThread, iWantSleep))
+	
+	if(!ReadWavFile())
 	{
-		CString strInfo;
-		strInfo.Format(_T("*** *** waiting for waveplay thread exit, %d times\n"), iCount++);
-		OutputDebugString(strInfo);
+		return;
 	}
 
-	return;
+	CloseWavFile();
+	
+	if(!InitSoundDev())
+	{
+		return;
+	}
+}
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL WavePlayer::CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT nCount)
+{
+	BOOL bRet = FALSE;
+	
+	if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
+	{
+		SetEvent(m_hStartEvent);
+		ResetEvent(m_hEndEvent);
+		
+		m_nDevID = nDevID;
+		m_nCount = nCount;
+		m_strWavFilePath =  pszWavFilePath;
+		
+		m_hThread = CreateThread(NULL, 0, WavePlayerThreadProc, (LPVOID)this, 0, &m_dwThreadID);
+		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
+		{
+			ResetEvent(m_hStartEvent);
+			return FALSE;
+		}
+
+		bRet = TRUE;
+		m_bExit = FALSE;
+		
+		CloseHandle(m_hThread);
+		m_hThread = NULL;
+	}
+	
+	return bRet;
+}
+
+BOOL WavePlayer::CloseProc()
+{
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL WavePlayer::OpenWavFile()
+{
+	BOOL bRet = FALSE;
+	
+	LONG lReadBytes = 0;
+
+	MMCKINFO mmckinfoParent;
+	MMCKINFO mmckinfoSubChunk;
+
+	MMRESULT hResult = 0;
+	
+	if(m_strWavFilePath == _T(""))
+	{
+		return FALSE;
+	}
+	
+	m_hMmioFile = mmioOpen((LPSTR)m_strWavFilePath.c_str(), NULL, MMIO_READ|MMIO_ALLOCBUF);
+	if(m_hMmioFile == NULL)
+	{
+		return FALSE;
+	}
+	
+	mmckinfoParent.fccType =mmioFOURCC('W','A','V','E');
+	hResult = mmioDescend(m_hMmioFile, (LPMMCKINFO)&mmckinfoParent, NULL, MMIO_FINDRIFF);
+	if(hResult != 0)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+
+ 	mmckinfoSubChunk.ckid = mmioFOURCC('f','m','t',' ');
+	hResult = mmioDescend(m_hMmioFile, &mmckinfoSubChunk, &mmckinfoParent, MMIO_FINDCHUNK);
+	if(hResult != 0)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+	
+	m_dwFmtSize = mmckinfoSubChunk.cksize;
+	m_hFormat=LocalAlloc(LMEM_MOVEABLE,LOWORD(m_dwFmtSize)); 
+	if(m_hFormat == NULL)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+	
+	m_lpFormat = (WAVEFORMATEX*)LocalLock(m_hFormat);
+	if(m_lpFormat == NULL)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+ 	
+ 	lReadBytes = mmioRead(m_hMmioFile, (HPSTR)m_lpFormat, m_dwFmtSize);
+	if (lReadBytes != m_dwFmtSize)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+
+	hResult = mmioAscend(m_hMmioFile, &mmckinfoSubChunk, 0);
+	if (hResult != 0)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+
+	mmckinfoSubChunk.ckid=mmioFOURCC('d','a','t','a'); 
+	hResult = mmioDescend(m_hMmioFile,&mmckinfoSubChunk,&mmckinfoParent,MMIO_FINDCHUNK);
+	if (hResult != 0)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+
+	m_dwDataSize = mmckinfoSubChunk.cksize;
+	m_dwDataOffset = mmckinfoSubChunk.dwDataOffset;
+
+	if (m_dwDataSize == 0L)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+
+	bRet = TRUE;
+
+ part1:
+	if (!bRet)
+	{
+		if (m_hMmioFile != NULL)
+		{
+			mmioClose(m_hMmioFile, 0);
+			m_hMmioFile = NULL;
+		}
+	}
+	
+	return bRet;
+}
+
+BOOL WavePlayer::ReadWavFile()
+{
+	BOOL bRet = FALSE;
+
+	LONG lReadBytes = 0;
+	LONG lSeekOffset = 0;
+	MMRESULT hResult = 0;
+
+	if (m_hMmioFile == NULL)
+	{
+		return FALSE;
+	}
+
+	m_pWavData = (HPSTR)malloc(m_dwDataSize);
+	if (m_pWavData == NULL)
+	{
+		return FALSE;
+	}
+	memset(m_pWavData, 0x0, m_dwDataSize);
+
+	lSeekOffset = mmioSeek(m_hMmioFile, m_dwDataOffset, SEEK_SET);
+	if (lSeekOffset < 0)
+	{
+		bRet = FALSE;
+		goto part2;
+	}
+
+	lReadBytes = mmioRead(m_hMmioFile, m_pWavData, m_dwDataSize);
+	if (lReadBytes < 0)
+	{
+		bRet = FALSE;
+		goto part2;
+	}
+
+	bRet = TRUE;
+
+part2:
+	if (!bRet)
+	{
+		if (m_pWavData != NULL)
+		{
+			free(m_pWavData);
+			m_pWavData = NULL;
+		}
+	}
+
+	return bRet;
+}
+
+void WavePlayer::CloseWavFile()
+{
+	if (m_hMmioFile != NULL)
+	{
+		mmioClose(m_hMmioFile, 0);
+		m_hMmioFile = NULL;
+	}
+}
+
+BOOL WavePlayer::InitSoundDev()
+{
+
+	BOOL bRet = FALSE;
+	UINT uDevNum = 0;
+	MMRESULT hResult = 0;
+
+	WAVEOUTCAPS pwoc; 
+	HWAVEOUT hWaveOut; 
+
+	if (m_lpFormat == NULL)
+	{
+		return FALSE;
+	}
+
+	if (m_pWavData == NULL)
+	{
+		return FALSE;
+	}
+
+	uDevNum = waveOutGetNumDevs();
+	if (uDevNum == 0)
+	{
+		return FALSE;
+	}
+
+	hResult = waveOutGetDevCaps(WAVE_MAPPER, &pwoc, sizeof(WAVEOUTCAPS));
+	if (hResult != 0)
+	{
+		return FALSE;
+	}
+
+	hResult = waveOutOpen(&hWaveOut, m_nDevID, m_lpFormat, NULL, NULL, CALLBACK_NULL);
+	if (hResult != 0)
+	{
+		return FALSE;
+	}
+
+	m_pWaveOutHdr.lpData  = (HPSTR)m_pWavData;
+	m_pWaveOutHdr.dwBufferLength = m_dwDataSize;
+	m_pWaveOutHdr.dwFlags = 0;
+	m_pWaveOutHdr.dwBytesRecorded = 0;
+	m_pWaveOutHdr.dwUser  = NULL;
+	m_pWaveOutHdr.dwLoops = 0;
+	m_pWaveOutHdr.lpNext  = NULL;
+	m_pWaveOutHdr.reserved = NULL;
+
+	hResult = waveOutPrepareHeader(hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
+	if (hResult != 0)
+	{
+		bRet = FALSE;
+		goto part3;
+	}
+
+part3:
+	// 	LocalUnlock(m_hFormat);   
+	// 	LocalFree(m_hFormat); 
+	//waveOutUnprepareHeader
+	return bRet;
+}
+
+BOOL WavePlayer::PlayWavData()
+{
+	BOOL bRet = FALSE;
+
+	return bRet;
 }

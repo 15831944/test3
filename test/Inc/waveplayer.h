@@ -1,43 +1,58 @@
-#ifndef _WAVEPLAYER_H_
-#define _WAVEPLAYER_H_
+#ifndef __WAVEPLAYER_H__
+#define __WAVEPLAYER_H__
 
 #include <afxmt.h>
 #include <mmsystem.h>
 #include <afxtempl.h>
 
-#define PLAY_ONCE         1           //播放一次
-#define PALY_LOOP         0xefffffff  //播放无限次
-
-class CWavePlayer
+class WavePlayer
 {
 public:
-	CWavePlayer();
-	~CWavePlayer();
+	WavePlayer();
+	~WavePlayer();
+	
 public:
-	BOOL PlayFile(CString szFile, int iDevID, int iPlayCount);
-	void StopPlay();
+	BOOL					CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT nCount);
+	BOOL					CloseProc();
+	
+	static 	WavePlayer&		Instance();
+	static  DWORD WINAPI	WavePlayerThreadProc(LPVOID lpParam);
+	
+protected:
+	void					PlayWavInfo();
+	
+	BOOL					OpenWavFile();
+	BOOL					ReadWavFile();
+	void					CloseWavFile();
 
+	BOOL					InitSoundDev();
+	BOOL					PlayWavData();
 
-public:
-	void PlayFunc();
-	void clear();
+protected:
+	HANDLE					m_hThread;
+	
+	HANDLE					m_hStartEvent;
+	HANDLE					m_hEndEvent;
+	
+	HANDLE					m_hFormat;
+	HMMIO					m_hMmioFile;
+	
+	WAVEFORMATEX * 			m_lpFormat;
+	WAVEHDR					m_pWaveOutHdr; 
+	
 private:
-	void WorkThreadClose();
-public:
-	BOOL                 m_bPlaying;
-	int                  m_iPlayCount;
-	int                  m_iWaveTime;
-    CRITICAL_SECTION     m_critiSec;
-private:
-	HWAVEOUT             m_hWaveOut;
-	HANDLE               m_hWorkThread;
-	int                  m_iDevID;
-	WAVEFORMATEX         m_waveFrm;
-	WAVEHDR              m_waveOutHdr;
-	DWORD                m_iWaveBufSize;
-	HPSTR                m_lpWaveBuf;         //音频数据
-	DWORD                m_dwVolOld;          //原始的音量
+	BOOL					m_bExit;
+	
+	UINT					m_nDevID;
+	UINT					m_nCount;
+	
+	DWORD					m_dwFmtSize;
+	DWORD					m_dwDataSize;
+	DWORD					m_dwDataOffset;
+	DWORD					m_dwThreadID;
+
+	HPSTR					m_pWavData;
+	std::string				m_strWavFilePath;
 };
 
-
-#endif //_WAVEPLAYER_H_
+#endif

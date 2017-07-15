@@ -764,6 +764,14 @@
 				RelativePath=".\Inc\thread_queue.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Inc\waveplayer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\waveplayer.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Control"
