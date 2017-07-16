@@ -61,6 +61,20 @@ void WavePlayer::PlayWavInfo()
 	{
 		return;
 	}
+
+	while(1)
+	{
+		if (!m_bExit)
+		{
+			PlayWavData();
+		}
+		else
+		{
+			SetEvent(m_hEndEvent);
+		}
+	};
+
+	ResetEvent(m_hStartEvent);
 }
 //////////////////////////////////////////////////////////////////////////
 //
@@ -266,7 +280,6 @@ BOOL WavePlayer::InitSoundDev()
 	MMRESULT hResult = 0;
 
 	WAVEOUTCAPS pwoc; 
-	HWAVEOUT hWaveOut; 
 
 	if (m_lpFormat == NULL)
 	{
@@ -290,7 +303,7 @@ BOOL WavePlayer::InitSoundDev()
 		return FALSE;
 	}
 
-	hResult = waveOutOpen(&hWaveOut, m_nDevID, m_lpFormat, NULL, NULL, CALLBACK_NULL);
+	hResult = waveOutOpen(&m_hWaveOut, WAVE_MAPPER, m_lpFormat, NULL, NULL, CALLBACK_NULL);
 	if (hResult != 0)
 	{
 		return FALSE;
@@ -305,23 +318,60 @@ BOOL WavePlayer::InitSoundDev()
 	m_pWaveOutHdr.lpNext  = NULL;
 	m_pWaveOutHdr.reserved = NULL;
 
-	hResult = waveOutPrepareHeader(hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
+	hResult = waveOutPrepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
 	if (hResult != 0)
 	{
 		bRet = FALSE;
 		goto part3;
 	}
 
+	bRet = TRUE;
+
 part3:
-	// 	LocalUnlock(m_hFormat);   
-	// 	LocalFree(m_hFormat); 
-	//waveOutUnprepareHeader
+	if (!bRet)
+	{
+		hResult = waveOutUnprepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
+		if (hResult == 0)
+		{
+			if (m_hWaveOut != NULL)
+			{
+				waveOutReset(m_hWaveOut);
+				waveOutClose(m_hWaveOut);
+				m_hWaveOut = NULL;
+			}
+		}
+	}
+
+	LocalUnlock(m_hFormat);   
+	LocalFree(m_hFormat);
+
+	m_hFormat = NULL;
+	m_lpFormat = NULL;
 	return bRet;
 }
 
+//libmad½âÂë
 BOOL WavePlayer::PlayWavData()
 {
 	BOOL bRet = FALSE;
+	MMRESULT hResult = 0;
 
+	if (m_hWaveOut == NULL)
+	{
+		return FALSE;
+	}
+
+	hResult = waveOutWrite(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
+	if (hResult != 0)
+	{
+		return FALSE;
+	}
+
+// 	if (!(m_pWaveOutHdr.dwFlags & WHDR_DONE))
+// 	{
+// 		WaitForSingleObject(m_hEndEvent, INFINITE);
+// 	}
+
+	//while (WaitForSingleObject(m_hEndEvent, m_dwWaitTime) != WAIT_OBJECT_0)
 	return bRet;
 }

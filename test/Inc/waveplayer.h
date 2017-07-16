@@ -39,6 +39,7 @@ protected:
 	
 	WAVEFORMATEX * 			m_lpFormat;
 	WAVEHDR					m_pWaveOutHdr; 
+	HWAVEOUT				m_hWaveOut;
 	
 private:
 	BOOL					m_bExit;
@@ -49,7 +50,9 @@ private:
 	DWORD					m_dwFmtSize;
 	DWORD					m_dwDataSize;
 	DWORD					m_dwDataOffset;
+
 	DWORD					m_dwThreadID;
+	DWORD					m_dwWaitTime;
 
 	HPSTR					m_pWavData;
 	std::string				m_strWavFilePath;
