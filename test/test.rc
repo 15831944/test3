@@ -131,6 +131,14 @@ BEGIN
     PUSHBUTTON      "Test2",IDC_BTN_TEST2,254,2,51,16
 END
 
+IDD_DIALOG4 DIALOGEX 0, 0, 310, 213
+STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
+FONT 9, "ËÎÌו", 400, 0, 0x86
+BEGIN
+    PUSHBUTTON      "Button1",IDC_BUTTON1,39,27,50,14
+    PUSHBUTTON      "Button2",IDC_BUTTON2,113,27,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -214,6 +222,12 @@ BEGIN
         BOTTOMMARGIN, 212
         HORZGUIDE, 2
         HORZGUIDE, 210
+    END
+
+    IDD_DIALOG4, DIALOG
+    BEGIN
+        RIGHTMARGIN, 308
+        BOTTOMMARGIN, 212
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -9,6 +9,7 @@
 #define IDD_DIALOG1                     0x0113
 #define IDD_DIALOG2                     0x0114
 #define IDD_DIALOG3                     0x0115
+#define IDD_DIALOG4						0x0116
 #define IDR_MAINFRAME                   0x0200
 #define IDI_ICON1                       0x0201
 #define IDI_ICON2                       0x0202

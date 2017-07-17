@@ -12,27 +12,33 @@ public:
 	~WavePlayer();
 	
 public:
-	BOOL					CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT nCount);
-	BOOL					CloseProc();
+	BOOL					CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT nCount, UINT nSpanTime=500);
+	BOOL					ClosePlayerProc();
 	
 	static 	WavePlayer&		Instance();
+	
+protected:
 	static  DWORD WINAPI	WavePlayerThreadProc(LPVOID lpParam);
+	static  void CALLBACK   WaveOutCallBackProc(HWAVEOUT hWavOut, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
 	
 protected:
 	void					PlayWavInfo();
+	void					WavePlayDone();
 	
 	BOOL					OpenWavFile();
 	BOOL					ReadWavFile();
 	void					CloseWavFile();
 
-	BOOL					InitSoundDev();
+	BOOL					OpenPlayWav();
 	BOOL					PlayWavData();
+	BOOL					ClearWavData();
 
 protected:
 	HANDLE					m_hThread;
 	
 	HANDLE					m_hStartEvent;
 	HANDLE					m_hEndEvent;
+	HANDLE					m_hPlayEvent;
 	
 	HANDLE					m_hFormat;
 	HMMIO					m_hMmioFile;
@@ -43,6 +49,7 @@ protected:
 	
 private:
 	BOOL					m_bExit;
+	BOOL					m_bOpenFile;
 	
 	UINT					m_nDevID;
 	UINT					m_nCount;

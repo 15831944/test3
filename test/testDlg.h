@@ -10,6 +10,7 @@
 #include "Dialog/DlgTest1Wnd.h"
 #include "Dialog/DlgTest2Wnd.h"
 #include "Dialog/DlgTest3Wnd.h"
+#include "Dialog/DlgTest4Wnd.h"
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
@@ -77,6 +78,8 @@ protected:
 	CDlgTest1Wnd		m_hDlgTest1Wnd;
 	CDlgTest2Wnd		m_hDlgTest2Wnd;
 	CDlgTest3Wnd		m_hDlgTest3Wnd;
+	CDlgTest4Wnd		m_hDlgTest4Wnd;
+
 private:
 	CPtrArray			m_pArPage;
 	int					m_nPrePage;	

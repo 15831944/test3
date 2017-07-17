@@ -5,8 +5,6 @@
 #include "../Inc/ETSLayout.h"
 #include "../Control/DrawButton.h"
 
-#include "../Inc/waveplayer.h"
-
 using namespace std;
 class CDlgTest1Wnd : public CDialog
 {
@@ -40,8 +38,6 @@ protected:
 protected:
 	WNDPROC			 				m_OldEditProc;	//FARPROC,WNDPROC
 	HWND							m_hEditWnd;
-
-	WavePlayer						m_hWavPlayer;
 
 private:
 	CString							m_strDefaultPath;

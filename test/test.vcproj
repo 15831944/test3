@@ -467,6 +467,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Dialog\DlgTest4Wnd.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -593,6 +597,10 @@
 			</File>
 			<File
 				RelativePath=".\Dialog\DlgTest3Wnd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Dialog\DlgTest4Wnd.h"
 				>
 			</File>
 			<File
