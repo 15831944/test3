@@ -15,6 +15,9 @@ WavePlayer::WavePlayer()
 	
 	m_hThread = NULL;
 	m_hFormat = NULL;
+	
+	m_hWaveOut = NULL;
+	m_pWavData = NULL; 
 	m_hMmioFile = NULL;
 
 	m_lpFormat = NULL;
