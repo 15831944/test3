@@ -705,34 +705,6 @@
 			Name="Inc"
 			>
 			<File
-				RelativePath=".\Inc\Base64.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\Character.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\Character.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\DBConnect.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\DBConnect.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\ETSLayout.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\ETSLayout.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Inc\GlobalInfo.cpp"
 				>
 			</File>
@@ -741,45 +713,61 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Inc\NodeTree.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\NodeTree.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\opengl_texture_draw_video.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\opengl_texture_draw_video.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\opengl_wnd_draw_video.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\opengl_wnd_draw_video.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Inc\PubClass.h"
 				>
 			</File>
-			<File
-				RelativePath=".\Inc\thread_queue.h"
+			<Filter
+				Name="algorithm"
 				>
-			</File>
-			<File
-				RelativePath=".\Inc\waveplayer.cpp"
+				<File
+					RelativePath=".\Inc\algorithm\thread_queue.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="audio"
 				>
-			</File>
-			<File
-				RelativePath=".\Inc\waveplayer.h"
+				<File
+					RelativePath=".\Inc\audio\waveplayer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\waveplayer.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="video"
 				>
-			</File>
+				<File
+					RelativePath=".\Inc\video\opengl_texture_draw_video.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\video\opengl_texture_draw_video.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\video\opengl_wnd_draw_video.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\video\opengl_wnd_draw_video.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="common"
+				>
+				<File
+					RelativePath=".\Inc\common\Character.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\common\Character.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Control"

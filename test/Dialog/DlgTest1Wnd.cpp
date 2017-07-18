@@ -3,7 +3,6 @@
 #include "DlgTest1Wnd.h"
 
 #include "../inc/GlobalInfo.h"
-#include "../inc/JsonConvert.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)

@@ -2,7 +2,6 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 
-#include "../Inc/ETSLayout.h"
 #include "../Control/DrawButton.h"
 
 using namespace std;

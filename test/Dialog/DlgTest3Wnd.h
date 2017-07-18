@@ -2,7 +2,7 @@
 #include "afxwin.h"
 #include <atlconv.h>
 
-#include "../inc/opengl_wnd_draw_video.h"
+#include "../inc/video/opengl_wnd_draw_video.h"
 
 using namespace std;
 class CDlgTest3Wnd : public CDialog

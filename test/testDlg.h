@@ -5,8 +5,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "./Inc/ETSLayout.h"
-
 #include "Dialog/DlgTest1Wnd.h"
 #include "Dialog/DlgTest2Wnd.h"
 #include "Dialog/DlgTest3Wnd.h"
@@ -14,7 +12,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
-using namespace ETSLayout;
 class CAboutDlg : public CDialog
 {
 public:

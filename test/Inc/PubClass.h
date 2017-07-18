@@ -30,9 +30,7 @@
 
 //#include <opencv2/opencv.hpp>
 
-#include "Base64.h"
-#include "CBase64.h"
-#include "Character.h"
+#include "./common/Character.h"
 
 #define	DEVICE_NAME_LEN_MAX		 256
 
