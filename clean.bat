@@ -2,7 +2,7 @@
 
 set s1=%~dp0%
 if exist "*.ncb"		(del /a /q /f "*.ncb")
-rem if exist "*.suo"		(del /a /q /f "*.suo")
+if exist "*.suo"		(del /a /q /f "*.suo")
 
 cd %s1%\test
 if exist "*.aps"		(del /a /q /f "*.aps")
