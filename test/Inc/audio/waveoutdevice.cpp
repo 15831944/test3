@@ -44,8 +44,10 @@ DWORD_PTR WaveoutDevice::GetId()
 WaveStatus WaveoutDevice::GetDeviceStatus()
 {
 	WaveStatus wStatus;
-	wStatus = static_cast<WaveStatus>( 
-	);
+    wStatus = static_cast<WaveStatus>( 
+        ::InterlockedCompareExchange(const_cast<LONG*>(&_lDeviceState), waveClosed, waveClosed)
+        );
+    return wStatus;
 }
 
 HRESULT WaveoutDevice::GetPosition(WaveTime& wti)
