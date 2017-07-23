@@ -4,6 +4,8 @@
 
 #include "../Control/DrawButton.h"
 
+typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);
+
 using namespace std;
 class CDlgTest1Wnd : public CDialog
 {
@@ -29,12 +31,15 @@ protected:
 	afx_msg void					OnBnClickedButton6();
 	afx_msg void					OnBnClickedButton7();
 
-	void	Test1(void* pParam);
+	void							Test1(CALLRING_CALLBACK_FUNC pfCallRingFunc);
+	static void						Test2(const char* pszFilePath, int nAudioCard);
+
 protected:
 	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 	void							InitialLayout();
 	
 protected:
+	CALLRING_CALLBACK_FUNC			m_pfCallRingFunc;
 	WNDPROC			 				m_OldEditProc;	//FARPROC,WNDPROC
 	HWND							m_hEditWnd;
 
@@ -42,5 +47,4 @@ private:
 	CString							m_strDefaultPath;
 	CString							m_strAppPath;
 	std::vector<void*> m_vecList;
-	
 };

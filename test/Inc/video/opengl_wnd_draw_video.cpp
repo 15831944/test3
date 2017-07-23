@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "opengl_wnd_draw_video.h"
 
+#if (OPENGL_DRAW_WND_VIDEO == 1)
+
 static const GLchar* VERTEX_SHADER = 
 {
 	"attribute vec4 vertexIn;	\n" 
@@ -1091,3 +1093,5 @@ GLuint opengl_wnd_draw_video::drawscene()
 #endif
 	return GL_TRUE;
 }
+
+#endif

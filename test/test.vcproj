@@ -740,14 +740,6 @@
 				Name="video"
 				>
 				<File
-					RelativePath=".\Inc\video\opengl_texture_draw_video.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\video\opengl_texture_draw_video.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Inc\video\opengl_wnd_draw_video.cpp"
 					>
 				</File>

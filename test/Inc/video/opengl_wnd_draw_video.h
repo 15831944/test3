@@ -1,6 +1,9 @@
 #ifndef __OPENGL_WND_DRAW_VIDEO_H__
 #define __OPENGL_WND_DRAW_VIDEO_H__
 
+#define OPENGL_DRAW_WND_VIDEO 0
+
+#if (OPENGL_DRAW_WND_VIDEO == 1)
 #include <glew.h>
 #include <glut.h>
 
@@ -112,5 +115,5 @@ private:
 
 	thread_queue<FRAME_DATA_BUFFER*> m_threadFrameQueue;
 };
-
+#endif
 #endif

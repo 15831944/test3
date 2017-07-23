@@ -52,21 +52,26 @@ void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 
 void CDlgTest3Wnd::OnBnClickedBtnCaptureimage()
 {
+#if (OPENGL_DRAW_WND_VIDEO == 1)
 	CRect rect1;
 	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
 
 	m_openglDrawVideo.SetProcTimeOver(50);
 	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PTORGB24_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
+#endif
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnTest1()
 {
+#if (OPENGL_DRAW_WND_VIDEO == 1)
 	m_openglDrawVideo.CloseGLProc();
 	GetDlgItem(IDC_STATIC_VIDEO)->Invalidate(TRUE);
+#endif
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnTest2()
 {
+#if (OPENGL_DRAW_WND_VIDEO == 1)
 	unsigned char* pBlockBuf = NULL;
 	unsigned long BLOCK_SIZE_IN = 0;
 	unsigned long BLOCK_SIZE_OUT = 0;
@@ -148,4 +153,5 @@ void CDlgTest3Wnd::OnBnClickedBtnTest2()
 		delete[] pBlockBuf;
 		pBlockBuf = NULL;
 	}
+#endif
 }
