@@ -728,6 +728,34 @@
 				Name="audio"
 				>
 				<File
+					RelativePath=".\Inc\audio\multimediastream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\multimediastream.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\wavebase.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\waveindevice.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\waveindevice.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\waveoutdevice.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\waveoutdevice.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\audio\waveplayer.cpp"
 					>
 				</File>
