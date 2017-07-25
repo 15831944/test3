@@ -1,2 +1,5 @@
 https://msdn.microsoft.com/ja-jp/dd317593
 http://blog.csdn.net/gaiazhang/article/details/50524442
+http://www.cnblogs.com/lisuyun/articles/5576967.html
+
+Core Audio API  IAudioMediaStream
