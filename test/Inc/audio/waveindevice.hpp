@@ -1,6 +1,8 @@
 #ifndef __WAVEINDEVICE_HPP__
 #define __WAVEINDEVICE_HPP__
 
+#include "wavebase.hpp"
+
 class WaveInDevice : public IWaveDevice
 {
 public:
@@ -8,7 +10,7 @@ public:
 	virtual ~WaveInDevice();
 	
 	static  UINT 		GetDevicesCount();
-    static  HRESULT 	GetDeviceCaps(UINT uDeviceID, WaveOutCaps& woc);
+    static  HRESULT 	GetDeviceCaps(UINT uDeviceID, WaveInCaps& wic);
 	
 public:
 	virtual bool		IsOpen() const;

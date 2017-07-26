@@ -18,7 +18,7 @@ UINT WaveInDevice::GetDevicesCount()
 	return waveInGetNumDevs();
 }
 
-HRESULT WaveInDevice::GetDeviceCaps(UINT uDeviceID, WaveOutCaps& woc)
+HRESULT WaveInDevice::GetDeviceCaps(UINT uDeviceID, WaveInCaps& wic)
 {
 	HRESULT hr;
     MMRESULT mmr = waveInGetDevCaps(uDeviceID, wic, wic.Size());
@@ -26,12 +26,12 @@ HRESULT WaveInDevice::GetDeviceCaps(UINT uDeviceID, WaveOutCaps& woc)
     return hr;
 }
 
-bool WaveInDevice::IsOpen()
+bool WaveInDevice::IsOpen() const
 {
 	return ( _hWaveIn != NULL );
 }
 
-DWORD_PTR WaveInDevice::GetId()
+DWORD_PTR WaveInDevice::GetId() const
 {
 	DWORD_PTR uID = static_cast<DWORD_PTR>(-1L);
     if ( IsOpen() )
@@ -41,7 +41,7 @@ DWORD_PTR WaveInDevice::GetId()
     return uID;
 }
 
-WaveStatus WaveInDevice::GetDeviceStatus()
+WaveStatus WaveInDevice::GetDeviceStatus() const
 {
 	WaveStatus wStatus;
     wStatus = static_cast<WaveStatus>( 
@@ -50,7 +50,7 @@ WaveStatus WaveInDevice::GetDeviceStatus()
     return wStatus;
 }
 
-HRESULT WaveInDevice::GetPosition(WaveTime& wti)
+HRESULT WaveInDevice::GetPosition(WaveTime& wti) const
 {
 	HRESULT hr = HRESULT_FROM_WIN32(ERROR_INVALID_HANDLE);
     if ( IsOpen() )
@@ -212,7 +212,7 @@ void WaveInDevice::ProcessEvent(UINT uMsg, DWORD_PTR dwParam1, DWORD_PTR dwParam
     }
 }
 
-void WaveInDevice::CALLBACK waveInProc(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance,
+void WaveInDevice::waveInProc(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance,
 								DWORD dwParam1, DWORD dwParam2)
 {
 	WaveInDevice* _this = reinterpret_cast<WaveInDevice*>( dwInstance );

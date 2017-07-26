@@ -1,6 +1,15 @@
 #ifndef __MULTIMEDIASTREAM_HPP__
 #define __MULTIMEDIASTREAM_HPP__
 
+#pragma warning(push)
+#include <atlbase.h>
+#include <Strmif.h>
+#include <mmreg.h>
+#include <amstream.h>
+#pragma warning(pop)
+
+#pragma comment(lib, "Strmiids.lib")
+
 //MAudioStream
 class MAudioStream
 {
@@ -53,7 +62,7 @@ public:
     HRESULT 				OpenFile(LPCTSTR lpszFileName, DWORD dwFlags);
 	
     HRESULT 				AddMediaStream(IUnknown* pStreamObject, const MSPID* pPurposeID, DWORD dwFlags, IMediaStream** ppNewStream);
-    HRESULT 				AddSourceFilter(LPCTSTR lpszFileName, LPCTSTR lpszName, IBaseFilter** ppFilter);
+    HRESULT 				AddSourceFilter(LPCTSTR lpszFileName, LPCTSTR lpszFilterName, IBaseFilter** ppFilter);
     HRESULT 				AddFilter(LPCTSTR lpszFilterName, IBaseFilter* pFilter);
 	
     HRESULT 				FindFilterByName(LPCTSTR lpszFilterName, IBaseFilter** ppFilter);

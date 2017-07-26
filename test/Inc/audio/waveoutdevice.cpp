@@ -13,12 +13,12 @@ WaveoutDevice::~WaveoutDevice()
 	Close();
 }
 
-UINT WaveOutDevice::GetDevicesCount()
+UINT WaveoutDevice::GetDevicesCount()
 {
     return waveOutGetNumDevs();
 }
 
-HRESULT WaveOutDevice::GetDeviceCaps(UINT uDeviceID, WaveOutCaps& woc)
+HRESULT WaveoutDevice::GetDeviceCaps(UINT uDeviceID, WaveOutCaps& woc)
 {
     HRESULT hr;
     MMRESULT mmr = waveOutGetDevCaps(uDeviceID, woc, woc.Size());
@@ -26,12 +26,12 @@ HRESULT WaveOutDevice::GetDeviceCaps(UINT uDeviceID, WaveOutCaps& woc)
     return hr;
 }
 
-bool WaveoutDevice::IsOpen()
+bool WaveoutDevice::IsOpen() const
 {
 	return ( _hWaveOut != NULL );
 }
 
-DWORD_PTR WaveoutDevice::GetId()
+DWORD_PTR WaveoutDevice::GetId() const
 {
 	DWORD_PTR uID = static_cast<DWORD_PTR>(-1L);
 	if (IsOpen())
@@ -41,7 +41,7 @@ DWORD_PTR WaveoutDevice::GetId()
     return uID;
 }
 
-WaveStatus WaveoutDevice::GetDeviceStatus()
+WaveStatus WaveoutDevice::GetDeviceStatus() const
 {
 	WaveStatus wStatus;
     wStatus = static_cast<WaveStatus>( 
@@ -50,7 +50,7 @@ WaveStatus WaveoutDevice::GetDeviceStatus()
     return wStatus;
 }
 
-HRESULT WaveoutDevice::GetPosition(WaveTime& wti)
+HRESULT WaveoutDevice::GetPosition(WaveTime& wti) const
 {
 	HRESULT hr = HRESULT_FROM_WIN32(ERROR_INVALID_HANDLE);
 	if (IsOpen())
@@ -67,7 +67,7 @@ HRESULT WaveoutDevice::Open(UINT uDeviceID, const WaveFormat& wfmt)
 	if (!IsOpen())
 	{
 		MMRESULT mmr = waveOutOpen(&_hWaveOut, uDeviceID, const_cast<WaveFormat&>(wfmt),
-								  reinterpret_cast<DWORD_PTR>(WaveOutDevice::waveOutProc),
+								  reinterpret_cast<DWORD_PTR>(WaveoutDevice::waveOutProc),
                                   reinterpret_cast<DWORD_PTR>(this),
                                   CALLBACK_FUNCTION);
 		if ( mmr == MMSYSERR_NOERROR )
@@ -247,7 +247,7 @@ void WaveoutDevice::ProcessEvent(UINT uMsg, DWORD_PTR dwParam1, DWORD_PTR dwPara
 
 void WaveoutDevice::waveOutProc(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
 {
-	WaveOutDevice* _this = reinterpret_cast<WaveOutDevice*>( dwInstance );
+	WaveoutDevice* _this = reinterpret_cast<WaveoutDevice*>( dwInstance );
     if ( _this )
         _this->ProcessEvent(uMsg, dwParam1, dwParam2);
 }

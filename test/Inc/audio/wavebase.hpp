@@ -1,6 +1,21 @@
 #ifndef __WAVEBASE_HPP__
 #define __WAVEBASE_HPP__
 
+#include <mmreg.h>
+#include <winbase.h>
+
+#pragma warning(push)
+#pragma warning(disable:4201)
+#pragma warning(disable:4995)
+#include <Mmsystem.h>
+#pragma warning(pop)
+
+#pragma comment(lib, "Winmm.lib")
+
+#ifndef WAVE_HEAP_FLAGS
+#define WAVE_HEAP_FLAGS (HEAP_ZERO_MEMORY|HEAP_GENERATE_EXCEPTIONS)
+#endif
+
 //WAVEINCAPS
 class WaveInCaps : WAVEINCAPS
 {
