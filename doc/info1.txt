@@ -2,4 +2,8 @@ https://msdn.microsoft.com/ja-jp/dd317593
 http://blog.csdn.net/gaiazhang/article/details/50524442
 http://www.cnblogs.com/lisuyun/articles/5576967.html
 
+
+http://blog.sina.com.cn/s/blog_637d7cd80101pmwg.html
+http://tieba.baidu.com/p/3135918591
+
 Core Audio API  IAudioMediaStream

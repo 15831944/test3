@@ -728,6 +728,14 @@
 				Name="audio"
 				>
 				<File
+					RelativePath=".\Inc\audio\MixerDevice.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\MixerDevice.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\audio\multimediastream.cpp"
 					>
 				</File>

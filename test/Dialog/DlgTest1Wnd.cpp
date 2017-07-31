@@ -156,12 +156,36 @@ void CDlgTest1Wnd::Test2(const char* pszFilePath, int nAudioCard)
 
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-	Test1((CALLRING_CALLBACK_FUNC)Test2);
+	char szS1[MAX_PATH] = {0};
+	std::string strS2;
+
+	for (int i=0; i<3; i++)
+	{
+		sprintf(szS1, "%d", i);
+		strS2 = szS1;
+
+		int* n = new int;
+		memcpy(n, &i, sizeof(int));
+
+		m_mapInt.insert(make_pair(strS2, n));
+	}
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-	m_pfCallRingFunc("123", 3);
+	int* p = NULL;
+	std::map<std::string, int*>::iterator iter = NULL;
+
+	for (iter=m_mapInt.begin();iter!=m_mapInt.end();)
+	{
+		if (iter->second != NULL)
+		{
+			delete iter->second;
+			iter->second = NULL;
+		}
+
+		iter = m_mapInt.erase(iter);
+	}
 }	
 
 void CDlgTest1Wnd::OnBnClickedButton3()

@@ -46,5 +46,5 @@ protected:
 private:
 	CString							m_strDefaultPath;
 	CString							m_strAppPath;
-	std::vector<void*> m_vecList;
+	std::map<std::string, int*>		m_mapInt;
 };
