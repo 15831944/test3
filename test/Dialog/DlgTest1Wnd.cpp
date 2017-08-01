@@ -3,6 +3,7 @@
 #include "DlgTest1Wnd.h"
 
 #include "../inc/GlobalInfo.h"
+#include "../contrib/VideoWndThread.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
@@ -144,48 +145,24 @@ LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 
 //////////////////////////////////////////////////////////////////////////
 //
-void CDlgTest1Wnd::Test1(CALLRING_CALLBACK_FUNC pfCallRingFunc)
-{
-	m_pfCallRingFunc = pfCallRingFunc;
-}
-
-void CDlgTest1Wnd::Test2(const char* pszFilePath, int nAudioCard)
-{
-
-}
-
+//http://blog.csdn.net/xujiezhige/article/details/6206133
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-	char szS1[MAX_PATH] = {0};
-	std::string strS2;
+	CVideoWndThread* pVideoWndThread = (CVideoWndThread*)AfxBeginThread(RUNTIME_CLASS(CVideoWndThread), CREATE_SUSPENDED);
+	ASSERT_VALID(pVideoWndThread);
 
-	for (int i=0; i<3; i++)
+	pVideoWndThread->m_bAutoDelete = FALSE;	//²»ÈÃÏß³Ìdelete this
+	pVideoWndThread->ResumeThread();
+
+	if (WaitForSingleObject(pVideoWndThread->m_hThread, INFINITE) == WAIT_OBJECT_0)
 	{
-		sprintf(szS1, "%d", i);
-		strS2 = szS1;
-
-		int* n = new int;
-		memcpy(n, &i, sizeof(int));
-
-		m_mapInt.insert(make_pair(strS2, n));
+		pVideoWndThread->m_bAutoDelete = TRUE;
+		pVideoWndThread->Delete();
 	}
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-	int* p = NULL;
-	std::map<std::string, int*>::iterator iter = NULL;
-
-	for (iter=m_mapInt.begin();iter!=m_mapInt.end();)
-	{
-		if (iter->second != NULL)
-		{
-			delete iter->second;
-			iter->second = NULL;
-		}
-
-		iter = m_mapInt.erase(iter);
-	}
 }	
 
 void CDlgTest1Wnd::OnBnClickedButton3()

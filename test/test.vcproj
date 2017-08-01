@@ -836,6 +836,14 @@
 				RelativePath=".\contrib\variable_test.h"
 				>
 			</File>
+			<File
+				RelativePath=".\contrib\VideoWndThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\contrib\VideoWndThread.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

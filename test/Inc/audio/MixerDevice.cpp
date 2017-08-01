@@ -122,7 +122,7 @@ HRESULT MixerDevice::GetLineControls(MixerLineControls& mxlcs, DWORD fdwControls
     return hr;
 }
 
-HRESULT MixerDevice:::GetLineInfo(MixerLineInfo& mxli, DWORD fdwInfo) const
+HRESULT MixerDevice::GetLineInfo(MixerLineInfo& mxli, DWORD fdwInfo) const
 {
 	HRESULT hr = HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED);
 	

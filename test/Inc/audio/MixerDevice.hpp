@@ -9,6 +9,8 @@
 #include <Mmsystem.h>
 #pragma warning(pop)
 
+static const UINT INVALID_MIXER_ID = static_cast<UINT>(-1L);
+
 //
 class MixerControlDetails : MIXERCONTROLDETAILS
 {

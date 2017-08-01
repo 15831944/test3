@@ -31,9 +31,6 @@ protected:
 	afx_msg void					OnBnClickedButton6();
 	afx_msg void					OnBnClickedButton7();
 
-	void							Test1(CALLRING_CALLBACK_FUNC pfCallRingFunc);
-	static void						Test2(const char* pszFilePath, int nAudioCard);
-
 protected:
 	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 	void							InitialLayout();
