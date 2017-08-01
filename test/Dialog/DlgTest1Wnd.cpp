@@ -148,7 +148,7 @@ LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 //http://blog.csdn.net/xujiezhige/article/details/6206133
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-	CVideoWndThread* pVideoWndThread = (CVideoWndThread*)AfxBeginThread(RUNTIME_CLASS(CVideoWndThread), CREATE_SUSPENDED);
+	CVideoWndThread* pVideoWndThread = (CVideoWndThread*)AfxBeginThread(RUNTIME_CLASS(CVideoWndThread), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED);
 	ASSERT_VALID(pVideoWndThread);
 
 	pVideoWndThread->m_bAutoDelete = FALSE;	//≤ª»√œﬂ≥Ãdelete this
