@@ -2,11 +2,8 @@
 #include "afxwin.h"
 #include <atlconv.h>
 
-
-
 #include "../inc/video/opengl_wnd_draw_video.h"
-
-
+#include "../inc/video/gdi_wnd_draw_video.h"
 
 using namespace std;
 class CDlgTest3Wnd : public CDialog
@@ -26,14 +23,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	afx_msg void					OnCbnSelchangeComboEnumdevice();
-	afx_msg void					OnBnClickedBtnCaptureimage();
-
+	
 	afx_msg void					OnBnClickedBtnTest1();
 	afx_msg void					OnBnClickedBtnTest2();
+	afx_msg void					OnBnClickedBtnTest3();
 
 protected:
 #if (OPENGL_DRAW_WND_VIDEO == 1)
 	opengl_wnd_draw_video			m_openglDrawVideo;
+#else
+	gdi_wnd_draw_video				m_gdiDrawVideo;
 #endif
 
 private:
