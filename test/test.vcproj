@@ -803,6 +803,14 @@
 					RelativePath=".\Inc\common\Character.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Inc\common\ShellClass.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\common\ShellClass.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -830,6 +838,14 @@
 			</File>
 			<File
 				RelativePath=".\Control\DrawListBox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Control\ShellCtrlClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Control\ShellCtrlClass.h"
 				>
 			</File>
 		</Filter>

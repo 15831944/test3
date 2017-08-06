@@ -2,7 +2,9 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 
+#include "afxshelltreeCtrl.h"
 #include "../Control/DrawButton.h"
+#include "../Control/ShellCtrlClass.h"
 
 typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);
 
@@ -26,10 +28,6 @@ protected:
 	afx_msg void					OnBnClickedButton1();
 	afx_msg void					OnBnClickedButton2();
 	afx_msg void					OnBnClickedButton3();
-	afx_msg void					OnBnClickedButton4();
-	afx_msg void					OnBnClickedButton5();
-	afx_msg void					OnBnClickedButton6();
-	afx_msg void					OnBnClickedButton7();
 
 protected:
 	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
@@ -39,6 +37,8 @@ protected:
 	CALLRING_CALLBACK_FUNC			m_pfCallRingFunc;
 	WNDPROC			 				m_OldEditProc;	//FARPROC,WNDPROC
 	HWND							m_hEditWnd;
+
+	CShellTreeCtrl					m_hSystemDir;
 
 private:
 	CString							m_strDefaultPath;

@@ -22,16 +22,13 @@ CDlgTest1Wnd::~CDlgTest1Wnd()
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_TREE_SYSTEMDIR, m_hSystemDir);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON1,		OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2,		OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3,		OnBnClickedButton3)
-	ON_BN_CLICKED(IDC_BUTTON4,		OnBnClickedButton4)
-	ON_BN_CLICKED(IDC_BUTTON5,		OnBnClickedButton5)
-	ON_BN_CLICKED(IDC_BUTTON6,		OnBnClickedButton6)
-	ON_BN_CLICKED(IDC_BUTTON7,		OnBnClickedButton7)
 END_MESSAGE_MAP()
 
 BOOL CDlgTest1Wnd::OnInitDialog()
@@ -44,8 +41,11 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 		return FALSE;
 	}
 
-//	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
+//	m_hSystemDir.ModifyStyle(LVS_TYPEMASK, LVS_ICON);
+//	 m_hSystemDir.SetRelatedList(&m_ctrlShellList);
 
+//	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
+/*
 	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
 	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
 	{
@@ -69,10 +69,11 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 		m_OldEditProc = (WNDPROC)GetWindowLong(m_hEditWnd, GWL_WNDPROC);
 		SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
 	}
+*/
 
+	m_hSystemDir.InitializeCtrl();
 	return TRUE;  
 }
-
 
 LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
@@ -148,6 +149,7 @@ LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 //http://blog.csdn.net/xujiezhige/article/details/6206133
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
+/*
 	CVideoWndThread* pVideoWndThread = (CVideoWndThread*)AfxBeginThread(RUNTIME_CLASS(CVideoWndThread), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED);
 	ASSERT_VALID(pVideoWndThread);
 
@@ -159,6 +161,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 		pVideoWndThread->m_bAutoDelete = TRUE;
 		pVideoWndThread->Delete();
 	}
+*/
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
@@ -169,20 +172,7 @@ void CDlgTest1Wnd::OnBnClickedButton3()
 {
 }
 
-
-void CDlgTest1Wnd::OnBnClickedButton4()
-{
-
-}
-
-void CDlgTest1Wnd::OnBnClickedButton5()
-{	
-}
-
-void CDlgTest1Wnd::OnBnClickedButton6()
-{		
-}
-
+/*
 void CDlgTest1Wnd::OnBnClickedButton7()
 {
 	CString strFilePath;
@@ -216,3 +206,4 @@ void CDlgTest1Wnd::OnBnClickedButton7()
 		::MessageBox(this->GetSafeHwnd(), _T("文件名称修改完成!"), _T("Warning"), MB_ICONEXCLAMATION|MB_OK);
 	}
 }
+*/
