@@ -44,15 +44,21 @@ void CShellTreeCtrl::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CShellTreeCtrl::OnSelchanging(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	HTREEITEM hItem = NULL;
+	LPTVITEMDATA* lptvid = NULL;
+
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
-	HTREEITEM hItem = pNMTreeView->itemNew.hItem;
+	if (pNMTreeView == NULL)
+	{
+		return;
+	}
 
 	if(!(pNMTreeView->action))
 	{
 		return;
 	}
 
-	LPTVITEMDATA* lptvid = NULL;
+	hItem = pNMTreeView->itemNew.hItem;
 	m_pSelectedItem = hItem;
 
 	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
@@ -209,6 +215,11 @@ void CShellTreeCtrl::InitializeCtrl()
 		hParent = InsertDesktopItem(lpsf);
 		lpsf->Release ();
 	}
+}
+
+void CShellTreeCtrl::SetSelectList(CShellListCtrl& hListCtrl)
+{
+	m_pShellListCtrl = &hListCtrl;
 }
 
 void CShellTreeCtrl::SetupImages()

@@ -45,8 +45,11 @@
 #define ID_MENU_CONTOUR_TEST            0x0405
 #define ID_MENU_KNN_TEST                0x0406
 #define IDC_TREE_SYSTEMDIR              1030
+#define IDC_TREE_SYSTDIR                1030
+#define IDC_TREE_SYSDIR                 1030
 #define ID_MENU_LINE_OCR                0x0407
 #define IDC_LIST1                       1031
+#define IDC_LIST_SYSDIR                 1031
 #define ID_MENU_TESSERACT_OCR           0x0408
 #define IDC_EDIT1                       1032
 #define ID_MENU_KNN_OCR                 0x0409

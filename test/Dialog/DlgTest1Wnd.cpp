@@ -22,7 +22,8 @@ CDlgTest1Wnd::~CDlgTest1Wnd()
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_TREE_SYSTEMDIR, m_hSysDirTree);
+	DDX_Control(pDX, IDC_TREE_SYSDIR, m_hSysDirTree);
+	DDX_Control(pDX, IDC_LIST_SYSDIR, m_hSysDirList);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
@@ -41,8 +42,11 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 		return FALSE;
 	}
 
-//	m_hSystemDir.ModifyStyle(LVS_TYPEMASK, LVS_ICON);
-//	 m_hSystemDir.SetRelatedList(&m_ctrlShellList);
+	m_hSysDirTree.InitializeCtrl();
+	m_hSysDirList.InitilizeCtrl();
+
+
+	m_hSysDirTree.SetSelectList(m_hSysDirList);
 
 //	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
 /*
@@ -71,7 +75,7 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	}
 */
 
-	m_hSysDirTree.InitializeCtrl();
+	
 	return TRUE;  
 }
 

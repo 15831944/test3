@@ -39,7 +39,7 @@ protected:
 	HWND							m_hEditWnd;
 
 	CShellTreeCtrl					m_hSysDirTree;
-	CListCtrl						m_hSysDirList;
+	CShellListCtrl					m_hSysDirList;
 
 private:
 	CString							m_strDefaultPath;

@@ -30,11 +30,14 @@ public:
 	BOOL 			PopulateTree(NMHDR* pNMHDR);
 	
 	void 			InitializeCtrl();
-	void 			SetupImages();
-	void 			SelectThisItem(const char *szBuff);
+	void			SetSelectList(CShellListCtrl& hListCtrl);
 	
 	HTREEITEM 		InsertDesktopItem(LPSHELLFOLDER lpsf);
 	UINT 			DeleteChildren(HTREEITEM hItem);
+
+protected:
+	void 			SelectThisItem(const char *szBuff);
+	void 			SetupImages();
 
 protected:
 	CImageList		m_pImageList;
