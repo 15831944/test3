@@ -22,7 +22,7 @@ CDlgTest1Wnd::~CDlgTest1Wnd()
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_TREE_SYSTEMDIR, m_hSystemDir);
+	DDX_Control(pDX, IDC_TREE_SYSTEMDIR, m_hSysDirTree);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
@@ -71,7 +71,7 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	}
 */
 
-	m_hSystemDir.InitializeCtrl();
+	m_hSysDirTree.InitializeCtrl();
 	return TRUE;  
 }
 

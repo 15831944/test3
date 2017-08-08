@@ -27,7 +27,7 @@ public:
 	void 				SetTvMask(ULONG ulAttrs , TVITEM *tvi, BOOL bChildValid);
 	void 				GetNormalAndSelectedIcons(LPITEMIDLIST lpifq, LPTV_ITEM lptvitem);
 	
-	HTREEITEM 			InsertTreeItem(BOOL bRoot, TVINSERTSTRUCT* tvins, char szBuff[MAX_PATH], HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid, CString szTitle);
+	BOOL	 			InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* tvins, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid);
 	
 public:	
 	HIMAGELIST			GetImageList(BOOL bSmall = TRUE);

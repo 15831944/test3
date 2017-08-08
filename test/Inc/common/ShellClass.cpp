@@ -28,12 +28,14 @@ void CShellClass::SetTvMask(ULONG ulAttrs , TVITEM *tvi, BOOL bChildValid)
 		tvi->stateMask = LVIS_CUT;
 		tvi->state = LVIS_CUT;
 	}
+
 	if (ulAttrs & SFGAO_LINK)
 	{
 		tvi->mask |= LVIF_STATE;
 		tvi->stateMask = LVIS_OVERLAYMASK;
 		tvi->state = INDEXTOOVERLAYMASK(2);
 	}
+
 	if (ulAttrs & SFGAO_SHARE)
 	{
 		tvi->mask |= LVIF_STATE;
@@ -60,85 +62,91 @@ void CShellClass::GetNormalAndSelectedIcons(LPITEMIDLIST lpifq, LPTV_ITEM lptvit
 	return;
 }
 
-HTREEITEM CShellClass::InsertTreeItem(BOOL bRoot, TVINSERTSTRUCT* tvins, char szBuff[MAX_PATH], HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid, CString szTitle)
+BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* tvins, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid)
 {
+	BOOL bRet = FALSE;
+
+	HRESULT hr;
 	UINT uCount = 0;
 	
+	TV_ITEM tvi;
+	LPMALLOC lpMalloc;
+
 	LPENUMIDLIST lpe = NULL;
 	LPITEMIDLIST lpiTemp = NULL;
 	LPITEMIDLIST lpifqThisItem = NULL;
 	
-	HRESULT hr;
-	TV_ITEM tvi;
-	LPMALLOC lpMalloc;
-	
-	CoInitialize( NULL );
-
+	char szShellName[MAX_PATH] = {0};
 	ULONG ulAttrs = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
-	
-    hr = SHGetMalloc(&lpMalloc);
-	if(FAILED(hr))
-	{
-		return NULL;
-	}
 
 	if(!(lpi) || (lpi->mkid.cb >= 82))
 	{
-		return NULL;
+		return FALSE;
 	}
 
+	CoInitialize(NULL);
+	
 	lpsf->GetAttributesOf(1, (const struct _ITEMIDLIST **)&lpi, &ulAttrs);
-	SetTvMask(ulAttrs , &tvi, bChildValid);
+	if (ulAttrs == 0)
+	{
+		return FALSE;
+	}
+	else
+	{
+		SetTvMask(ulAttrs , &tvi, bChildValid);
+	}
+
+	hr = SHGetMalloc(&lpMalloc);
+	if(FAILED(hr))
+	{
+		return FALSE;
+	}
 
 	if (ulAttrs & SFGAO_FOLDER | SFGAO_FILESYSTEM)
 	{
 		LPTVITEMDATA* lptvid = NULL;
 
-		lptvid = (LPTVITEMDATA*) lpMalloc->Alloc (sizeof (LPTVITEMDATA));
+		lptvid = (LPTVITEMDATA*) lpMalloc->Alloc(sizeof (LPTVITEMDATA));
 		if (!lptvid)
 		{
-			goto Done; 
+			bRet = FALSE;
+			goto part1; 
 		}
 
-		if (!GetName (lpsf, lpi, SHGDN_NORMAL, szBuff))
+		if (!GetName(lpsf, lpi, SHGDN_NORMAL, pszBufName))
 		{
-			goto Done;
+			bRet = FALSE;
+			goto part1;
 		}
 
-		if(strcmp(szTitle,"") !=0 )
-		{
-			strcpy(szBuff , szTitle);
-		}
-
-		tvi.pszText = szBuff;
+		tvi.pszText = pszBufName;
 		tvi.cchTextMax = MAX_PATH;
 
-//		lpifqThisItem = Concatenate (lpMalloc, lpifq, lpi);
+		lptvid->lpi = CopyItemID(lpMalloc, lpi);
 
-		lptvid->lpi = CopyItemID (lpMalloc, lpi);
-//		GetNormalAndSelectedIcons (lpifqThisItem, &tvi);
-
-		lptvid->lpsfParent = lpsf; // pointer to parent folder
-		lpsf->AddRef ();
+		lptvid->lpsfParent = lpsf;
+		lpsf->AddRef();
 
         lptvid->bRoot = bRoot;
-		lptvid->lpifq =  Concatenate(lpMalloc, lpifq, lpi);
-		GetNormalAndSelectedIcons (lptvid->lpifq, &tvi);
+		lptvid->lpifq = Concatenate(lpMalloc, lpifq, lpi);
+
+		GetNormalAndSelectedIcons(lptvid->lpifq, &tvi);
+
 		tvi.lParam = (LPARAM)lptvid;
 
 		tvins->item = tvi;
 		tvins->hInsertAfter = hPrev;
-		tvins->hParent = hParent; //NULL; //hParent;
+		tvins->hParent = hParent;
 
-//		hPrev = mTree->InsertItem (&tvins);
+		bRet = TRUE;
 	}
 	
-Done:
+part1:
 	lpMalloc->Release();
 //	lpsf->Release();
     CoUninitialize();
 	
-	return hPrev;
+	return bRet;
 }
 
 HIMAGELIST CShellClass::GetImageList(BOOL bSmall)
@@ -352,7 +360,7 @@ LPITEMIDLIST CShellClass::Concatenate(LPMALLOC lpMalloc ,LPCITEMIDLIST pidl1, LP
 	UINT cb1 = 0;
 	UINT cb2 = 0;
 	
-	LPITEMIDLIST   pidlNew; 
+	LPITEMIDLIST pidlNew; 
 	
 	if(!pidl1 && !pidl2)
 	{		

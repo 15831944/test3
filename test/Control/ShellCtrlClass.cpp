@@ -96,13 +96,37 @@ BOOL CShellTreeCtrl::SubclassDlgItem(UINT nID, CWnd* pParent)
 
 BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 {
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
-	HTREEITEM hItem = pNMTreeView->itemNew.hItem;
-	LPTVITEMDATA* lptvid = NULL;
-
 	HRESULT hr;
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
-	if (! lptvid)
+
+	ULONG celtFetched;
+	HTREEITEM hItem = NULL;
+	HTREEITEM hParent = NULL;
+
+	CShellClass csc;
+	TVINSERTSTRUCT tvins;
+
+	LPENUMIDLIST lpe = NULL;	
+	LPITEMIDLIST pidlItems = NULL;
+	LPENUMIDLIST ppenum = NULL;
+
+	LPTVITEMDATA* lptvid = NULL;
+	IShellFolder *psfProgFiles = NULL;
+
+	char szBufName[MAX_PATH] = {0};
+	CWaitCursor wait;
+	
+	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
+	if (pNMTreeView == NULL)
+	{
+		return FALSE;
+	}
+	else
+	{
+		hItem = pNMTreeView->itemNew.hItem;
+	}
+	
+	lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+	if (!lptvid)
 	{
 		AfxMessageBox(IDS_MEMORY_ERROR);
 		return FALSE;
@@ -113,14 +137,6 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 	{
 		return FALSE;
 	}
-
-	LPENUMIDLIST lpe = NULL;	
-	ULONG celtFetched;
-	LPITEMIDLIST pidlItems = NULL;
-	LPENUMIDLIST ppenum = NULL;
-	IShellFolder *psfProgFiles = NULL;
-
-	CWaitCursor wait;
 
 	if(lptvid->bRoot)
 	{
@@ -140,7 +156,7 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 	{
 		return FALSE;
 	}
-
+	
 	DeleteChildren(hItem);
 
 	if(m_pShellListCtrl != NULL)
@@ -148,27 +164,30 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 		m_pShellListCtrl->MyDeleteAllItems();
 	}
 
-	while( hr = ppenum->Next(1,&pidlItems, &celtFetched) == S_OK && (celtFetched) == 1)
+	while(((hr = ppenum->Next(1,&pidlItems, &celtFetched)) == S_OK) && ((celtFetched) == 1))
 	{
-		char szBuff[MAX_PATH] = {0};
-
-		CShellClass csc;
-		TVINSERTSTRUCT tvins;
 		ULONG uAttr = SFGAO_FOLDER;
+		memset(&tvins, 0x0, sizeof(TVINSERTSTRUCT));
 
 		psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *) &pidlItems, &uAttr);
 		if(m_pShellListCtrl == NULL)
 		{
-			csc.InsertTreeItem(FALSE, &tvins, szBuff, hItem, NULL , psfProgFiles , lptvid->lpifq, pidlItems , TRUE, "");
-			HTREEITEM hPrev = InsertItem(&tvins);
+			if (!csc.InsertTreeItem(FALSE, szBufName, &tvins, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, TRUE))
+			{
+				continue;
+			}
+			else
+			{
+				HTREEITEM hPrev = InsertItem(&tvins);
+			}			
 		}
 		else 
 		{
-			if(uAttr & SFGAO_FOLDER)
-			{
-				csc.InsertTreeItem(FALSE, &tvins, szBuff, hItem, NULL , psfProgFiles , lptvid->lpifq, pidlItems , TRUE, "");
-				HTREEITEM hPrev = InsertItem(&tvins);
-			}
+// 			if(uAttr & SFGAO_FOLDER)
+// 			{
+// 				csc.InsertTreeItem(FALSE, &tvins, szBuff, hItem, NULL , psfProgFiles , lptvid->lpifq, pidlItems , TRUE, "");
+// 				HTREEITEM hPrev = InsertItem(&tvins);
+// 			}
 		}
 	}
 
@@ -177,15 +196,14 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 
 void CShellTreeCtrl::InitializeCtrl()
 {
-	ModifyStyle(NULL,  TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, 0);
+	HRESULT hr;
+	HTREEITEM hParent = NULL;
+	LPSHELLFOLDER lpsf = NULL;
 
+	ModifyStyle(NULL,  TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, 0);
 	SetupImages();
 
-	LPSHELLFOLDER lpsf = NULL;
-	HRESULT hr;
-
-	HTREEITEM hParent = NULL;
-	hr = SHGetDesktopFolder (&lpsf);
+	hr = SHGetDesktopFolder(&lpsf);
 	if (SUCCEEDED (hr))
 	{
 		hParent = InsertDesktopItem(lpsf);
@@ -210,19 +228,24 @@ void CShellTreeCtrl::SelectThisItem(const char *szBuff)
 
 HTREEITEM CShellTreeCtrl::InsertDesktopItem(LPSHELLFOLDER lpsf)
 {
-	LPITEMIDLIST lpi = NULL;
-	HTREEITEM hParent = NULL;
-	
 	CShellClass csc;
-	TVINSERTSTRUCT tvins;
+	TVINSERTSTRUCT tvins = {0};
 	
-    char szBuff [MAX_PATH];
-	
+	LPITEMIDLIST lpi = NULL;
+	HTREEITEM hParent = NULL;	
+	char szBufName[MAX_PATH] = {0};
+
 	SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOP, &lpi);
-	csc.InsertTreeItem(TRUE, &tvins, szBuff, NULL, NULL , lpsf , NULL, lpi , TRUE, "");
-	
-	hParent = InsertItem(&tvins);
-	Expand(hParent, TVE_EXPAND);
+
+	if (!csc.InsertTreeItem(TRUE, szBufName, &tvins, NULL, NULL , lpsf , NULL, lpi , TRUE))
+	{
+		return NULL;
+	}
+	else
+	{
+		hParent = InsertItem(&tvins);
+		Expand(hParent, TVE_EXPAND);
+	}
 
 	return hParent;
 }

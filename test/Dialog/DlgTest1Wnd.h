@@ -38,7 +38,8 @@ protected:
 	WNDPROC			 				m_OldEditProc;	//FARPROC,WNDPROC
 	HWND							m_hEditWnd;
 
-	CShellTreeCtrl					m_hSystemDir;
+	CShellTreeCtrl					m_hSysDirTree;
+	CListCtrl						m_hSysDirList;
 
 private:
 	CString							m_strDefaultPath;
