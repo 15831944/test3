@@ -75,6 +75,8 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 	LPENUMIDLIST lpe = NULL;
 	LPITEMIDLIST lpiTemp = NULL;
 	LPITEMIDLIST lpifqThisItem = NULL;
+
+	LPTVITEMDATA* lptvid = NULL;
 	
 	char szShellName[MAX_PATH] = {0};
 	ULONG ulAttrs = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
@@ -86,8 +88,8 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 
 	CoInitialize(NULL);
 	
-	lpsf->GetAttributesOf(1, (const struct _ITEMIDLIST **)&lpi, &ulAttrs);
-	if (ulAttrs == 0)
+	hr = lpsf->GetAttributesOf(1, (const struct _ITEMIDLIST **)&lpi, &ulAttrs);
+	if (FAILED(hr) || ulAttrs == 0)
 	{
 		return FALSE;
 	}
@@ -104,8 +106,6 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 
 	if (ulAttrs & SFGAO_FOLDER | SFGAO_FILESYSTEM)
 	{
-		LPTVITEMDATA* lptvid = NULL;
-
 		lptvid = (LPTVITEMDATA*) lpMalloc->Alloc(sizeof (LPTVITEMDATA));
 		if (!lptvid)
 		{

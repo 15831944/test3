@@ -104,12 +104,14 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 {
 	HRESULT hr;
 
-	ULONG celtFetched;
+	ULONG celtFetched = 0;
+	ULONG uAttr = 0;
+
 	HTREEITEM hItem = NULL;
 	HTREEITEM hParent = NULL;
 
-	CShellClass csc;
-	TVINSERTSTRUCT tvins;
+ 	CShellClass csc;
+ 	TVINSERTSTRUCT tvins;
 
 	LPENUMIDLIST lpe = NULL;	
 	LPITEMIDLIST pidlItems = NULL;
@@ -157,7 +159,7 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 		}
 	}
 
-	hr = psfProgFiles->EnumObjects(NULL,SHCONTF_FOLDERS | SHCONTF_NONFOLDERS | SHCONTF_INCLUDEHIDDEN , &ppenum);
+	hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
 	if(ppenum == NULL)
 	{
 		return FALSE;
@@ -170,12 +172,13 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 		m_pShellListCtrl->MyDeleteAllItems();
 	}
 
-	while(((hr = ppenum->Next(1,&pidlItems, &celtFetched)) == S_OK) && ((celtFetched) == 1))
+	while(((hr = ppenum->Next(1, &pidlItems, &celtFetched)) == S_OK) && ((celtFetched) == 1))
 	{
-		ULONG uAttr = SFGAO_FOLDER;
 		memset(&tvins, 0x0, sizeof(TVINSERTSTRUCT));
 
-		psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *) &pidlItems, &uAttr);
+		uAttr = SFGAO_FOLDER;
+		psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *)&pidlItems, &uAttr);
+
 		if(m_pShellListCtrl == NULL)
 		{
 			if (!csc.InsertTreeItem(FALSE, szBufName, &tvins, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, TRUE))
@@ -189,11 +192,11 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 		}
 		else 
 		{
-// 			if(uAttr & SFGAO_FOLDER)
-// 			{
-// 				csc.InsertTreeItem(FALSE, &tvins, szBuff, hItem, NULL , psfProgFiles , lptvid->lpifq, pidlItems , TRUE, "");
-// 				HTREEITEM hPrev = InsertItem(&tvins);
-// 			}
+			if(uAttr & SFGAO_FOLDER)
+			{
+				csc.InsertTreeItem(FALSE, szBufName, &tvins, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, TRUE);
+				HTREEITEM hPrev = InsertItem(&tvins);
+			}
 		}
 	}
 
@@ -206,7 +209,7 @@ void CShellTreeCtrl::InitializeCtrl()
 	HTREEITEM hParent = NULL;
 	LPSHELLFOLDER lpsf = NULL;
 
-	ModifyStyle(NULL,  TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, 0);
+	ModifyStyle(NULL, TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT, 0);
 	SetupImages();
 
 	hr = SHGetDesktopFolder(&lpsf);
@@ -483,7 +486,7 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 	lvi.pszText =  LPSTR_TEXTCALLBACK; 
 	uFlags = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
 	LPTVITEMDATA* lptvid = NULL;
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
+	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
 
 	lvi.iImage = I_IMAGECALLBACK; 
 	lptvid->lpsfParent = lpsf;
@@ -542,7 +545,7 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 		}
 	}
 
-	hr = psfProgFiles->EnumObjects(NULL,SHCONTF_FOLDERS | SHCONTF_NONFOLDERS | SHCONTF_INCLUDEHIDDEN, &ppenum);
+	hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
 	if(FAILED(hr))
 	{
 		return;
@@ -559,7 +562,6 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 	SetRedraw(TRUE);
 	return;
 }
-
 
 void CShellListCtrl::MyDeleteAllItems()
 {

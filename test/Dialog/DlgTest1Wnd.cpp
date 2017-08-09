@@ -45,7 +45,6 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	m_hSysDirTree.InitializeCtrl();
 	m_hSysDirList.InitilizeCtrl();
 
-
 	m_hSysDirTree.SetSelectList(m_hSysDirList);
 
 //	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
