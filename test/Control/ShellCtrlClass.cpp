@@ -428,13 +428,14 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CShellListCtrl::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	LVHITTESTINFO lvhInf;
+	LVHITTESTINFO lvhInf = {0};
+
 	GetCursorPos(&lvhInf.pt);
 	ScreenToClient(&lvhInf.pt);
+
 	int item = ListView_HitTest(m_hWnd, &lvhInf);
 	if((LVHT_ONITEMLABEL & lvhInf.flags ) || (LVHT_ONITEMICON & lvhInf.flags))
 	{
-
 		LPTVITEMDATA* lptvid = NULL;
 		lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
 
@@ -509,11 +510,14 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 
 int CShellListCtrl::InitilizeCtrl()
 {
-	ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);
+	ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);	//
+	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
 	SetupImageLists();
 
 	CRect rect;
 	GetClientRect(&rect);
+
 	InsertColumn(ID_COL_NAME, "Name", LVCFMT_LEFT  , rect.right/2, -1);
 	InsertColumn(ID_COL_TYPE, "Type", LVCFMT_LEFT  , rect.right/5, -1);
 	InsertColumn(ID_COL_SIZE, "Size", LVCFMT_RIGHT , rect.right/6, -1);
@@ -526,8 +530,10 @@ void CShellListCtrl::SetupImageLists()
 {
 	CShellClass csc;
 	HIMAGELIST himlSmall, himlLarge;
+
 	himlSmall = csc.GetImageList(TRUE);
 	himlLarge = csc.GetImageList(FALSE);
+
 	SetImageList(m_pImageListL.FromHandle(himlLarge), LVSIL_NORMAL); 
 	SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_SMALL); 
 	SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_STATE); 
