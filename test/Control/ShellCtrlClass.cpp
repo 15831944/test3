@@ -153,14 +153,14 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 	else
 	{
 		hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *) &psfProgFiles);
-		if(psfProgFiles == NULL)
+		if(FAILED(hr) || psfProgFiles == NULL)
 		{
 			return FALSE;
 		}
 	}
 
 	hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
-	if(ppenum == NULL)
+	if(FAILED(hr) || ppenum == NULL)
 	{
 		return FALSE;
 	}
@@ -176,8 +176,17 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 	{
 		memset(&tvins, 0x0, sizeof(TVINSERTSTRUCT));
 
+		if (pidlItems == NULL)
+		{
+			continue;
+		}
+
 		uAttr = SFGAO_FOLDER;
-		psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *)&pidlItems, &uAttr);
+		hr =psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *)&pidlItems, &uAttr);
+		if (FAILED(hr) || uAttr == 0)
+		{
+			continue;
+		}
 
 		if(m_pShellListCtrl == NULL)
 		{
@@ -188,7 +197,7 @@ BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 			else
 			{
 				HTREEITEM hPrev = InsertItem(&tvins);
-			}			
+			}
 		}
 		else 
 		{
@@ -538,8 +547,8 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 	}
 	else
 	{
-		hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *) &psfProgFiles);
-		if(FAILED(hr))
+		hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *)&psfProgFiles);
+		if(FAILED(hr) || psfProgFiles == NULL)
 		{
 			return;
 		}

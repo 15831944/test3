@@ -1,6 +1,13 @@
 #include "stdafx.h"
 #include "ShellClass.h"
 
+/************************************************************************/
+/*	author : wl
+ *	email  : lysgwl@163.com
+ *  date   : 2017.08.10 09:38
+*/
+/************************************************************************/
+
 CShellClass::CShellClass()
 {
 }
@@ -9,7 +16,7 @@ CShellClass::~CShellClass()
 {
 }
 
-void CShellClass::SetTvMask(ULONG ulAttrs , TVITEM *tvi, BOOL bChildValid)
+void CShellClass::SetTvMask(TVITEM *tvi, ULONG ulAttrs, BOOL bChildValid)
 {
 	tvi->mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 
@@ -62,6 +69,15 @@ void CShellClass::GetNormalAndSelectedIcons(LPITEMIDLIST lpifq, LPTV_ITEM lptvit
 	return;
 }
 
+//bRoot :		是否根目录
+//pszBufName :	返回的文件夹名称
+//tvins :		返回的Tree结构体信息	
+//hParent :		Tree父节点信息
+//hPrev :		Tree前一个节点信息
+//lpsf  :		IShellFolder接口
+//lpifq :		LPITEMIDLIST指针
+//lpi   :		LPITEMIDLIST指针
+//bChildValid :
 BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* tvins, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid)
 {
 	BOOL bRet = FALSE;
@@ -79,9 +95,9 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 	LPTVITEMDATA* lptvid = NULL;
 	
 	char szShellName[MAX_PATH] = {0};
-	ULONG ulAttrs = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
+	ULONG ulAttrs = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE ;
 
-	if(!(lpi) || (lpi->mkid.cb >= 82))
+	if(!(lpi) || (lpi->mkid.cb >= MAX_PATH))
 	{
 		return FALSE;
 	}
@@ -95,7 +111,7 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 	}
 	else
 	{
-		SetTvMask(ulAttrs , &tvi, bChildValid);
+		SetTvMask(&tvi, ulAttrs, bChildValid);
 	}
 
 	hr = SHGetMalloc(&lpMalloc);
@@ -135,7 +151,7 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 		tvi.lParam = (LPARAM)lptvid;
 
 		tvins->item = tvi;
-		tvins->hInsertAfter = hPrev;
+		tvins->hInsertAfter = TVI_LAST;//hPrev;
 		tvins->hParent = hParent;
 
 		bRet = TRUE;

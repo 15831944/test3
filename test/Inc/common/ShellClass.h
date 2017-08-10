@@ -24,7 +24,7 @@ public:
 public:
 		
 public:
-	void 				SetTvMask(ULONG ulAttrs , TVITEM *tvi, BOOL bChildValid);
+	void 				SetTvMask(TVITEM *tvi, ULONG ulAttrs, BOOL bChildValid);
 	void 				GetNormalAndSelectedIcons(LPITEMIDLIST lpifq, LPTV_ITEM lptvitem);
 	
 	BOOL	 			InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* tvins, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid);
