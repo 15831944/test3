@@ -32,11 +32,10 @@ protected:
 	afx_msg void					OnBnClickedButton3();
 
 protected:
-	static BOOL						GetShellTreePath(char* pszShellPath);
+	static BOOL						GetShellTreePath(char* pszShellPath, void* pParam);
 	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 	void							InitialLayout();
-	void							SetShellTreePath(const char* pszShellPath);
 	
 protected:
 	CALLRING_CALLBACK_FUNC			m_pfCallRingFunc;

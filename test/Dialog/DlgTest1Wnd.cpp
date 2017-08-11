@@ -50,7 +50,7 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	}
 
 	m_hSysDirTree.InitializeCtrl();
-	m_hSysDirList.InitilizeCtrl((GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
+	m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
 
 	m_hSysDirTree.SetSelectList(m_hSysDirList);
 
@@ -83,20 +83,21 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	return TRUE;  
 }
 
-BOOL CDlgTest1Wnd::GetShellTreePath(char* pszShellPath)
+BOOL CDlgTest1Wnd::GetShellTreePath(char* pszShellPath, void* pParam)
 {
+	CDlgTest1Wnd* pTest1Wnd = (CDlgTest1Wnd*)pParam;
+	if (pTest1Wnd == NULL)
+	{
+		return FALSE;
+	}
+
 	if (pszShellPath == NULL || strcmp(pszShellPath, _T("")) == 0)
 	{
 		return FALSE;
 	}
 
-	CDlgTest1Wnd::Instance().SetShellTreePath(pszShellPath);
+	pTest1Wnd->m_strShellPath = pszShellPath;
 	return TRUE;
-}
-
-void CDlgTest1Wnd::SetShellTreePath(const char* pszShellPath)
-{
-	m_strShellPath = pszShellPath;
 }
 
 LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -194,7 +195,6 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 
 void CDlgTest1Wnd::OnBnClickedButton3()
 {
-	AfxMessageBox(m_strShellPath);
 }
 
 /*

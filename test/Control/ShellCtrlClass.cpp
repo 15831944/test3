@@ -293,6 +293,9 @@ UINT CShellTreeCtrl::DeleteChildren(HTREEITEM hItem)
 CShellListCtrl::CShellListCtrl()
 {
 	giCtr = 0;
+
+	m_pParam = NULL;
+	m_pShellTreeCtrl = NULL;
 	m_pCallBackShellPath = NULL;
 
 	HRESULT hr = SHGetMalloc(&m_pMalloc);
@@ -526,13 +529,18 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 	return TRUE;
 }
 
-int CShellListCtrl::InitilizeCtrl(GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath)
+int CShellListCtrl::InitilizeCtrl(void* pParam, GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath)
 {
 	CRect rect;
 	GetClientRect(&rect);
 
 	ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);	//
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+	if (pParam != NULL)
+	{
+		m_pParam = pParam;
+	}
 
 	if (pCallBackPath != NULL)
 	{
@@ -601,7 +609,7 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 	{
 		if(SHGetPathFromIDList(lptvid->lpi, szShellPath))
 		{
-			m_pCallBackShellPath(szShellPath);
+			m_pCallBackShellPath(szShellPath, m_pParam);
 		}
 
 		hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);

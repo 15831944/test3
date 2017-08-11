@@ -853,6 +853,14 @@
 			Name="Contrib"
 			>
 			<File
+				RelativePath=".\contrib\update_file_name.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\contrib\update_file_name.h"
+				>
+			</File>
+			<File
 				RelativePath=".\contrib\variable_test.cpp"
 				>
 			</File>
