@@ -16,6 +16,8 @@ public:
 	CDlgTest1Wnd(CWnd* pParent = NULL);					
 	virtual ~CDlgTest1Wnd();
 
+	static CDlgTest1Wnd& Instance();
+
 public:
 	enum { IDD = IDD_DIALOG1 };
 
@@ -30,8 +32,11 @@ protected:
 	afx_msg void					OnBnClickedButton3();
 
 protected:
+	static BOOL						GetShellTreePath(char* pszShellPath);
 	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+
 	void							InitialLayout();
+	void							SetShellTreePath(const char* pszShellPath);
 	
 protected:
 	CALLRING_CALLBACK_FUNC			m_pfCallRingFunc;
@@ -43,6 +48,8 @@ protected:
 
 private:
 	CString							m_strDefaultPath;
+	CString							m_strShellPath;
 	CString							m_strAppPath;
+	
 	std::map<std::string, int*>		m_mapInt;
 };

@@ -10,6 +10,7 @@ CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgTest1Wnd::IDD, pParent)
 {
 	m_strDefaultPath = _T("");
+	m_strShellPath = _T("");
 	m_strAppPath = _T("");
 
 	m_pfCallRingFunc = NULL;
@@ -17,6 +18,12 @@ CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
 
 CDlgTest1Wnd::~CDlgTest1Wnd()
 {
+}
+
+CDlgTest1Wnd& CDlgTest1Wnd::Instance()
+{
+	static CDlgTest1Wnd inst;
+	return inst;
 }
 
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
@@ -43,7 +50,7 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	}
 
 	m_hSysDirTree.InitializeCtrl();
-	m_hSysDirList.InitilizeCtrl();
+	m_hSysDirList.InitilizeCtrl((GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
 
 	m_hSysDirTree.SetSelectList(m_hSysDirList);
 
@@ -73,9 +80,23 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 		SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
 	}
 */
-
-	
 	return TRUE;  
+}
+
+BOOL CDlgTest1Wnd::GetShellTreePath(char* pszShellPath)
+{
+	if (pszShellPath == NULL || strcmp(pszShellPath, _T("")) == 0)
+	{
+		return FALSE;
+	}
+
+	CDlgTest1Wnd::Instance().SetShellTreePath(pszShellPath);
+	return TRUE;
+}
+
+void CDlgTest1Wnd::SetShellTreePath(const char* pszShellPath)
+{
+	m_strShellPath = pszShellPath;
 }
 
 LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -173,6 +194,7 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 
 void CDlgTest1Wnd::OnBnClickedButton3()
 {
+	AfxMessageBox(m_strShellPath);
 }
 
 /*

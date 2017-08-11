@@ -61,7 +61,7 @@ void CShellTreeCtrl::OnSelchanging(NMHDR* pNMHDR, LRESULT* pResult)
 	hItem = pNMTreeView->itemNew.hItem;
 	m_pSelectedItem = hItem;
 
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
+	lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
 	if (! lptvid)
 	{
 		AfxMessageBox(IDS_MEMORY_ERROR);
@@ -83,7 +83,7 @@ void CShellTreeCtrl::OnSelchanging(NMHDR* pNMHDR, LRESULT* pResult)
 		else
 		{
 			ULONG uAttr = SFGAO_FOLDER;
-			lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
+			lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *)&lptvid->lpi, &uAttr);
 			if(!(uAttr & SFGAO_FOLDER))
 			{
 				CShellContextMenuClass cmc;
@@ -293,6 +293,7 @@ UINT CShellTreeCtrl::DeleteChildren(HTREEITEM hItem)
 CShellListCtrl::CShellListCtrl()
 {
 	giCtr = 0;
+	m_pCallBackShellPath = NULL;
 
 	HRESULT hr = SHGetMalloc(&m_pMalloc);
 	if(FAILED(hr))
@@ -316,29 +317,44 @@ END_MESSAGE_MAP()
 
 void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	char refTime[32] = {0};
+	char sNumBuff[32] = {0};
 	char szBuff[MAX_PATH] = {0};
+	
+	DWORD dwStyles = SHGFI_PIDL|SHGFI_TYPENAME;
+	ULONG uAttr = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
 
 	SHFILEINFO sfi;
+	SYSTEMTIME st;
+	SHFILEINFO fileInfo;
 	CShellClass csc;
 	
 	WIN32_FIND_DATA fd;
 	LPTVITEMDATA* lptvid = NULL;
 
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+	if (pDispInfo == NULL)
+	{
+		return;
+	}
 
 	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
-	lptvid = (LPTVITEMDATA*)pDispInfo->item.lParam;
-
-	DWORD dwStyles = SHGFI_PIDL|SHGFI_TYPENAME;
+	if (lptvid == NULL)
+	{
+		return;
+	}
+	else
+	{
+		lptvid = (LPTVITEMDATA*)pDispInfo->item.lParam;
+	}
 	
-	SHGetFileInfo ((LPCSTR)lptvid->lpi, 0, &sfi, sizeof (SHFILEINFO), dwStyles);
-	SHGetDataFromIDList(lptvid->lpsfParent , lptvid->lpi, SHGDFIL_FINDDATA , (WIN32_FIND_DATA*)&fd , sizeof(fd));
+	SHGetFileInfo ((LPCSTR)lptvid->lpi, 0, &sfi, sizeof(SHFILEINFO), dwStyles);
+	SHGetDataFromIDList(lptvid->lpsfParent, lptvid->lpi, SHGDFIL_FINDDATA, (WIN32_FIND_DATA*)&fd, sizeof(fd));
 
 	if (pDispInfo->item.mask & LVIF_IMAGE)
 	{
 		pDispInfo->item.iImage = csc.GetNormalIcon(lptvid->lpifq);
 
-		ULONG uAttr = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
 		lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
 		if (uAttr & SFGAO_GHOSTED)
 		{
@@ -346,44 +362,42 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 			pDispInfo->item.stateMask = LVIS_CUT;
 			pDispInfo->item.state = LVIS_CUT;
 		}
+
 		if (uAttr & SFGAO_LINK)
 		{
 			pDispInfo->item.mask |= LVIF_STATE;
 			pDispInfo->item.stateMask = LVIS_OVERLAYMASK;
 			pDispInfo->item.state = INDEXTOOVERLAYMASK(2);
 		}
+
 		if (uAttr & SFGAO_SHARE)
 		{
 			pDispInfo->item.mask |= LVIF_STATE;
 			pDispInfo->item.stateMask = LVIS_OVERLAYMASK;
 			pDispInfo->item.state = INDEXTOOVERLAYMASK(1);
 		}
-
 	}
 
 	if (pDispInfo->item.mask & LVIF_TEXT)
 	{
 		switch(pDispInfo->item.iSubItem)
 		{
-
 		case ID_COL_NAME:
 			{
 				csc.GetName(lptvid->lpsfParent, lptvid->lpi, SHGDN_NORMAL, szBuff);
 				_tcscpy(pDispInfo->item.pszText, szBuff);
-				break;
 			}
+			break;
 		case ID_COL_TYPE:
 			{
-				SHFILEINFO fileInfo;
 				SHGetFileInfo((LPCTSTR)lptvid->lpi, NULL, &fileInfo, sizeof(fileInfo), SHGFI_PIDL|SHGFI_TYPENAME);
 				_tcscpy(pDispInfo->item.pszText,fileInfo.szTypeName);
-				break;
 			}
+			break;
 		case ID_COL_SIZE:
 			{
 				if(fd.dwFileAttributes != 3435973836)
 				{
-					char sNumBuff[30];
 					if(fd.nFileSizeLow)
 					{
 						if(fd.nFileSizeLow > 1024)
@@ -403,23 +417,19 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 
 					_tcscpy(pDispInfo->item.pszText,sNumBuff);
 				}
-				break;
 			}
-
+			break;
 		case ID_COL_DATE:
 			{
 				if(fd.dwFileAttributes != 3435973836)
 				{
-					char refTime[20];
+					FileTimeToSystemTime(&fd.ftLastWriteTime, &st);
 
-					SYSTEMTIME st;
-					FileTimeToSystemTime( &fd.ftLastWriteTime, &st );
-
-					wsprintf(refTime, "%02u-%02u-%04u" , st.wMonth, st.wDay, st.wYear ); 
+					wsprintf(refTime, _T("%02u-%02u-%04u"), st.wMonth, st.wDay, st.wYear); 
 					_tcscpy(pDispInfo->item.pszText, refTime);
 				}
-				break;
 			}
+			break;
 		}
 	}
 
@@ -483,20 +493,28 @@ BOOL CShellListCtrl::SubclassDlgItem(UINT nID, CWnd* pParent)
 
 BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LPITEMIDLIST lpifq)
 {
+	int iItem = 0;
 	UINT uFlags;
-	LV_ITEM lvi;
-	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
 
+	LV_ITEM lvi;
 	CShellClass csc;
-	char szBuff[MAX_PATH];
+
+	char szBuff[MAX_PATH] = {0};
+	LPTVITEMDATA* lptvid = NULL;
+
+	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+	if(lptvid == NULL)
+	{
+		return FALSE;
+	}
+	
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
+	uFlags = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
 	csc.GetName (lpsf, lpi, SHGDN_NORMAL, szBuff);
 
 	lvi.iItem = giCtr++;
 	lvi.iSubItem = ID_COL_NAME;
 	lvi.pszText =  LPSTR_TEXTCALLBACK; 
-	uFlags = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
-	LPTVITEMDATA* lptvid = NULL;
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
 
 	lvi.iImage = I_IMAGECALLBACK; 
 	lptvid->lpsfParent = lpsf;
@@ -504,19 +522,24 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 	lptvid->lpifq = csc.Concatenate(m_pMalloc, lpifq,lpi); 
 	lvi.lParam = (LPARAM)lptvid;
 
-	int iItem = InsertItem (&lvi);
+	iItem = InsertItem (&lvi);
 	return TRUE;
 }
 
-int CShellListCtrl::InitilizeCtrl()
+int CShellListCtrl::InitilizeCtrl(GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath)
 {
+	CRect rect;
+	GetClientRect(&rect);
+
 	ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);	//
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-	SetupImageLists();
+	if (pCallBackPath != NULL)
+	{
+		m_pCallBackShellPath = pCallBackPath;
+	}
 
-	CRect rect;
-	GetClientRect(&rect);
+	SetupImageLists();
 
 	InsertColumn(ID_COL_NAME, "Name", LVCFMT_LEFT  , rect.right/2, -1);
 	InsertColumn(ID_COL_TYPE, "Type", LVCFMT_LEFT  , rect.right/5, -1);
@@ -542,7 +565,11 @@ void CShellListCtrl::SetupImageLists()
 void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 {
 	HRESULT hr;
+	ULONG ulAttrs = 0;
 	ULONG celtFetched;
+
+	char szShellPath[MAX_PATH] = {0};
+
 	LPITEMIDLIST pidlItems = NULL;
 	LPENUMIDLIST ppenum = NULL;
 	IShellFolder *psfProgFiles = NULL;
@@ -560,8 +587,9 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 		}
 	}
 
-	hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
-	if(FAILED(hr))
+	ulAttrs = SFGAO_FILESYSTEM;
+	hr = psfProgFiles->GetAttributesOf(1, (const struct _ITEMIDLIST **)&pidlItems, &ulAttrs);
+	if (FAILED(hr) || ulAttrs == 0)
 	{
 		return;
 	}
@@ -569,9 +597,23 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 	MyDeleteAllItems();
 	SetRedraw(FALSE);
 
-	while( hr = ppenum->Next(1,&pidlItems, &celtFetched) == S_OK && (celtFetched) == 1)
+	if (ulAttrs & SFGAO_FILESYSTEM)
 	{
-		InsertListViewItem(psfProgFiles , pidlItems, lptvid->lpifq);
+		if(SHGetPathFromIDList(lptvid->lpi, szShellPath))
+		{
+			m_pCallBackShellPath(szShellPath);
+		}
+
+		hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
+		if(FAILED(hr))
+		{
+			return;
+		}
+
+		while( hr = ppenum->Next(1,&pidlItems, &celtFetched) == S_OK && (celtFetched) == 1)
+		{
+			InsertListViewItem(psfProgFiles , pidlItems, lptvid->lpifq);
+		}
 	}
 
 	SetRedraw(TRUE);
