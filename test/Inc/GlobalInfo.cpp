@@ -19,7 +19,6 @@ CGlobalInfo* CGlobalInfo::CreateInstance()
 	return CGlobalInfo::m_pGlobal;
 }
 
-
 void CGlobalInfo::DestroyInstance()
 {
 	if (CGlobalInfo::m_pGlobal != NULL)
