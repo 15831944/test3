@@ -52,8 +52,10 @@
 #define IDC_LIST_SYSDIR                 1031
 #define ID_MENU_TESSERACT_OCR           0x0408
 #define IDC_EDIT1                       1032
+#define IDC_EDIT_FINDNAME               1032
 #define ID_MENU_KNN_OCR                 0x0409
 #define IDC_EDIT2                       1033
+#define IDC_EDIT_SUBNAME                1033
 #define ID_MENU_BARCODE_DEMO            0x0410
 #define IDC_STATIC_VERSION              0x0500
 #define IDC_STATIC_VIDEO                0x0501

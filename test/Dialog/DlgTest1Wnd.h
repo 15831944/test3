@@ -5,6 +5,7 @@
 #include "afxshelltreeCtrl.h"
 #include "../Control/DrawButton.h"
 #include "../Control/ShellCtrlClass.h"
+#include "../contrib/update_file_name.h"
 
 typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);
 
@@ -44,6 +45,7 @@ protected:
 
 	CShellTreeCtrl					m_hSysDirTree;
 	CShellListCtrl					m_hSysDirList;
+	update_file_name				m_hUpdateFile;
 
 private:
 	CString							m_strDefaultPath;

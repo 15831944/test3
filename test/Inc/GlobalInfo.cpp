@@ -671,137 +671,105 @@ bool CGlobalInfo::TFun1(const char *pszSrcFileName, const char *pszReqName, cons
 	return bRet;
 }
 
-std::vector<CString> CGlobalInfo::SplitString1(LPCTSTR lpszSource, LPCTSTR lpszSeparator)
+/*
+ * CÓïÑÔº¯Êý×Ö·û´®·Ö¸î
+ * char×ª»»CString, strtokº¯Êý·Ö¸î×Ö·û´®;
+*/
+std::vector<char*> CGlobalInfo::SplitString1(const char pszSource[], const char* pszSeparator)
 {
-	int nPos    = 0;
-	int nPrePos = 0;
+	BOOL bRet = FALSE;
+	int npos = 0;
+	unsigned long ulStrLen = 0;
 
-	CString strSubString;
-	CString strString = lpszSource;
+	char* pString = NULL;
+	char* pSrcString = NULL;
+	char* pSubString = NULL;
 
-	std::vector<CString> vecString;
+	std::vector<char*> vecString;
 
-	while(nPos != -1)
+	if (pszSource == NULL || pszSeparator == NULL)
 	{
-		nPrePos = nPos;
-
-		nPos = strString.Find(lpszSeparator, (nPos+1));
-		vecString.push_back(strString.Mid(nPrePos, (nPos-nPrePos)));
+		bRet = FALSE;
+		goto part1;
 	}
 
-	return vecString;
-}
+	pString = (char*)pszSource;
 
-std::vector<CString> CGlobalInfo::SplitString2(LPCTSTR lpszSource, LPCTSTR lpszSeparator)
-{
-	CString strSubString;
-	CString strString = lpszSource;
-	
-	std::vector<CString> vecString;
+#define MACRO_STRTOK_TAG 1
+#define MACRO_STRSTR_TAG 0
 
-	int nPos = strString.Find(lpszSeparator);
-
-	while(nPos != -1)
+#if (MACRO_STRTOK_TAG == 1)	
+	pSubString = strtok(pString, pszSeparator);
+	if (pSubString == NULL)
 	{
-		strSubString = strString.Left(nPos);
-		if (!strSubString.IsEmpty())
-		{
-			vecString.push_back(strSubString);
-		}
-
-		strString = strString.Right(strString.GetLength()-nPos-1);
-		nPos = strString.Find(lpszSeparator);
+		bRet = FALSE;
+		goto part1;
+	}
+	else
+	{
+		vecString.push_back(pSubString);
 	}
 
-	if (!strString.IsEmpty())
+	while(1)
 	{
-		vecString.push_back(strString);
-	}
-
-	return vecString;
-}
-
-std::vector<CString> CGlobalInfo::SplitString3(LPCTSTR lpszSource, LPCTSTR lpszSeparator)
-{
-	int nPos = 0;
-
-	CString strSubString;
-
-	std::vector<CString> vecString;
-
-	while(AfxExtractSubString(strSubString, lpszSource, nPos, *lpszSeparator))
-	{
-		nPos++;
-		vecString.push_back(strSubString);
-	}
-
-	return vecString;
-}
-
-std::vector<CString> CGlobalInfo::SplitString4(LPCTSTR lpszSource, LPCTSTR lpszSeparator)
-{
-	CString strSubString;
-	CString strString(lpszSource);
-	CString strSeparator(lpszSeparator);
-	
-	std::vector<CString> vecString;
-
-	strSubString = strtok(strString.GetBuffer(0), strSeparator.GetBuffer(0));
-	if (!strSubString.IsEmpty())
-	{
-		vecString.push_back(strSubString);
-	}
-
-	while (1)
-	{
-		strSubString = strtok(NULL, strSeparator.GetBuffer(0));
-		if (strSubString == _T(""))
+		pSubString = strtok(NULL, pszSeparator);
+		if (pSubString == NULL)
 		{
 			break;
 		}
-
-		strSubString.TrimLeft();
-		if (!strSubString.IsEmpty())
+		else
 		{
-			vecString.push_back(strSubString);
+			vecString.push_back(pSubString);
 		}
 	}
+#endif
 
-	return vecString;
-}
-
-std::vector<CString> CGlobalInfo::SplitString5(LPCTSTR lpszSource, LPCTSTR lpszSeparator)
-{
-	int nPos = 0;
-
-	CString strSubString;
-	CString strString(lpszSource);
-
-	std::vector<CString> vecString;
-
-	strSubString = strString.Tokenize(lpszSeparator, nPos);
-	while(strSubString.Trim() != _T(""))
+#if (MACRO_STRSTR_TAG == 1)
+	while(1)
 	{
-		vecString.push_back(strSubString);
-		strSubString = strString.Tokenize(lpszSeparator, nPos);
+		pSubString = strstr(pString, pszSeparator);
+		if (pSubString != NULL)
+		{
+			memset(pSubString, '\0', strlen(pszSeparator));
+			vecString.push_back(pString);
+			
+			pSubString = pSubString + strlen(pszSeparator);
+			pString = pSubString;
+		}
+		else
+		{
+			vecString.push_back(pString);
+			break;
+		}
 	}
+#endif
 
+part1:
 	return vecString;
 }
 
-std::vector<std::string> CGlobalInfo::SplitString6(LPCTSTR lpszSource, LPCTSTR lpszSeparator)
+/*
+ * C++º¯Êý×Ö·û´®·Ö¸î
+ * char×ª»»string, substrº¯Êý·Ö¸î×Ö·û´®;
+*/
+std::vector<std::string> CGlobalInfo::SplitString2(const char* pszSource, const char* pszSeparator)
 {
 	std::string::size_type start = 0;
 	std::string::size_type index = 0;
 
-	std::string strSubString;
-	std::string strString(lpszSource);
+	std::string strString(pszSource);
+	std::string strSepString(pszSeparator);
 
 	std::vector<std::string> vecString;
 
+#define MACRO_STRING1_TAG 0
+#define MACRO_STRING2_TAG 1
+
+#if (MACRO_STRING1_TAG == 1)
+	std::string strSubString;
 	do 
 	{
-		index = strString.find_first_of(lpszSeparator, start);
+		index = strString.find_first_of(pszSeparator, start);
 		if (index != std::string::npos)
 		{
 			strSubString = strString.substr(start, index-start);
@@ -810,7 +778,7 @@ std::vector<std::string> CGlobalInfo::SplitString6(LPCTSTR lpszSource, LPCTSTR l
 				vecString.push_back(strSubString);
 			}
 
-			start = strString.find_first_not_of(lpszSeparator, index);
+			start = strString.find_first_not_of(pszSeparator, index);
 
 			if (start == std::string::npos)
 			{
@@ -821,6 +789,111 @@ std::vector<std::string> CGlobalInfo::SplitString6(LPCTSTR lpszSource, LPCTSTR l
 
 	strSubString = strString.substr(start);
 	vecString.push_back(strSubString);
+#endif
+	
+#if (MACRO_STRING2_TAG == 1)
+	string::const_iterator substart = strString.begin();
+	
+	string::const_iterator delimstart = strSepString.begin();
+	string::const_iterator delimend   = strSepString.end();
+	
+	while(1)
+	{
+		string::const_iterator subend = strString.end();
+
+		subend = search(substart, subend, delimstart, delimend);
+		if (subend == strString.end())
+		{
+			std::string strSubString(substart, subend);
+			if (!strSubString.empty())
+			{
+				vecString.push_back(strSubString);
+			}
+			break;
+		}
+		else
+		{
+			std::string strSubString(substart, subend);
+			if (!strSubString.empty())
+			{
+				vecString.push_back(strSubString);
+			}
+
+			substart = subend + strSepString.size();
+		}
+	}
+#endif
 
 	return vecString;
 }
+
+/*
+ * MFCº¯Êý×Ö·û´®·Ö¸î
+ * char×ª»»CString, MFCº¯Êý·Ö¸î×Ö·û´®;
+*/
+std::vector<CString> CGlobalInfo::SplitString3(const char* pszSource, const char* pszSeparator)
+{
+	int nPos    = 0;
+	int nPrePos = 0;
+
+	CString strSubString;
+	CString strString = pszSource;
+
+	std::vector<CString> vecString;
+
+#define MACRO_CSTRING1_TAG 1
+#define MACRO_CSTRING2_TAG 0
+#define MACRO_CSTRING3_TAG 0
+#define MACRO_CSTRING4_TAG 0
+
+#if (MACRO_CSTRING1_TAG == 1)
+	while(nPos != -1)
+	{
+		nPrePos = nPos;
+
+		nPos = strString.Find(pszSeparator, (nPos+1));
+		vecString.push_back(strString.Mid(nPrePos, (nPos-nPrePos)));
+	}
+#endif
+
+#if (MACRO_CSTRING2_TAG == 1)
+	nPos = strString.Find(pszSeparator);
+
+	while(nPos != -1)
+	{
+		strSubString = strString.Left(nPos);
+		if (!strSubString.IsEmpty())
+		{
+			vecString.push_back(strSubString);
+		}
+
+		strString = strString.Right(strString.GetLength()-nPos-1);
+		nPos = strString.Find(pszSeparator);
+	}
+
+	if (!strString.IsEmpty())
+	{
+		vecString.push_back(strString);
+	}
+#endif
+
+#if (MACRO_CSTRING3_TAG == 1)
+	strSubString = strString.Tokenize(pszSeparator, nPos);
+	while(strSubString.Trim() != _T(""))
+	{
+		vecString.push_back(strSubString);
+		strSubString = strString.Tokenize(pszSeparator, nPos);
+	}
+#endif
+
+#if (MACRO_CSTRING4_TAG == 1)
+	while(AfxExtractSubString(strSubString, pszSource, nPos, *pszSeparator))
+	{
+		nPos++;
+		vecString.push_back(strSubString);
+	}
+#endif
+
+	return vecString;
+}
+

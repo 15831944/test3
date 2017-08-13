@@ -27,12 +27,9 @@ public:
 	int								EnumModifyName(const char *pszFilePath, const char *pszNewFileName, const char *pszSpanName);
 	bool							TFun1(const char *pszSrcFileName, const char *pszReqName, const char *pszSpanName, char *pszDstFileName, const int nBit);
 	
-	std::vector<CString>			SplitString1(LPCTSTR lpszSource, LPCTSTR lpszSeparator);
-	std::vector<CString>			SplitString2(LPCTSTR lpszSource, LPCTSTR lpszSeparator);	
-	std::vector<CString>			SplitString3(LPCTSTR lpszSource, LPCTSTR lpszSeparator);
-	std::vector<CString>			SplitString4(LPCTSTR lpszSource, LPCTSTR lpszSeparator);
-	std::vector<CString>			SplitString5(LPCTSTR lpszSource, LPCTSTR lpszSeparator);
-	std::vector<std::string>		SplitString6(LPCTSTR lpszSource, LPCTSTR lpszSeparator);
+	std::vector<char*>				SplitString1(const char pszSource[], const char* pszSeparator);
+	std::vector<std::string>		SplitString2(const char* pszSource, const char* pszSeparator);	
+	std::vector<CString>			SplitString3(const char* pszSource, const char* pszSeparator);
 	
 private:
 	static  CGlobalInfo*			m_pGlobal;

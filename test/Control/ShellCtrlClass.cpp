@@ -341,7 +341,7 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
+	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
 	if (lptvid == NULL)
 	{
 		return;
@@ -607,7 +607,7 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 
 	if (ulAttrs & SFGAO_FILESYSTEM)
 	{
-		if(SHGetPathFromIDList(lptvid->lpi, szShellPath))
+		if(SHGetPathFromIDList(lptvid->lpifq, szShellPath))
 		{
 			m_pCallBackShellPath(szShellPath, m_pParam);
 		}

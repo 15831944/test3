@@ -242,7 +242,7 @@ BOOL CShellClass::GetName (LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, DWORD dwFlags, 
 	BOOL bSuccess = TRUE;
 	STRRET str;
 	
-	if (NOERROR == lpsf->GetDisplayNameOf (lpi, dwFlags, &str))
+	if (NOERROR == lpsf->GetDisplayNameOf(lpi, dwFlags, &str))
 	{
 		switch (str.uType)
 		{

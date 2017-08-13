@@ -191,10 +191,49 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
+	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
+	if (pGlobal == NULL)
+	{
+		return;
+	}
 }	
 
 void CDlgTest1Wnd::OnBnClickedButton3()
 {
+	CString strFindName;
+	CString strSubName;
+
+	if (m_strShellPath == _T("") || m_strShellPath.GetLength() <= 0)
+	{
+		MessageBox(_T("请选择正确的文件路径!"), _T("警告!"), MB_ICONWARNING|MB_OK);
+		return;
+	}
+
+	GetDlgItem(IDC_EDIT_FINDNAME)->GetWindowText(strFindName);
+	GetDlgItem(IDC_EDIT_SUBNAME)->GetWindowText(strSubName);
+
+	if (strFindName == _T("") || strFindName.GetLength() <= 0)
+	{
+		GetDlgItem(IDC_EDIT_FINDNAME)->GetFocus();
+		MessageBox(_T("查找的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
+		return;
+	}
+
+	if (strSubName == _T("") || strSubName.GetLength() <= 0)
+	{
+		GetDlgItem(IDC_EDIT_SUBNAME)->GetFocus();
+		MessageBox(_T("替换的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
+		return;
+	}
+
+	if (!m_hUpdateFile.CreateUpdateProc(m_strShellPath, strFindName, strSubName))
+	{
+		return;
+	}
+
+	GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BUTTON3)->EnableWindow(FALSE);
 }
 
 /*
