@@ -196,6 +196,15 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	{
 		return;
 	}
+
+	unsigned char szValue[4] = {0};
+	memcpy(szValue, _T("\xAA\x00\x80\x55"), 4);
+
+	char szHex[4*2+1] = {0};
+
+	pGlobal->BytesHexToString(szHex, szValue, 4);
+
+	AfxMessageBox(szHex);
 }	
 
 void CDlgTest1Wnd::OnBnClickedButton3()

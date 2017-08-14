@@ -56,6 +56,7 @@
 #define ID_MENU_KNN_OCR                 0x0409
 #define IDC_EDIT2                       1033
 #define IDC_EDIT_SUBNAME                1033
+#define IDC_COMBO1                      1034
 #define ID_MENU_BARCODE_DEMO            0x0410
 #define IDC_STATIC_VERSION              0x0500
 #define IDC_STATIC_VIDEO                0x0501
@@ -73,7 +74,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        153
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

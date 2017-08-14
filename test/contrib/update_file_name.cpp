@@ -21,7 +21,7 @@ update_file_name::update_file_name()
 
 update_file_name::~update_file_name()
 {
-	CloseUpdateProc();
+//	CloseUpdateProc();
 }
 
 update_file_name& update_file_name::Instance()
@@ -104,7 +104,10 @@ void update_file_name::UpdateFileInfo()
 	}
 	else if (hEvalTag.hConfigType ==  CONFIG_FILENAMETYPE)
 	{
-		
+		if (!SetFileNameInfo(&hEvalTag))
+		{
+			return;
+		}
 	}
 	else
 	{
@@ -353,6 +356,8 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 {
 	BOOL bRet = FALSE;
+
+	char szSpecFileExt[MAX_PATH] = {0};
 	char szSpecFilePath[MAX_PATH] = {0};
 
 	ENUM_FILEINFO* pFileInfo = NULL;
@@ -382,26 +387,68 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 			continue;
 		}
 
+		bRet = FALSE;
 		for (vecIter=pEvalTag->vecString.begin(); vecIter!=pEvalTag->vecString.end(); vecIter++)
 		{
+			sprintf(szSpecFileExt, _T(".%s"), vecIter->c_str());
+			if (strcmp(pFileInfo->szFileExt, szSpecFileExt) != 0)
+			{
+				bRet = FALSE;
+				continue;
+			}
+			else
+			{
+				bRet = TRUE;
+				break;
+			}
 		}
 
-		if (strcmp(pFileInfo->szFileExt, m_strFindName.c_str()) != 0)
+		if (bRet)
+		{
+			memset(szSpecFilePath, 0x0, MAX_PATH);
+			sprintf(szSpecFilePath, _T("%s\\%s%s"), pFileInfo->szParentPath, pFileInfo->szFileName, m_strSubName.c_str());
+
+			rename(pFileInfo->szFilePath, szSpecFilePath);
+		}
+		else
 		{
 			continue;
 		}
-
-		memset(szSpecFilePath, 0x0, MAX_PATH);
-		sprintf(szSpecFilePath, _T("%s\\%s%s"), pFileInfo->szParentPath, pFileInfo->szFileName, m_strSubName.c_str());
-
-		rename(pFileInfo->szFilePath, szSpecFilePath);
 	}
 
-	return bRet;
+	return TRUE;
 }
 
 BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 {
 	BOOL bRet = FALSE;
+
+	ENUM_FILEINFO* pFileInfo = NULL;
+	std::vector<std::string>::iterator vecIter;
+	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
+
+	if (m_strFindName == _T("") && m_strFindName.size() == 0)
+	{
+		return FALSE;
+	}
+
+	if (m_strSubName == _T("") && m_strSubName.size() == 0)
+	{
+		return FALSE;
+	}
+
+	if (m_mapEnumInfo.size() == 0)
+	{
+		return FALSE;
+	}
+
+	for (mapIter=m_mapEnumInfo.begin(); mapIter!=m_mapEnumInfo.end(); mapIter++)
+	{
+		pFileInfo = mapIter->second;
+		if (pFileInfo == NULL)
+		{
+			continue;
+		}
+	}
 	return bRet;
 }
