@@ -14,6 +14,7 @@ typedef enum tagConfigType
 typedef enum tagEvalType
 {
 	EVAL_EMPTYTYPE = 0,
+	EVAL_ALLFILENAME,
 	EVAL_SPECIFYNAME
 }ENUM_EVALTYPE;
 
@@ -69,6 +70,9 @@ protected:
 
 	BOOL							SetFileExtInfo(EVAL_FILEINFO* pEvalTag);
 	BOOL							SetFileNameInfo(EVAL_FILEINFO* pEvalTag);
+
+	BOOL							SetAllFileName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex);
+	BOOL							SetSpecifyName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt);
 
 protected:
 	HANDLE							m_hThread;

@@ -364,6 +364,11 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 	std::vector<std::string>::iterator vecIter;
 	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
 
+	if (pEvalTag == NULL)
+	{
+		return FALSE;
+	}
+
 	if (m_strFindName == _T("") && m_strFindName.size() == 0)
 	{
 		return FALSE;
@@ -379,6 +384,7 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 		return FALSE;
 	}
 
+	
 	for (mapIter=m_mapEnumInfo.begin(); mapIter!=m_mapEnumInfo.end(); mapIter++)
 	{
 		pFileInfo = mapIter->second;
@@ -422,10 +428,16 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 {
 	BOOL bRet = FALSE;
+	unsigned long ulIndex = 0;
 
 	ENUM_FILEINFO* pFileInfo = NULL;
 	std::vector<std::string>::iterator vecIter;
 	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
+
+	if (pEvalTag == NULL || pEvalTag->hEvalType == EVAL_EMPTYTYPE)
+	{
+		return FALSE;
+	}
 
 	if (m_strFindName == _T("") && m_strFindName.size() == 0)
 	{
@@ -442,13 +454,139 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 		return FALSE;
 	}
 
-	for (mapIter=m_mapEnumInfo.begin(); mapIter!=m_mapEnumInfo.end(); mapIter++)
+	for (mapIter=m_mapEnumInfo.begin(); mapIter!=m_mapEnumInfo.end(); mapIter++, ulIndex++)
 	{
 		pFileInfo = mapIter->second;
 		if (pFileInfo == NULL)
 		{
 			continue;
 		}
+
+		if (pEvalTag->hEvalType == EVAL_ALLFILENAME)
+		{
+			SetAllFileName(pFileInfo->szParentPath, pFileInfo->szFileName, NULL, m_strSubName.c_str(), pFileInfo->szFileExt, ulIndex);
+		}
+		else if (pEvalTag->hEvalType == EVAL_SPECIFYNAME)
+		{
+			SetSpecifyName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt);
+		}
 	}
+	return bRet;
+}
+
+BOOL update_file_name::SetAllFileName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex)
+{
+	int nret = 0;
+	int npos = 0;
+
+	BOOL bRet = FALSE;
+
+	char szSrcFilePath[MAX_PATH]  = {0};
+	char szDescFilePath[MAX_PATH] = {0};
+
+	if (pszFilePath == NULL || *pszFilePath == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszSpecName == NULL || *pszSpecName == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszFileExt == NULL || *pszFileExt == '\0')
+	{
+		return FALSE;
+	}
+
+	sprintf(szSrcFilePath,  _T("%s\\%s%s"), pszFilePath, pszSrcName,  pszFileExt);
+	sprintf(szDescFilePath, _T("%s\\%s_%d%s"), pszFilePath, pszSpecName, ulIndex, pszFileExt);
+
+	nret = rename(szSrcFilePath, szDescFilePath);
+	if (nret == 0)
+	{
+		bRet = TRUE;
+	}
+	else
+	{
+		bRet = FALSE;
+	}
+
+	return bRet;
+}
+
+BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt)
+{
+	int nret = 0;
+	int npos = 0;
+	int nlen = 0;
+	int nindex = 0;
+
+	BOOL bRet = FALSE;
+
+	char* pChar = NULL;
+	char* pSrcName = NULL;
+
+	char szLeftName[MAX_PATH] = {0};
+	char szRightName[MAX_PATH] = {0};
+	char szSrcFilePath[MAX_PATH]  = {0};
+	char szDescFilePath[MAX_PATH] = {0};
+
+	if (pszFilePath == NULL || *pszFilePath == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszFindName == NULL || *pszFindName == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszSpecName == NULL || *pszSpecName == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszFileExt == NULL || *pszFileExt == '\0')
+	{
+		return FALSE;
+	}
+
+// 	pChar = strstr(pszSrcName, pszSpecName);
+// 	if (pChar == NULL)
+// 	{
+// 		return FALSE;
+// 	}
+// 	else
+// 	{
+// 		npos = pChar - pszSrcName;
+// 		if (npos == -1)
+// 		{
+// 			return FALSE;
+// 		}
+// 	}
+
+	pSrcName = (char*)pszSrcName;
+	nlen = strlen(pszSrcName);
+
+	while(nlen>0)
+	{
+		pChar = strstr(pSrcName, pszFindName);
+		if (pChar == NULL)
+		{
+			nlen -= strlen(pSrcName);
+			continue;
+		}
+
+		npos = pChar - pSrcName;
+		if (npos == -1)
+		{
+			nlen -= strlen(pSrcName);
+			continue;
+		}
+
+
+	}
+
 	return bRet;
 }
