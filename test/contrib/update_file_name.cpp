@@ -41,7 +41,7 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 	return 0;
 }
 
-BOOL update_file_name::CreateUpdateProc(const char* pszShellPath, const char* pszFindName, const char* pszSubName)
+BOOL update_file_name::CreateUpdateProc(HWND hWnd, const char* pszShellPath, const char* pszFindName, const char* pszSubName, ENUM_EVALTYPE hEvalType)
 {
 	BOOL bRet = FALSE;
 	
@@ -49,10 +49,14 @@ BOOL update_file_name::CreateUpdateProc(const char* pszShellPath, const char* ps
 	{
 		SetEvent(m_hStartEvent);
 		ResetEvent(m_hEndEvent);
+
+		m_hWnd = hWnd;
 		
 		m_strShellPath = pszShellPath;
 		m_strFindName  = pszFindName;
 		m_strSubName   = pszSubName;
+
+		m_hEvalType    = hEvalType;
 		
 		m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
@@ -81,38 +85,63 @@ BOOL update_file_name::CloseUpdateProc()
 
 void update_file_name::UpdateFileInfo()
 {
+	BOOL bRet = FALSE;
 	EVAL_FILEINFO hEvalTag;
 
 	if (!EnumFileInfo())
 	{
+		bRet = FALSE;
 		m_dwError = ERROR_ENUM_FILEINFO;
-		return;
+		goto part1;
 	}
 
 	if (!GetEvalResult(&hEvalTag))
 	{
+		bRet = FALSE;
 		m_dwError = ERROR_ENUM_FILEINFO;
-		return;
+		goto part1;
 	}
 
 	if (hEvalTag.hConfigType ==  CONFIG_EXTTYPE)
 	{
 		if (!SetFileExtInfo(&hEvalTag))
 		{
-			return;
+			bRet = FALSE;
+			goto part1;
 		}
 	}
 	else if (hEvalTag.hConfigType ==  CONFIG_FILENAMETYPE)
 	{
 		if (!SetFileNameInfo(&hEvalTag))
 		{
-			return;
+			bRet = FALSE;
+			goto part1;
 		}
 	}
 	else
 	{
-		return;
+		bRet = FALSE;
+		goto part1;
 	}
+
+part1:
+	SetUpdateResult(bRet);
+}
+
+void update_file_name::SetUpdateResult(BOOL bRet)
+{
+	unsigned long ulRetMsg = 0;
+
+	if (bRet)
+	{
+		ulRetMsg = UPDATE_FILENAME_SUCCESSUL_RESULT;
+	}
+	else
+	{
+		ulRetMsg = UPDATE_FILENAME_FAILED_RESULT;
+	}
+
+	::PostMessage(m_hWnd, WM_UPDATEFILENAME_MSG, (WPARAM)ulRetMsg, (LPARAM)m_dwError);
 }
 
 BOOL update_file_name::EnumFileInfo()
@@ -342,7 +371,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 	if (bRet)
 	{
 		pEvalTag->hConfigType = hConfigType;
-		pEvalTag->hEvalType = EVAL_SPECIFYNAME;
+		pEvalTag->hEvalType = m_hEvalType;
 
 		if (hConfigType == CONFIG_EXTTYPE)
 		{
@@ -476,8 +505,8 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 
 BOOL update_file_name::SetAllFileName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex)
 {
-	int nret = 0;
-	int npos = 0;
+	int nRet = 0;
+	int nPos = 0;
 
 	BOOL bRet = FALSE;
 
@@ -502,8 +531,8 @@ BOOL update_file_name::SetAllFileName(const char* pszFilePath, const char* pszSr
 	sprintf(szSrcFilePath,  _T("%s\\%s%s"), pszFilePath, pszSrcName,  pszFileExt);
 	sprintf(szDescFilePath, _T("%s\\%s_%d%s"), pszFilePath, pszSpecName, ulIndex, pszFileExt);
 
-	nret = rename(szSrcFilePath, szDescFilePath);
-	if (nret == 0)
+	nRet = rename(szSrcFilePath, szDescFilePath);
+	if (nRet == 0)
 	{
 		bRet = TRUE;
 	}
@@ -517,18 +546,19 @@ BOOL update_file_name::SetAllFileName(const char* pszFilePath, const char* pszSr
 
 BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt)
 {
-	int nret = 0;
-	int npos = 0;
-	int nlen = 0;
-	int nindex = 0;
+	int nRet = 0;
+	int nPos = 0;
+	int nIndex = 0;
+
+	int nNameLen = 0;
+	int nRemainLen = 0;
 
 	BOOL bRet = FALSE;
 
 	char* pChar = NULL;
 	char* pSrcName = NULL;
 
-	char szLeftName[MAX_PATH] = {0};
-	char szRightName[MAX_PATH] = {0};
+	char szFileName[MAX_PATH] = {0};
 	char szSrcFilePath[MAX_PATH]  = {0};
 	char szDescFilePath[MAX_PATH] = {0};
 
@@ -552,40 +582,60 @@ BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSr
 		return FALSE;
 	}
 
-// 	pChar = strstr(pszSrcName, pszSpecName);
-// 	if (pChar == NULL)
-// 	{
-// 		return FALSE;
-// 	}
-// 	else
-// 	{
-// 		npos = pChar - pszSrcName;
-// 		if (npos == -1)
-// 		{
-// 			return FALSE;
-// 		}
-// 	}
-
 	pSrcName = (char*)pszSrcName;
-	nlen = strlen(pszSrcName);
+	nRemainLen = strlen(pszSrcName);
 
-	while(nlen>0)
+	while(nRemainLen>0)
 	{
 		pChar = strstr(pSrcName, pszFindName);
 		if (pChar == NULL)
 		{
-			nlen -= strlen(pSrcName);
+			memcpy(szFileName+nNameLen, pSrcName, nPos);
+			nNameLen += nPos;
+			nRemainLen -= strlen(pSrcName);
 			continue;
 		}
 
-		npos = pChar - pSrcName;
-		if (npos == -1)
+		nPos = pChar - pSrcName;
+		if (nPos == -1)
 		{
-			nlen -= strlen(pSrcName);
+			nRemainLen -= strlen(pSrcName);
 			continue;
 		}
 
+		if (nPos != 0)
+		{
+			nRet = 1;
+			memcpy(szFileName+nNameLen, pSrcName, nPos);
+			nNameLen += nPos;
+			nRemainLen -= nPos;
 
+			memcpy(szFileName+nNameLen, pszSpecName, strlen(pszSpecName));
+			nNameLen += strlen(pszSpecName); 
+			nRemainLen -= strlen(pszSpecName);
+		}
+		
+		pSrcName = pSrcName + nPos + strlen(pszFindName);
+	}
+
+	if (nRet != 1)
+	{
+		bRet = FALSE;
+	}
+	else
+	{
+		sprintf(szSrcFilePath,  _T("%s\\%s%s"), pszFilePath, pszSrcName, pszFileExt);
+		sprintf(szDescFilePath, _T("%s\\%s%s"), pszFilePath, szFileName, pszFileExt);
+
+		nRet = rename(szSrcFilePath, szDescFilePath);
+		if (nRet == 0)
+		{
+			bRet = TRUE;
+		}
+		else
+		{
+			bRet = FALSE;
+		}
 	}
 
 	return bRet;

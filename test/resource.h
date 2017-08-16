@@ -57,6 +57,8 @@
 #define IDC_EDIT2                       1033
 #define IDC_EDIT_SUBNAME                1033
 #define IDC_COMBO1                      1034
+#define IDC_COMBO_EVAL                  1034
+#define IDC_COMBO_EVALNAME              1034
 #define ID_MENU_BARCODE_DEMO            0x0410
 #define IDC_STATIC_VERSION              0x0500
 #define IDC_STATIC_VIDEO                0x0501

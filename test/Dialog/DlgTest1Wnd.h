@@ -27,14 +27,19 @@ protected:
 	virtual BOOL					OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
-
+	afx_msg void					OnCbnSelchangeComboEvalname();
 	afx_msg void					OnBnClickedButton1();
 	afx_msg void					OnBnClickedButton2();
 	afx_msg void					OnBnClickedButton3();
 
+	afx_msg LRESULT					OnUpdateFileName(WPARAM wParam, LPARAM lParam);
 protected:
 	static BOOL						GetShellTreePath(char* pszShellPath, void* pParam);
 	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+
+	void							Init();
+	void							InitCtrl();
+	void							InitInfo();
 
 	void							InitialLayout();
 	
@@ -45,12 +50,13 @@ protected:
 
 	CShellTreeCtrl					m_hSysDirTree;
 	CShellListCtrl					m_hSysDirList;
+	CComboBox						m_hComboEval;
+
 	update_file_name				m_hUpdateFile;
+	ENUM_EVALTYPE					m_hEvalType;
 
 private:
 	CString							m_strDefaultPath;
 	CString							m_strShellPath;
-	CString							m_strAppPath;
-	
-	std::map<std::string, int*>		m_mapInt;
+	CString							m_strAppPath;	
 };

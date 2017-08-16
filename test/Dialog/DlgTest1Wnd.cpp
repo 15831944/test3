@@ -14,6 +14,7 @@ CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
 	m_strAppPath = _T("");
 
 	m_pfCallRingFunc = NULL;
+	m_hEvalType = EVAL_EMPTYTYPE;
 }
 
 CDlgTest1Wnd::~CDlgTest1Wnd()
@@ -29,14 +30,18 @@ CDlgTest1Wnd& CDlgTest1Wnd::Instance()
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_TREE_SYSDIR, m_hSysDirTree);
-	DDX_Control(pDX, IDC_LIST_SYSDIR, m_hSysDirList);
+	DDX_Control(pDX, IDC_TREE_SYSDIR,			m_hSysDirTree);
+	DDX_Control(pDX, IDC_LIST_SYSDIR,			m_hSysDirList);
+	DDX_Control(pDX, IDC_COMBO_EVALNAME,		m_hComboEval);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
-	ON_BN_CLICKED(IDC_BUTTON1,		OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2,		OnBnClickedButton2)
-	ON_BN_CLICKED(IDC_BUTTON3,		OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BUTTON1,					OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2,					OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3,					OnBnClickedButton3)
+	ON_CBN_SELCHANGE(IDC_COMBO_EVALNAME,		OnCbnSelchangeComboEvalname)
+
+	ON_MESSAGE(WM_UPDATEFILENAME_MSG,			OnUpdateFileName)
 END_MESSAGE_MAP()
 
 BOOL CDlgTest1Wnd::OnInitDialog()
@@ -49,12 +54,25 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 		return FALSE;
 	}
 
+	Init();
+	return TRUE;  
+}
+
+void CDlgTest1Wnd::Init()
+{
+	InitCtrl();
+	InitInfo();
+}
+
+void CDlgTest1Wnd::InitCtrl()
+{
 	m_hSysDirTree.InitializeCtrl();
 	m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
 
 	m_hSysDirTree.SetSelectList(m_hSysDirList);
 
 //	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
+
 /*
 	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
 	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
@@ -80,7 +98,34 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 		SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
 	}
 */
-	return TRUE;  
+}
+
+void CDlgTest1Wnd::InitInfo()
+{
+	int nIndex = 0;
+	int nCount = 0;
+
+	CString strItemString;
+	EVAL_ITEMDATA hEvalItem[3];
+
+	memset(&hEvalItem, 0x0, sizeof(hEvalItem));
+
+	hEvalItem[0].hEvalType = EVAL_EMPTYTYPE;
+	strcpy(hEvalItem[0].szItemName, _T("请选择..."));
+
+	hEvalItem[1].hEvalType = EVAL_ALLFILENAME;
+	strcpy(hEvalItem[1].szItemName, _T("更新全部名称"));
+
+	hEvalItem[2].hEvalType = EVAL_SPECIFYNAME;
+	strcpy(hEvalItem[2].szItemName, _T("更新指定名称"));
+
+	for (nIndex=0; nIndex<sizeof(hEvalItem)/sizeof(EVAL_ITEMDATA); nIndex++)
+	{
+		m_hComboEval.InsertString(nIndex, hEvalItem[nIndex].szItemName);
+		m_hComboEval.SetItemData(nIndex, hEvalItem[nIndex].hEvalType);
+	}
+
+	m_hComboEval.SetCurSel(0);
 }
 
 BOOL CDlgTest1Wnd::GetShellTreePath(char* pszShellPath, void* pParam)
@@ -169,6 +214,54 @@ LRESULT CDlgTest1Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 	return ::DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
+void CDlgTest1Wnd::OnCbnSelchangeComboEvalname()
+{
+	int nIndex = 0;
+	DWORD dwDataPtr = 0;
+
+	nIndex = m_hComboEval.GetCurSel();
+	if (nIndex == -1)
+	{
+		return;
+	}
+	
+	dwDataPtr = m_hComboEval.GetItemData(nIndex);
+	if (dwDataPtr == CB_ERR)
+	{
+		return;
+	}
+	
+	switch(dwDataPtr)
+	{
+	case EVAL_EMPTYTYPE:
+		{
+			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
+			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+
+			m_hEvalType = EVAL_EMPTYTYPE;
+		}
+		break;
+
+	case EVAL_ALLFILENAME:
+		{
+			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
+			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+
+			m_hEvalType = EVAL_ALLFILENAME;
+		}
+		break;
+
+	case EVAL_SPECIFYNAME:
+		{
+			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
+			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+
+			m_hEvalType = EVAL_SPECIFYNAME;
+		}
+		break;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 //http://blog.csdn.net/xujiezhige/article/details/6206133
@@ -209,6 +302,9 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 
 void CDlgTest1Wnd::OnBnClickedButton3()
 {
+	int nIndex = 0;
+	DWORD dwDataPtr = 0;
+
 	CString strFindName;
 	CString strSubName;
 
@@ -221,11 +317,31 @@ void CDlgTest1Wnd::OnBnClickedButton3()
 	GetDlgItem(IDC_EDIT_FINDNAME)->GetWindowText(strFindName);
 	GetDlgItem(IDC_EDIT_SUBNAME)->GetWindowText(strSubName);
 
-	if (strFindName == _T("") || strFindName.GetLength() <= 0)
+	switch(m_hEvalType)
 	{
-		GetDlgItem(IDC_EDIT_FINDNAME)->GetFocus();
-		MessageBox(_T("查找的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
-		return;
+	case EVAL_EMPTYTYPE:
+		{
+			MessageBox(_T("请选择正确的更新规则!"), _T("警告!"), MB_ICONWARNING|MB_OK);
+			return;
+		}
+		break;
+
+	case EVAL_ALLFILENAME:
+		{
+			
+		}
+		break;
+
+	case EVAL_SPECIFYNAME:
+		{
+			if (strFindName == _T("") || strFindName.GetLength() <= 0)
+			{
+				GetDlgItem(IDC_EDIT_FINDNAME)->GetFocus();
+				MessageBox(_T("查找的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
+				return;
+			}
+		}
+		break;
 	}
 
 	if (strSubName == _T("") || strSubName.GetLength() <= 0)
@@ -235,7 +351,7 @@ void CDlgTest1Wnd::OnBnClickedButton3()
 		return;
 	}
 
-	if (!m_hUpdateFile.CreateUpdateProc(m_strShellPath, strFindName, strSubName))
+	if (!m_hUpdateFile.CreateUpdateProc(this->GetSafeHwnd(), m_strShellPath, strFindName, strSubName, m_hEvalType))
 	{
 		return;
 	}
@@ -280,3 +396,69 @@ void CDlgTest1Wnd::OnBnClickedButton7()
 	}
 }
 */
+
+LRESULT CDlgTest1Wnd::OnUpdateFileName(WPARAM wParam, LPARAM lParam)
+{
+	int nIndex = 0;
+	DWORD dwDataPtr = 0;
+
+	DWORD dwTypeMsg = 0;
+	DWORD dwTypeValue = 0;
+
+	ENUM_EVALTYPE hEvalType = EVAL_EMPTYTYPE;
+
+	dwTypeMsg = wParam;
+	if (dwTypeMsg == 0)
+	{
+		return 0;
+	}
+
+	switch(dwTypeMsg)
+	{
+	case UPDATE_FILENAME_SUCCESSUL_RESULT:
+		{
+			
+		}
+		break;
+
+	case UPDATE_FILENAME_FAILED_RESULT:
+		{
+
+		}
+		break;
+	}
+
+	nIndex = m_hComboEval.GetCurSel();
+	if (nIndex != -1)
+	{
+		dwDataPtr = m_hComboEval.GetItemData(nIndex);
+		if (dwDataPtr != CB_ERR)
+		{
+			switch(dwDataPtr)
+			{
+			case EVAL_EMPTYTYPE:
+				{
+					GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
+					GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+				}
+				break;
+
+			case EVAL_ALLFILENAME:
+				{
+					GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
+					GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+				}
+				break;
+
+			case EVAL_SPECIFYNAME:
+				{
+					GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
+					GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+				}
+				break;
+			}
+		}
+	}
+	GetDlgItem(IDC_BUTTON3)->EnableWindow(TRUE);
+	return 0;
+}

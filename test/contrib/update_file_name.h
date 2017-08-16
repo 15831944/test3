@@ -1,8 +1,13 @@
 #ifndef __UPDATE_FILE_NAME_H__
 #define __UPDATE_FILE_NAME_H__
 
-#define ERROR_ENUM_FILEINFO		0x0F000001
-#define ERROR_ENUM_EVALINFO		0x0F000002
+#define ERROR_ENUM_FILEINFO					0x0F000001
+#define ERROR_ENUM_EVALINFO					0x0F000002
+
+#define UPDATE_FILENAME_SUCCESSUL_RESULT	0x08000001
+#define UPDATE_FILENAME_FAILED_RESULT		0x08000002
+
+#define	WM_UPDATEFILENAME_MSG				WM_USER	+ 0x1001
 
 typedef enum tagConfigType
 {
@@ -18,6 +23,12 @@ typedef enum tagEvalType
 	EVAL_SPECIFYNAME
 }ENUM_EVALTYPE;
 
+typedef struct tagUpdateResult
+{
+	unsigned long	ulError;
+	unsigned long	ulResult;
+}DATA_UPDATERESULT;
+
 typedef struct tagEnumFileInfo
 {
 	DWORD		dwFileSize;
@@ -30,6 +41,12 @@ typedef struct tagEnumFileInfo
 	char		szFilePath[MAX_PATH];
 	char		szFileExt[MAX_PATH];
 }ENUM_FILEINFO;
+
+typedef struct tagItemData
+{
+	ENUM_EVALTYPE	hEvalType;
+	char			szItemName[MAX_PATH];
+}EVAL_ITEMDATA;
 
 typedef struct tagEvalFileInfo
 {
@@ -53,7 +70,7 @@ public:
 	~update_file_name();
 	
 public:
-	BOOL							CreateUpdateProc(const char* pszShellPath, const char* pszFindName, const char* pszSubName);
+	BOOL							CreateUpdateProc(HWND hWnd, const char* pszShellPath, const char* pszFindName, const char* pszSubName, ENUM_EVALTYPE hEvalType);
 	BOOL							CloseUpdateProc();
 	
 	static 	update_file_name&		Instance();
@@ -64,6 +81,7 @@ protected:
 protected:
 	void							UpdateFileInfo();
 	BOOL							EnumFileInfo();
+	void							SetUpdateResult(BOOL bRet);
 
 	BOOL							GetFileTitle(const char *pszFileName, char *pszTitle, char *pszExt);
 	BOOL							GetEvalResult(EVAL_FILEINFO* pEvalTag);
@@ -80,6 +98,9 @@ protected:
 	HANDLE							m_hStartEvent;
 	HANDLE							m_hEndEvent;
 	
+	HWND							m_hWnd;
+	ENUM_EVALTYPE					m_hEvalType;
+
 private:
 	BOOL							m_bExit;
 	
