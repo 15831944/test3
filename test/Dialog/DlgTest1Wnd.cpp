@@ -459,6 +459,8 @@ LRESULT CDlgTest1Wnd::OnUpdateFileName(WPARAM wParam, LPARAM lParam)
 			}
 		}
 	}
+
+	m_hSysDirList.PostMessage(WM_UPDATECTRLDIR_MSG, 0, 0);
 	GetDlgItem(IDC_BUTTON3)->EnableWindow(TRUE);
 	return 0;
 }

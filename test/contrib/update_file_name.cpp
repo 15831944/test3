@@ -7,8 +7,11 @@ update_file_name::update_file_name()
 {
 	m_bExit = FALSE;
 	
+	m_dwError = 0;
 	m_dwThreadID = 0;
-	m_dwWaitTime = 0;
+
+	m_dwProcTimeOver = 80;
+	m_dwCloseTimeOver = 500;
 	
 	m_strShellPath = _T("");
 	m_strFindName  = _T("");
@@ -21,7 +24,19 @@ update_file_name::update_file_name()
 
 update_file_name::~update_file_name()
 {
-//	CloseUpdateProc();
+	CloseUpdateProc();
+
+	if (m_hStartEvent != NULL)
+	{
+		CloseHandle(m_hStartEvent);
+		m_hStartEvent = NULL;
+	}
+
+	if (m_hEndEvent != NULL)
+	{
+		CloseHandle(m_hEndEvent);
+		m_hEndEvent = NULL;
+	}
 }
 
 update_file_name& update_file_name::Instance()
@@ -77,9 +92,28 @@ BOOL update_file_name::CreateUpdateProc(HWND hWnd, const char* pszShellPath, con
 
 BOOL update_file_name::CloseUpdateProc()
 {
+	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
+
 	m_bExit = TRUE;
-	WaitForSingleObject(m_hEndEvent, INFINITE);
+	WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
 	
+	if (m_mapEnumInfo.size() > 0)
+	{
+		for (mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
+		{
+			if (mapIter->second != NULL)
+			{
+				delete mapIter->second;
+				mapIter->second = NULL;
+			}
+
+			mapIter = m_mapEnumInfo.erase(mapIter);
+		}
+
+		m_mapEnumInfo.clear();
+	}
+
+	ResetEvent(m_hStartEvent);
 	return TRUE;
 }
 
@@ -124,7 +158,11 @@ void update_file_name::UpdateFileInfo()
 		goto part1;
 	}
 
+	bRet = TRUE;
+	SetEvent(m_hEndEvent);
+
 part1:
+	CloseUpdateProc();
 	SetUpdateResult(bRet);
 }
 
@@ -186,6 +224,25 @@ BOOL update_file_name::EnumFileInfo()
 
 	do 
 	{
+		if (WaitForSingleObject(m_hEndEvent, m_dwProcTimeOver) == WAIT_OBJECT_0)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			if (!m_bExit)
+			{
+				m_dwProcTimeOver = 0;
+			}
+			else
+			{
+
+				SetEvent(m_hEndEvent);
+				continue;
+			}
+		}
+
 		if ((_tcslen(c_file.name)==1 && c_file.name[0]==_T('.')) ||
 			(_tcslen(c_file.name)==2 && c_file.name[0]==_T('.') && c_file.name[1]==_T('.')))
 		{
@@ -232,6 +289,8 @@ BOOL update_file_name::EnumFileInfo()
 
 			strFileName = c_file.name;
 			m_mapEnumInfo.insert(make_pair(strFileName, pFileInfo));
+
+			bRet = TRUE;
 		}
 	} while (_tfindnext(file, &c_file) == 0);
 
@@ -240,7 +299,7 @@ BOOL update_file_name::EnumFileInfo()
 		_findclose(file);
 	}
 
-	return TRUE;
+	return bRet;
 }
 
 BOOL update_file_name::GetFileTitle(const char *pszFileName, char *pszTitle, char *pszExt)
@@ -288,11 +347,6 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 	ENUM_CONFIGTYPE hConfigType = CONFIG_EMPTYTYPE;
 	
 	if (pEvalTag == NULL)
-	{
-		return FALSE;
-	}
-
-	if (m_strFindName == _T("") && m_strFindName.size() == 0)
 	{
 		return FALSE;
 	}
@@ -385,6 +439,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 {
 	BOOL bRet = FALSE;
+	BOOL bStatus = FALSE;
 
 	char szSpecFileExt[MAX_PATH] = {0};
 	char szSpecFilePath[MAX_PATH] = {0};
@@ -413,33 +468,53 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 		return FALSE;
 	}
 
-	
 	for (mapIter=m_mapEnumInfo.begin(); mapIter!=m_mapEnumInfo.end(); mapIter++)
 	{
+		if (WaitForSingleObject(m_hEndEvent, m_dwProcTimeOver) == WAIT_OBJECT_0)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			if (!m_bExit)
+			{
+				m_dwProcTimeOver = 0;
+			}
+			else
+			{
+
+				SetEvent(m_hEndEvent);
+				continue;
+			}
+		}
+
 		pFileInfo = mapIter->second;
 		if (pFileInfo == NULL)
 		{
 			continue;
 		}
 
-		bRet = FALSE;
+		bStatus = FALSE;
 		for (vecIter=pEvalTag->vecString.begin(); vecIter!=pEvalTag->vecString.end(); vecIter++)
 		{
 			sprintf(szSpecFileExt, _T(".%s"), vecIter->c_str());
 			if (strcmp(pFileInfo->szFileExt, szSpecFileExt) != 0)
 			{
-				bRet = FALSE;
+				bStatus = FALSE;
 				continue;
 			}
 			else
 			{
-				bRet = TRUE;
+				bStatus = TRUE;
 				break;
 			}
 		}
 
-		if (bRet)
+		if (bStatus)
 		{
+			bRet = TRUE;
+
 			memset(szSpecFilePath, 0x0, MAX_PATH);
 			sprintf(szSpecFilePath, _T("%s\\%s%s"), pFileInfo->szParentPath, pFileInfo->szFileName, m_strSubName.c_str());
 
@@ -451,7 +526,7 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 		}
 	}
 
-	return TRUE;
+	return bRet;
 }
 
 BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
@@ -468,11 +543,6 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 		return FALSE;
 	}
 
-	if (m_strFindName == _T("") && m_strFindName.size() == 0)
-	{
-		return FALSE;
-	}
-
 	if (m_strSubName == _T("") && m_strSubName.size() == 0)
 	{
 		return FALSE;
@@ -485,6 +555,25 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 
 	for (mapIter=m_mapEnumInfo.begin(); mapIter!=m_mapEnumInfo.end(); mapIter++, ulIndex++)
 	{
+		if (WaitForSingleObject(m_hEndEvent, m_dwProcTimeOver) == WAIT_OBJECT_0)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			if (!m_bExit)
+			{
+				m_dwProcTimeOver = 0;
+			}
+			else
+			{
+
+				SetEvent(m_hEndEvent);
+				continue;
+			}
+		}
+
 		pFileInfo = mapIter->second;
 		if (pFileInfo == NULL)
 		{
@@ -499,7 +588,10 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 		{
 			SetSpecifyName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt);
 		}
+
+		bRet = TRUE;
 	}
+
 	return bRet;
 }
 
@@ -590,8 +682,8 @@ BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSr
 		pChar = strstr(pSrcName, pszFindName);
 		if (pChar == NULL)
 		{
-			memcpy(szFileName+nNameLen, pSrcName, nPos);
-			nNameLen += nPos;
+			memcpy(szFileName+nNameLen, pSrcName, strlen(pSrcName));
+			nNameLen += strlen(pSrcName);
 			nRemainLen -= strlen(pSrcName);
 			continue;
 		}
@@ -603,16 +695,25 @@ BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSr
 			continue;
 		}
 
-		if (nPos != 0)
+		if (nPos == 0)
 		{
 			nRet = 1;
+
+			memcpy(szFileName+nNameLen, pszSpecName, strlen(pszSpecName));
+			nNameLen += strlen(pszSpecName); 
+			nRemainLen -= strlen(pszFindName);
+		}
+		else
+		{
+			nRet = 1;
+
 			memcpy(szFileName+nNameLen, pSrcName, nPos);
 			nNameLen += nPos;
 			nRemainLen -= nPos;
 
 			memcpy(szFileName+nNameLen, pszSpecName, strlen(pszSpecName));
 			nNameLen += strlen(pszSpecName); 
-			nRemainLen -= strlen(pszSpecName);
+			nRemainLen -= strlen(pszFindName);
 		}
 		
 		pSrcName = pSrcName + nPos + strlen(pszFindName);

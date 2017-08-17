@@ -63,6 +63,9 @@ typedef struct tagEvalFileInfo
 	}
 }EVAL_FILEINFO;
 
+//////////////////////////////////////////////////////////////////////////
+//
+using namespace std;
 class update_file_name
 {
 public:
@@ -104,9 +107,11 @@ protected:
 private:
 	BOOL							m_bExit;
 	
-	DWORD							m_dwThreadID;
-	DWORD							m_dwWaitTime;
 	DWORD							m_dwError;
+	DWORD							m_dwThreadID;
+
+	DWORD							m_dwProcTimeOver;
+	DWORD							m_dwCloseTimeOver;
 	
 	std::string						m_strShellPath;
 	std::string						m_strFindName;

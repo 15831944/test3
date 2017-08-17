@@ -4,6 +4,7 @@
 #include "../inc/common/ShellClass.h"
 
 #define IDS_MEMORY_ERROR "Error Allocating Shell Memory"
+#define WM_UPDATECTRLDIR_MSG				WM_USER + 0x1002
 
 #define ID_COL_NAME   0
 #define ID_COL_TYPE   1
@@ -64,6 +65,8 @@ protected:
 	afx_msg void 	OnDblclk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void 	OnRclick(NMHDR* pNMHDR, LRESULT* pResult);	
 	DECLARE_MESSAGE_MAP()
+
+	afx_msg LRESULT	OnUpdateCtrlItem(WPARAM wParam, LPARAM lParam);
 	
 public:
 	BOOL 			SubclassDlgItem(UINT nID, CWnd* pParent);
@@ -79,6 +82,8 @@ public:
 protected:
 	CImageList      m_pImageListL;
 	CImageList      m_pImageListS;
+
+	LPTVITEMDATA*	m_pTvid;
 	
 	void*			m_pParam;
 	CShellTreeCtrl* m_pShellTreeCtrl;

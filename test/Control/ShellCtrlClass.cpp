@@ -294,6 +294,8 @@ CShellListCtrl::CShellListCtrl()
 {
 	giCtr = 0;
 
+	m_pTvid = NULL;
+
 	m_pParam = NULL;
 	m_pShellTreeCtrl = NULL;
 	m_pCallBackShellPath = NULL;
@@ -311,11 +313,13 @@ CShellListCtrl::~CShellListCtrl()
 
 BEGIN_MESSAGE_MAP(CShellListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CShellListCtrl)
-	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetdispinfo)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnDblclk)
-	ON_NOTIFY_REFLECT(NM_RCLICK, OnRclick)
+	ON_NOTIFY_REFLECT(LVN_GETDISPINFO,	OnGetdispinfo)
+	ON_NOTIFY_REFLECT(NM_DBLCLK,		OnDblclk)
+	ON_NOTIFY_REFLECT(NM_RCLICK,		OnRclick)
 	// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
+
+	ON_MESSAGE(WM_UPDATECTRLDIR_MSG,	OnUpdateCtrlItem)
 END_MESSAGE_MAP()
 
 void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
@@ -582,6 +586,8 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 	LPENUMIDLIST ppenum = NULL;
 	IShellFolder *psfProgFiles = NULL;
 
+	m_pTvid = lptvid;
+
 	if(lptvid->bRoot)
 	{
 		psfProgFiles = lptvid->lpsfParent;
@@ -639,6 +645,16 @@ void CShellListCtrl::ShowStdMenu(BOOL bShowMenu ,  LPTVITEMDATA* lptvid)
 	CShellContextMenuClass cmc;
 	cmc.ShowMenu(lptvid, bShowMenu, m_hWnd);
 	return;
+}
+
+LRESULT CShellListCtrl::OnUpdateCtrlItem(WPARAM wParam, LPARAM lParam)
+{
+	if (m_pTvid != NULL)
+	{
+		LVPopulateFiles(m_pTvid);
+	}
+
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
