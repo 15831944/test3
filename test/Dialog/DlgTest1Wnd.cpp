@@ -106,7 +106,7 @@ void CDlgTest1Wnd::InitInfo()
 	int nCount = 0;
 
 	CString strItemString;
-	EVAL_ITEMDATA hEvalItem[3];
+	EVAL_ITEMDATA hEvalItem[4];
 
 	memset(&hEvalItem, 0x0, sizeof(hEvalItem));
 
@@ -114,10 +114,13 @@ void CDlgTest1Wnd::InitInfo()
 	strcpy(hEvalItem[0].szItemName, _T("请选择..."));
 
 	hEvalItem[1].hEvalType = EVAL_ALLFILENAME;
-	strcpy(hEvalItem[1].szItemName, _T("更新全部名称"));
+	strcpy(hEvalItem[1].szItemName, _T("全部名称"));
 
 	hEvalItem[2].hEvalType = EVAL_SPECIFYNAME;
-	strcpy(hEvalItem[2].szItemName, _T("更新指定名称"));
+	strcpy(hEvalItem[2].szItemName, _T("指定名称"));
+
+	hEvalItem[3].hEvalType = EVAL_SPECIFYNUMINDEX;
+	strcpy(hEvalItem[3].szItemName, _T("数字索引"));
 
 	for (nIndex=0; nIndex<sizeof(hEvalItem)/sizeof(EVAL_ITEMDATA); nIndex++)
 	{
@@ -238,6 +241,9 @@ void CDlgTest1Wnd::OnCbnSelchangeComboEvalname()
 			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
 			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
 
+			GetDlgItem(IDC_EDIT_FINDNAME)->SetWindowText(_T(""));
+			GetDlgItem(IDC_EDIT_SUBNAME)->SetWindowText(_T(""));
+
 			m_hEvalType = EVAL_EMPTYTYPE;
 		}
 		break;
@@ -246,6 +252,8 @@ void CDlgTest1Wnd::OnCbnSelchangeComboEvalname()
 		{
 			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
 			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+
+			GetDlgItem(IDC_EDIT_SUBNAME)->SetWindowText(_T(""));
 
 			m_hEvalType = EVAL_ALLFILENAME;
 		}
@@ -257,6 +265,15 @@ void CDlgTest1Wnd::OnCbnSelchangeComboEvalname()
 			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
 
 			m_hEvalType = EVAL_SPECIFYNAME;
+		}
+		break;
+
+	case EVAL_SPECIFYNUMINDEX:
+		{
+			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
+			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+
+			m_hEvalType = EVAL_SPECIFYNUMINDEX;
 		}
 		break;
 	}
@@ -284,20 +301,6 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
-	if (pGlobal == NULL)
-	{
-		return;
-	}
-
-	unsigned char szValue[4] = {0};
-	memcpy(szValue, _T("\xAA\x00\x80\x55"), 4);
-
-	char szHex[4*2+1] = {0};
-
-	pGlobal->BytesHexToString(szHex, szValue, 4);
-
-	AfxMessageBox(szHex);
 }	
 
 void CDlgTest1Wnd::OnBnClickedButton3()
@@ -340,6 +343,12 @@ void CDlgTest1Wnd::OnBnClickedButton3()
 				MessageBox(_T("查找的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
 				return;
 			}
+		}
+		break;
+
+	case EVAL_SPECIFYNUMINDEX:
+		{
+
 		}
 		break;
 	}

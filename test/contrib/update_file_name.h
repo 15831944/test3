@@ -20,7 +20,8 @@ typedef enum tagEvalType
 {
 	EVAL_EMPTYTYPE = 0,
 	EVAL_ALLFILENAME,
-	EVAL_SPECIFYNAME
+	EVAL_SPECIFYNAME,
+	EVAL_SPECIFYNUMINDEX
 }ENUM_EVALTYPE;
 
 typedef struct tagUpdateResult
@@ -94,6 +95,7 @@ protected:
 
 	BOOL							SetAllFileName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex);
 	BOOL							SetSpecifyName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt);
+	BOOL							SetNumIndexName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt);
 
 protected:
 	HANDLE							m_hThread;

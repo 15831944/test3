@@ -588,6 +588,10 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 		{
 			SetSpecifyName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt);
 		}
+		else if (pEvalTag->hEvalType == EVAL_SPECIFYNUMINDEX)
+		{
+			SetNumIndexName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt);
+		}
 
 		bRet = TRUE;
 	}
@@ -689,7 +693,7 @@ BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSr
 		}
 
 		nPos = pChar - pSrcName;
-		if (nPos == -1)
+		if (nPos <= -1)
 		{
 			nRemainLen -= strlen(pSrcName);
 			continue;
@@ -740,4 +744,128 @@ BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSr
 	}
 
 	return bRet;
+}
+
+BOOL update_file_name::SetNumIndexName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt)
+{
+	int nRet = 0;
+
+	int nPos = 0;
+	int nLeftPos = 0;
+
+	int nIndex = 0;
+	int nLeftIndex = 0;
+
+	int nNameLen = 0;
+	int nLeftLen = 0;
+	int nRemainLen = 0;
+
+	BOOL bRet = FALSE;
+
+	char* pChar = NULL;
+	char* pValue = NULL;
+	char* pSrcName = NULL;
+
+	char szFileName[MAX_PATH] = {0};
+	char szSrcFilePath[MAX_PATH]  = {0};
+	char szDescFilePath[MAX_PATH] = {0};
+
+	if (pszFilePath == NULL || *pszFilePath == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszFindName == NULL || *pszFindName == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszSpecName == NULL || *pszSpecName == '\0')
+	{
+		return FALSE;
+	}
+
+	if (pszFileExt == NULL || *pszFileExt == '\0')
+	{
+		return FALSE;
+	}
+
+	pSrcName = (char*)pszSrcName;
+	nRemainLen = strlen(pszSrcName);
+
+	pChar = strstr(pSrcName, pszFindName);
+	if (pChar == NULL)
+	{
+		return FALSE;
+	}
+
+	nPos = pChar - pSrcName;
+	if (nPos < 0)
+	{
+		return FALSE;
+	}
+
+	if (nPos == 0)
+	{
+	}
+	else
+	{
+		nLeftLen = nPos;
+		pValue = szFileName;
+
+		//123wl321	//1&2&3wl321
+		while(nLeftLen > 0)
+		{
+			if (*pSrcName >= '0' &&*pSrcName <= '9')
+			{
+				if (nIndex == nLeftIndex)
+				{
+					strncpy(pValue+nLeftPos, _T("("), 1);
+					nLeftPos += 1;
+
+					memcpy(pValue+nLeftPos, &(*pSrcName), 1);
+					nLeftPos += 1;
+				}
+				else if (nIndex = (nLeftIndex+1))
+				{
+					memcpy(pValue+nLeftPos, &(*pSrcName), 1);
+					nLeftPos += 1;
+				}
+				else if (nIndex > nLeftIndex)
+				{
+					strncpy(pValue+nLeftPos, _T("_"), 1);
+					nLeftPos += 1;
+
+					memcpy(pValue+nLeftPos, &(*pSrcName), 1);
+					nLeftPos += 1;
+				}
+				
+				nLeftLen -= 1;
+				nLeftIndex = nIndex;
+
+				nIndex++;
+				pSrcName = pSrcName + 1;
+				continue;
+			}
+
+			nLeftLen -= 1;
+			nIndex++;
+			pSrcName = pSrcName + 1;
+			continue;
+		}
+	}
+
+// 	while(nRemainLen>0)
+// 	{
+// 		pChar = strstr(pSrcName, pszFindName);
+// 		if (pChar != NULL)
+// 		{
+// 			nPos = pChar - pSrcName;
+// 			if (nPos >= 0)
+// 			{
+// 
+// 				pSrcName = pSrcName + nPos + strlen(pszFindName);
+// 			}
+// 		}
+// 	}
 }
