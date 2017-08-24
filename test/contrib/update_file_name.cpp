@@ -590,7 +590,7 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 		}
 		else if (pEvalTag->hEvalType == EVAL_SPECIFYNUMINDEX)
 		{
-			SetNumIndexName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt);
+			SetNumIndexName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt, ulIndex);
 		}
 
 		bRet = TRUE;
@@ -605,6 +605,8 @@ BOOL update_file_name::SetAllFileName(const char* pszFilePath, const char* pszSr
 	int nPos = 0;
 
 	BOOL bRet = FALSE;
+
+	const char* pSubName = _T("_");
 
 	char szSrcFilePath[MAX_PATH]  = {0};
 	char szDescFilePath[MAX_PATH] = {0};
@@ -625,7 +627,7 @@ BOOL update_file_name::SetAllFileName(const char* pszFilePath, const char* pszSr
 	}
 
 	sprintf(szSrcFilePath,  _T("%s\\%s%s"), pszFilePath, pszSrcName,  pszFileExt);
-	sprintf(szDescFilePath, _T("%s\\%s_%d%s"), pszFilePath, pszSpecName, ulIndex, pszFileExt);
+	sprintf(szDescFilePath, _T("%s\\%s%s%d%s"), pszFilePath, pszSpecName, pSubName, ulIndex, pszFileExt);
 
 	nRet = rename(szSrcFilePath, szDescFilePath);
 	if (nRet == 0)
@@ -746,27 +748,40 @@ BOOL update_file_name::SetSpecifyName(const char* pszFilePath, const char* pszSr
 	return bRet;
 }
 
-BOOL update_file_name::SetNumIndexName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt)
+BOOL update_file_name::SetNumIndexName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex)
 {
 	int nRet = 0;
 
 	int nPos = 0;
 	int nLeftPos = 0;
+	int nRightPos = 0;
 
-	int nIndex = 0;
+	int nPtrIndex = 0;
 	int nLeftIndex = 0;
+	int nRightIndex = 0;
 
 	int nNameLen = 0;
 	int nLeftLen = 0;
+	int nRightLen = 0;
 	int nRemainLen = 0;
 
 	BOOL bRet = FALSE;
+	BOOL bFirst = FALSE;
+	BOOL bLeftFind = FALSE;
+	BOOL bRightFind = FALSE;
 
 	char* pChar = NULL;
 	char* pValue = NULL;
 	char* pSrcName = NULL;
+	char* pPtrValue = NULL;
 
-	char szFileName[MAX_PATH] = {0};
+	const char* pSubName = _T("_");
+	const char* pLeftSubName = _T("_");
+	const char* pRightSubName = _T("#");
+
+	char szLeftFileName[MAX_PATH] = {0};
+	char szRightFileName[MAX_PATH] = {0};
+
 	char szSrcFilePath[MAX_PATH]  = {0};
 	char szDescFilePath[MAX_PATH] = {0};
 
@@ -807,65 +822,209 @@ BOOL update_file_name::SetNumIndexName(const char* pszFilePath, const char* pszS
 
 	if (nPos == 0)
 	{
+		//Right //2			//(wl)_1#23#4	//(wl)_123
+		nRightLen = nRemainLen - strlen(pszFindName);
+		pValue = szRightFileName;
+
+		nPtrIndex = 0;
+		bFirst = FALSE;
+		bLeftFind = FALSE;
+
+		pPtrValue = (char*)pszSrcName + strlen(pszFindName);
+
+		while(nRightLen > 0)
+		{
+			if (*pPtrValue >= '0' &&*pPtrValue <= '9')
+			{
+				if (!bFirst)
+				{
+					bFirst = TRUE;
+					bRightFind = TRUE;
+
+					memcpy(pValue+nRightPos, &(*pPtrValue), 1);
+					nRightPos += 1;
+				}
+				else
+				{
+					if (nPtrIndex == (nRightIndex+1))
+					{
+						memcpy(pValue+nRightPos, &(*pPtrValue), 1);
+						nRightPos += 1;
+					}
+					else
+					{
+						strncpy(pValue+nRightPos, pRightSubName, 1);
+						nRightPos += 1;
+
+						memcpy(pValue+nRightPos, &(*pPtrValue), 1);
+						nRightPos += 1;
+					}
+				}
+
+				nRightLen -= 1;
+				nRightIndex = nPtrIndex;
+
+				nPtrIndex++;
+				pPtrValue = pPtrValue + 1;
+				continue;
+			}
+
+			nRightLen -= 1;
+			nPtrIndex ++;
+
+			pPtrValue = pPtrValue + 1;
+			continue;
+		}
 	}
 	else
 	{
+		//Left //1			//$1$2$3s1(wl)		//123$4(wl)
 		nLeftLen = nPos;
-		pValue = szFileName;
+		pValue = szLeftFileName;
 
-		//123wl321	//1&2&3wl321
+		pPtrValue = (char*)pszSrcName;
+
 		while(nLeftLen > 0)
 		{
-			if (*pSrcName >= '0' &&*pSrcName <= '9')
+			if (*pPtrValue >= '0' &&*pPtrValue <= '9')
 			{
-				if (nIndex == nLeftIndex)
+				if (!bFirst)
 				{
+					bFirst = TRUE;
+					bLeftFind = TRUE;
+
 					strncpy(pValue+nLeftPos, _T("("), 1);
 					nLeftPos += 1;
 
-					memcpy(pValue+nLeftPos, &(*pSrcName), 1);
+					memcpy(pValue+nLeftPos, &(*pPtrValue), 1);
 					nLeftPos += 1;
 				}
-				else if (nIndex = (nLeftIndex+1))
+				else
 				{
-					memcpy(pValue+nLeftPos, &(*pSrcName), 1);
-					nLeftPos += 1;
-				}
-				else if (nIndex > nLeftIndex)
-				{
-					strncpy(pValue+nLeftPos, _T("_"), 1);
-					nLeftPos += 1;
+					if (nPtrIndex == (nLeftIndex+1))
+					{
+						memcpy(pValue+nLeftPos, &(*pPtrValue), 1);
+						nLeftPos += 1;
+					}
+					else
+					{
+						strncpy(pValue+nLeftPos, pLeftSubName, 1);
+						nLeftPos += 1;
 
-					memcpy(pValue+nLeftPos, &(*pSrcName), 1);
-					nLeftPos += 1;
+						memcpy(pValue+nLeftPos, &(*pPtrValue), 1);
+						nLeftPos += 1;
+					}
 				}
-				
+
 				nLeftLen -= 1;
-				nLeftIndex = nIndex;
+				nLeftIndex = nPtrIndex;
+				nPtrIndex++;
 
-				nIndex++;
-				pSrcName = pSrcName + 1;
+				if (bFirst && nLeftLen == 0)
+				{
+					strncpy(pValue+nLeftPos, _T(")"), 1);
+					nLeftPos += 1;
+				}
+
+				pPtrValue = pPtrValue + 1;
 				continue;
 			}
 
 			nLeftLen -= 1;
-			nIndex++;
-			pSrcName = pSrcName + 1;
+			nPtrIndex++;
+
+			if (bFirst && nLeftLen == 0)
+			{
+				strncpy(pValue+nLeftPos, _T(")"), 1);
+				nLeftPos += 1;
+			}
+
+			pPtrValue = pPtrValue + 1;
+			continue;
+		}
+
+		//Right //2			//$1$2$3s1(wl)_1#23#4		//123$4(wl)_123
+		nRightLen = nRemainLen - nPos - strlen(pszFindName);
+		pValue = szRightFileName;
+
+		nPtrIndex = 0;
+		bFirst = FALSE;
+		
+		pPtrValue = (char*)pszSrcName + nPos + strlen(pszFindName);
+
+		while(nRightLen > 0)
+		{
+			if (*pPtrValue >= '0' &&*pPtrValue <= '9')
+			{
+				if (!bFirst)
+				{
+					bFirst = TRUE;
+					bRightFind = TRUE;
+
+					memcpy(pValue+nRightPos, &(*pPtrValue), 1);
+					nRightPos += 1;
+				}
+				else
+				{
+					if (nPtrIndex == (nRightIndex+1))
+					{
+						memcpy(pValue+nRightPos, &(*pPtrValue), 1);
+						nRightPos += 1;
+					}
+					else
+					{
+						strncpy(pValue+nRightPos, pRightSubName, 1);
+						nRightPos += 1;
+
+						memcpy(pValue+nRightPos, &(*pPtrValue), 1);
+						nRightPos += 1;
+					}
+				}
+
+				nRightLen -= 1;
+				nRightIndex = nPtrIndex;
+
+				nPtrIndex++;
+				pPtrValue = pPtrValue + 1;
+				continue;
+			}
+
+			nRightLen -= 1;
+			nPtrIndex ++;
+
+			pPtrValue = pPtrValue + 1;
 			continue;
 		}
 	}
 
-// 	while(nRemainLen>0)
-// 	{
-// 		pChar = strstr(pSrcName, pszFindName);
-// 		if (pChar != NULL)
-// 		{
-// 			nPos = pChar - pSrcName;
-// 			if (nPos >= 0)
-// 			{
-// 
-// 				pSrcName = pSrcName + nPos + strlen(pszFindName);
-// 			}
-// 		}
-// 	}
+	if (!bLeftFind && !bRightFind)
+	{
+		sprintf(szDescFilePath, _T("%s\\%s%s%d%s"), pszFilePath, pszSpecName, pSubName, ulIndex, pszFileExt);
+	}
+	else if (bLeftFind && bRightFind)
+	{
+		sprintf(szDescFilePath, _T("%s\\%s%s%s%s%s"), pszFilePath, szLeftFileName, pszSpecName, pSubName, szRightFileName, pszFileExt);
+	}
+	else if (bLeftFind)
+	{
+		sprintf(szDescFilePath, _T("%s\\%s%s%s%d%s"), pszFilePath, szLeftFileName, pszSpecName, pSubName, ulIndex, pszFileExt);
+	}
+	else if (bRightFind)
+	{
+		sprintf(szDescFilePath, _T("%s\\%s%s%s%s"), pszFilePath, pszSpecName, pSubName, szRightFileName, pszFileExt);
+	}
+
+	sprintf(szSrcFilePath,  _T("%s\\%s%s"), pszFilePath, pszSrcName, pszFileExt);
+
+	nRet = rename(szSrcFilePath, szDescFilePath);
+	if (nRet == 0)
+	{
+		bRet = TRUE;
+	}
+	else
+	{
+		bRet = FALSE;
+	}
+
+	return bRet;
 }

@@ -465,6 +465,13 @@ LRESULT CDlgTest1Wnd::OnUpdateFileName(WPARAM wParam, LPARAM lParam)
 					GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
 				}
 				break;
+
+			case EVAL_SPECIFYNUMINDEX:
+				{
+					GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
+					GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
+				}
+				break;
 			}
 		}
 	}
