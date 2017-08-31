@@ -98,6 +98,8 @@ void CDlgTest1Wnd::InitCtrl()
 		SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
 	}
 */
+	this->GetDlgItem(IDC_EDIT_FINDNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入查找的名称...");
+	this->GetDlgItem(IDC_EDIT_SUBNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入替换的名称...");
 }
 
 void CDlgTest1Wnd::InitInfo()
@@ -301,7 +303,31 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-}	
+#if 0
+	HWND hFind = ::FindWindow("notepad", NULL);
+	if (hFind == NULL)
+	{
+		return;
+	}
+
+	//::BringWindowToTop(hFind);
+
+	/*
+	AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(),NULL), GetCurrentThreadId(),TRUE);
+	::ShowWindow(hFind, SW_SHOWNORMAL);
+	::SetForegroundWindow(hFind); 
+	::SetFocus(hFind); 
+	AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(),NULL), GetCurrentThreadId(),FALSE);
+	*/
+
+	typedef void (WINAPI *PROCSWITCHTOTHISWINDOW) (HWND, BOOL);
+	PROCSWITCHTOTHISWINDOW SwitchToThisWindow; 
+
+	HMODULE hUser32 = GetModuleHandle("user32");
+	SwitchToThisWindow    =    (PROCSWITCHTOTHISWINDOW)GetProcAddress(hUser32, "SwitchToThisWindow");
+	SwitchToThisWindow(hFind, TRUE);
+#endif
+}
 
 void CDlgTest1Wnd::OnBnClickedButton3()
 {
