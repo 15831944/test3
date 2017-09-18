@@ -299,6 +299,14 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 		pVideoWndThread->Delete();
 	}
 */
+
+	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
+	if (pGlobal == NULL)
+	{
+		return;
+	}
+
+	pGlobal->GetDiskInfo(2);
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()

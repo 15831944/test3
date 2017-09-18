@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "GlobalInfo.h"
 
+
+
 CGlobalInfo* CGlobalInfo::m_pGlobal = NULL;
 CGlobalInfo::CGlobalInfo(void)
 {
@@ -195,480 +197,6 @@ __int64 CGlobalInfo::SystemTimeToInt64(const SYSTEMTIME& itime)
 	ularge.HighPart = ft.dwHighDateTime;
 	__int64 int64 = ularge.QuadPart;
 	return int64;
-}
-
-bool CGlobalInfo::ConvertToInt(const double &val,int& i)
-{
-	int num[2] ={0};  
-	memcpy(num,&val,8);  
-	int high =num[1];  
-	int nExp =((high>>20)&0x7ff) - 1023;  
-	if(nExp<= 20)  
-	{  
-		i = ( high&0xfffff |0x100000)>>(20 - nExp);  
-	}  
-	else if(nExp > 20 && nExp <= 30)  
-	{  
-		int low= num[0];  
-		i = ( ( high&0xfffff |0x100000)<<(nExp - 20) )+ ( low >>(52 - nExp));  
-	}  
-	else  
-		return false;  
-
-	if(high&0x80000000)  
-		i = ~i + 1;  
-	return true; 
-}
-
-bool CGlobalInfo::GetFileTitle(const char *pszFileName, char *pszTitle, char *pszExt)
-{
-	char *ptr = NULL;
-	int  nPos = 0;
-	int  nLen = 0;
-
-	if (pszFileName == NULL || pszTitle == NULL || pszExt == NULL)
-	{
-		return false;
-	}
-
-	nLen = strlen(pszFileName);
-
-	ptr = strrchr((char*)pszFileName, '.');
-	if (ptr == NULL)
-	{
-		memcpy(pszTitle, pszFileName, strlen(pszFileName));
-		return true;
-	}
-
-	nPos = ptr - pszFileName;
-	if (nPos == -1)
-	{
-		return false;
-	}
-
-	memcpy(pszTitle, pszFileName, nPos);
-	memcpy(pszExt, pszFileName+nPos, nLen-nPos);
-
-	return true;
-}
-
-int CGlobalInfo::EnumModifyName(const char *pszFilePath, const char *pszNewFileName, const char *pszSpanName)
-{
-	int  result;
-	long file;
-
-	char szFindPath[MAX_PATH+1]  = {0};
-	char szFileName[MAX_PATH+1]  = {0};
-	char szFileExt[MAX_PATH+1]   = {0};
-
-	char szSrcFile[MAX_PATH+1] = {0};
-	char szDstFile[MAX_PATH+1] = {0};
-
-	char szSrcFileTitle[MAX_PATH+1] = {0};
-	char szDstFileTitle[MAX_PATH+1] = {0};
-	char szSpan[] = _T("\\");
-
-	struct _stat	s_file;
-	_finddata_t		c_file;
-
-	if (pszFilePath == NULL)
-	{
-		return -1;
-	}
-
-	if (_stat(pszFilePath, &s_file) != 0)
-	{
-		return -1;
-	}
-
-	if ((s_file.st_mode&_S_IFDIR) != _S_IFDIR)
-	{
-		return -1;
-	}
-
-	_tcscpy(szFindPath, pszFilePath);
-	_tcscat(szFindPath, _T("\\*.*"));
-
-	file = _findfirst(szFindPath, &c_file);
-	if (file == -1)
-	{
-		return 0;
-	}
-
-	do 
-	{
-		if ((_tcslen(c_file.name)==1 && c_file.name[0]==_T('.')) ||
-			(_tcslen(c_file.name)==2 && c_file.name[0]==_T('.') && c_file.name[1]==_T('.')))
-		{
-			continue;
-		}
-
-		if ((c_file.attrib&_A_SUBDIR) == _A_SUBDIR)
-		{
-			continue;
-		}
-		else
-		{
-			memset(szFileName, 0x0, MAX_PATH+1);
-			
-			memset(szSrcFile, 0x0, MAX_PATH+1);
-			memset(szDstFile, 0x0, MAX_PATH+1);
-
-			if (strlen(c_file.name) == 0)
-			{
-				continue;
-			}
-
-			sprintf_s(szSrcFile, "%s\\%s", pszFilePath, c_file.name);
-
-			if (!GetFileTitle(c_file.name, szSrcFileTitle, szFileExt))
-			{
-				continue;
-			}
-
-			if (!TFun1(szSrcFileTitle, pszNewFileName, pszSpanName,szDstFileTitle, 2))
-			{
-				continue;
-			}
-
-			sprintf_s(szFileName, "%s%s", szDstFileTitle, szFileExt);
-			sprintf_s(szDstFile, "%s\\%s", pszFilePath, szFileName);	
-
-			rename(szSrcFile, szDstFile);
-
-			result = 1;
-			continue;
-		}
-	} while (_tfindnext(file, &c_file) == 0);
-
-	if (file)
-	{
-		_findclose(file);
-	}
-
-	return result;
-}
-
-bool CGlobalInfo::TFun1(const char *pszSrcFileName, const char *pszReqName, const char *pszSpanName, char *pszDstFileName, const int nBit)
-{
-	bool bRet  = false;
-	bool bFind = false;
-
-	char *ptr  = NULL;
-	char *pVal = NULL;
-
-	static int nIndex = 0;
-	char szIndexVal[32];
-	char szFileName[32];
-
-	int  nPos1 = 0;
-	int  nPos2 = 0;
-	int  nPos3 = 0;
-
-	int  nLen      = 0;
-	int  nSrcLen   = 0;
-	int  nReqLen   = 0;	
-	int  nSpanLen  = 0;
-	
-	int  nLeftLen  = 0;
-	int  nRightLen = 0;	
-
-	if (pszSrcFileName == NULL || pszReqName == NULL || pszDstFileName == NULL)
-	{
-		return false;
-	}
-
-	nSrcLen  = strlen(pszSrcFileName);
-	nReqLen  = strlen(pszReqName);
-
-	memset(szIndexVal, 0x0, 32);
-	memset(szFileName, 0x0, 32);
-
-	if (pszSpanName != "")
-	{
-		nSpanLen = strlen(pszSpanName);
-
-		ptr = strstr((char*)pszSrcFileName, pszSpanName);
-		if (ptr == NULL)
-		{
-			return false;
-		}
-
-		nPos1 = ptr - pszSrcFileName;
-		if (nPos1 == -1)
-		{
-			return false;
-		}
-		
-		if (nPos1 != 0)
-		{//查找span分割的左右部分的字符串
-			for (int i=0; i<3; i++)
-			{
-				if (bFind)
-				{
-					memcpy(szIndexVal, pVal, nLen);
-					break;
-				}
-
-				if (i == 0)
-				{//
-					nLeftLen = nPos1+1; 
-
-					pVal = new char[nLeftLen];
-					memset(pVal, 0x0, nLeftLen);
-
-					ptr = (char*)pszSrcFileName;
-
-					while(nPos2 < nPos1)
-					{
-						if (*ptr >= '0' && *ptr <= '9')
-						{
-							memcpy(pVal+nPos3, &(*ptr), 1);
-							nPos3 += 1;
-
-							nLen++;
-
-							ptr++;
-							nPos2++;							
-							continue;
-						}
-						
-						if (nLen >= nBit)
-						{
-							bFind = true;
-							break;
-						}
-						else
-						{
-							nLen  = 0;
-							nPos3 = 0;
-
-							memset(pVal, 0x0, nLeftLen);
-						}
-							
-						ptr++;
-						nPos2++;
-					}
-
-					if (nLen >= nBit)
-					{
-						bFind = true;
-						memcpy(szIndexVal, pVal, nLen);
-					}
-
-					if (pVal)
-					{
-						delete[] pVal;
-						pVal = NULL;
-					}
-
-					if (bFind)
-					{
-						break;
-					}
-				}
-				else if (i == 1)
-				{//
-					nPos3 = 0;
-					nPos2 += nSpanLen;
-
-					nLen  = 0;
-					nRightLen = (nSrcLen-nPos2) +1;
-					
-					ptr = (char*)(pszSrcFileName + nPos2);
-	
-					pVal = new char[nRightLen];
-					memset(pVal, 0x0, nRightLen);
-
-					while(nPos2 < nSrcLen)
-					{
-						if (*ptr >= '0' && *ptr <= '9')
-						{
-							memcpy(pVal+nPos3, &(*ptr), 1);
-							nPos3 += 1;
-
-							nLen++;
-
-							ptr++;
-							nPos2++;
-							continue;
-						}
-
-						if (nLen >= nBit)
-						{
-							bFind = true;
-							break;
-						}
-						else
-						{
-							nLen  = 0;
-							nPos3 = 0;
-
-							memset(pVal, 0x0, nRightLen);
-						}
-
-						ptr++;
-						nPos2++;
-					}
-
-					if (nLen >= nBit)
-					{
-						bFind = true;
-						memcpy(szIndexVal, pVal, nLen);
-					}
-
-					if (pVal)
-					{
-						delete[] pVal;
-						pVal = NULL;
-					}
-
-					if (bFind)
-					{
-						break;
-					}
-				}
-				else
-				{
-					sprintf_s(szIndexVal, "%d", nIndex++);
-				}
-			}
-		}
-		else
-		{//查找span右半部分的字符串
-			nPos3  = 0;
-			nPos2 += nSpanLen;
-
-			nRightLen = (nSrcLen-nPos2) + 1;
-			
-			ptr = (char*)(pszSrcFileName + nPos2);
-
-			pVal = new char[nRightLen];
-			memset(pVal, 0x0, nRightLen);
-
-			while(nPos2 < nSrcLen)
-			{
-				if (*ptr >= '0' && *ptr <= '9')
-				{
-					memcpy(pVal+nPos3, &(*ptr), 1);
-					nPos3 += 1;
-
-					nLen++;
-
-					ptr++;
-					nPos2++;
-					continue;
-				}
-
-				if (nLen >= nBit)
-				{
-					bFind = true;
-					break;
-				}
-				else
-				{
-					nLen  = 0;
-					nPos3 = 0;
-
-					memset(pVal, 0x0, nRightLen);
-				}
-
-				ptr++;
-				nPos2++;
-			}
-
-			if (nLen >= nBit)
-			{
-				bFind = true;
-				memcpy(szIndexVal, pVal, nLen);
-			}
-
-			if (pVal)
-			{
-				delete[] pVal;
-				pVal = NULL;
-			}
-		}
-
-		if (bFind)
-		{
-			bRet = true;
-
-			sprintf_s(szFileName, "%s%s", pszReqName, szIndexVal);	
-			memcpy(pszDstFileName, szFileName, (nReqLen+nLen));
-		}
-		else
-		{
-			bRet = false;
-		}
-		
-	}
-	else
-	{
-		nLeftLen =  nSrcLen + 1;
-
-		ptr = (char*)pszSrcFileName;
-
-		pVal = new char[nLeftLen];
-		memset(pVal, 0x0, nLeftLen);
-
-		while(nPos2 < nSrcLen)
-		{
-			if (*ptr >= '0' && *ptr <= '9')
-			{
-				memcpy(pVal+nPos3, &(*ptr), 1);
-				nPos3 += 1;
-
-				nLen++;
-
-				ptr++;
-				nPos2++;
-				continue;
-			}
-
-			if (nLen >= nBit)
-			{
-				bFind = true;
-				break;
-			}
-			else
-			{
-				nLen  = 0;
-				nPos3 = 0;
-
-				memset(pVal, 0x0, nLeftLen);
-			}
-
-			ptr++;
-			nPos2++;
-		}
-
-		if (nLen >= nBit)
-		{
-			bFind = true;
-			memcpy(szIndexVal, pVal, nLen);
-		}
-
-		if (pVal)
-		{
-			delete[] pVal;
-			pVal = NULL;
-		}
-
-		if (bFind)
-		{
-			bRet = true;
-
-			sprintf_s(szFileName, "%s%s", pszReqName, szIndexVal);	
-			memcpy(pszDstFileName, szFileName, (nReqLen+nLen));
-		}
-		else
-		{
-			bRet = false;
-		}
-	}
-
-	return bRet;
 }
 
 /*
@@ -897,3 +425,182 @@ std::vector<CString> CGlobalInfo::SplitString3(const char* pszSource, const char
 	return vecString;
 }
 
+//////////////////////////////////////////////////////////////////////////
+//
+bool CGlobalInfo::ConvertToInt(const double &val,int& i)
+{
+	int num[2] ={0};  
+	memcpy(num,&val,8);  
+	int high =num[1];  
+	int nExp =((high>>20)&0x7ff) - 1023;  
+	if(nExp<= 20)  
+	{  
+		i = ( high&0xfffff |0x100000)>>(20 - nExp);  
+	}  
+	else if(nExp > 20 && nExp <= 30)  
+	{  
+		int low= num[0];  
+		i = ( ( high&0xfffff |0x100000)<<(nExp - 20) )+ ( low >>(52 - nExp));  
+	}  
+	else  
+		return false;  
+
+	if(high&0x80000000)  
+		i = ~i + 1;  
+	return true; 
+}
+
+bool CGlobalInfo::GetDiskInfo(unsigned int nDrvIndex)
+{
+	HANDLE hDev;
+
+	int nDrive =0;
+	int btIDCmd = 0;
+
+	int nModelNoLen = 0;
+	int nSerialNoLen = 0;
+
+	DWORD dwBytesReturned = 0;
+	DWORD dwDiskData[256] = {0};
+
+	SENDCMDINPARAMS InParams;
+	GETVERSIONINPARAMS gvopVersionParams = {0};
+
+	const WORD IDE_ATAPI_IDENTIFY = 0xA1;   // 读取ATAPI设备的命令
+	const WORD IDE_ATA_IDENTIFY   = 0xEC;   // 读取ATA设备的命令
+
+	USHORT* pIDSector = NULL;
+	BYTE btIDOutCmd[sizeof(SENDCMDOUTPARAMS) + IDENTIFY_BUFFER_SIZE - 1];
+
+	char szModelNo[MAX_PATH]   = {0};
+	char szSerialNo[MAX_PATH]  = {0};
+	char szDriveName[MAX_PATH] = {0};
+	
+	sprintf(szDriveName, _T("\\\\.\\PHYSICALDRIVE%d"), nDrvIndex);
+
+	hDev = ::CreateFile(szDriveName, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	if (hDev == NULL || hDev == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+
+	DeviceIoControl(hDev, SMART_GET_VERSION, NULL, 0, &gvopVersionParams, sizeof(gvopVersionParams), &dwBytesReturned, NULL);
+
+	if (gvopVersionParams.bIDEDeviceMap <= 0)
+	{
+		if (hDev)
+		{
+			::CloseHandle(hDev);
+			hDev = NULL;
+		}
+
+		return false;
+	}
+
+	btIDCmd = (gvopVersionParams.bIDEDeviceMap >> nDrive & 0x10) ? IDE_ATAPI_IDENTIFY : IDE_ATA_IDENTIFY;
+
+	if(!DoIdentify(hDev, &InParams, (PSENDCMDOUTPARAMS)btIDOutCmd, (BYTE)btIDCmd, (BYTE)nDrive, &dwBytesReturned))
+	{
+		if (hDev)
+		{
+			::CloseHandle(hDev);
+			hDev = NULL;
+		}
+		return false;
+	}
+
+	if (hDev)
+	{
+		::CloseHandle(hDev);
+		hDev = NULL;
+	}
+
+	pIDSector = (USHORT*)((SENDCMDOUTPARAMS*)btIDOutCmd)->bBuffer;
+	for(int i=0; i < 256; i++)	dwDiskData[i] = pIDSector[i];
+
+	nSerialNoLen = MAX_PATH;
+	ToLittleEndian(dwDiskData, 10, 19, szSerialNo, nSerialNoLen);
+
+	nModelNoLen = MAX_PATH;
+	ToLittleEndian(dwDiskData, 27, 46, szModelNo, nModelNoLen);
+
+	return true;
+}
+
+bool CGlobalInfo::DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned)
+{
+	pSCIP->cBufferSize = IDENTIFY_BUFFER_SIZE;
+	pSCIP->irDriveRegs.bFeaturesReg = 0;
+	pSCIP->irDriveRegs.bSectorCountReg  = 1;
+	pSCIP->irDriveRegs.bSectorNumberReg = 1;
+	pSCIP->irDriveRegs.bCylLowReg  = 0;
+	pSCIP->irDriveRegs.bCylHighReg = 0;
+
+	pSCIP->irDriveRegs.bDriveHeadReg = (btDriveNum & 1) ? 0xB0 : 0xA0;
+	pSCIP->irDriveRegs.bCommandReg = btIDCmd;
+	pSCIP->bDriveNumber = btDriveNum;
+	pSCIP->cBufferSize = IDENTIFY_BUFFER_SIZE;
+
+	return DeviceIoControl(	hPhysicalDriveIOCTL, 
+							SMART_RCV_DRIVE_DATA,
+							(LPVOID)pSCIP,
+							sizeof(SENDCMDINPARAMS) - 1,
+							(LPVOID)pSCOP,
+							sizeof(SENDCMDOUTPARAMS) + IDENTIFY_BUFFER_SIZE - 1,
+							pdwBytesReturned, NULL);
+}
+
+bool CGlobalInfo::ToLittleEndian(PDWORD pDiskData, int nFirstIndex, int nLastIndex, char* pResBuf, int &nResBufLen)
+{
+	int nIndex = 0;
+	int nBufLen = 0;
+
+	char* pDest = NULL;
+	char szBuf[MAX_PATH] = {0};
+
+	if (pDiskData == NULL)
+	{
+		return false;
+	}
+
+	if (pResBuf == NULL)
+	{
+		return false;
+	}
+
+	pDest = szBuf;
+
+	for (nIndex=nFirstIndex; nIndex<nLastIndex; nIndex++)
+	{
+		pDest[0] = pDiskData[nIndex] >> 8;
+		pDest[1] = pDiskData[nIndex] & 0xff;
+
+		pDest += 2;
+	}
+	*pDest = 0;
+
+	--pDest;
+	while(*pDest == 0x20)
+	{
+		*pDest = 0;
+		--pDest;
+	}
+
+	nBufLen = strlen(szBuf);
+	if (nBufLen <= 0)
+	{
+		return false;
+	}
+	else
+	{
+		if (nBufLen > nResBufLen)
+		{
+			return false;
+		}
+
+		nResBufLen = nBufLen;
+		strcpy(pResBuf, szBuf);
+	}
+
+	return true;
+}
