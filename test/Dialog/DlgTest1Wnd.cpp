@@ -306,7 +306,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 		return;
 	}
 
-	pGlobal->GetDiskInfo(2);
+	pGlobal->GetDiskInfo(0);
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
