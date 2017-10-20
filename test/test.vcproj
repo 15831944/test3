@@ -713,6 +713,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Inc\PubClass.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Inc\PubClass.h"
 				>
 			</File>

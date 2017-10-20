@@ -5,6 +5,8 @@
 #include "../inc/GlobalInfo.h"
 #include "../contrib/VideoWndThread.h"
 
+extern BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
+
 IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgTest1Wnd::IDD, pParent)
@@ -286,7 +288,7 @@ void CDlgTest1Wnd::OnCbnSelchangeComboEvalname()
 //http://blog.csdn.net/xujiezhige/article/details/6206133
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-/*
+#if 0
 	CVideoWndThread* pVideoWndThread = (CVideoWndThread*)AfxBeginThread(RUNTIME_CLASS(CVideoWndThread), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED);
 	ASSERT_VALID(pVideoWndThread);
 
@@ -298,8 +300,9 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 		pVideoWndThread->m_bAutoDelete = TRUE;
 		pVideoWndThread->Delete();
 	}
-*/
+#endif
 
+#if 0
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
 	{
@@ -307,16 +310,125 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	}
 
 	pGlobal->GetDiskInfo(0);
+#endif
+
+#if 1
+	int nPos = 0;
+	int nPrePos = 0;
+
+	DWORD dwFlag = 0;
+	DWORD dwOffset = 0;
+	
+	BOOL bRet = FALSE;
+	BOOL bPreExist  = FALSE;
+	BOOL bIsP2pCall = FALSE;
+	BOOL bIsThreePartyCall   = FALSE;
+	BOOL bIsRingGroupCall	 = FALSE;
+	BOOL bIsPickupCall		 = FALSE;
+	BOOL bIsUnPackCall		 = FALSE;
+	BOOL bIsOrdinaryMeeting  = FALSE;
+	BOOL bIsAnnouncementCall = FALSE;
+	BOOL bIsScheduledMeeting = FALSE;
+	
+	char* p = NULL;
+	char chTag[3] = {0};
+	const char* pszCallTag = {"HTMLYDN"};
+	string s1 = "1234567HY";
+
+	p = (char*)pszCallTag;
+	while(*p != '\0')
+	{
+		if (!bPreExist)
+		{
+			dwOffset = 0;
+		}
+		else
+		{
+			dwOffset = nPrePos;
+		}
+
+		nPos = s1.find(*p, dwOffset);
+		if (nPos != string::npos)
+		{
+			if (!bPreExist)
+			{
+				if (*p == 'H')
+				{//会议
+					bIsOrdinaryMeeting = TRUE;
+				}
+				else if (*p == 'T')
+				{//通播
+					bIsAnnouncementCall = TRUE;
+				}
+				else if (*p == 'M')
+				{//三方通话
+					bIsThreePartyCall = TRUE;
+				}
+				else if (*p == 'L')
+				{//振铃组
+					bIsRingGroupCall = TRUE;
+				}
+				else if (*p == 'D')
+				{//代接
+					bIsPickupCall = TRUE;
+				}
+				else if (*p == 'N')
+				{//强插
+					bIsUnPackCall = TRUE;
+				}
+
+				bRet = TRUE;
+				nPrePos = nPos;
+				bPreExist = TRUE;
+				
+				memset(chTag, 0x0, 3);
+				sprintf(chTag, _T("%c"), *p);
+
+				dwFlag = dwFlag << 1;
+				dwFlag |= 1;
+
+				p++;
+				continue;
+			}
+			else
+			{
+				dwFlag = dwFlag << 1;
+				dwFlag |= 1;
+
+				if (*p == 'Y' && strcmp(chTag, _T("H")) == 0)
+				{
+					bRet = TRUE;
+					bIsScheduledMeeting = TRUE;
+					sprintf(chTag, _T("HY"));
+					continue;
+				}
+				else
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+		}
+
+		p++;
+	}
+#endif
+	
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-#if 0
-	HWND hFind = ::FindWindow("notepad", NULL);
+	DWORD dwProcessID = 0;
+	ENUM_WNDINFO hWndInfo;
+
+#if 1
+	HWND hFind = ::FindWindow("dd", NULL);
 	if (hFind == NULL)
 	{
 		return;
 	}
+
+	::GetWindowThreadProcessId(hFind, &dwProcessID);
 
 	//::BringWindowToTop(hFind);
 
@@ -328,13 +440,19 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	AttachThreadInput(GetWindowThreadProcessId(::GetForegroundWindow(),NULL), GetCurrentThreadId(),FALSE);
 	*/
 
+	/*
 	typedef void (WINAPI *PROCSWITCHTOTHISWINDOW) (HWND, BOOL);
 	PROCSWITCHTOTHISWINDOW SwitchToThisWindow; 
 
 	HMODULE hUser32 = GetModuleHandle("user32");
 	SwitchToThisWindow    =    (PROCSWITCHTOTHISWINDOW)GetProcAddress(hUser32, "SwitchToThisWindow");
 	SwitchToThisWindow(hFind, TRUE);
+	*/
 #endif
+
+	hWndInfo.hWnd = hFind;
+	hWndInfo.dwProcessID = dwProcessID;
+	EnumWindows(EnumWindowsProc, (LPARAM)&hWndInfo);
 }
 
 void CDlgTest1Wnd::OnBnClickedButton3()
