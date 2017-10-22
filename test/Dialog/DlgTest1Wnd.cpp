@@ -419,7 +419,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	DWORD dwProcessID = 0;
-	ENUM_WNDINFO hWndInfo;
+	HT_ENUM_WNDINFO hWndInfo;
 
 #if 1
 	HWND hFind = ::FindWindow("dd", NULL);

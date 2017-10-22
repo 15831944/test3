@@ -7,7 +7,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 	DWORD dwProcessID = 0;
 	HWND hTargetWnd = NULL;
 
-	ENUM_WNDINFO* pWndInfo = (ENUM_WNDINFO*)lParam;
+	HT_ENUM_WNDINFO* pWndInfo = (HT_ENUM_WNDINFO*)lParam;
 	if (pWndInfo == NULL)
 	{
 		return FALSE;
@@ -35,4 +35,38 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 
 	dwFlag = pWnd->m_nFlags & WF_MODALLOOP;
 	return TRUE;
+}
+
+int CALLBACK EnumFontProc(ENUMLOGFONTEX *lpelf,NEWTEXTMETRICEX *lpntm,DWORD nFontType,long lParam)
+{
+	CString strFontName;
+
+	CWnd* pWnd = NULL;
+	HT_TESTWND_MSG* pWndMsg = NULL;
+
+	pWnd = (CWnd*)lParam;
+	if (pWnd == NULL)
+	{
+		return 0;
+	}
+
+	strFontName = lpelf->elfLogFont.lfFaceName;
+	if (strFontName == _T("") || strFontName.GetLength() <= 0)
+	{
+		return 0;
+	}
+
+	pWndMsg = new HT_TESTWND_MSG;
+	if (pWndMsg == NULL)
+	{
+		return 0;
+	}
+
+	pWndMsg->bFlag = TRUE;
+	pWndMsg->hWnd  = pWnd->GetSafeHwnd();
+	pWndMsg->dwParam = GETSYSTEM_FONT;
+	strcpy(pWndMsg->szValue, strFontName.GetBuffer(0));
+
+	::PostMessage(pWnd->GetSafeHwnd(), WM_TEST2WND_CTRL, GETSYSTEM_FONT, (LPARAM)pWndMsg);
+	return 1;
 }

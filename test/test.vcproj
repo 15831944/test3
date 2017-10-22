@@ -845,6 +845,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Control\ScrollWndMsg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Control\ScrollWndMsg.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\ShellCtrlClass.cpp"
 				>
 			</File>

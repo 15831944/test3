@@ -1,7 +1,8 @@
 #pragma once
+#include "afxwin.h"
 
 #include "../Control/DrawListBox.h"
-#include "afxwin.h"
+#include "../Control/ScrollWndMsg.h"
 
 using namespace std;
 class CDlgTest2Wnd : public CDialog
@@ -10,11 +11,6 @@ class CDlgTest2Wnd : public CDialog
 public:
 	CDlgTest2Wnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CDlgTest2Wnd();
-
-public:
-	void					Init();
-	void					InitCtrl();
-	void					InitInfo();
 
 	void					SetListWndInfo(LPCTSTR lpszText);
 
@@ -28,6 +24,12 @@ protected:
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 
 	afx_msg void			OnLbnSelchangeListTest();
+	afx_msg LRESULT			OnTest2WndMessage(WPARAM wParam, LPARAM lParam);
+
+
+protected:
+	BOOL					InitCtrl();
+	BOOL					InitInfo();
 
 	void					CreateImageList();
 
@@ -35,4 +37,6 @@ protected:
 	CFont					m_font;
 	CListBox				m_ListBox;		//CDragListBox
 	CImageList				m_ImageList;
+
+	CScrollWndMsg			m_dlgScrollWnd;
 };
