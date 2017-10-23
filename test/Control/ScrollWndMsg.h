@@ -1,6 +1,13 @@
 #ifndef __SCROLLWNDMSG_H__
 #define __SCROLLWNDMSG_H__
 
+typedef struct _STRUCT_ICONS
+{
+	HICON		hIcon;
+	DWORD		dwWidth;
+	DWORD		dwHeight;
+}STRUCT_ICONS;
+
 class CScrollWndMsg : CWnd
 {
 public:
@@ -10,7 +17,7 @@ public:
 public:
 	BOOL					Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, UINT nWndId);
 
-	void					SetFont(int nSize, LPCTSTR lpszFaceName);
+	void					SetFont(int nHeight, LPCTSTR lpszFaceName);
 	void					SetWndText(LPCTSTR lpszWndText, COLORREF color = NULL);
 	void					SetWndTipText(LPCTSTR lpszWndTipText, COLORREF color = NULL);
 	void					SetWndBorder(BOOL bWndBorder, COLORREF color = NULL);
@@ -43,29 +50,30 @@ protected:
 	CDC 					m_BkMemDC;
 	CBitmap*				m_pBkBitmap;
 	CFont 					m_cFont;
-	
-#pragma pack(1)
-	typedef struct _STRUCT_ICONS
-	{
-		HICON		hIcon;
-		DWORD		dwWidth;
-		DWORD		dwHeight;
-	}STRUCT_ICONS;
-#pragma pack()
+
 	STRUCT_ICONS			m_csIcons[2];
 	
 private:
+	BOOL					m_bInited;
+	BOOL					m_bRefreshSkin;
+	BOOL					m_bRefreshText;
+
 	BOOL					m_bBorder;
 	BOOL					m_bBkBitmap;	
-	BOOL 					m_bWndBorder;	
+	BOOL 					m_bWndBorder;
+
+	int						m_nTextStartX;
+	int						m_nTextStartY;
 	
 	CString					m_strWndText;
 	CString					m_strWndTipText;
 	
 	COLORREF				m_crWndBk;
-	COLORREF				m_crWndBorder;	
+	COLORREF				m_crWndBorder;
+
 	COLORREF				m_crNormalText;	
 	COLORREF				m_crWndTipText;
+
 	COLORREF				m_crSelText;
 	COLORREF				m_crHoverText;
 	COLORREF				m_crDisableText;

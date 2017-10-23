@@ -3,7 +3,39 @@
 
 CScrollWndMsg::CScrollWndMsg()
 {
+	m_nWndId   = 0;
+	m_dwStyple = 0;
+	m_nTextStartX = 0;
+	m_nTextStartY = 0;
+
+	m_bInited = FALSE;
+	m_bRefreshSkin = FALSE;
+	m_bRefreshText = FALSE;
+
+	m_bBorder = FALSE;
+	m_bBkBitmap  = FALSE;
+	m_bWndBorder = FALSE;
+
+	m_strWndText = _T("");
+	m_strWndTipText = _T("");
+
+	m_pBkBitmap = NULL;
+
 	m_crWndBk = RGB(50,150,200);
+	m_crWndBorder = RGB(50,150,200);
+
+	m_crNormalText = RGB(50,150,200);
+	m_crWndTipText = RGB(50,150,200);
+	
+	m_crSelText    = RGB(50,150,200);
+	m_crHoverText  = RGB(50,150,200);
+	m_crDisableText = RGB(50,150,200);
+
+	m_crSelBorder  = RGB(50,150,200);
+	m_crSelFill    = RGB(50,150,200);
+
+	m_crHoverBorder = RGB(50,150,200);
+	m_crHoverFill  = RGB(50,150,200);
 }
 
 CScrollWndMsg::~CScrollWndMsg()
@@ -29,21 +61,32 @@ BOOL CScrollWndMsg::OnEraseBkgnd(CDC* pDC)
 void CScrollWndMsg::OnPaint() 
 {
 	CPaintDC dc(this); 
+
+	CDC MemDC;
+	CBrush brBkGnd;
+	CBitmap MemBitmap;
+
 	CRect rc;
 	GetClientRect(&rc);
 
-	CDC MemDC;
 	MemDC.CreateCompatibleDC(&dc);
-	CBitmap MemBitmap;
 	MemBitmap.CreateCompatibleBitmap(&dc, rc.Width(), rc.Height());
 	CBitmap *pOldBitmap = MemDC.SelectObject(&MemBitmap);
 
-	CBrush brBkGnd;
-	brBkGnd.CreateSolidBrush(m_crWndBk);
-	MemDC.FillRect(&rc ,&brBkGnd);
-	MemDC.SetBkMode(TRANSPARENT);
+	if (m_bRefreshSkin=TRUE)
+	{
+		brBkGnd.CreateSolidBrush(m_crWndBk);
+		MemDC.FillRect(&rc ,&brBkGnd);
+		MemDC.SetBkMode(TRANSPARENT);
 
-	dc.BitBlt(rc.left, rc.top, rc.Width(), rc.Height(), &MemDC, 0, 0, SRCCOPY);
+		if (m_bRefreshText=TRUE)
+		{
+			MemDC.TextOut(0, 0, "this is a test!");
+		}
+
+		dc.BitBlt(rc.left, rc.top, rc.Width(), rc.Height(), &MemDC, 0, 0, SRCCOPY);
+	}
+
 	MemDC.SelectObject(pOldBitmap);
 	MemDC.DeleteDC();
 }
@@ -64,8 +107,18 @@ BOOL CScrollWndMsg::Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, 
 	return TRUE;
 }
 
-void CScrollWndMsg::SetFont(int nSize, LPCTSTR lpszFaceName)
+void CScrollWndMsg::SetFont(int nHeight, LPCTSTR lpszFaceName)
 {
+	CFont cfont;
+
+	LOGFONT lf;
+	memset(&lf, 0x0, sizeof(LOGFONT));
+
+	lf.lfHeight = nHeight;
+	_tcscpy_s(lf.lfFaceName, lpszFaceName);
+
+	VERIFY(cfont.CreateFontIndirect(&lf));
+	//m_cFont = (HFONT)cfont.m_hObject;
 }
 
 void CScrollWndMsg::SetWndText(LPCTSTR lpszWndText, COLORREF color)
