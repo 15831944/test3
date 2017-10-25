@@ -16,8 +16,7 @@ class CAboutDlg : public CDialog
 {
 public:
 	CAboutDlg();
-	
-	DECLARE_LAYOUT();
+
 	//{{AFX_DATA(CAboutDlg)
 	enum { IDD = IDD_ABOUTBOX };
 	//}}AFX_DATA
@@ -43,7 +42,6 @@ class CTestDlg : public CDialog
 public:
 	CTestDlg(CWnd* pParent = NULL);	
 
-	DECLARE_LAYOUT();
 	//{{AFX_DATA(CTestDlg)
 	enum { IDD = IDD_TEST_DIALOG };
 	//}}AFX_DATA

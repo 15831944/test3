@@ -303,16 +303,29 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 #endif
 
 #if 0
+	CString strDiskInfo;
+	unsigned int nDrvIndex = 0;
+	
+	char szModelNo[MAX_PATH]  = {0};
+	char szSerialNo[MAX_PATH] = {0};
+	
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
 	{
 		return;
 	}
 
-	pGlobal->GetDiskInfo(0);
+	if (!pGlobal->GetDiskInfo(nDrvIndex, szModelNo, szSerialNo))
+	{
+		return;
+	}
+
+	strDiskInfo.Format(_T("”≤≈Ã–Õ∫≈:%s \n”≤≈Ã–Ú¡–∫≈:%s"), szModelNo, szSerialNo);
+	AfxMessageBox(strDiskInfo);
+	
 #endif
 
-#if 1
+#if 0
 	int nPos = 0;
 	int nPrePos = 0;
 
@@ -400,7 +413,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 					bRet = TRUE;
 					bIsScheduledMeeting = TRUE;
 					sprintf(chTag, _T("HY"));
-					continue;
+					break;
 				}
 				else
 				{

@@ -450,7 +450,7 @@ bool CGlobalInfo::ConvertToInt(const double &val,int& i)
 	return true; 
 }
 
-bool CGlobalInfo::GetDiskInfo(unsigned int nDrvIndex)
+bool CGlobalInfo::GetDiskInfo(unsigned int nDrvIndex, char szArrayModelNo[MAX_PATH], char szArraySerialNo[MAX_PATH])
 {
 	HANDLE hDev;
 
@@ -486,16 +486,16 @@ bool CGlobalInfo::GetDiskInfo(unsigned int nDrvIndex)
 
 	DeviceIoControl(hDev, SMART_GET_VERSION, NULL, 0, &gvopVersionParams, sizeof(gvopVersionParams), &dwBytesReturned, NULL);
 
-	if (gvopVersionParams.bIDEDeviceMap <= 0)
-	{
-		if (hDev)
-		{
-			::CloseHandle(hDev);
-			hDev = NULL;
-		}
-
-		return false;
-	}
+// 	if (gvopVersionParams.bIDEDeviceMap <= 0)
+// 	{
+// 		if (hDev)
+// 		{
+// 			::CloseHandle(hDev);
+// 			hDev = NULL;
+// 		}
+// 
+// 		return false;
+// 	}
 
 	btIDCmd = (gvopVersionParams.bIDEDeviceMap >> nDrive & 0x10) ? IDE_ATAPI_IDENTIFY : IDE_ATA_IDENTIFY;
 
@@ -524,6 +524,8 @@ bool CGlobalInfo::GetDiskInfo(unsigned int nDrvIndex)
 	nModelNoLen = MAX_PATH;
 	ToLittleEndian(dwDiskData, 27, 46, szModelNo, nModelNoLen);
 
+	strcpy(szArrayModelNo,  szModelNo);
+	strcpy(szArraySerialNo, szSerialNo);
 	return true;
 }
 

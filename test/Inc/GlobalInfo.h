@@ -29,7 +29,7 @@ public:
 	std::vector<CString>			SplitString3(const char* pszSource, const char* pszSeparator);
 
 	bool							ConvertToInt(const double &val,int& i);
-	bool							GetDiskInfo(unsigned int nDrvIndex);
+	bool							GetDiskInfo(unsigned int nDrvIndex, char szArrayModelNo[MAX_PATH], char szArraySerialNo[MAX_PATH]);
 
 protected:
 	bool							DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned);
