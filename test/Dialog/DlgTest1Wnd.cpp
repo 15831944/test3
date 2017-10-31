@@ -302,7 +302,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	}
 #endif
 
-#if 0
+#if 1
 	CString strDiskInfo;
 	unsigned int nDrvIndex = 0;
 	

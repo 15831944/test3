@@ -16,7 +16,7 @@ CScrollWndMsg::CScrollWndMsg()
 	m_bBkBitmap  = FALSE;
 	m_bWndBorder = FALSE;
 
-	m_strWndText = _T("");
+	m_strWndText = _T("this is a test!");
 	m_strWndTipText = _T("");
 
 	m_pBkBitmap = NULL;
@@ -24,7 +24,7 @@ CScrollWndMsg::CScrollWndMsg()
 	m_crWndBk = RGB(50,150,200);
 	m_crWndBorder = RGB(50,150,200);
 
-	m_crNormalText = RGB(50,150,200);
+	m_crNormalText = RGB(150,250,200);
 	m_crWndTipText = RGB(50,150,200);
 	
 	m_crSelText    = RGB(50,150,200);
@@ -62,29 +62,35 @@ void CScrollWndMsg::OnPaint()
 {
 	CPaintDC dc(this); 
 
+	int nHeight = 0;
+
 	CDC MemDC;
 	CBrush brBkGnd;
 	CBitmap MemBitmap;
 
-	CRect rc;
-	GetClientRect(&rc);
+	
+	CRect rcClient;
+	
+	GetClientRect(&rcClient);
 
 	MemDC.CreateCompatibleDC(&dc);
-	MemBitmap.CreateCompatibleBitmap(&dc, rc.Width(), rc.Height());
+	MemBitmap.CreateCompatibleBitmap(&dc, rcClient.Width(), rcClient.Height());
 	CBitmap *pOldBitmap = MemDC.SelectObject(&MemBitmap);
 
 	if (m_bRefreshSkin=TRUE)
 	{
 		brBkGnd.CreateSolidBrush(m_crWndBk);
-		MemDC.FillRect(&rc ,&brBkGnd);
+		MemDC.FillRect(&rcClient ,&brBkGnd);
 		MemDC.SetBkMode(TRANSPARENT);
+		MemDC.SetTextColor(m_crNormalText);
 
 		if (m_bRefreshText=TRUE)
 		{
-			MemDC.TextOut(0, 0, "this is a test!");
+			
+//			MemDC.TextOut(0, 0, "this is a test!");
 		}
 
-		dc.BitBlt(rc.left, rc.top, rc.Width(), rc.Height(), &MemDC, 0, 0, SRCCOPY);
+		dc.BitBlt(rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), &MemDC, 0, 0, SRCCOPY);
 	}
 
 	MemDC.SelectObject(pOldBitmap);
@@ -94,6 +100,22 @@ void CScrollWndMsg::OnPaint()
 void CScrollWndMsg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CWnd::OnMouseMove(nFlags, point);
+}
+//////////////////////////////////////////////////////////////////////////
+//
+void CScrollWndMsg::SetRectPostion1()
+{
+	CRect rcClient, rcText;
+	GetClientRect(&rcClient);
+
+//	int height = dc.DrawText( m_szText, &rectTmp, DT_CALCRECT|DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK );
+//	rect.top += (rect.Height() - height)/2;
+//	dc.DrawText( m_szText, &rect, DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK );
+
+// 	rcText = rcClient;
+// 	nHeight = MemDC.DrawText(m_strWndText, rcText, DT_CENTER | DT_WORDBREAK | DT_CALCRECT | DT_EDITCONTROL);
+// 	rcText.OffsetRect(0, (rcClient.Height()-nHeight)/2);
+// 	MemDC.DrawText(m_strWndText, rcClient, DT_CENTER | DT_WORDBREAK);
 }
 //////////////////////////////////////////////////////////////////////////
 //

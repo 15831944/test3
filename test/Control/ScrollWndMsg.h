@@ -35,6 +35,8 @@ public:
 protected:
 	//static BOOL				hasclass;
 	//static BOOL				RegisterWindowClass();
+
+	void					SetRectPostion1();
 	
 protected:
 	//virtual BOOL 			PreTranslateMessage(MSG* pMsg);
