@@ -3,8 +3,8 @@
 #include "afxwin.h"
 
 #include "afxshelltreeCtrl.h"
-#include "../Control/DrawButton.h"
-#include "../Control/ShellCtrlClass.h"
+#include "../Control/Button/DrawButton.h"
+#include "../Control/TreeCtrl/ShellCtrlClass.h"
 #include "../contrib/update_file_name.h"
 
 typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);

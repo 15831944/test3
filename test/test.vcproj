@@ -820,46 +820,82 @@
 		<Filter
 			Name="Control"
 			>
-			<File
-				RelativePath=".\Control\CustomCombox.cpp"
+			<Filter
+				Name="Combox"
 				>
-			</File>
-			<File
-				RelativePath=".\Control\CustomCombox.h"
+				<File
+					RelativePath=".\Control\ComboBox\CustomCombox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\ComboBox\CustomCombox.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Button"
 				>
-			</File>
-			<File
-				RelativePath=".\Control\DrawButton.cpp"
+				<File
+					RelativePath=".\Control\Button\DrawButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\Button\DrawButton.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ListBox"
 				>
-			</File>
-			<File
-				RelativePath=".\Control\DrawButton.h"
+				<File
+					RelativePath=".\Control\ListBox\DrawListBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\ListBox\DrawListBox.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="TreeCtrl"
 				>
-			</File>
-			<File
-				RelativePath=".\Control\DrawListBox.cpp"
+				<File
+					RelativePath=".\Control\TreeCtrl\ShellCtrlClass.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\TreeCtrl\ShellCtrlClass.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\TreeCtrl\StackedClass.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\TreeCtrl\StackedClass.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\TreeCtrl\StackedTreeCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\TreeCtrl\StackedTreeCtrl.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="WndCtrl"
 				>
-			</File>
-			<File
-				RelativePath=".\Control\DrawListBox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Control\ScrollWndMsg.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Control\ScrollWndMsg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Control\ShellCtrlClass.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Control\ShellCtrlClass.h"
-				>
-			</File>
+				<File
+					RelativePath=".\Control\WndCtrl\ScrollWndMsg.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\WndCtrl\ScrollWndMsg.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Contrib"

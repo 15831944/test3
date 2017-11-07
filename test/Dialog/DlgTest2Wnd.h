@@ -1,8 +1,8 @@
 #pragma once
 #include "afxwin.h"
 
-#include "../Control/DrawListBox.h"
-#include "../Control/ScrollWndMsg.h"
+#include "../Control/ListBox//DrawListBox.h"
+#include "../Control/WndCtrl/ScrollWndMsg.h"
 
 using namespace std;
 class CDlgTest2Wnd : public CDialog
