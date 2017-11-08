@@ -3,6 +3,7 @@
 #include <atlconv.h>
 
 #include "../Inc/audio/waveplayer.h"
+#include "../Control/TreeCtrl/StackedTreeCtrl.h"
 
 using namespace std;
 class CDlgTest4Wnd : public CDialog
@@ -25,4 +26,5 @@ protected:
 
 protected:
 	WavePlayer						m_hWavPlayer;
+	CStackedTreeCtrl				m_hTreeCtrl;
 };

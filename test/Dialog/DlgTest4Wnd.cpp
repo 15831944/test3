@@ -3,7 +3,6 @@
 #include "DlgTest4Wnd.h"
 
 #include "../inc/GlobalInfo.h"
-#include "../Control/TreeCtrl/StackedTreeCtrl.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest4Wnd, CDialog)
 CDlgTest4Wnd::CDlgTest4Wnd(CWnd* pParent /*=NULL*/)
@@ -32,18 +31,25 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 	USES_CONVERSION;
 	CDialog::OnInitDialog();
 
+	DWORD dwStyle;
+	CRect rcClient;
+	CRect rcTreeWnd;
+	
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
 	{
 		return FALSE;
 	}
 
-	DWORD dwStyle = 0;
-	CRect rect(0, 0, 10,20);
-	CStackedTreeCtrl hTreeCtrl;
-	
-	dwStyle = WS_CHILD|WS_VISIBLE|SS_NOTIFY|SS_CENTER;
-	hTreeCtrl.Create(dwStyle, rect, this, 0);
+	GetClientRect(&rcClient);
+	dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE;
+
+	rcTreeWnd.left   = rcClient.left;
+	rcTreeWnd.top    = rcClient.top;
+	rcTreeWnd.right  = rcClient.right/3;
+	rcTreeWnd.bottom = rcClient.bottom;
+
+	m_hTreeCtrl.Create(dwStyle, rcTreeWnd, this, 0+1);
 	return TRUE;  
 }
 
