@@ -65,6 +65,7 @@ typedef struct{
 	DWORD			dwParam;
 	char			szValue[MAX_PATH];
 	char			szAddInfo[MAX_PATH];
+	LOGFONT			hLogFont;
 }HT_TESTWND_MSG;
 
 typedef struct{

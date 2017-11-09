@@ -10,32 +10,33 @@ CScrollWndMsg::CScrollWndMsg()
 
 	m_bInited = FALSE;
 	m_bRefreshSkin = FALSE;
-	m_bRefreshText = FALSE;
+	m_bRefreshText = TRUE;
 
-	m_bBorder = FALSE;
-	m_bBkBitmap  = FALSE;
+	m_bWndSel    = FALSE;
 	m_bWndBorder = FALSE;
+	m_bWndHover  = FALSE;
+	m_bBkBitmap  = FALSE;
 
-	m_strWndText = _T("this is a test!");
+	m_strWndText = _T("");
 	m_strWndTipText = _T("");
 
 	m_pBkBitmap = NULL;
 
-	m_crWndBk = RGB(50,150,200);
-	m_crWndBorder = RGB(50,150,200);
+	m_clrWndBk = RGB(50,150,200);
+	m_clrWndBorder = RGB(50,150,200);
 
-	m_crNormalText = RGB(150,250,200);
-	m_crWndTipText = RGB(50,150,200);
+	m_clrNormalText = RGB(50,150,200);
+	m_clrWndTipText = RGB(50,150,200);
 	
-	m_crSelText    = RGB(50,150,200);
-	m_crHoverText  = RGB(50,150,200);
-	m_crDisableText = RGB(50,150,200);
+	m_clrSelText    = RGB(50,150,200);
+	m_clrHoverText  = RGB(50,150,200);
+	m_clrDisableText = RGB(50,150,200);
 
-	m_crSelBorder  = RGB(50,150,200);
-	m_crSelFill    = RGB(50,150,200);
+	m_clrSelBorder  = RGB(50,150,200);
+	m_clrSelFill    = RGB(50,150,200);
 
-	m_crHoverBorder = RGB(50,150,200);
-	m_crHoverFill  = RGB(50,150,200);
+	m_clrHoverBorder = RGB(50,150,200);
+	m_clrHoverFill  = RGB(50,150,200);
 }
 
 CScrollWndMsg::~CScrollWndMsg()
@@ -45,77 +46,175 @@ CScrollWndMsg::~CScrollWndMsg()
 //////////////////////////////////////////////////////////////////////////
 //
 BEGIN_MESSAGE_MAP(CScrollWndMsg, CWnd)
-	//{{AFX_MSG_MAP(CScrollWndMsg)
-	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
 	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
+	ON_WM_SHOWWINDOW()
+
 	ON_WM_MOUSEWHEEL()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-BOOL CScrollWndMsg::OnEraseBkgnd(CDC* pDC) 
+BOOL CScrollWndMsg::PreTranslateMessage(MSG* pMsg)
 {
-	return TRUE;	
-//	return CWnd::OnEraseBkgnd(pDC);
+	return CWnd::PreTranslateMessage(pMsg);
+}
+
+void CScrollWndMsg::OnSize(UINT nType, int cx, int cy)
+{
+	CWnd::OnSize(nType, cx, cy);
 }
 
 void CScrollWndMsg::OnPaint() 
 {
 	CPaintDC dc(this); 
 
-	int nHeight = 0;
+	CPen   BorderPen, *pOldPen(NULL);
+	CBrush FillBrush, *pOldBrush(NULL);
 
-	CDC MemDC;
-	CBrush brBkGnd;
-	CBitmap MemBitmap;
+	CRect rcWnd;
+	GetClientRect(&rcWnd);
+	rcWnd.DeflateRect(0, 1, 5, 6);
 
-	
-	CRect rcClient;
-	
-	GetClientRect(&rcClient);
-
-	MemDC.CreateCompatibleDC(&dc);
-	MemBitmap.CreateCompatibleBitmap(&dc, rcClient.Width(), rcClient.Height());
-	CBitmap *pOldBitmap = MemDC.SelectObject(&MemBitmap);
-
-	if (m_bRefreshSkin=TRUE)
+	if (m_bWndSel)
 	{
-		brBkGnd.CreateSolidBrush(m_crWndBk);
-		MemDC.FillRect(&rcClient ,&brBkGnd);
-		MemDC.SetBkMode(TRANSPARENT);
-		MemDC.SetTextColor(m_crNormalText);
+		FillBrush.CreateSolidBrush(m_clrSelFill);
+		pOldBrush = dc.SelectObject(&FillBrush);
 
-		if (m_bRefreshText=TRUE)
-		{
-			
-//			MemDC.TextOut(0, 0, "this is a test!");
-		}
+		BorderPen.CreatePen(PS_SOLID, 1, m_clrSelBorder);
+		pOldPen = dc.SelectObject(&BorderPen);
 
-		dc.BitBlt(rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), &MemDC, 0, 0, SRCCOPY);
+		dc.RoundRect(&rcWnd, CPoint(5,5));
+
+		dc.SelectObject(pOldPen);
+		dc.SelectObject(pOldBrush);
+
+		BorderPen.DeleteObject();
+		FillBrush.DeleteObject();
 	}
 
-	MemDC.SelectObject(pOldBitmap);
-	MemDC.DeleteDC();
+	if (m_bWndHover)
+	{
+		FillBrush.CreateSolidBrush(m_bWndSel ? m_clrSelFill : m_clrHoverFill);
+		pOldBrush = dc.SelectObject(&FillBrush);
+
+		BorderPen.CreatePen(PS_SOLID, 1, m_clrHoverBorder);
+		pOldPen = dc.SelectObject(&BorderPen);
+
+		dc.RoundRect(&rcWnd, CPoint(5,5));
+
+		dc.SelectObject(pOldPen);
+		dc.SelectObject(pOldBrush);
+
+		BorderPen.DeleteObject();
+		FillBrush.DeleteObject();
+	}
+
+	if (m_bRefreshText)
+	{
+		DrawEdge1(&dc, &rcWnd, m_strWndText);
+	}
+}
+
+BOOL CScrollWndMsg::OnEraseBkgnd(CDC* pDC) 
+{
+	CRect rcWnd;
+	GetClientRect(&rcWnd);
+	rcWnd.DeflateRect(0, 1, 5, 6);
+
+	if (m_bWndBorder)
+	{
+		CPen pen, *pOldPen(NULL);
+
+		pen.CreatePen(PS_SOLID, 1, m_clrWndBorder);
+		pOldPen = pDC->SelectObject(&pen);
+ 
+		pDC->Rectangle(&rcWnd);
+
+		pDC->SelectObject(pOldPen);
+		pen.DeleteObject();
+	}
+
+	if (m_bBkBitmap && m_pBkBitmap != NULL)
+	{
+		CDC MemDC;
+		MemDC.CreateCompatibleDC(pDC);
+
+		CBitmap bitmap;
+		CBitmap *pOldBitmap = m_pBkBitmap;
+
+		BITMAP bmp;
+		pOldBitmap->GetBitmap(&bmp);
+
+		pDC->StretchBlt(rcWnd.left, rcWnd.top, rcWnd.Width(), rcWnd.Height(), &MemDC, 0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+
+		if (MemDC.GetSafeHdc())
+		{
+			MemDC.SelectObject(pOldBitmap);
+			MemDC.DeleteDC();
+		}
+	}
+	else
+	{
+		CBrush BkBrush, *pOldBrush(NULL);
+		BkBrush.CreateSolidBrush(m_clrWndBk);
+
+		pOldBrush = pDC->SelectObject(&BkBrush);
+		pDC->PatBlt(rcWnd.left, rcWnd.top, rcWnd.Width(), rcWnd.Height(), PATCOPY);
+
+		pDC->SelectObject(pOldBrush);
+		BkBrush.DeleteObject();
+	}
+	
+	return TRUE;	
+//	return CWnd::OnEraseBkgnd(pDC);
+}
+
+void CScrollWndMsg::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CWnd::OnShowWindow(bShow, nStatus);
 }
 
 void CScrollWndMsg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CWnd::OnMouseMove(nFlags, point);
 }
+
 //////////////////////////////////////////////////////////////////////////
 //
-void CScrollWndMsg::SetRectPostion1()
+void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 {
-	CRect rcClient, rcText;
-	GetClientRect(&rcClient);
+	int nTextHeight = 0;
+	CRect rcText;
 
-//	int height = dc.DrawText( m_szText, &rectTmp, DT_CALCRECT|DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK );
-//	rect.top += (rect.Height() - height)/2;
-//	dc.DrawText( m_szText, &rect, DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK );
+	if (pDC == NULL)
+	{
+		return;
+	}
 
-// 	rcText = rcClient;
-// 	nHeight = MemDC.DrawText(m_strWndText, rcText, DT_CENTER | DT_WORDBREAK | DT_CALCRECT | DT_EDITCONTROL);
-// 	rcText.OffsetRect(0, (rcClient.Height()-nHeight)/2);
-// 	MemDC.DrawText(m_strWndText, rcClient, DT_CENTER | DT_WORDBREAK);
+	if (pWndRect == NULL)
+	{
+		return;
+	}
+
+	if (lpszText == NULL || *lpszText == '\0')
+	{
+		return;
+	}
+
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(m_clrNormalText);
+
+	rcText.CopyRect(pWndRect);
+	nTextHeight = pDC->DrawText(lpszText, rcText, DT_CALCRECT | DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+	rcText.CopyRect(pWndRect);
+
+	if (pWndRect->Height() > nTextHeight)
+	{
+		rcText.OffsetRect(0, (pWndRect->Height()-nTextHeight)/2);
+		//rcText.top += (pWndRect->Height() - nTextHeight)/2;
+	}
+
+	pDC->DrawText(lpszText, rcText, DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK);
 }
 //////////////////////////////////////////////////////////////////////////
 //
@@ -127,6 +226,36 @@ BOOL CScrollWndMsg::Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, 
 	}
 
 	return TRUE;
+}
+
+void CScrollWndMsg::SetWndBkColor(COLORREF color)
+{
+	m_clrWndBk =  color;
+}
+
+void CScrollWndMsg::SetWndBkBitmap(UINT nIDBitmap)
+{
+	m_pBkBitmap->LoadBitmap(nIDBitmap);
+	m_bBkBitmap = TRUE;
+}
+
+void CScrollWndMsg::SetWndBkBitmap(LPCTSTR lpBitmapName)
+{
+	HBITMAP hBitmap = (HBITMAP)::LoadImage(NULL,
+		lpBitmapName,
+		IMAGE_BITMAP,
+		0,
+		0,
+		LR_LOADFROMFILE);
+
+	m_pBkBitmap = CBitmap::FromHandle(hBitmap);	
+	m_bBkBitmap = TRUE;
+}
+
+void CScrollWndMsg::SetWndBorder(BOOL bWndBorder, COLORREF color)
+{
+	m_bWndBorder = bWndBorder;
+	m_clrWndBorder =  color;
 }
 
 void CScrollWndMsg::SetFont(int nHeight, LPCTSTR lpszFaceName)
@@ -146,44 +275,35 @@ void CScrollWndMsg::SetFont(int nHeight, LPCTSTR lpszFaceName)
 void CScrollWndMsg::SetWndText(LPCTSTR lpszWndText, COLORREF color)
 {
 	m_strWndText = lpszWndText;
-	m_crNormalText = color;
+	m_clrNormalText = color;
+}
+
+void CScrollWndMsg::SetTextColor(COLORREF clrNormalText, COLORREF clrSelText)
+{
+	m_clrNormalText =  clrNormalText;
+	m_clrSelText = clrSelText;
 }
 
 void CScrollWndMsg::SetWndTipText(LPCTSTR lpszWndTipText, COLORREF color)
 {
 	m_strWndTipText = lpszWndTipText;
-	m_crWndTipText =  color;
+	m_clrWndTipText =  color;
 }
 
-void CScrollWndMsg::SetWndBorder(BOOL bWndBorder, COLORREF color)
+void CScrollWndMsg::SetSelColor(COLORREF clrSelBorder, COLORREF clrSelFill)
 {
-	m_bWndBorder = bWndBorder;
-	m_crWndBorder =  color;
+	m_clrSelBorder = clrSelBorder;
+	m_clrSelFill = clrSelFill;
 }
 
-void CScrollWndMsg::SetWndBkColor(COLORREF color)
+void CScrollWndMsg::SetHoverColor(COLORREF clrHoverBorder, COLORREF clrHoverFill)
 {
-	m_crWndBk =  color;
+	m_clrHoverBorder = clrHoverBorder;
+	m_clrHoverFill = clrHoverFill;
 }
 
-void CScrollWndMsg::SetTextColor(COLORREF crNormalText, COLORREF crSelText)
-{
-	m_crNormalText =  crNormalText;
-	m_crSelText = crSelText;
-}
-
-void CScrollWndMsg::SetSelColor(COLORREF crSelBorder, COLORREF crSelFill)
-{
-	m_crSelBorder = crSelBorder;
-	m_crSelFill = crSelFill;
-}
-
-void CScrollWndMsg::SetHoverColor(COLORREF crHoverBorder, COLORREF crHoverFill)
-{
-	m_crHoverBorder = crHoverBorder;
-	m_crHoverFill = crHoverFill;
-}
-
+//////////////////////////////////////////////////////////////////////////
+//
 void CScrollWndMsg::SetScrollPause()
 {
 }

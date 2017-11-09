@@ -177,10 +177,11 @@ void CTestDlg::InitCtrl()
 
 	CRect rcClient;
 	m_hTabCtrl.GetClientRect(&rcClient);
-	rcClient.top +=20;
+
+	rcClient.left   +=2;
+	rcClient.top    +=20;
+	rcClient.right  -=2;
 	rcClient.bottom -=4;
-	rcClient.left +=2;
-	rcClient.right -=2;
 
 	for(int i=0; i<m_pArPage.GetSize(); i++)
 	{

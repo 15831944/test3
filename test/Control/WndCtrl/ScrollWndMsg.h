@@ -8,83 +8,91 @@ typedef struct _STRUCT_ICONS
 	DWORD		dwHeight;
 }STRUCT_ICONS;
 
-class CScrollWndMsg : CWnd
+class CScrollWndMsg : public CWnd
 {
 public:
 	CScrollWndMsg();
 	~CScrollWndMsg();
 
-public:
-	BOOL					Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, UINT nWndId);
+protected:
+	virtual BOOL 				PreTranslateMessage(MSG* pMsg);
 
-	void					SetFont(int nHeight, LPCTSTR lpszFaceName);
-	void					SetWndText(LPCTSTR lpszWndText, COLORREF color = NULL);
-	void					SetWndTipText(LPCTSTR lpszWndTipText, COLORREF color = NULL);
-	void					SetWndBorder(BOOL bWndBorder, COLORREF color = NULL);
-	
-	void					SetWndBkColor(COLORREF color = NULL);
-	void					SetTextColor(COLORREF crNormalText, COLORREF crSelText);
-	void					SetSelColor(COLORREF crSelBorder, COLORREF crSelFill);
-	void					SetHoverColor(COLORREF crHoverBorder, COLORREF crHoverFill);
-	
-	void					SetScrollPause();
-	void					SetScrollSpeed(DWORD dwSpan);
-	void					SetScrollShowPos(DWORD dx, DWORD dy);
-	void					ClearScrollText();
-	
+	afx_msg void				OnSize(UINT nType, int cx, int cy);
+	afx_msg void 				OnPaint();
+	afx_msg BOOL				OnEraseBkgnd(CDC* pDC);
+	afx_msg void				OnShowWindow(BOOL bShow, UINT nStatus);
+
+	afx_msg void 				OnMouseMove(UINT nFlags, CPoint point);
+	DECLARE_MESSAGE_MAP()
+
 protected:
 	//static BOOL				hasclass;
 	//static BOOL				RegisterWindowClass();
 
-	void					SetRectPostion1();
-	
-protected:
-	//virtual BOOL 			PreTranslateMessage(MSG* pMsg);
-	afx_msg void 			OnPaint();
-	afx_msg BOOL			OnEraseBkgnd(CDC* pDC);
-	afx_msg void 			OnMouseMove(UINT nFlags, CPoint point);
-	DECLARE_MESSAGE_MAP()
-	
-protected:
-	UINT					m_nWndId;
-	DWORD					m_dwStyple;
-	
-	CDC 					m_BkMemDC;
-	CBitmap*				m_pBkBitmap;
-	CFont 					m_cFont;
+public:
+	BOOL						Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, UINT nWndId);
 
-	STRUCT_ICONS			m_csIcons[2];
+	void						SetWndBkColor(COLORREF color = NULL);
+	void						SetWndBkBitmap(UINT nIDBitmap);
+	void						SetWndBkBitmap(LPCTSTR lpBitmapName);
+	void						SetWndBorder(BOOL bWndBorder, COLORREF color = NULL);
+
+	void						SetFont(int nHeight, LPCTSTR lpszFaceName);
+	void						SetWndText(LPCTSTR lpszWndText, COLORREF color = NULL);
+	void						SetTextColor(COLORREF clrNormalText, COLORREF clrSelText);
+	void						SetWndTipText(LPCTSTR lpszWndTipText, COLORREF color = NULL);
+
+	void						SetSelColor(COLORREF clrSelBorder, COLORREF clrSelFill);
+	void						SetHoverColor(COLORREF clrHoverBorder, COLORREF clrHoverFill);
+	
+	void						SetScrollPause();
+	void						SetScrollSpeed(DWORD dwSpan);
+	void						SetScrollShowPos(DWORD dx, DWORD dy);
+	void						ClearScrollText();
+	
+protected:
+	void						DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText);
+
+protected:
+	UINT						m_nWndId;
+	DWORD						m_dwStyple;
+	
+	CBitmap*					m_pBkBitmap;
+	CFont 						m_cFont;
+
+	STRUCT_ICONS				m_csIcons[2];
 	
 private:
-	BOOL					m_bInited;
-	BOOL					m_bRefreshSkin;
-	BOOL					m_bRefreshText;
+	BOOL						m_bInited;
+	BOOL						m_bRefreshSkin;
+	BOOL						m_bRefreshText;
+		
+	BOOL						m_bWndSel;
+	BOOL 						m_bWndBorder;
+	BOOL						m_bWndHover;
+	BOOL						m_bBkBitmap;
 
-	BOOL					m_bBorder;
-	BOOL					m_bBkBitmap;	
-	BOOL 					m_bWndBorder;
+	int							m_nTextStartX;
+	int							m_nTextStartY;
+	
+	CString						m_strWndText;
+	CString						m_strWndTipText;
+	
+	COLORREF					m_clrWndBk;
+	COLORREF					m_clrWndBorder;
 
-	int						m_nTextStartX;
-	int						m_nTextStartY;
-	
-	CString					m_strWndText;
-	CString					m_strWndTipText;
-	
-	COLORREF				m_crWndBk;
-	COLORREF				m_crWndBorder;
+	COLORREF					m_clrNormalText;	
+	COLORREF					m_clrWndTipText;
 
-	COLORREF				m_crNormalText;	
-	COLORREF				m_crWndTipText;
-
-	COLORREF				m_crSelText;
-	COLORREF				m_crHoverText;
-	COLORREF				m_crDisableText;
+	COLORREF					m_clrSelText;
+	COLORREF					m_clrHoverText;
+	COLORREF					m_clrDisableText;
 	
-	COLORREF				m_crSelBorder;
-	COLORREF				m_crSelFill;
+	COLORREF					m_clrSelBorder;
+	COLORREF					m_clrSelFill;
 	
-	COLORREF				m_crHoverBorder;
-	COLORREF				m_crHoverFill;
+	COLORREF					m_clrHoverBorder;
+	COLORREF					m_clrHoverFill;
 };
 
 #endif

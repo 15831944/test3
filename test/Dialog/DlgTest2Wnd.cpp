@@ -12,6 +12,20 @@ CDlgTest2Wnd::CDlgTest2Wnd(CWnd* pParent)
 
 CDlgTest2Wnd::~CDlgTest2Wnd()
 {
+// 	DWORD dwIndex = 0;
+// 	DWORD dwCount = 10;//m_ListBox.GetCount();
+// 
+// 	for (dwIndex=0; dwIndex<dwCount; dwIndex++)
+// 	{
+// 		LOGFONT* pLogFont = (LOGFONT*)m_ListBox.GetItemDataPtr(dwIndex);
+// 		if (pLogFont == NULL)
+// 		{
+// 			continue;
+// 		}
+// 
+// 		delete pLogFont;
+// 		pLogFont = NULL;
+// 	}
 }
 
 void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
@@ -29,12 +43,12 @@ BOOL CDlgTest2Wnd::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	if (!InitCtrl())
+	if (!InitInfo())
 	{
 		return FALSE;
 	}
 
-	if (!InitInfo())
+	if (!InitCtrl())
 	{
 		return FALSE;
 	}
@@ -54,11 +68,15 @@ void CDlgTest2Wnd::OnLbnSelchangeListTest()
 	CRect rcStatic;
 	CString strFontName;
 
+	LOGFONT* pLogFont = NULL;
+
 	nCulSel = m_ListBox.GetCurSel();
 	if (nCulSel == -1)
 	{
 		return;
 	}
+
+	pLogFont = (LOGFONT*)m_ListBox.GetItemDataPtr(nCulSel);
 
 // 	m_font.Detach();
 // 	m_ListBox.GetText(nCulSel, strFontName);
@@ -70,7 +88,10 @@ void CDlgTest2Wnd::OnLbnSelchangeListTest()
 
 LRESULT CDlgTest2Wnd::OnTest2WndMessage(WPARAM wParam, LPARAM lParam)
 {
+	DWORD dwIndex = 0;
 	CString strFontName;
+
+	LOGFONT* pLogFont = NULL;
 	HT_TESTWND_MSG* pWndMsg = NULL;
 
 	switch(wParam)
@@ -80,21 +101,31 @@ LRESULT CDlgTest2Wnd::OnTest2WndMessage(WPARAM wParam, LPARAM lParam)
 			pWndMsg = (HT_TESTWND_MSG*)lParam;
 			if (pWndMsg == NULL)
 			{
-				return -1;
+				break;
 			}
 
 			if (pWndMsg->dwParam != GETSYSTEM_FONT)
 			{
-				return -1;
+				break;
 			}
 			
  			strFontName = pWndMsg->szValue;
 			if (m_ListBox.FindString(0, strFontName) > 0)
 			{
-				return -1;
+				break;
 			}
 
-			m_ListBox.AddString(strFontName);
+			pLogFont = new LOGFONT;
+			if (pLogFont == NULL)
+			{
+				break;
+			}
+			memset(pLogFont, 0x0, sizeof(LOGFONT));
+			memcpy(pLogFont, &pWndMsg->hLogFont, sizeof(LOGFONT));
+
+			dwIndex = m_ListBox.GetCount();
+			m_ListBox.InsertString(dwIndex, strFontName);
+			m_ListBox.SetItemDataPtr(dwIndex, pLogFont);
 		}
 		break;
 	}
@@ -117,6 +148,8 @@ BOOL CDlgTest2Wnd::InitCtrl()
 	CRect rcClient;
 	CRect rcDlgList;
 	CRect rcDlgText;
+
+	CString strTextInfo;
 	
 	GetClientRect(&rcClient);
 	m_ListBox.GetClientRect(&rcDlgList);
@@ -132,6 +165,10 @@ BOOL CDlgTest2Wnd::InitCtrl()
 		return FALSE;
 	}
 
+	strTextInfo = _T("this is a test!");
+
+	m_dlgScrollWnd.SetWndBkColor(RGB(0, 51, 102));
+	m_dlgScrollWnd.SetWndText(strTextInfo, RGB(255, 0, 0));
 	return TRUE;
 }
 

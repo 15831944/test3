@@ -66,6 +66,7 @@ int CALLBACK EnumFontProc(ENUMLOGFONTEX *lpelf,NEWTEXTMETRICEX *lpntm,DWORD nFon
 	pWndMsg->hWnd  = pWnd->GetSafeHwnd();
 	pWndMsg->dwParam = GETSYSTEM_FONT;
 	strcpy(pWndMsg->szValue, strFontName.GetBuffer(0));
+	memcpy(&pWndMsg->hLogFont, &lpelf->elfLogFont, sizeof(LOGFONTA));
 
 	::PostMessage(pWnd->GetSafeHwnd(), WM_TEST2WND_CTRL, GETSYSTEM_FONT, (LPARAM)pWndMsg);
 	return 1;
