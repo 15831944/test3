@@ -23,9 +23,9 @@ protected:
 	virtual BOOL			OnInitDialog();
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 
+	afx_msg void			OnDestroy();
 	afx_msg void			OnLbnSelchangeListTest();
 	afx_msg LRESULT			OnTest2WndMessage(WPARAM wParam, LPARAM lParam);
-
 
 protected:
 	BOOL					InitCtrl();

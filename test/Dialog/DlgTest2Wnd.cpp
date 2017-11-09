@@ -12,20 +12,6 @@ CDlgTest2Wnd::CDlgTest2Wnd(CWnd* pParent)
 
 CDlgTest2Wnd::~CDlgTest2Wnd()
 {
-// 	DWORD dwIndex = 0;
-// 	DWORD dwCount = 10;//m_ListBox.GetCount();
-// 
-// 	for (dwIndex=0; dwIndex<dwCount; dwIndex++)
-// 	{
-// 		LOGFONT* pLogFont = (LOGFONT*)m_ListBox.GetItemDataPtr(dwIndex);
-// 		if (pLogFont == NULL)
-// 		{
-// 			continue;
-// 		}
-// 
-// 		delete pLogFont;
-// 		pLogFont = NULL;
-// 	}
 }
 
 void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
@@ -37,6 +23,7 @@ void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgTest2Wnd, CDialog)
 	ON_LBN_SELCHANGE(IDC_LIST_TEST,					OnLbnSelchangeListTest)
 	ON_MESSAGE(WM_TEST2WND_CTRL,					OnTest2WndMessage)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 BOOL CDlgTest2Wnd::OnInitDialog()
@@ -59,6 +46,23 @@ BOOL CDlgTest2Wnd::OnInitDialog()
 BOOL CDlgTest2Wnd::PreTranslateMessage(MSG* pMsg)
 {
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CDlgTest2Wnd::OnDestroy()
+{
+	CDialog::OnDestroy();
+
+	for (DWORD dwIndex=0; dwIndex<m_ListBox.GetCount(); dwIndex++)
+	{
+		LOGFONT* pLogFont = (LOGFONT*)m_ListBox.GetItemDataPtr(dwIndex);
+		if (pLogFont == NULL)
+		{
+			continue;
+		}
+
+		delete pLogFont;
+		pLogFont = NULL;
+	}
 }
 
 void CDlgTest2Wnd::OnLbnSelchangeListTest()
