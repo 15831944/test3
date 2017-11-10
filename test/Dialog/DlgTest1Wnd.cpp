@@ -431,10 +431,10 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
+#if 0
 	DWORD dwProcessID = 0;
 	HT_ENUM_WNDINFO hWndInfo;
 
-#if 1
 	HWND hFind = ::FindWindow("dd", NULL);
 	if (hFind == NULL)
 	{
@@ -461,11 +461,11 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	SwitchToThisWindow    =    (PROCSWITCHTOTHISWINDOW)GetProcAddress(hUser32, "SwitchToThisWindow");
 	SwitchToThisWindow(hFind, TRUE);
 	*/
-#endif
 
 	hWndInfo.hWnd = hFind;
 	hWndInfo.dwProcessID = dwProcessID;
 	EnumWindows(EnumWindowsProc, (LPARAM)&hWndInfo);
+#endif
 }
 
 void CDlgTest1Wnd::OnBnClickedButton3()
