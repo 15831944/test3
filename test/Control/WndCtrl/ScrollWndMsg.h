@@ -58,7 +58,7 @@ protected:
 	DWORD						m_dwStyple;
 	
 	CBitmap*					m_pBkBitmap;
-	CFont 						m_cFont;
+	CFont*						m_pFont;
 
 	STRUCT_ICONS				m_csIcons[2];
 	

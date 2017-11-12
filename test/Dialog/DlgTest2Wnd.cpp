@@ -81,13 +81,12 @@ void CDlgTest2Wnd::OnLbnSelchangeListTest()
 	}
 
 	pLogFont = (LOGFONT*)m_ListBox.GetItemDataPtr(nCulSel);
+	if (pLogFont == NULL)
+	{
+		return;
+	}
 
-// 	m_font.Detach();
-// 	m_ListBox.GetText(nCulSel, strFontName);
-// 
-// 	GetDlgItem(IDC_STATIC_TEXT)->GetWindowRect(&rcStatic);
-// 	m_font.CreateFont((rcStatic.Height()-5),0,0,0,FW_NORMAL,0,0,0,DEFAULT_CHARSET,OUT_CHARACTER_PRECIS,CLIP_CHARACTER_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH|FF_DONTCARE,strFontName);
-// 	GetDlgItem(IDC_STATIC_TEXT)->SetFont(&m_font);
+	m_dlgScrollWnd.SetFont(50, pLogFont->lfFaceName);
 }
 
 LRESULT CDlgTest2Wnd::OnTest2WndMessage(WPARAM wParam, LPARAM lParam)
@@ -130,6 +129,9 @@ LRESULT CDlgTest2Wnd::OnTest2WndMessage(WPARAM wParam, LPARAM lParam)
 			dwIndex = m_ListBox.GetCount();
 			m_ListBox.InsertString(dwIndex, strFontName);
 			m_ListBox.SetItemDataPtr(dwIndex, pLogFont);
+
+			m_ListBox.SetSel(0,TRUE);
+			m_ListBox.SetCurSel(0);
 		}
 		break;
 	}

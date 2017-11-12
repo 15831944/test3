@@ -21,6 +21,7 @@ CScrollWndMsg::CScrollWndMsg()
 	m_strWndTipText = _T("");
 
 	m_pBkBitmap = NULL;
+	m_pFont     = NULL;
 
 	m_clrWndBk = RGB(50,150,200);
 	m_clrWndBorder = RGB(50,150,200);
@@ -112,6 +113,7 @@ void CScrollWndMsg::OnPaint()
 	if (m_bRefreshText)
 	{
 		DrawEdge1(&dc, &rcWnd, m_strWndText);
+		m_bRefreshText = FALSE;
 	}
 }
 
@@ -164,7 +166,7 @@ BOOL CScrollWndMsg::OnEraseBkgnd(CDC* pDC)
 		pDC->SelectObject(pOldBrush);
 		BkBrush.DeleteObject();
 	}
-	
+
 	return TRUE;	
 //	return CWnd::OnEraseBkgnd(pDC);
 }
@@ -183,8 +185,11 @@ void CScrollWndMsg::OnMouseMove(UINT nFlags, CPoint point)
 //
 void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 {
-	int nTextHeight = 0;
 	CRect rcText;
+	int nTextHeight = 0;
+	
+	CPen BorderPen, *pOldPen(NULL);
+	CFont *pOldFont = NULL;
 
 	if (pDC == NULL)
 	{
@@ -201,6 +206,14 @@ void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 		return;
 	}
 
+// 	pen.CreatePen(PS_SOLID, 1, m_clrWndBorder);
+// 	pOldPen = pDC->SelectObject(&pen);
+
+	if (m_pFont != NULL && m_pFont->m_hObject)
+	{
+		pOldFont = pDC->SelectObject(m_pFont);
+	}
+
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(m_clrNormalText);
 
@@ -215,6 +228,7 @@ void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 	}
 
 	pDC->DrawText(lpszText, rcText, DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK);
+	pDC->SelectObject(pOldFont);
 }
 //////////////////////////////////////////////////////////////////////////
 //
@@ -260,16 +274,24 @@ void CScrollWndMsg::SetWndBorder(BOOL bWndBorder, COLORREF color)
 
 void CScrollWndMsg::SetFont(int nHeight, LPCTSTR lpszFaceName)
 {
-	CFont cfont;
+	HFONT hfont;
 
 	LOGFONT lf;
-	memset(&lf, 0x0, sizeof(LOGFONT));
+	ZeroMemory(&lf, sizeof(lf));
 
 	lf.lfHeight = nHeight;
+	lf.lfWeight = FW_BOLD;
 	_tcscpy_s(lf.lfFaceName, lpszFaceName);
 
-	VERIFY(cfont.CreateFontIndirect(&lf));
-	//m_cFont = (HFONT)cfont.m_hObject;
+	hfont = CreateFontIndirect(&lf);
+	if (m_pFont != NULL && m_pFont->m_hObject)
+	{
+		m_pFont->DeleteObject();
+	}
+	
+	m_pFont = CFont::FromHandle(hfont);
+	m_bRefreshText = TRUE;
+	Invalidate(TRUE);
 }
 
 void CScrollWndMsg::SetWndText(LPCTSTR lpszWndText, COLORREF color)
