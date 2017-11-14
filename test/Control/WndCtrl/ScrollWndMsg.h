@@ -1,6 +1,8 @@
 #ifndef __SCROLLWNDMSG_H__
 #define __SCROLLWNDMSG_H__
 
+#define ID_TEXTSCROLL_TIMER		0x1001
+
 typedef struct _STRUCT_ICONS
 {
 	HICON		hIcon;
@@ -8,6 +10,7 @@ typedef struct _STRUCT_ICONS
 	DWORD		dwHeight;
 }STRUCT_ICONS;
 
+//
 class CScrollWndMsg : public CWnd
 {
 public:
@@ -22,6 +25,7 @@ protected:
 	afx_msg BOOL				OnEraseBkgnd(CDC* pDC);
 	afx_msg void				OnShowWindow(BOOL bShow, UINT nStatus);
 
+	afx_msg void				OnTimer(UINT nIDEvent);
 	afx_msg void 				OnMouseMove(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 
@@ -38,7 +42,7 @@ public:
 	void						SetWndBorder(BOOL bWndBorder, COLORREF color = NULL);
 
 	void						SetFont(int nHeight, LPCTSTR lpszFaceName);
-	void						SetWndText(LPCTSTR lpszWndText, COLORREF color = NULL);
+	void						SetWndText(LPCTSTR lpszWndText, CONST RECT *lprcText = NULL, COLORREF color = NULL);
 	void						SetTextColor(COLORREF clrNormalText, COLORREF clrSelText);
 	void						SetWndTipText(LPCTSTR lpszWndTipText, COLORREF color = NULL);
 
@@ -54,12 +58,14 @@ protected:
 	void						DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText);
 
 protected:
+	UINT						m_nTimer;
 	UINT						m_nWndId;
 	DWORD						m_dwStyple;
 	
 	CBitmap*					m_pBkBitmap;
 	CFont*						m_pFont;
 
+	CRect						m_rcText;
 	STRUCT_ICONS				m_csIcons[2];
 	
 private:

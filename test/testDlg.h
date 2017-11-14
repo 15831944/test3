@@ -9,29 +9,27 @@
 #include "Dialog/DlgTest2Wnd.h"
 #include "Dialog/DlgTest3Wnd.h"
 #include "Dialog/DlgTest4Wnd.h"
+
+#include "./Inc/common/ETSLayout.h"
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
-class CAboutDlg : public CDialog
+class CAboutDlg : public ETSLayoutDialog
 {
 public:
 	CAboutDlg();
+	DECLARE_LAYOUT();
 
-	//{{AFX_DATA(CAboutDlg)
+public:
+	BOOL	InitLayout();
+
+public:
 	enum { IDD = IDD_ABOUTBOX };
-	//}}AFX_DATA
 
-	//{{AFX_VIRTUAL(CAboutDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);     
-	//}}AFX_VIRTUAL
-
-
-protected:
-	//{{AFX_MSG(CAboutDlg)
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnInitDialog();
+	DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////

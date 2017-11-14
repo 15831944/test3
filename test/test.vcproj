@@ -808,6 +808,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Inc\common\ETSLayout.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\common\ETSLayout.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\common\ShellClass.cpp"
 					>
 				</File>

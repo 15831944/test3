@@ -3,6 +3,7 @@
 
 CScrollWndMsg::CScrollWndMsg()
 {
+	m_nTimer   = 0;
 	m_nWndId   = 0;
 	m_dwStyple = 0;
 	m_nTextStartX = 0;
@@ -22,6 +23,7 @@ CScrollWndMsg::CScrollWndMsg()
 
 	m_pBkBitmap = NULL;
 	m_pFont     = NULL;
+	m_rcText.SetRectEmpty();
 
 	m_clrWndBk = RGB(50,150,200);
 	m_clrWndBorder = RGB(50,150,200);
@@ -52,6 +54,7 @@ BEGIN_MESSAGE_MAP(CScrollWndMsg, CWnd)
 	ON_WM_ERASEBKGND()
 	ON_WM_SHOWWINDOW()
 
+	ON_WM_TIMER()
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
@@ -176,6 +179,21 @@ void CScrollWndMsg::OnShowWindow(BOOL bShow, UINT nStatus)
 	CWnd::OnShowWindow(bShow, nStatus);
 }
 
+void CScrollWndMsg::OnTimer(UINT nIDEvent) 
+{
+	switch(nIDEvent)
+	{
+	case ID_TEXTSCROLL_TIMER:
+		{
+
+		}
+		break;
+	default:
+		break;
+	}
+	CWnd::OnTimer(nIDEvent);
+}
+
 void CScrollWndMsg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CWnd::OnMouseMove(nFlags, point);
@@ -239,6 +257,7 @@ BOOL CScrollWndMsg::Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, 
 		return FALSE;
 	}
 
+	m_nTimer = SetTimer(ID_TEXTSCROLL_TIMER, 1000, NULL);
 	return TRUE;
 }
 
@@ -294,9 +313,28 @@ void CScrollWndMsg::SetFont(int nHeight, LPCTSTR lpszFaceName)
 	Invalidate(TRUE);
 }
 
-void CScrollWndMsg::SetWndText(LPCTSTR lpszWndText, COLORREF color)
+void CScrollWndMsg::SetWndText(LPCTSTR lpszWndText, CONST RECT *lprcText, COLORREF color)
 {
-	m_strWndText = lpszWndText;
+	CRect rcText;
+	if (lpszWndText == NULL || *lpszWndText == '\0')
+	{
+		return;
+	}
+
+	if (strcmp(lpszWndText, m_strWndText.GetBuffer(0)) != 0)
+	{
+		m_strWndText = lpszWndText;
+	}
+	
+	if (lprcText != NULL)
+	{
+		rcText = lprcText;
+		if (!rcText.EqualRect(&m_rcText))
+		{
+			m_rcText = lprcText;
+		}
+	}
+	
 	m_clrNormalText = color;
 }
 

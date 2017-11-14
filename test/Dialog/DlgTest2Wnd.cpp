@@ -174,7 +174,7 @@ BOOL CDlgTest2Wnd::InitCtrl()
 	strTextInfo = _T("this is a test!");
 
 	m_dlgScrollWnd.SetWndBkColor(RGB(0, 51, 102));
-	m_dlgScrollWnd.SetWndText(strTextInfo, RGB(255, 0, 0));
+	m_dlgScrollWnd.SetWndText(strTextInfo, NULL, RGB(255, 0, 0));
 	return TRUE;
 }
 

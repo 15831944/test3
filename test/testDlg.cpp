@@ -10,30 +10,33 @@ static char THIS_FILE[] = __FILE__;
 
 //////////////////////////////////////////////////////////////////////////
 //                
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg() : ETSLayoutDialog(CAboutDlg::IDD)
 {
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	//}}AFX_DATA_MAP
+	ETSLayoutDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-	//}}AFX_MSG_MAP
+BEGIN_MESSAGE_MAP(CAboutDlg, ETSLayoutDialog)
 END_MESSAGE_MAP()
-
 
 BOOL CAboutDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
-
+	ETSLayoutDialog::OnInitDialog();
+	//InitLayout();
 	return TRUE; 
+}
+
+BOOL CAboutDlg::InitLayout()
+{
+	CreateRoot(VERTICAL)
+		<< item(IDC_BUTTON1, GREEDY)
+		<< item(IDC_BUTTON2, GREEDY);
+	UpdateLayout();
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
