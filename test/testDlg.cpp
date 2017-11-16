@@ -10,34 +10,46 @@ static char THIS_FILE[] = __FILE__;
 
 //////////////////////////////////////////////////////////////////////////
 //                
-CAboutDlg::CAboutDlg() : ETSLayoutDialog(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 {
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	ETSLayoutDialog::DoDataExchange(pDX);
+	CDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, ETSLayoutDialog)
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
 BOOL CAboutDlg::OnInitDialog()
 {
-	ETSLayoutDialog::OnInitDialog();
-	//InitLayout();
+	CDialog::OnInitDialog();
+
+	m_hResizeCtrl.Create(this, FALSE);
+	m_hResizeCtrl.SetEnabled(TRUE);
+
+	CResizeInfo hSizeInfo[] = 
+	{
+		{IDC_BUTTON1, 0, 0, 100, 50},
+		{IDC_BUTTON2, 0, 50, 100, 50},
+		{0},
+	};
+	m_hResizeCtrl.Add(hSizeInfo);
+	m_hResizeCtrl.SetMinimumTrackingSize();
+
 	return TRUE; 
 }
 
-BOOL CAboutDlg::InitLayout()
-{
-	CreateRoot(VERTICAL)
-		<< item(IDC_BUTTON1, GREEDY)
-		<< item(IDC_BUTTON2, GREEDY);
-	UpdateLayout();
-
-	return TRUE;
-}
+// BOOL CAboutDlg::InitLayout()
+// {
+// 	CreateRoot(VERTICAL)
+// 		<< item(IDC_BUTTON1, GREEDY)
+// 		<< item(IDC_BUTTON2, GREEDY);
+// 	UpdateLayout();
+// 
+// 	return TRUE;
+// }
 
 /////////////////////////////////////////////////////////////////////////////
 // CTestDlg dialog

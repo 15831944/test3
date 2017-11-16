@@ -11,17 +11,14 @@
 #include "Dialog/DlgTest4Wnd.h"
 
 #include "./Inc/common/ETSLayout.h"
+#include "./Inc/common/ResizeCtrl.h"
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
-class CAboutDlg : public ETSLayoutDialog
+class CAboutDlg : public CDialog
 {
 public:
 	CAboutDlg();
-	DECLARE_LAYOUT();
-
-public:
-	BOOL	InitLayout();
 
 public:
 	enum { IDD = IDD_ABOUTBOX };
@@ -30,6 +27,9 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);     
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	CResizeCtrl	m_hResizeCtrl;
 };
 
 /////////////////////////////////////////////////////////////////////////////

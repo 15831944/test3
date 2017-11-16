@@ -816,6 +816,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Inc\common\ResizeCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\common\ResizeCtrl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\common\ShellClass.cpp"
 					>
 				</File>
