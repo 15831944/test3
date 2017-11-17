@@ -10,22 +10,32 @@ static char THIS_FILE[] = __FILE__;
 
 //////////////////////////////////////////////////////////////////////////
 //                
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg() : CResizableDialog(CAboutDlg::IDD)
 {
+	m_bInited = FALSE;
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CResizableDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+BEGIN_MESSAGE_MAP(CAboutDlg, CResizableDialog)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 BOOL CAboutDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	CResizableDialog::OnInitDialog();
 
+#if 0
+	CreateRoot(VERTICAL)
+		<< item(IDC_BUTTON1, GREEDY)
+		<< item(IDC_BUTTON2, GREEDY);
+	UpdateLayout();
+#endif
+
+#if 0
 	m_hResizeCtrl.Create(this, FALSE);
 	m_hResizeCtrl.SetEnabled(TRUE);
 
@@ -37,19 +47,46 @@ BOOL CAboutDlg::OnInitDialog()
 	};
 	m_hResizeCtrl.Add(hSizeInfo);
 	m_hResizeCtrl.SetMinimumTrackingSize();
+#endif
+	
+#if 1
+	ShowSizeGrip(FALSE);
+	AddAnchor( IDC_BUTTON1, MIDDLE_CENTER, MIDDLE_CENTER );
+	AddAnchor( IDC_BUTTON2, MIDDLE_CENTER, MIDDLE_CENTER );
+#endif
 
+	m_bInited = TRUE;
+	MoveWindow(0, 0, 1024, 768);
+
+	CenterWindow();
 	return TRUE; 
 }
 
-// BOOL CAboutDlg::InitLayout()
-// {
-// 	CreateRoot(VERTICAL)
-// 		<< item(IDC_BUTTON1, GREEDY)
-// 		<< item(IDC_BUTTON2, GREEDY);
-// 	UpdateLayout();
-// 
-// 	return TRUE;
-// }
+void CAboutDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CResizableDialog::OnSize(nType, cx, cy);
+
+	if (!m_bInited)
+	{
+		return;
+	}
+
+	AdjustChildWndSize();
+}
+
+void CAboutDlg::AdjustChildWndSize()
+{
+	int nWndCtrlId = 0;
+
+	HWND  hWndChild=::GetWindow(m_hWnd,GW_CHILD);
+	while(hWndChild)
+	{
+		nWndCtrlId = ::GetDlgCtrlID(hWndChild);
+		AddAnchor(nWndCtrlId, MIDDLE_CENTER, MIDDLE_CENTER);
+
+		hWndChild=::GetWindow(hWndChild, GW_HWNDNEXT);
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CTestDlg dialog

@@ -816,6 +816,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Inc\common\ResizableDialog.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\common\ResizableDialog.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\common\ResizeCtrl.cpp"
 					>
 				</File>

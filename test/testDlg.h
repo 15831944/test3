@@ -12,10 +12,11 @@
 
 #include "./Inc/common/ETSLayout.h"
 #include "./Inc/common/ResizeCtrl.h"
+#include "./Inc/common/ResizableDialog.h"
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
-class CAboutDlg : public CDialog
+class CAboutDlg : public CResizableDialog//public CDialog
 {
 public:
 	CAboutDlg();
@@ -28,8 +29,14 @@ protected:
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+
 protected:
-	CResizeCtrl	m_hResizeCtrl;
+	void			AdjustChildWndSize();
+
+protected:
+	//CResizeCtrl	m_hResizeCtrl;
+	BOOL			m_bInited;
 };
 
 /////////////////////////////////////////////////////////////////////////////
