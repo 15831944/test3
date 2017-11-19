@@ -185,7 +185,8 @@ void CScrollWndMsg::OnTimer(UINT nIDEvent)
 	{
 	case ID_TEXTSCROLL_TIMER:
 		{
-
+			m_bRefreshText = TRUE;
+			Invalidate(TRUE);
 		}
 		break;
 	default:
@@ -204,6 +205,10 @@ void CScrollWndMsg::OnMouseMove(UINT nFlags, CPoint point)
 void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 {
 	CRect rcText;
+	static CRect rcLeftText;
+	static CRect rcRightText;
+
+	int nTextLen = 0;
 	int nTextHeight = 0;
 	
 	CPen BorderPen, *pOldPen(NULL);
@@ -224,6 +229,36 @@ void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 		return;
 	}
 
+	nTextLen = strlen(lpszText);
+
+	if (nTextLen < pWndRect->Width())
+	{
+	}
+	else
+	{
+
+	}
+
+	if (rcLeftText.IsRectEmpty())
+	{
+		rcLeftText.CopyRect(pWndRect);
+		rcText.CopyRect(rcLeftText);
+	}
+	else
+	{
+		rcLeftText.left = rcLeftText.left - 1;
+		rcText.CopyRect(rcLeftText);
+	}
+
+	nTextHeight = pDC->DrawText(lpszText, rcText, DT_CALCRECT | DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+	rcText.CopyRect(rcLeftText);
+
+	if (rcLeftText.Height() > nTextHeight)
+	{
+		//rcText.OffsetRect(0, (rcLeftText.Height()-nTextHeight)/2);
+		rcText.top += (rcLeftText.Height() - nTextHeight)/2;
+	}
+
 // 	pen.CreatePen(PS_SOLID, 1, m_clrWndBorder);
 // 	pOldPen = pDC->SelectObject(&pen);
 
@@ -234,17 +269,7 @@ void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(m_clrNormalText);
-
-	rcText.CopyRect(pWndRect);
-	nTextHeight = pDC->DrawText(lpszText, rcText, DT_CALCRECT | DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
-	rcText.CopyRect(pWndRect);
-
-	if (pWndRect->Height() > nTextHeight)
-	{
-		rcText.OffsetRect(0, (pWndRect->Height()-nTextHeight)/2);
-		//rcText.top += (pWndRect->Height() - nTextHeight)/2;
-	}
-
+	
 	pDC->DrawText(lpszText, rcText, DT_CENTER|DT_EDITCONTROL|DT_WORDBREAK);
 	pDC->SelectObject(pOldFont);
 }
@@ -257,7 +282,7 @@ BOOL CScrollWndMsg::Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, 
 		return FALSE;
 	}
 
-	m_nTimer = SetTimer(ID_TEXTSCROLL_TIMER, 1000, NULL);
+	m_nTimer = SetTimer(ID_TEXTSCROLL_TIMER, 50, NULL);
 	return TRUE;
 }
 
