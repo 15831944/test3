@@ -246,7 +246,7 @@ void CScrollWndMsg::DrawEdge1(CDC* pDC, CRect* pWndRect, LPCTSTR lpszText)
 	}
 	else
 	{
-		rcLeftText.left = rcLeftText.left - 1;
+		rcLeftText.left = rcLeftText.left - 30;
 		rcText.CopyRect(rcLeftText);
 	}
 
@@ -282,7 +282,7 @@ BOOL CScrollWndMsg::Create(DWORD dwStyle, const CRect &pWndRect, CWnd* pParent, 
 		return FALSE;
 	}
 
-	m_nTimer = SetTimer(ID_TEXTSCROLL_TIMER, 50, NULL);
+	m_nTimer = SetTimer(ID_TEXTSCROLL_TIMER, 0, NULL);
 	return TRUE;
 }
 

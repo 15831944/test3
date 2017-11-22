@@ -73,6 +73,14 @@ typedef struct{
 	DWORD			dwProcessID;
 }HT_ENUM_WNDINFO;
 
+typedef struct{
+	USHORT			usTransId;
+	USHORT			usFlag;
+	USHORT			usQuestionCount;
+	USHORT			usAnswerCount;
+	USHORT			usAuthorityCount;
+	USHORT			usAdditionalCount;
+}HT_DNS_HEADER;
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);

@@ -45,6 +45,23 @@ CString CGlobalInfo::GetAppPath()
 	return strAppPath;
 }
 
+void CGlobalInfo::test1()
+{
+	unsigned int uDNSEncode = 0;
+	char* pszDomain = _T("www.baidu.com");
+
+	uDNSEncode = strlen(pszDomain) + 2;
+
+// 	char* pszDNSEncode = new char[uDNSEncode];
+// 	if (pszDNSEncode == NULL)
+// 	{
+// 		return;
+// 	}
+// 	memset(pszDNSEncode, 0x0, uDNSEncode);
+
+	SendDNSRequest(NULL, "www.baidu.com");
+}
+
 int CGlobalInfo::StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag)
 {
 	unsigned char* pSrc = (unsigned char*)szSrc;
@@ -529,6 +546,13 @@ bool CGlobalInfo::GetDiskInfo(unsigned int nDrvIndex, char szArrayModelNo[MAX_PA
 	return true;
 }
 
+bool CGlobalInfo::DNSLookupInfo()
+{
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
 bool CGlobalInfo::DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned)
 {
 	pSCIP->cBufferSize = IDENTIFY_BUFFER_SIZE;
@@ -604,5 +628,180 @@ bool CGlobalInfo::ToLittleEndian(PDWORD pDiskData, int nFirstIndex, int nLastInd
 		strcpy(pResBuf, szBuf);
 	}
 
+	return true;
+}
+
+bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDomainName)
+{
+	bool bRet = false;
+
+	unsigned int uQType = 0;
+	unsigned int uQClass = 0;
+	
+	unsigned int uCurProcId = 0;
+	unsigned int uDNSPacketSize = 0;
+	unsigned int uDomainNameLen = 0;
+	unsigned int uDNSEncodeNameLen = 0;
+
+	const short nDNS_TYPE_LEN = 2;
+	const short nDNS_CLASS_LEN = 2;
+	const short nMAX_DOMAINNAME_LEN = MAX_PATH;
+	const short nDNS_PACKET_LEN = (sizeof(HT_DNS_HEADER) + nMAX_DOMAINNAME_LEN + nDNS_TYPE_LEN + nDNS_CLASS_LEN);
+
+	char *pszDNSPacket = NULL;
+	char *pszDNSEncodeName = NULL;
+	HT_DNS_HEADER *pDNSHeader = NULL;
+
+	if (pszDNSServerAddr == NULL || *pszDNSServerAddr == '\0')
+	{
+		return false;
+	}
+
+	if (pszDomainName == NULL || *pszDomainName == '\0')
+	{
+		return false;
+	}
+
+	do 
+	{
+		//
+		uDomainNameLen = strlen(pszDomainName);
+		uDNSEncodeNameLen = uDomainNameLen + 2;
+
+		//DNS◊È∞¸
+		pszDNSPacket = new(std::nothrow)char(nDNS_PACKET_LEN);
+		if (pszDNSPacket == NULL)
+		{
+			bRet = false;
+			break;
+		}
+		memset(pszDNSPacket, 0x0, nDNS_PACKET_LEN);
+
+		pDNSHeader = (HT_DNS_HEADER*)pszDNSPacket;
+		uCurProcId = (unsigned int)GetCurrentProcessId();
+		pDNSHeader->usTransId = uCurProcId;
+		pDNSHeader->usFlag = htons(0x0100);
+		pDNSHeader->usQuestionCount = htons(0x0001);
+		pDNSHeader->usAnswerCount = 0x0000;
+		pDNSHeader->usAuthorityCount = 0x0000;
+		pDNSHeader->usAdditionalCount = 0x0000;
+
+		uQType = htons(0x0001);
+		uQClass = htons(0x0001);
+
+		//”Ú√˚±‡¬Î
+		pszDNSEncodeName = new char[uDNSEncodeNameLen];
+		if (pszDNSEncodeName == NULL)
+		{
+			bRet = false;
+			break;
+		}
+		memset(pszDNSEncodeName, 0x0, uDNSEncodeNameLen);
+
+		if (!DNSEncodeString(pszDomainName, pszDNSEncodeName, &uDNSEncodeNameLen))
+		{
+			bRet = false;
+			break;
+		}
+
+		memcpy(pszDNSPacket += sizeof(HT_DNS_HEADER), pszDNSEncodeName, uDNSEncodeNameLen);
+		memcpy(pszDNSPacket += uDNSEncodeNameLen, (char*)(&uQType), nDNS_TYPE_LEN);
+		memcpy(pszDNSPacket += nDNS_TYPE_LEN, (char*)(&uQClass), nDNS_CLASS_LEN);
+
+		uDNSPacketSize = sizeof(HT_DNS_HEADER) + uDNSEncodeNameLen + nDNS_TYPE_LEN + nDNS_CLASS_LEN;
+
+	} while (false);
+
+	if (pszDNSEncodeName != NULL)
+	{
+		delete[] pszDNSEncodeName;
+		pszDNSEncodeName = NULL;
+	}
+
+	if (pszDNSPacket != NULL)
+	{
+		delete pszDNSPacket;
+		pszDNSPacket = NULL;
+	}
+
+	return bRet;
+}
+
+bool CGlobalInfo::RecvDNSResponse()
+{
+	return true;
+}
+
+bool CGlobalInfo::DNSEncodeString(const char* pszDomainName, char* pszDNSEncode, unsigned int *puDNSEncodeLen)
+{
+	unsigned int uBufferLen = 0;
+	unsigned int uDNSLabelLen = 0;
+	unsigned int uDNSEncodeLen = 0;
+	unsigned int uDomainNameLen = 0;
+
+	const short nMAX_STRING_LEN = 64;
+	const short nMAX_LABEL_LEN  = MAX_PATH;
+	const short nMAX_ENCODE_LEN = MAX_PATH;
+
+	char szBuffer[nMAX_STRING_LEN]  = {0};
+	char szDNSLabel[nMAX_LABEL_LEN] = {0};
+	char szDNSEncode[nMAX_ENCODE_LEN] = {0};
+	
+	char szSeps[] = _T(".");
+
+	LPTSTR pszDNSToken = NULL;
+	LPTSTR pszDNSNextToken = NULL;
+
+	if (pszDomainName == NULL || *pszDomainName == '\0')
+	{
+		return false;
+	}
+
+	if (pszDNSEncode == NULL || *puDNSEncodeLen == NULL)
+	{
+		return false;
+	}
+
+	uDomainNameLen = strlen(pszDomainName);
+	StringCchCopy(szDNSLabel, nMAX_LABEL_LEN-1, pszDomainName);
+
+	pszDNSToken = _tcstok_s(szDNSLabel, szSeps, &pszDNSNextToken);
+	if (*pszDNSNextToken == 32)
+	{
+		pszDNSNextToken++;
+	}
+
+	while (pszDNSToken != NULL)
+	{	
+		if (*pszDNSToken != '\0')
+		{
+			memset(szBuffer, 0x0, nMAX_STRING_LEN);
+
+			uDNSLabelLen = strlen(pszDNSToken);
+			sprintf(szBuffer, _T("%c%s"), uDNSLabelLen, pszDNSToken);
+			
+			uBufferLen = strlen(szBuffer);
+			memcpy(szDNSEncode+uDNSEncodeLen, szBuffer, uBufferLen);
+			uDNSEncodeLen += uBufferLen;
+		}
+
+		if (*pszDNSNextToken == 32)
+		{
+			pszDNSNextToken++;
+		}
+
+		pszDNSToken  = _tcstok_s(NULL, szSeps, &pszDNSNextToken);
+	}
+
+	szDNSEncode[uDNSEncodeLen+1] = '\0';
+	uDNSEncodeLen += 1;
+
+	if (*puDNSEncodeLen < uDNSEncodeLen)
+	{
+		return false;
+	}
+
+	*puDNSEncodeLen = uDNSEncodeLen;
+	memcpy(pszDNSEncode, szDNSEncode, uDNSEncodeLen);
 	return true;
 }

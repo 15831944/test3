@@ -302,7 +302,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	}
 #endif
 
-#if 1
+#if 0
 	CString strDiskInfo;
 	unsigned int nDrvIndex = 0;
 	
@@ -427,6 +427,15 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	}
 #endif
 	
+#if 1
+	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
+	if (pGlobal == NULL)
+	{
+		return;
+	}
+
+	pGlobal->test1();
+#endif
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
