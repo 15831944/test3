@@ -38,13 +38,15 @@ protected:
 	bool							DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned);
 	bool							ToLittleEndian(PDWORD pDiskData, int nFirstIndex, int nLastIndex, char* pResBuf, int &nResBufLen);
 
-	bool							SendDNSRequest(const char* pszDNSServerAddr, const char* pszDomainName);
-	bool							RecvDNSResponse();
+	bool							SendDNSRequest(const char *pszDNSServerAddr, const char *pszDomainName);
+	bool							RecvDNSResponse(const char *pszDNSServerIp, HANDLE hEvent, SOCKET hSocket);
 
-	bool							DNSEncodeString(const char* pszDomainName, char* pszDNSEncode, unsigned int *puDNSEncodeLen);
+	bool							DNSEncodeString(const char *pszDomainName, char *pszDNSEncodeName, unsigned int *puDNSEncodeNameLen);
+	bool							DNSDecodeString(const char *pszDNSEncodeName, char *pszDomainName, unsigned int *puDNSDomainNameLen, unsigned int *puDNSEncodeNameLen, char *pszPacketPos = NULL);
 
 private:
 	static  CGlobalInfo*			m_pGlobal;
+	SOCKET							m_hSocket;
 };
 
 #endif

@@ -6,10 +6,13 @@
 CGlobalInfo* CGlobalInfo::m_pGlobal = NULL;
 CGlobalInfo::CGlobalInfo(void)
 {
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
 }
 
 CGlobalInfo::~CGlobalInfo(void)
 {
+	WSACleanup();
 }
 
 CGlobalInfo* CGlobalInfo::CreateInstance()
@@ -47,19 +50,15 @@ CString CGlobalInfo::GetAppPath()
 
 void CGlobalInfo::test1()
 {
-	unsigned int uDNSEncode = 0;
-	char* pszDomain = _T("www.baidu.com");
+	m_hSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	if (m_hSocket == INVALID_SOCKET)
+	{
+		return;
+	}
 
-	uDNSEncode = strlen(pszDomain) + 2;
-
-// 	char* pszDNSEncode = new char[uDNSEncode];
-// 	if (pszDNSEncode == NULL)
-// 	{
-// 		return;
-// 	}
-// 	memset(pszDNSEncode, 0x0, uDNSEncode);
-
-	SendDNSRequest(NULL, "www.baidu.com");
+	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	SendDNSRequest("192.168.2.222", "www.baidu.com");
+	RecvDNSResponse("192.168.2.222", hEvent, m_hSocket);
 }
 
 int CGlobalInfo::StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag)
@@ -631,14 +630,13 @@ bool CGlobalInfo::ToLittleEndian(PDWORD pDiskData, int nFirstIndex, int nLastInd
 	return true;
 }
 
-bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDomainName)
+bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerIp, const char* pszDomainName)
 {
 	bool bRet = false;
 
 	unsigned int uQType = 0;
 	unsigned int uQClass = 0;
 	
-	unsigned int uCurProcId = 0;
 	unsigned int uDNSPacketSize = 0;
 	unsigned int uDomainNameLen = 0;
 	unsigned int uDNSEncodeNameLen = 0;
@@ -648,11 +646,11 @@ bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDo
 	const short nMAX_DOMAINNAME_LEN = MAX_PATH;
 	const short nDNS_PACKET_LEN = (sizeof(HT_DNS_HEADER) + nMAX_DOMAINNAME_LEN + nDNS_TYPE_LEN + nDNS_CLASS_LEN);
 
+	HT_DNS_HEADER stDNSHeader;
 	char *pszDNSPacket = NULL;
 	char *pszDNSEncodeName = NULL;
-	HT_DNS_HEADER *pDNSHeader = NULL;
-
-	if (pszDNSServerAddr == NULL || *pszDNSServerAddr == '\0')
+	
+	if (pszDNSServerIp == NULL || *pszDNSServerIp == '\0')
 	{
 		return false;
 	}
@@ -662,6 +660,11 @@ bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDo
 		return false;
 	}
 
+	sockaddr_in sockAddrDNSServer;
+	sockAddrDNSServer.sin_family = AF_INET; 
+	sockAddrDNSServer.sin_port = htons( 53 );
+	sockAddrDNSServer.sin_addr.s_addr = inet_addr(pszDNSServerIp);
+
 	do 
 	{
 		//
@@ -669,7 +672,7 @@ bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDo
 		uDNSEncodeNameLen = uDomainNameLen + 2;
 
 		//DNS组包
-		pszDNSPacket = new(std::nothrow)char(nDNS_PACKET_LEN);
+		pszDNSPacket = new char[nDNS_PACKET_LEN];	//(std::nothrow)
 		if (pszDNSPacket == NULL)
 		{
 			bRet = false;
@@ -677,14 +680,13 @@ bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDo
 		}
 		memset(pszDNSPacket, 0x0, nDNS_PACKET_LEN);
 
-		pDNSHeader = (HT_DNS_HEADER*)pszDNSPacket;
-		uCurProcId = (unsigned int)GetCurrentProcessId();
-		pDNSHeader->usTransId = uCurProcId;
-		pDNSHeader->usFlag = htons(0x0100);
-		pDNSHeader->usQuestionCount = htons(0x0001);
-		pDNSHeader->usAnswerCount = 0x0000;
-		pDNSHeader->usAuthorityCount = 0x0000;
-		pDNSHeader->usAdditionalCount = 0x0000;
+		memset(&stDNSHeader, 0x0, sizeof(HT_DNS_HEADER));
+		stDNSHeader.usTransId = GetCurrentProcessId();
+		stDNSHeader.usFlag = htons(0x0100);
+		stDNSHeader.usQuestionCount = htons(0x0001);
+		stDNSHeader.usAnswerCount = 0x0000;
+		stDNSHeader.usAuthorityCount = 0x0000;
+		stDNSHeader.usAdditionalCount = 0x0000;
 
 		uQType = htons(0x0001);
 		uQClass = htons(0x0001);
@@ -704,12 +706,23 @@ bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDo
 			break;
 		}
 
-		memcpy(pszDNSPacket += sizeof(HT_DNS_HEADER), pszDNSEncodeName, uDNSEncodeNameLen);
-		memcpy(pszDNSPacket += uDNSEncodeNameLen, (char*)(&uQType), nDNS_TYPE_LEN);
-		memcpy(pszDNSPacket += nDNS_TYPE_LEN, (char*)(&uQClass), nDNS_CLASS_LEN);
+		uDNSPacketSize = 0;
+		memcpy(pszDNSPacket+uDNSPacketSize, &stDNSHeader, sizeof(HT_DNS_HEADER));
+		uDNSPacketSize += sizeof(HT_DNS_HEADER);
+		memcpy(pszDNSPacket+uDNSPacketSize, pszDNSEncodeName, uDNSEncodeNameLen+1);
+		uDNSPacketSize += uDNSEncodeNameLen+1;
+		memcpy(pszDNSPacket+uDNSPacketSize, (char*)(&uQType),  nDNS_TYPE_LEN);
+		uDNSPacketSize += nDNS_TYPE_LEN;
+		memcpy(pszDNSPacket+uDNSPacketSize, (char*)(&uQClass), nDNS_CLASS_LEN);
+		uDNSPacketSize += nDNS_CLASS_LEN;
 
-		uDNSPacketSize = sizeof(HT_DNS_HEADER) + uDNSEncodeNameLen + nDNS_TYPE_LEN + nDNS_CLASS_LEN;
+		if (sendto(m_hSocket, pszDNSPacket, uDNSPacketSize, 0, (sockaddr*)&sockAddrDNSServer, sizeof(sockAddrDNSServer)) == SOCKET_ERROR)
+		{
+			bRet = false;
+			break;
+		}
 
+		bRet = true;
 	} while (false);
 
 	if (pszDNSEncodeName != NULL)
@@ -720,19 +733,137 @@ bool CGlobalInfo::SendDNSRequest(const char* pszDNSServerAddr, const char* pszDo
 
 	if (pszDNSPacket != NULL)
 	{
-		delete pszDNSPacket;
+		delete[] pszDNSPacket;
 		pszDNSPacket = NULL;
 	}
 
 	return bRet;
 }
 
-bool CGlobalInfo::RecvDNSResponse()
+bool CGlobalInfo::RecvDNSResponse(const char *pszDNSServerIp, HANDLE hEvent, SOCKET hSocket)
 {
+	int ret = 0;
+	unsigned int uDomainNameLen = 0;
+	unsigned int uDNSEncodeNameLen = 0;
+
+	fd_set fdRead;
+	struct timeval tv;
+
+	const short nDNS_DOMAIN_LEN = MAX_PATH;
+	const short nDNS_BUFFER_LEN = 1024;
+	const short nDNS_TYPE_LEN = 2;
+	const short nDNS_CLASS_LEN = 2;
+
+	char recvbuf[nDNS_BUFFER_LEN] = {0};
+	char szDomainName[nDNS_DOMAIN_LEN] = {0};
+
+	if (pszDNSServerIp == NULL || *pszDNSServerIp == '\0')
+	{
+		return false;
+	}
+
+	if (hEvent == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+
+	if (hSocket == INVALID_SOCKET)
+	{
+		return false;
+	}
+
+	sockaddr_in sockAddrDNSServer;
+	sockAddrDNSServer.sin_family = AF_INET; 
+	sockAddrDNSServer.sin_port = htons( 53 );
+	sockAddrDNSServer.sin_addr.s_addr = inet_addr(pszDNSServerIp);
+
+	tv.tv_sec = 1;
+	tv.tv_usec = 500;
+
+	USHORT usQuestionCount = 0;
+	USHORT usAnswerCount = 0;
+
+	USHORT nsEncodedNameLen = 0;
+	USHORT usTransId = GetCurrentProcessId();
+
+	while (1)
+	{
+		if (WaitForSingleObject(hEvent, 80) != WAIT_OBJECT_0)
+		{
+			FD_ZERO(&fdRead);
+			FD_SET(hSocket, &fdRead);
+
+			ret = select(hSocket+1, &fdRead, NULL, NULL, &tv);
+			if (ret <= 0)
+			{
+				continue;
+			}
+			else
+			{
+				if (FD_ISSET(hSocket, &fdRead))
+				{
+					int nSockaddrDestSize = sizeof(sockAddrDNSServer);
+					memset(recvbuf, 0x0, nDNS_BUFFER_LEN);
+
+					if (recvfrom(hSocket, recvbuf, nDNS_BUFFER_LEN, 0, (struct sockaddr*)&sockAddrDNSServer, &nSockaddrDestSize) != SOCKET_ERROR)
+					{
+						HT_DNS_HEADER *pDNSHeader = (HT_DNS_HEADER*)recvbuf;
+						if (pDNSHeader == NULL)
+						{
+							continue;
+						}
+
+						if (pDNSHeader->usTransId == usTransId
+							&& (ntohs(pDNSHeader->usFlag) & 0xfb7f) == 0x8100
+							&& (usQuestionCount = ntohs(pDNSHeader->usQuestionCount)) >= 0
+							&& (usAnswerCount = ntohs(pDNSHeader->usAnswerCount)) > 0)
+						{
+							char *pDNSData = recvbuf + sizeof(HT_DNS_HEADER);
+							if (pDNSData == NULL)
+							{
+								continue;
+							}
+
+							//解析Question字段
+							for (int i = 0; i != usQuestionCount; ++i)
+							{
+								uDNSEncodeNameLen = 0;
+
+								uDomainNameLen = nDNS_DOMAIN_LEN;
+								memset(szDomainName, 0x0, nDNS_DOMAIN_LEN);
+
+ 								if (!DNSDecodeString(pDNSData, szDomainName, &uDomainNameLen, &uDNSEncodeNameLen))
+								{
+									return false;
+								}
+
+ 								pDNSData += (uDNSEncodeNameLen + nDNS_TYPE_LEN + nDNS_CLASS_LEN);
+							}
+
+							//解析Answer字段
+							for (int i = 0; i != usAnswerCount; ++i)
+							{
+								uDNSEncodeNameLen = 0;
+
+								uDomainNameLen = nDNS_DOMAIN_LEN;
+								memset(szDomainName, 0x0, nDNS_DOMAIN_LEN);
+
+								if (!DNSDecodeString(pDNSData, szDomainName, &uDomainNameLen, &uDNSEncodeNameLen, recvbuf))
+								{
+									return FALSE;
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
 	return true;
 }
 
-bool CGlobalInfo::DNSEncodeString(const char* pszDomainName, char* pszDNSEncode, unsigned int *puDNSEncodeLen)
+bool CGlobalInfo::DNSEncodeString(const char* pszDomainName, char* pszDNSEncodeName, unsigned int *puDNSEncodeNameLen)
 {
 	unsigned int uBufferLen = 0;
 	unsigned int uDNSLabelLen = 0;
@@ -757,7 +888,7 @@ bool CGlobalInfo::DNSEncodeString(const char* pszDomainName, char* pszDNSEncode,
 		return false;
 	}
 
-	if (pszDNSEncode == NULL || *puDNSEncodeLen == NULL)
+	if (pszDNSEncodeName == NULL || *puDNSEncodeNameLen == NULL)
 	{
 		return false;
 	}
@@ -793,15 +924,99 @@ bool CGlobalInfo::DNSEncodeString(const char* pszDomainName, char* pszDNSEncode,
 		pszDNSToken  = _tcstok_s(NULL, szSeps, &pszDNSNextToken);
 	}
 
-	szDNSEncode[uDNSEncodeLen+1] = '\0';
-	uDNSEncodeLen += 1;
-
-	if (*puDNSEncodeLen < uDNSEncodeLen)
+ 	szDNSEncode[uDNSEncodeLen] = '\0';
+	if (*puDNSEncodeNameLen < uDNSEncodeLen)
 	{
 		return false;
 	}
 
-	*puDNSEncodeLen = uDNSEncodeLen;
-	memcpy(pszDNSEncode, szDNSEncode, uDNSEncodeLen);
+	*puDNSEncodeNameLen = uDNSEncodeLen;
+	memcpy(pszDNSEncodeName, szDNSEncode, uDNSEncodeLen);
+	return true;
+}
+
+bool CGlobalInfo::DNSDecodeString(const char *pszDNSEncodeName, char *pszDomainName, unsigned int *puDNSDomainNameLen, unsigned int *puDNSEncodeNameLen, char *pszPacketPos)
+{
+	unsigned int uDNSTokenPos = 0;
+	unsigned int uDNSTokenLen = 0;
+	unsigned int uDNSLabelLen = 0;
+	unsigned int uDNSEncodeLen = 0;
+	unsigned int uDomainNameLen = 0;
+
+	const short nMAX_STRING_LEN = 64;
+	const short nMAX_LABEL_LEN  = MAX_PATH;
+
+	char szBuffer[nMAX_STRING_LEN]  = {0};
+	char szDNSLabel[nMAX_LABEL_LEN];// = {0};
+
+	char* pszDecodeString = NULL;
+
+	if (pszDNSEncodeName == NULL || *pszDNSEncodeName == '\0')
+	{
+		return false;
+	}
+
+	if (pszDomainName == NULL || puDNSDomainNameLen == NULL)
+	{
+		return false;
+	}
+
+	if (puDNSEncodeNameLen == NULL)
+	{
+		return false;
+	}
+
+	pszDecodeString = (char*)pszDNSEncodeName;
+	while(*pszDecodeString != 0x0)
+	{
+		if ((*pszDecodeString & 0xc0) == 0)	//普通格式:
+		{
+			uDNSTokenPos = 0;
+			uDNSTokenLen = *pszDecodeString;
+
+			memcpy(szDNSLabel+uDNSLabelLen, pszDecodeString+1, uDNSTokenLen);
+			uDNSLabelLen += uDNSTokenLen;
+			uDNSTokenPos += uDNSTokenLen;
+			uDNSEncodeLen += uDNSTokenLen;
+
+			memcpy(szDNSLabel+uDNSLabelLen, _T("."), 1);
+			uDNSLabelLen += 1;
+			uDNSTokenPos += 1;
+			uDNSEncodeLen += 1;
+
+			pszDecodeString += uDNSTokenPos;
+		}
+		else
+		{
+			if (pszPacketPos == NULL || pszPacketPos == '\0')
+			{
+				return false;
+			}
+	
+			uDomainNameLen = MAX_PATH;
+			USHORT usJumpPos = ntohs(*(USHORT*)(pszDecodeString)) & 0x3fff;
+			if (!DNSDecodeString(pszPacketPos+usJumpPos, pszDomainName+uDNSLabelLen, &uDomainNameLen, &uDNSEncodeLen, pszPacketPos))
+			{
+				return false;
+			}
+			else
+			{
+				*puDNSEncodeNameLen += 2;
+				return true;
+			}
+		}
+	}
+
+	szDNSLabel[uDNSLabelLen-1] = '\0';
+	uDNSLabelLen -= 1;
+
+	if (*puDNSDomainNameLen < uDNSLabelLen)
+	{
+		return false;
+	}
+	*puDNSDomainNameLen = uDNSLabelLen;
+	strcpy(pszDomainName, szDNSLabel);
+
+	*puDNSEncodeNameLen = uDNSEncodeLen +1;
 	return true;
 }
