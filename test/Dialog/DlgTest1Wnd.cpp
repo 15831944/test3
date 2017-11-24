@@ -6,7 +6,6 @@
 #include "../contrib/VideoWndThread.h"
 
 extern BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
-#include "../s1.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
@@ -435,18 +434,10 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 		return;
 	}
 
-	//pGlobal->test1();
+	char s1[MAX_PATH] = {0};
+	unsigned int n1 = MAX_PATH;
 
-	ULONG ulTimeSpent = 0;
-
-	std::vector<ULONG> veculIPList;
-	std::vector<std::string> vecstrIPList;
-	std::vector<std::string> vecCNameList;
-
-	char szDomainName[] = "www.baidu.com";
-
-	CDNSLookup dnslookup;
-	BOOL bRet = dnslookup.DNSLookup(inet_addr("192.168.2.222"), szDomainName, &vecstrIPList, &vecCNameList, 1000, &ulTimeSpent);
+	pGlobal->DNSLookupInfo("192.168.2.222", "www.baidu.com", s1, &n1);
 #endif
 }
 

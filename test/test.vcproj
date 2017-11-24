@@ -471,10 +471,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\s1.cpp"
-				>
-			</File>
-			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -609,10 +605,6 @@
 			</File>
 			<File
 				RelativePath="Resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\s1.h"
 				>
 			</File>
 			<File

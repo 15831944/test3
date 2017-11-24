@@ -16,7 +16,6 @@ public:
 
 public:
 	CString							GetAppPath();
-	void							test1();
 
 	int								StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag=0);
 	int 							HexStringToBytes(unsigned char* szDesc, const char* szSrc,int nLen);
@@ -32,21 +31,20 @@ public:
 	bool							ConvertToInt(const double &val,int& i);
 	bool							GetDiskInfo(unsigned int nDrvIndex, char szArrayModelNo[MAX_PATH], char szArraySerialNo[MAX_PATH]);
 
-	bool							DNSLookupInfo();
+	bool							DNSLookupInfo(const char *pszDNSServerIp, const char *pszDomainName, char *pszDomainIp, unsigned int *puDomainIpLen);
 
 protected:
 	bool							DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned);
 	bool							ToLittleEndian(PDWORD pDiskData, int nFirstIndex, int nLastIndex, char* pResBuf, int &nResBufLen);
 
-	bool							SendDNSRequest(const char *pszDNSServerAddr, const char *pszDomainName);
-	bool							RecvDNSResponse(const char *pszDNSServerIp, HANDLE hEvent, SOCKET hSocket);
+	bool							SendDNSRequest(SOCKET hSocket, const char *pszDNSServerAddr, const char *pszDomainName);
+	bool							RecvDNSResponse(SOCKET hSocket, HANDLE hEvent, const char *pszDNSServerIp, std::vector<ULONG> *pvecIPList);
 
 	bool							DNSEncodeString(const char *pszDomainName, char *pszDNSEncodeName, unsigned int *puDNSEncodeNameLen);
 	bool							DNSDecodeString(const char *pszDNSEncodeName, char *pszDomainName, unsigned int *puDNSDomainNameLen, unsigned int *puDNSEncodeNameLen, char *pszPacketPos = NULL);
 
 private:
 	static  CGlobalInfo*			m_pGlobal;
-	SOCKET							m_hSocket;
 };
 
 #endif
