@@ -427,7 +427,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	}
 #endif
 	
-#if 1
+#if 0
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
 	{
