@@ -5,25 +5,33 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#ifndef _SECURE_ATL
+#define _SECURE_ATL 1
+#endif
+
+#ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN				// Exclude rarely-used stuff from Windows headers
+#endif
 
 #include <afxwin.h>					// MFC core and standard components
 #include <afxext.h>					// MFC extensions
+
 #include <afxdisp.h>				// MFC Automation classes
+
+#ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>				// MFC support for Internet Explorer 4 Common Controls
+#endif
+
 #ifndef _AFX_NO_AFXCMN_SUPPORT
 #include <afxcmn.h>					// MFC support for Windows Common Controls
 #endif								// _AFX_NO_AFXCMN_SUPPORT
 
-#include <afxcontrolbars.h>     // MFC support for ribbons and control bars
+#include <afxcontrolbars.h>			// MFC support for ribbons and control bars
 
 //////////////////////////////////////////////////////////////////////////
 //
-#include <windows.h>
-
 #pragma comment(lib, "version.lib")
 #pragma warning(disable : 4275 4786 4996)
-
 
 #include "Inc/PubClass.h"
 #include <SkinUI.h>

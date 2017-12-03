@@ -10,82 +10,72 @@ static char THIS_FILE[] = __FILE__;
 
 //////////////////////////////////////////////////////////////////////////
 //                
-CAboutDlg::CAboutDlg() : CResizableDialog(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg() 
+	: CSkinDialog(CAboutDlg::IDD, TEXT("360Safe.xml"))
 {
 	m_bInited = FALSE;
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CResizableDialog::DoDataExchange(pDX);
+	CSkinDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CResizableDialog)
+BEGIN_MESSAGE_MAP(CAboutDlg, CSkinDialog)
+	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_QUERYDRAGICON()
 END_MESSAGE_MAP()
 
 BOOL CAboutDlg::OnInitDialog()
 {
-	CResizableDialog::OnInitDialog();
-
-#if 0
-	CreateRoot(VERTICAL)
-		<< item(IDC_BUTTON1, GREEDY)
-		<< item(IDC_BUTTON2, GREEDY);
-	UpdateLayout();
-#endif
-
-#if 0
-	m_hResizeCtrl.Create(this, FALSE);
-	m_hResizeCtrl.SetEnabled(TRUE);
-
-	CResizeInfo hSizeInfo[] = 
-	{
-		{IDC_BUTTON1, 0, 0, 100, 50},
-		{IDC_BUTTON2, 0, 50, 100, 50},
-		{0},
-	};
-	m_hResizeCtrl.Add(hSizeInfo);
-	m_hResizeCtrl.SetMinimumTrackingSize();
-#endif
+	CSkinDialog::OnInitDialog();
 	
-#if 1
-	ShowSizeGrip(FALSE);
-	AddAnchor( IDC_BUTTON1, MIDDLE_CENTER, MIDDLE_CENTER );
-	AddAnchor( IDC_BUTTON2, MIDDLE_CENTER, MIDDLE_CENTER );
-#endif
-
-	m_bInited = TRUE;
-	MoveWindow(0, 0, 1024, 768);
+	SetIcon(m_hIcon, TRUE);
+	SetIcon(m_hIcon, FALSE);
 
 	CenterWindow();
 	return TRUE; 
 }
 
+void CAboutDlg::OnPaint()
+{
+	if (IsIconic())
+	{
+		CPaintDC dc(this);
+
+		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+
+		int cxIcon = GetSystemMetrics(SM_CXICON);
+		int cyIcon = GetSystemMetrics(SM_CYICON);
+
+		CRect rect;
+		GetClientRect(&rect);
+
+		int x = (rect.Width() - cxIcon + 1) / 2;
+		int y = (rect.Height() - cyIcon + 1) / 2;
+
+		dc.DrawIcon(x, y, m_hIcon);
+	}
+	else
+	{
+		CSkinDialog::OnPaint();
+	}
+}
+
 void CAboutDlg::OnSize(UINT nType, int cx, int cy)
 {
-	CResizableDialog::OnSize(nType, cx, cy);
+	CSkinDialog::OnSize(nType, cx, cy);
 
 	if (!m_bInited)
 	{
 		return;
 	}
-
-	AdjustChildWndSize();
 }
 
-void CAboutDlg::AdjustChildWndSize()
+HCURSOR CAboutDlg::OnQueryDragIcon()
 {
-	int nWndCtrlId = 0;
-
-	HWND  hWndChild=::GetWindow(m_hWnd,GW_CHILD);
-	while(hWndChild)
-	{
-		nWndCtrlId = ::GetDlgCtrlID(hWndChild);
-		AddAnchor(nWndCtrlId, MIDDLE_CENTER, MIDDLE_CENTER);
-
-		hWndChild=::GetWindow(hWndChild, GW_HWNDNEXT);
-	}
+	return static_cast<HCURSOR>(m_hIcon);
 }
 
 /////////////////////////////////////////////////////////////////////////////

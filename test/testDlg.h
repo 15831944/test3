@@ -9,14 +9,10 @@
 #include "Dialog/DlgTest2Wnd.h"
 #include "Dialog/DlgTest3Wnd.h"
 #include "Dialog/DlgTest4Wnd.h"
-
-#include "./Inc/common/ETSLayout.h"
-#include "./Inc/common/ResizeCtrl.h"
-#include "./Inc/common/ResizableDialog.h"
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
-class CAboutDlg : public CResizableDialog//public CDialog
+class CAboutDlg : public CSkinDialog
 {
 public:
 	CAboutDlg();
@@ -25,18 +21,17 @@ public:
 	enum { IDD = IDD_ABOUTBOX };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);     
-	virtual BOOL OnInitDialog();
+	virtual void		DoDataExchange(CDataExchange* pDX);     
+	virtual BOOL		OnInitDialog();
+
+	afx_msg void		OnPaint();
+	afx_msg void		OnSize(UINT nType, int cx, int cy);
+	afx_msg HCURSOR		OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-
 protected:
-	void			AdjustChildWndSize();
-
-protected:
-	//CResizeCtrl	m_hResizeCtrl;
-	BOOL			m_bInited;
+	BOOL				m_bInited;
+	HICON				m_hIcon;
 };
 
 /////////////////////////////////////////////////////////////////////////////
