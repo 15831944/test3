@@ -15,6 +15,8 @@
 #include <afxcmn.h>					// MFC support for Windows Common Controls
 #endif								// _AFX_NO_AFXCMN_SUPPORT
 
+#include <afxcontrolbars.h>     // MFC support for ribbons and control bars
+
 //////////////////////////////////////////////////////////////////////////
 //
 #include <windows.h>
@@ -24,7 +26,21 @@
 
 
 #include "Inc/PubClass.h"
+#include <SkinUI.h>
 
+#ifdef _DEBUG
+#	ifdef _UNICODE
+#		pragma comment (lib,"SkinUI_ud.lib")
+#	else
+#		pragma comment (lib,"SkinUI_d.lib")
+#	endif
+#else
+#	ifdef _UNICODE
+#		pragma comment (lib,"SkinUI_u.lib")
+#	else
+#		pragma comment (lib,"SkinUI.lib")
+#	endif
+#endif
 //////////////////////////////////////////////////////////////////////////
 //
 #ifndef _UNICODE
