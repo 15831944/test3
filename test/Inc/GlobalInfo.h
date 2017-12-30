@@ -16,6 +16,7 @@ public:
 
 public:
 	CString							GetAppPath();
+	bool							IsFileExists(LPCTSTR lpszFilePath);
 
 	int								StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag=0);
 	int 							HexStringToBytes(unsigned char* szDesc, const char* szSrc,int nLen);

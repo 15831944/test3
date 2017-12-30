@@ -27,4 +27,6 @@ protected:
 protected:
 	WavePlayer						m_hWavPlayer;
 	CStackedTreeCtrl				m_hTreeCtrl;
+public:
+	afx_msg void OnBnClickedButton3();
 };

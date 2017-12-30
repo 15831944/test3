@@ -3,6 +3,8 @@
 // Used by test.rc
 //
 #define IDM_ABOUTBOX                    0x0010
+#define IDD_DIALOG5                     153
+#define IDD_PTZ_DIALOG                  153
 #define IDD_ABOUTBOX                    0x0100
 #define IDS_ABOUTBOX                    0x0101
 #define IDD_TEST_DIALOG                 0x0102
@@ -74,7 +76,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        153
+#define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         32807
 #define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101

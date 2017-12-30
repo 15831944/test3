@@ -46,6 +46,21 @@ CString CGlobalInfo::GetAppPath()
 	return strAppPath;
 }
 
+bool CGlobalInfo::IsFileExists(LPCTSTR lpszFilePath)
+{
+	if (lpszFilePath == NULL  || *lpszFilePath == '\0')
+	{
+		return false;
+	}
+
+	if ((_access(lpszFilePath, 0)) == -1)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 int CGlobalInfo::StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag)
 {
 	unsigned char* pSrc = (unsigned char*)szSrc;

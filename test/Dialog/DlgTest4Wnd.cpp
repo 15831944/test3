@@ -3,6 +3,7 @@
 #include "DlgTest4Wnd.h"
 
 #include "../inc/GlobalInfo.h"
+#include "DlgPTZControlWnd.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest4Wnd, CDialog)
 CDlgTest4Wnd::CDlgTest4Wnd(CWnd* pParent /*=NULL*/)
@@ -22,6 +23,7 @@ void CDlgTest4Wnd::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON1, &CDlgTest4Wnd::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CDlgTest4Wnd::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CDlgTest4Wnd::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -61,4 +63,10 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 void CDlgTest4Wnd::OnBnClickedButton2()
 {
 	m_hWavPlayer.ClosePlayerProc();
+}
+
+void CDlgTest4Wnd::OnBnClickedButton3()
+{
+	CDlgPTZControlWnd	dlgPTZControl;
+	dlgPTZControl.DoModal();
 }

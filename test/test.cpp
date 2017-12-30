@@ -37,6 +37,10 @@ BOOL CTestApp::InitInstance()
 	Enable3dControlsStatic();	
 #endif
 
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR           gdiplusToken;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
 	CTestDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();
@@ -47,6 +51,7 @@ BOOL CTestApp::InitInstance()
 	{
 	}
 	
+	GdiplusShutdown(gdiplusToken);
 	return FALSE;
 }
 
