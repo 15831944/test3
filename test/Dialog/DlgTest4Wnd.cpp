@@ -18,6 +18,7 @@ CDlgTest4Wnd::~CDlgTest4Wnd()
 void CDlgTest4Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON3, m_btnTest3);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
@@ -33,15 +34,16 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 	USES_CONVERSION;
 	CDialog::OnInitDialog();
 
-	DWORD dwStyle;
-	CRect rcClient;
-	CRect rcTreeWnd;
-	
 	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
 	if (pGlobal == NULL)
 	{
 		return FALSE;
 	}
+
+#if 0
+	DWORD dwStyle;
+	CRect rcClient;
+	CRect rcTreeWnd;
 
 	GetClientRect(&rcClient);
 	dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE;
@@ -52,6 +54,8 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 	rcTreeWnd.bottom = rcClient.bottom;
 
 	m_hTreeCtrl.Create(dwStyle, rcTreeWnd, this, 0+1);
+#endif
+	
 	return TRUE;  
 }
 
@@ -67,6 +71,8 @@ void CDlgTest4Wnd::OnBnClickedButton2()
 
 void CDlgTest4Wnd::OnBnClickedButton3()
 {
+#if 0
 	CDlgPTZControlWnd	dlgPTZControl;
 	dlgPTZControl.DoModal();
+#endif
 }

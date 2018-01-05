@@ -439,6 +439,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 
 	pGlobal->DNSLookupInfo("192.168.2.222", "www.baidu.com", s1, &n1);
 #endif
+
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()

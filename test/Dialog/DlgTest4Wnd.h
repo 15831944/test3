@@ -20,13 +20,16 @@ public:
 protected:
 	virtual void					DoDataExchange(CDataExchange* pDX);    
 	virtual BOOL					OnInitDialog();
-	DECLARE_MESSAGE_MAP()
+
 	afx_msg void					OnBnClickedButton1();
 	afx_msg void					OnBnClickedButton2();
+	afx_msg void					OnBnClickedButton3();
+	DECLARE_MESSAGE_MAP()
+	
+protected:
+	CMFCButton						m_btnTest3;
 
 protected:
 	WavePlayer						m_hWavPlayer;
 	CStackedTreeCtrl				m_hTreeCtrl;
-public:
-	afx_msg void OnBnClickedButton3();
 };
