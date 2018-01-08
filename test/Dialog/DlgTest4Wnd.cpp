@@ -55,7 +55,11 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 
 	m_hTreeCtrl.Create(dwStyle, rcTreeWnd, this, 0+1);
 #endif
-	
+
+#if 1
+	m_btnTest3.SetImage(_T("D:\\s1_Normal.png"), NULL, NULL, _T("D:\\s1_Hover.png"));
+#endif
+	m_btnTest3.EnableWindow(FALSE);
 	return TRUE;  
 }
 

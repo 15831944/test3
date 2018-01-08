@@ -824,6 +824,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Inc\common\MemDCEx.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\common\ResizableDialog.cpp"
 					>
 				</File>
@@ -873,6 +877,14 @@
 				</File>
 				<File
 					RelativePath=".\Control\Button\DrawButton.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\Button\ImageButton.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\Button\ImageButton.h"
 					>
 				</File>
 			</Filter>

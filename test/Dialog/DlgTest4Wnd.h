@@ -3,6 +3,7 @@
 #include <atlconv.h>
 
 #include "../Inc/audio/waveplayer.h"
+#include "../Control/Button/ImageButton.h"
 #include "../Control/TreeCtrl/StackedTreeCtrl.h"
 
 using namespace std;
@@ -27,7 +28,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	
 protected:
-	CMFCButton						m_btnTest3;
+	CImageButton					m_btnTest3;
 
 protected:
 	WavePlayer						m_hWavPlayer;
