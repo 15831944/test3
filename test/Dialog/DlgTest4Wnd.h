@@ -28,7 +28,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	
 protected:
-	CImageButton					m_btnTest3;
+	CButton							m_btnTest3;
 
 protected:
 	WavePlayer						m_hWavPlayer;
