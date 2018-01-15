@@ -940,6 +940,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="ListCtrl"
+				>
+				<File
+					RelativePath=".\Control\ListCtrl\ReportCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\ListCtrl\ReportCtrl.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Contrib"

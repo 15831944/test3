@@ -4,6 +4,7 @@
 
 #include "../Inc/audio/waveplayer.h"
 #include "../Control/Button/ImageButton.h"
+#include "../Control/ListCtrl/ReportCtrl.h"
 #include "../Control/TreeCtrl/StackedTreeCtrl.h"
 
 using namespace std;
@@ -26,9 +27,16 @@ protected:
 	afx_msg void					OnBnClickedButton2();
 	afx_msg void					OnBnClickedButton3();
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	BOOL							InitCtrl();
+	BOOL							InitInfo();
+
+	BOOL							InitList();
 	
 protected:
 	CButton							m_btnTest3;
+	CReportCtrl						m_ListTest;
 
 protected:
 	WavePlayer						m_hWavPlayer;
