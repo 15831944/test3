@@ -28,7 +28,6 @@ BEGIN_MESSAGE_MAP(CDlgTest3Wnd, CDialog)
 	ON_BN_CLICKED(IDC_BTN_TEST3,			OnBnClickedBtnTest3)
 END_MESSAGE_MAP()
 
-
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CDlgTest3Wnd::OnInitDialog()

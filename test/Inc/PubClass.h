@@ -27,6 +27,7 @@
 #include <queue> 
 #include <vector>
 
+//#include "./common/MemDC.h"
 //#include <opencv2/opencv.hpp>
 #include "./common/Character.h"
 //////////////////////////////////////////////////////////////////////////
@@ -80,6 +81,7 @@ typedef struct{
 	USHORT			usAuthorityCount;
 	USHORT			usAdditionalCount;
 }HT_DNS_HEADER;
+
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);

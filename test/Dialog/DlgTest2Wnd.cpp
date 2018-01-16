@@ -2,8 +2,6 @@
 #include  "../test.h"
 #include  "DlgTest2Wnd.h"
 
-//////////////////////////////////////////////////////////////////////////
-//
 IMPLEMENT_DYNAMIC(CDlgTest2Wnd, CDialog)
 CDlgTest2Wnd::CDlgTest2Wnd(CWnd* pParent)
 	: CDialog(CDlgTest2Wnd::IDD, pParent)

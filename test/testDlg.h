@@ -1,9 +1,4 @@
-#if !defined(AFX_TESTDLG_H__F4D8A3C3_2AF6_45E0_B4FD_0A81D067D979__INCLUDED_)
-#define AFX_TESTDLG_H__F4D8A3C3_2AF6_45E0_B4FD_0A81D067D979__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include "Dialog/DlgTest1Wnd.h"
 #include "Dialog/DlgTest2Wnd.h"
@@ -35,34 +30,29 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CTestDlg dialog
-//ShowCaret
+// CTestDlg dialog	ShowCaret
 class CTestDlg : public CDialog
 {
 public:
 	CTestDlg(CWnd* pParent = NULL);	
-
-	//{{AFX_DATA(CTestDlg)
-	enum { IDD = IDD_TEST_DIALOG };
-	//}}AFX_DATA
+	virtual ~CTestDlg();
 	
-	//{{AFX_VIRTUAL(CTestDlg)
-protected:
-	virtual void		DoDataExchange(CDataExchange* pDX);	
-	//}}AFX_VIRTUAL
-
+public:
+	enum { IDD = IDD_TEST_DIALOG };
+	
 protected:
 	HICON m_hIcon;
-
-	//{{AFX_MSG(CTestDlg)
+	virtual void		DoDataExchange(CDataExchange* pDX);	
 	virtual BOOL		OnInitDialog();
+	
 	afx_msg void		OnPaint();
 	afx_msg HCURSOR		OnQueryDragIcon();
 	afx_msg void		OnSysCommand(UINT nID, LPARAM lParam);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+	
 	afx_msg void		OnTcnSelchangeTabWndctrl(NMHDR *pNMHDR, LRESULT *pResult);
-
+	DECLARE_MESSAGE_MAP()
+	
+protected:	
 	void				Init();
 
 	void				InitCtrl();
@@ -82,6 +72,3 @@ private:
 
 	int					m_nIndex;
 };
-
-//{{AFX_INSERT_LOCATION}}
-#endif // !defined(AFX_TESTDLG_H__F4D8A3C3_2AF6_45E0_B4FD_0A81D067D979__INCLUDED_)

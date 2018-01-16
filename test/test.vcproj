@@ -824,7 +824,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\common\MemDCEx.h"
+					RelativePath=".\Inc\common\MemDC.h"
 					>
 				</File>
 				<File
@@ -877,14 +877,6 @@
 				</File>
 				<File
 					RelativePath=".\Control\Button\DrawButton.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\Button\ImageButton.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\Button\ImageButton.h"
 					>
 				</File>
 			</Filter>

@@ -1,15 +1,7 @@
 #include "stdafx.h"
 #include "test.h"
 #include "testDlg.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-//////////////////////////////////////////////////////////////////////////
-//                
+              
 CAboutDlg::CAboutDlg() 
 	: CSkinDialog(CAboutDlg::IDD, TEXT("360Safe.xml"))
 {
@@ -83,32 +75,29 @@ HCURSOR CAboutDlg::OnQueryDragIcon()
 CTestDlg::CTestDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CTestDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(CTestDlg)
-	//}}AFX_DATA_INIT
-	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+CTestDlg::~CTestDlg()
+{
 }
 
 void CTestDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTestDlg)
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_TAB1, m_hTabCtrl);
 }
 
 BEGIN_MESSAGE_MAP(CTestDlg, CDialog)
-	//{{AFX_MSG_MAP(CTestDlg)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	//}}AFX_MSG_MAP
-
+	
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1,OnTcnSelchangeTabWndctrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTestDlg message handlers
+//
 BOOL CTestDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
@@ -130,7 +119,6 @@ BOOL CTestDlg::OnInitDialog()
 
 	SetIcon(m_hIcon, TRUE);			
 	SetIcon(m_hIcon, FALSE);		
-
 
 	Init();
 	return TRUE;  

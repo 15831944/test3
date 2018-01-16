@@ -26,6 +26,7 @@ BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON1, &CDlgTest4Wnd::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CDlgTest4Wnd::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CDlgTest4Wnd::OnBnClickedButton3)
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,6 +75,14 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 	return TRUE;  
 }
 
+void CDlgTest4Wnd::OnPaint()
+{
+	CPaintDC dc(this);
+	DrawRectFrame(&dc);
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
 void CDlgTest4Wnd::OnBnClickedButton1()
 {
 	m_hWavPlayer.CreatePlayerProc("1.wav", 0, 2);
@@ -102,9 +111,16 @@ int nItem = m_list.GetTopIndex();
 #endif
 }
 
+//////////////////////////////////////////////////////////////////////////
+//
 BOOL CDlgTest4Wnd::InitCtrl()
 {
 	if (!InitList())
+	{
+		return FALSE;
+	}
+
+	if (!InitWndRect())
 	{
 		return FALSE;
 	}
@@ -173,5 +189,27 @@ BOOL CDlgTest4Wnd::InitList()
 		}
 	}
 
+	return TRUE;
+}
+
+BOOL CDlgTest4Wnd::InitWndRect()
+{
+	return TRUE;
+}
+
+BOOL CDlgTest4Wnd::DrawRectFrame(CDC *pDC)
+{
+	CRect rcClient;
+	GetClientRect(&rcClient);
+
+	if (pDC == NULL)
+	{
+		return FALSE;
+	}
+
+	//CMemDC MemDC(pDC);
+	//Graphics graphics(MemDC->GetSafeHdc());
+
+	//Pen pen(Color(255, 0, 255, 0), 3);
 	return TRUE;
 }

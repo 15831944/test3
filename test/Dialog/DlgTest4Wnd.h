@@ -1,4 +1,5 @@
 #pragma once
+
 #include "afxwin.h"
 #include <atlconv.h>
 
@@ -8,6 +9,7 @@
 #include "../Control/TreeCtrl/StackedTreeCtrl.h"
 
 using namespace std;
+using namespace Gdiplus;
 class CDlgTest4Wnd : public CDialog
 {
 	DECLARE_DYNAMIC(CDlgTest4Wnd)
@@ -23,6 +25,8 @@ protected:
 	virtual void					DoDataExchange(CDataExchange* pDX);    
 	virtual BOOL					OnInitDialog();
 
+	afx_msg void					OnPaint();
+
 	afx_msg void					OnBnClickedButton1();
 	afx_msg void					OnBnClickedButton2();
 	afx_msg void					OnBnClickedButton3();
@@ -33,6 +37,9 @@ protected:
 	BOOL							InitInfo();
 
 	BOOL							InitList();
+	BOOL							InitWndRect();
+
+	BOOL							DrawRectFrame(CDC *pDC);
 	
 protected:
 	CButton							m_btnTest3;
