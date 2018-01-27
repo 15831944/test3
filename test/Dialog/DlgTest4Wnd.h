@@ -39,7 +39,7 @@ protected:
 	BOOL							InitList();
 	BOOL							InitWndRect();
 
-	BOOL							DrawRectFrame(CDC *pDC);
+	BOOL							DrawRectFrameLine(CDC *pDC);
 	
 protected:
 	CButton							m_btnTest3;

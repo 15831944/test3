@@ -78,7 +78,7 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 void CDlgTest4Wnd::OnPaint()
 {
 	CPaintDC dc(this);
-	DrawRectFrame(&dc);
+	DrawRectFrameLine(&dc);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ BOOL CDlgTest4Wnd::InitWndRect()
 	return TRUE;
 }
 
-BOOL CDlgTest4Wnd::DrawRectFrame(CDC *pDC)
+BOOL CDlgTest4Wnd::DrawRectFrameLine(CDC *pDC)
 {
 	CRect rcClient;
 	GetClientRect(&rcClient);
@@ -207,9 +207,22 @@ BOOL CDlgTest4Wnd::DrawRectFrame(CDC *pDC)
 		return FALSE;
 	}
 
-	//CMemDC MemDC(pDC);
-	//Graphics graphics(MemDC->GetSafeHdc());
+ 	CMemDCEx MemDCEx(pDC, NULL);
+ 	Graphics graphics(MemDCEx->GetSafeHdc());
 
-	//Pen pen(Color(255, 0, 255, 0), 3);
+	Pen pen(Color(255, 0, 255, 0), 3);
+	graphics.SetSmoothingMode(SmoothingModeAntiAlias);
+
+	PointF ptLeftTop(rcClient.left, rcClient.top);
+	PointF ptRightTop(rcClient.right, rcClient.top);
+
+	PointF ptLeftBottom(rcClient.left, rcClient.bottom);
+	PointF ptRightBottom(rcClient.right, rcClient.bottom);
+
+	graphics.DrawLine(&pen, ptLeftTop,    ptRightTop);
+	graphics.DrawLine(&pen, ptLeftTop,    ptLeftBottom);
+	graphics.DrawLine(&pen, ptLeftBottom, ptRightBottom);
+	graphics.DrawLine(&pen, ptRightTop,   ptRightBottom);
+	
 	return TRUE;
 }

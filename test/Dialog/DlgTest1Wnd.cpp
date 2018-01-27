@@ -23,12 +23,6 @@ CDlgTest1Wnd::~CDlgTest1Wnd()
 {
 }
 
-CDlgTest1Wnd& CDlgTest1Wnd::Instance()
-{
-	static CDlgTest1Wnd inst;
-	return inst;
-}
-
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);

@@ -5,31 +5,29 @@
 #endif
 
 #ifndef VC_EXTRALEAN
-#define VC_EXTRALEAN					// Exclude rarely-used stuff from Windows headers
+#define VC_EXTRALEAN
 #endif
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
 #define _AFX_ALL_WARNINGS
 
-#include <afxwin.h>						// MFC core and standard components
-#include <afxext.h>						// MFC extensions
+#include <afxwin.h>
+#include <afxext.h>
 
-#include <afxdisp.h>					// MFC Automation classes
+#include <afxdisp.h>
 
 #ifndef _AFX_NO_OLE_SUPPORT
-#include <afxdtctl.h>					// MFC support for Internet Explorer 4 Common Controls
+#include <afxdtctl.h>
 #endif
 
 #ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>						// MFC support for Windows Common Controls
-#endif									// _AFX_NO_AFXCMN_SUPPORT
+#include <afxcmn.h>
+#endif
 
-//#include <afxcontrolbars.h>			// MFC support for ribbons and control bars
+#include <afxcontrolbars.h>
 
 //////////////////////////////////////////////////////////////////////////
 //
-#pragma comment(lib, "version.lib")
-
 #include <SkinUI.h>
 #include "Inc/PubClass.h"
 
@@ -46,7 +44,7 @@
 #		pragma comment (lib,"SkinUI.lib")
 #	endif
 #endif
-
+#pragma comment(lib, "version.lib")
 //////////////////////////////////////////////////////////////////////////
 //
 #ifndef _UNICODE

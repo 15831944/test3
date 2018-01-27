@@ -27,7 +27,7 @@
 #include <queue> 
 #include <vector>
 
-//#include "./common/MemDC.h"
+#include "./common/MemDCEx.h"
 //#include <opencv2/opencv.hpp>
 #include "./common/Character.h"
 //////////////////////////////////////////////////////////////////////////

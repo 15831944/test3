@@ -455,10 +455,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\Dialog\DlgPTZControlWnd.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Dialog\DlgTest1Wnd.cpp"
 				>
 			</File>
@@ -591,10 +587,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath=".\Dialog\DlgPTZControlWnd.h"
-				>
-			</File>
 			<File
 				RelativePath=".\Dialog\DlgTest1Wnd.h"
 				>
@@ -821,10 +813,6 @@
 				</File>
 				<File
 					RelativePath=".\Inc\common\ETSLayout.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\MemDC.h"
 					>
 				</File>
 				<File

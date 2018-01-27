@@ -15,7 +15,6 @@ BOOL CTestApp::InitInstance()
 {
 	ULONG_PTR gdiplusToken;
 	GdiplusStartupInput gdiplusStartupInput;
-	
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	CTestDlg dlg;

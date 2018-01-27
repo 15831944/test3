@@ -18,8 +18,6 @@ public:
 	CDlgTest1Wnd(CWnd* pParent = NULL);					
 	virtual ~CDlgTest1Wnd();
 
-	static CDlgTest1Wnd& Instance();
-
 public:
 	enum { IDD = IDD_DIALOG1 };
 

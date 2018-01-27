@@ -1,13 +1,10 @@
-#ifndef __MEMDC_H__
-#define __MEMDC_H__
+#ifndef __MEMDCEX_H__
+#define __MEMDCEX_H__
 
-class CMemDC : public CDC
+class CMemDCEx : public CDC
 {
 public:
-	CMemDC(CDC* pDC, const CRect* pRect=NULL) 
-		: CDC(),
-		m_oldBitmap(NULL),
-		m_pDC(pDC)
+	CMemDCEx(CDC* pDC, const CRect* pRect=NULL) : CDC(), m_oldBitmap(NULL),m_pDC(pDC)
 	{
 		ASSERT(m_pDC != NULL);
 		m_bMemDC = !pDC->IsPrinting();						//确定正在使用的设备上下文是否用于打印
@@ -47,7 +44,45 @@ public:
 		FillSolidRect(m_rect, pDC->GetBkColor());
 	}
 
-	~CMemDC()
+	CMemDCEx(CDC* pDC, CRect rect = CRect(0,0,0,0), BOOL bCopyFirst = FALSE) : CDC(), m_oldBitmap(NULL), m_pDC(pDC)
+	{
+		ASSERT(m_pDC != NULL);								//断言参数不为空
+		m_bMemDC = !pDC->IsPrinting();
+
+		if (m_bMemDC)
+		{
+			//创建一个内存DC
+			CreateCompatibleDC(pDC);
+			if ( rect == CRect(0,0,0,0) )
+			{
+				pDC->GetClipBox(&m_rect);
+			}
+			else
+			{
+				m_rect = rect;
+			}
+			//创建兼容位图
+			m_bitmap.CreateCompatibleBitmap(pDC, m_rect.Width(), m_rect.Height());
+			//保留旧位图对象
+			m_oldBitmap = SelectObject(&m_bitmap);
+			//移动窗口原点
+			SetWindowOrg(m_rect.left, m_rect.top);
+			//初次复制
+			if(bCopyFirst)
+			{
+				this->BitBlt(m_rect.left, m_rect.top, m_rect.Width(), m_rect.Height(),m_pDC, m_rect.left, m_rect.top, SRCCOPY);
+			}
+		} 
+		else
+		{
+			//创建一个跟当前DC绘制有关的副本
+			m_bPrinting = pDC->m_bPrinting;
+			m_hDC = pDC->m_hDC;
+			m_hAttribDC = pDC->m_hAttribDC;
+		}
+	}
+
+	~CMemDCEx()
 	{
 		if (m_bMemDC)
 		{
@@ -62,8 +97,8 @@ public:
 		}
 	}
 
-	CMemDC* operator->()	{return this;} 
-	operator CMemDC*()		{return this;}
+	CMemDCEx* operator->()		{return this;} 
+	operator CMemDCEx*()		{return this;}
 
 private:
 	CBitmap		m_bitmap;
