@@ -8,36 +8,32 @@ public:
 	virtual ~CUserListBox();
 	
 public:
-	void	InsertItem(int nIndex, LPCTSTR lpszItem, LPCTSTR lpszAppend, UNIT uIcon, BOOL state);	
+	int						AddString(LPCTSTR lpstString);
+	int						InsertItem(int nIndex, LPCTSTR lpszString);	
 	
 protected:
 	DECLARE_MESSAGE_MAP()
-	virtual void DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
-	virtual void MeasureItem(LPMEASUREITEMSTRUCT /*lpMeasureItemStruct*/);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnDestroy();	
+	virtual void 			DrawItem(LPDRAWITEMSTRUCT /*lpDrawItemStruct*/);
+	virtual void			MeasureItem(LPMEASUREITEMSTRUCT /*lpMeasureItemStruct*/);
+
+	afx_msg void			OnDestroy();	
 
 protected:
+#pragma pack(1)
 	typedef struct _LISTBOX_DATA{
-		CString	strAppend;
-		LPTSTR	szIcon;
-		CRect	rcRect;
-		BOOL	bState;
-		_LISTBOX_DATA()
+		DWORD		dwItemData;
+		LPVOID		pData;
+		int			nImage;
+		UINT		nFormat;
+		DWORD		dwFlags;
+		_LISTBOX_DATA::_LISTBOX_DATA()
 		{
-			bState = TRUE;
-			rcRect.left  = 0;
-			rcRect.top   = 0;
-			rcRect.right = 0;
-			rcRect.bottom= 0;
-			strAppend = _T("");
-			szIcon    = NULL;
+			::ZeroMemory(this, sizeof(_LISTBOX_DATA));
 		}
 	}LISTBOX_DATA;
-	
-private:
-	BOOL	m_bDown;	
+#pragma pack()
+
+protected:
+	int						SetListItemData(int nIndex, DWORD dwItemData, LPVOID lpData, int nImage, DWORD dwFlag, BYTE byMask);
 };
 #endif

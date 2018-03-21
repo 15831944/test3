@@ -30,6 +30,9 @@
 #include "./common/MemDCEx.h"
 //#include <opencv2/opencv.hpp>
 #include "./common/Character.h"
+
+#include <UKeyVerifyThread.h>
+
 //////////////////////////////////////////////////////////////////////////
 //
 #define GETSYSTEM_FONT						0x1000

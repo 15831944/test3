@@ -4,8 +4,6 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
-#include "resource.h"		
-
 class CTestApp : public CWinApp
 {
 public:

@@ -24,7 +24,7 @@
 			OutputDirectory="$(SolutionDir)Temp\Link\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)Temp\Compile\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			UseOfMFC="2"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			WholeProgramOptimization="0"
@@ -55,13 +55,13 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\common&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\feitian&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\common&quot;;&quot;$(SolutionDir)Include\feitian\pkcs#11&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				GeneratePreprocessedFile="0"
 				KeepComments="false"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="false"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
@@ -89,11 +89,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib"
+				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib UKeyVerifyLib.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\feitian&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;;&quot;$(SolutionDir)lib\feitian\pkcs#11&quot;"
 				UACExecutionLevel="0"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -471,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Dialog\DlgTest5Wnd.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -601,6 +605,10 @@
 			</File>
 			<File
 				RelativePath=".\Dialog\DlgTest4Wnd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Dialog\DlgTest5Wnd.h"
 				>
 			</File>
 			<File
@@ -879,6 +887,14 @@
 					RelativePath=".\Control\ListBox\DrawListBox.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Control\ListBox\UserListBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\ListBox\UserListBox.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="TreeCtrl"
@@ -950,14 +966,6 @@
 			</File>
 			<File
 				RelativePath=".\contrib\variable_test.h"
-				>
-			</File>
-			<File
-				RelativePath=".\contrib\VideoWndThread.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\contrib\VideoWndThread.h"
 				>
 			</File>
 		</Filter>

@@ -23,10 +23,12 @@ void CDlgTest4Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
+	ON_WM_PAINT()
+
 	ON_BN_CLICKED(IDC_BUTTON1, &CDlgTest4Wnd::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CDlgTest4Wnd::OnBnClickedButton2)
 	ON_BN_CLICKED(IDC_BUTTON3, &CDlgTest4Wnd::OnBnClickedButton3)
-	ON_WM_PAINT()
+	ON_BN_CLICKED(IDC_BUTTON4, &CDlgTest4Wnd::OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,13 +87,52 @@ void CDlgTest4Wnd::OnPaint()
 //
 void CDlgTest4Wnd::OnBnClickedButton1()
 {
-	m_hWavPlayer.CreatePlayerProc("1.wav", 0, 2);
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()
 {
-	m_hWavPlayer.ClosePlayerProc();
 }
+
+
+BOOL test1(CK_UKPROCINFO *pUKeyInfo, char *pszUserPIN)
+{
+	char szUserNum[64] = {0};
+	char szUserPasswd[64] = {0};
+
+	if (pUKeyInfo == NULL)
+	{
+		return FALSE;
+	}
+
+	if (pUKeyInfo->emOperateType == CK_OPERATEENUMSLOTTYPE)
+	{
+	}
+	else if (pUKeyInfo->emOperateType == CK_OPERATEVERIFYTYPE)
+	{
+		if (pUKeyInfo->emUKType == CK_UKFINGERTYPE)
+		{
+
+		}
+		else if (pUKeyInfo->emUKType == CK_UKNORMALTYPE)
+		{
+			if (pszUserPIN != NULL)
+			{
+				strcpy(pszUserPIN, _T("12345678"));
+			}
+		}
+	}
+	else if (pUKeyInfo->emOperateType == CK_OPERATEWRITETYPE)
+	{
+	}
+	else if (pUKeyInfo->emOperateType == CK_OPERATEREADTYPE)
+	{
+		strcpy(szUserNum, pUKeyInfo->szUserNum);
+		strcpy(szUserPasswd, pUKeyInfo->szUserPasswd);
+	}
+
+	return TRUE;
+}
+
 
 void CDlgTest4Wnd::OnBnClickedButton3()
 {
@@ -108,6 +149,33 @@ int nItem = m_list.GetTopIndex();
     CSize sz(0, (nSel - nItem)*rc.Height());
     m_list.Scroll(sz);
     m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
+#endif
+
+#if 1
+	if (!m_UKeyVerifyProc.CreateVerifyProc(TRUE, test1))
+	{
+		return;
+	}
+
+	m_UKeyVerifyProc.SetUserData(_T("16104010016"), _T("123456"));
+	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
+	m_UKeyVerifyProc.SetThreadProcState(TRUE);
+#endif
+}
+
+void CDlgTest4Wnd::OnBnClickedButton4()
+{
+#if 1
+	char szUserNum[MAX_PATH] = {0};
+	char szUserPasswd[MAX_PATH] = {0};
+
+	if (!m_UKeyVerifyProc.CreateVerifyProc(FALSE, test1))
+	{
+		return;
+	}
+
+	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
+	m_UKeyVerifyProc.SetThreadProcState(TRUE);
 #endif
 }
 

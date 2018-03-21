@@ -194,16 +194,19 @@ void CTestDlg::InitCtrl()
 	m_hDlgTest2Wnd.Create(IDD_DIALOG2, GetDlgItem(IDC_TAB1));
 	m_hDlgTest3Wnd.Create(IDD_DIALOG3, GetDlgItem(IDC_TAB1));
 	m_hDlgTest4Wnd.Create(IDD_DIALOG4, GetDlgItem(IDC_TAB1));
+	m_hDlgTest5Wnd.Create(IDD_DIALOG5, GetDlgItem(IDC_TAB1));
 
 	m_pArPage.Add(&m_hDlgTest1Wnd);
 	m_pArPage.Add(&m_hDlgTest2Wnd);
 	m_pArPage.Add(&m_hDlgTest3Wnd);
 	m_pArPage.Add(&m_hDlgTest4Wnd);
+	m_pArPage.Add(&m_hDlgTest5Wnd);
 
 	m_hTabCtrl.InsertItem(0, _T("test1"));
 	m_hTabCtrl.InsertItem(1, _T("test2"));
 	m_hTabCtrl.InsertItem(2, _T("test3"));
 	m_hTabCtrl.InsertItem(3, _T("test4"));
+	m_hTabCtrl.InsertItem(4, _T("test5"));
 
 	CRect rcClient;
 	m_hTabCtrl.GetClientRect(&rcClient);
@@ -218,9 +221,9 @@ void CTestDlg::InitCtrl()
 		((CDialog*)m_pArPage[i])->MoveWindow(&rcClient);
 	}
 
-	((CDialog*)m_pArPage[0])->ShowWindow(TRUE);
-	((CDialog*)m_pArPage[0])->SetFocus();
+	((CDialog*)m_pArPage[3])->ShowWindow(TRUE);
+	((CDialog*)m_pArPage[3])->SetFocus();
 
-	m_hTabCtrl.SetCurSel(0);
-	m_nPrePage = 0;
+	m_hTabCtrl.SetCurSel(3);
+	m_nPrePage = 3;
 }

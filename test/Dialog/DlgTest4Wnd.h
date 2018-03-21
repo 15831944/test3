@@ -30,6 +30,7 @@ protected:
 	afx_msg void					OnBnClickedButton1();
 	afx_msg void					OnBnClickedButton2();
 	afx_msg void					OnBnClickedButton3();
+	afx_msg void					OnBnClickedButton4();
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -46,6 +47,6 @@ protected:
 	CReportCtrl						m_ListTest;
 
 protected:
-	WavePlayer						m_hWavPlayer;
 	CStackedTreeCtrl				m_hTreeCtrl;
+	CUKeyVerifyThread				m_UKeyVerifyProc;
 };

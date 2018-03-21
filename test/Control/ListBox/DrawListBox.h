@@ -1,7 +1,4 @@
-#ifndef __DRAWLISTBOX_H__
-#define __DRAWLISTBOX_H__
-
-
+#pragma once
 #include <afxtempl.h>
 
 //CBaseListBox
@@ -154,5 +151,3 @@ private:
 	COLORREF					m_crHoverBorder;
 	COLORREF					m_crHoverFill;
 };
-
-#endif

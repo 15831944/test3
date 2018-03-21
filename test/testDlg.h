@@ -4,6 +4,7 @@
 #include "Dialog/DlgTest2Wnd.h"
 #include "Dialog/DlgTest3Wnd.h"
 #include "Dialog/DlgTest4Wnd.h"
+#include "Dialog/DlgTest5Wnd.h"
 /////////////////////////////////////////////////////////////////////////////
 // 
 using namespace std;
@@ -65,6 +66,7 @@ protected:
 	CDlgTest2Wnd		m_hDlgTest2Wnd;
 	CDlgTest3Wnd		m_hDlgTest3Wnd;
 	CDlgTest4Wnd		m_hDlgTest4Wnd;
+	CDlgTest5Wnd		m_hDlgTest5Wnd;
 
 private:
 	CPtrArray			m_pArPage;
