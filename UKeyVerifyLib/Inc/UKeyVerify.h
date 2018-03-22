@@ -15,7 +15,7 @@ public:
 
 public:
 	BOOL				GetSlotList();
-	BOOL				GetSlotId(CK_ULONG ulSlotIndex, CK_ULONG &ulSlotId);
+	BOOL				GetSlotId(CK_LONG SlotIndex, CK_ULONG &ulSlotId);
 	BOOL				GetSlotInfo(CK_ULONG ulSlotId, CK_ULONG &ulFlags);
 	
 	BOOL				CreateSession(CK_ULONG ulSlotId);

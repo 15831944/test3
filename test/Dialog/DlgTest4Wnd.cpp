@@ -94,7 +94,7 @@ void CDlgTest4Wnd::OnBnClickedButton2()
 }
 
 
-BOOL test1(CK_UKPROCINFO *pUKeyInfo, char *pszUserPIN)
+BOOL test1(const CK_UKEYPROCINFO *pUKeyInfo, CK_UKEYUSERDATA *pUKeyUserData, LPVOID lpParam)
 {
 	char szUserNum[64] = {0};
 	char szUserPasswd[64] = {0};
@@ -104,30 +104,34 @@ BOOL test1(CK_UKPROCINFO *pUKeyInfo, char *pszUserPIN)
 		return FALSE;
 	}
 
-	if (pUKeyInfo->emOperateType == CK_OPERATEENUMSLOTTYPE)
+	if (pUKeyInfo->emUKeyOperateType == CK_OPERATEENUMSLOTTYPE)
 	{
+		int i = 0;
+		int j = 0;
 	}
-	else if (pUKeyInfo->emOperateType == CK_OPERATEVERIFYTYPE)
+	else if (pUKeyInfo->emUKeyOperateType == CK_OPERATEVERIFYTYPE)
 	{
-		if (pUKeyInfo->emUKType == CK_UKFINGERTYPE)
+		if (pUKeyInfo->emUKeyType == CK_UKFINGERTYPE)
 		{
 
 		}
-		else if (pUKeyInfo->emUKType == CK_UKNORMALTYPE)
+		else if (pUKeyInfo->emUKeyType == CK_UKNORMALTYPE)
 		{
-			if (pszUserPIN != NULL)
+			if (pUKeyUserData != NULL)
 			{
-				strcpy(pszUserPIN, _T("12345678"));
+				strcpy(pUKeyUserData->szUserPIN, _T("12345678"));
 			}
 		}
 	}
-	else if (pUKeyInfo->emOperateType == CK_OPERATEWRITETYPE)
+	else if (pUKeyInfo->emUKeyOperateType == CK_OPERATEWRITETYPE)
 	{
+		int i = 0;
+		int j = 0;
 	}
-	else if (pUKeyInfo->emOperateType == CK_OPERATEREADTYPE)
+	else if (pUKeyInfo->emUKeyOperateType == CK_OPERATEREADTYPE)
 	{
-		strcpy(szUserNum, pUKeyInfo->szUserNum);
-		strcpy(szUserPasswd, pUKeyInfo->szUserPasswd);
+		strcpy(szUserNum, pUKeyUserData->szUserNum);
+		strcpy(szUserPasswd, pUKeyUserData->szUserPasswd);
 	}
 
 	return TRUE;
@@ -151,7 +155,7 @@ int nItem = m_list.GetTopIndex();
     m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
 #endif
 
-#if 1
+#if 0
 	if (!m_UKeyVerifyProc.CreateVerifyProc(TRUE, test1))
 	{
 		return;
@@ -165,18 +169,6 @@ int nItem = m_list.GetTopIndex();
 
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
-#if 1
-	char szUserNum[MAX_PATH] = {0};
-	char szUserPasswd[MAX_PATH] = {0};
-
-	if (!m_UKeyVerifyProc.CreateVerifyProc(FALSE, test1))
-	{
-		return;
-	}
-
-	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
-	m_UKeyVerifyProc.SetThreadProcState(TRUE);
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -198,6 +190,14 @@ BOOL CDlgTest4Wnd::InitCtrl()
 
 BOOL CDlgTest4Wnd::InitInfo()
 {
+	if (!m_UKeyVerifyProc.CreateVerifyProc(FALSE, test1, 0))
+	{
+		return FALSE;
+	}
+
+	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
+	m_UKeyVerifyProc.SetThreadProcState(TRUE);
+
 	return TRUE;
 }
 

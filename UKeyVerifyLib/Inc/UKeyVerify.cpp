@@ -103,12 +103,12 @@ BOOL CUKeyVerify::GetSlotList()
 	return bRet;
 }
 
-BOOL CUKeyVerify::GetSlotId(CK_ULONG ulSlotIndex, CK_ULONG &ulSlotId)
+BOOL CUKeyVerify::GetSlotId(CK_LONG SlotIndex, CK_ULONG &ulSlotId)
 {
 	CK_RV rv;
 	CK_FLAGS flags = 0;
 
-	if (ulSlotIndex == -1)
+	if (SlotIndex == -1)
 	{
 		rv = C_WaitForSlotEvent(flags, &ulSlotId, NULL_PTR);
 		if (rv != CKR_OK)
@@ -123,12 +123,12 @@ BOOL CUKeyVerify::GetSlotId(CK_ULONG ulSlotIndex, CK_ULONG &ulSlotId)
 			return FALSE;
 		}
 
-		if (ulSlotIndex < m_ulSlotCount-1)
+		if (SlotIndex < m_ulSlotCount-1)
 		{
 			return FALSE;
 		}
 
-		ulSlotId = m_pSlotList[ulSlotIndex];
+		ulSlotId = m_pSlotList[SlotIndex];
 	}
 
 	return TRUE;
@@ -147,6 +147,11 @@ BOOL CUKeyVerify::GetSlotInfo(CK_ULONG ulSlotId, CK_ULONG &ulFlags)
 		if (rv != CKR_OK)
 		{
 			bRet = FALSE;
+
+			if (rv == CKR_TOKEN_NOT_PRESENT)
+			{
+				ulFlags = CKR_TOKEN_NOT_PRESENT;
+			}		
 			break;
 		}
 		
