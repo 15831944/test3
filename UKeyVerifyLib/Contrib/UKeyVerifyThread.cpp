@@ -1,6 +1,9 @@
 #include "StdAfx.h"
 #include "UKeyVerifyThread.h"
 
+#include "../Inc/UKeyVerify.h"
+#include "UKeyFindThread.h"
+
 /************************************************************************/
 /* author : wl
  * email  : lysgwl@163.com
@@ -8,6 +11,7 @@
  */
 /************************************************************************/
 
+static CUKeyFindThread g_UKeyFindThread;
 CUKeyVerifyThread::CUKeyVerifyThread()
 {
 	m_bExit = FALSE;
@@ -25,12 +29,10 @@ CUKeyVerifyThread::CUKeyVerifyThread()
 	m_lpParam = NULL;
 	m_pfUKDataFunc = NULL;
 
-	memset(&m_stcCurUKeyData, 0x0, sizeof(CK_UKEYPROCINFO));
+	CUKeyVerify::Instance().Initialize();
 
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
-
-	m_UKeyVerify.Initialize();
 }
 
 CUKeyVerifyThread::~CUKeyVerifyThread()
@@ -49,7 +51,7 @@ CUKeyVerifyThread::~CUKeyVerifyThread()
 		m_hEndEvent = NULL;
 	}
 
-	m_UKeyVerify.Finalize();
+	CUKeyVerify::Instance().Finalize();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -68,46 +70,15 @@ DWORD CUKeyVerifyThread::UKeyVerifyThreadProc(LPVOID lpParam)
 void CUKeyVerifyThread::UKeyVerifyInfo()
 {
 	BOOL bRet = FALSE;
-	CK_ULONG ulFlags = 0;
-	CK_ULONG ulSlotId = 0;
-
-	CK_UKEYPROCINFO stcUKeyProc;
-	CK_UKEYUSERDATA stcUkeyUserData;
-	
 	while(WaitForSingleObject(m_hEndEvent, m_dwProcTimeOver) != WAIT_OBJECT_0)
 	{
 		if (!m_bExit)
 		{
 			do 
 			{
-				memset(&stcUKeyProc, 0x0, sizeof(CK_UKEYPROCINFO));
-				memset(&stcUkeyUserData, 0x0, sizeof(CK_UKEYUSERDATA));
-
-				if (!GetUKeySlotInfo(-1, &stcUKeyProc, &stcUkeyUserData, ulSlotId, ulFlags))
-				{
-					bRet = FALSE;
-					memset(&m_stcCurUKeyData, 0x0, sizeof(CK_UKEYPROCINFO));
-					break;
-				}
-
-				if (m_stcCurUKeyData.bFlags && m_stcCurUKeyData.ulSlotId == ulSlotId)
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				if (!UKeySlotVerify(ulSlotId, ulFlags, &stcUKeyProc, &stcUkeyUserData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
 				if (m_bFlags)
 				{
-					stcUKeyProc.emUKeyOperateType = CK_OPERATEWRITETYPE;
-					stcUkeyUserData.emUKeyOperateType = CK_OPERATEWRITETYPE;
-
-					if (!SetObjectData(m_strUserNum, m_strUserPasswd, &stcUKeyProc, &stcUkeyUserData))
+					if (!SetUKeyData(0))
 					{
 						bRet = FALSE;
 						break;
@@ -115,10 +86,7 @@ void CUKeyVerifyThread::UKeyVerifyInfo()
 				}
 				else
 				{
-					stcUKeyProc.emUKeyOperateType = CK_OPERATEREADTYPE;
-					stcUkeyUserData.emUKeyOperateType = CK_OPERATEREADTYPE;
-
-					if (!GetObjectData(stcUkeyUserData.szUserNum, stcUkeyUserData.szUserPasswd, &stcUKeyProc, &stcUkeyUserData))
+					if (!GetUKeyData(0))
 					{
 						bRet = FALSE;
 						break;
@@ -126,11 +94,7 @@ void CUKeyVerifyThread::UKeyVerifyInfo()
 				}
 
 				bRet = TRUE;
-				memcpy(&m_stcCurUKeyData, &stcUKeyProc, sizeof(CK_UKEYPROCINFO));
 			} while (FALSE);
-
-			ClearUKeyInfo();
-			m_pfUKDataFunc(&stcUKeyProc, &stcUkeyUserData, m_lpParam);
 		}
 		else
 		{
@@ -139,244 +103,486 @@ void CUKeyVerifyThread::UKeyVerifyInfo()
 	};
 }
 
-BOOL CUKeyVerifyThread::GetUKeySlotInfo(CK_LONG ulSlotIndex, CK_UKEYPROCINFO *pstcUKeyProc, CK_UKEYUSERDATA *pstcUKeyUserData, CK_ULONG &ulSlotId, CK_ULONG &ulFlags)
+BOOL CUKeyVerifyThread::SetUKeyData(int iSlotIndex)
 {
 	BOOL bRet = FALSE;
-	if (pstcUKeyProc == NULL || pstcUKeyUserData == NULL)
+	int iIndex = 0;
+	
+	CK_SESSION_HANDLE hSession = NULL;
+	CK_UKEYPROCINFO *pUKeyData = NULL;
+
+	CK_UKEYPROCINFO stcUKeyData = {0};
+	CK_UKEYUSERDATA stcUKeyUserData = {0};
+
+	std::vector<CK_UKEYPROCINFO *> vecUKeyData;
+	std::vector<CK_UKEYPROCINFO *>::iterator iterUKeyData;
+	
+	do 
+	{
+		if (!UKeyEnum(vecUKeyData))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		for (iterUKeyData=vecUKeyData.begin(), iIndex=0; iterUKeyData!=vecUKeyData.end(); ++iterUKeyData, ++iIndex)
+		{
+			do 
+			{
+				pUKeyData = (CK_UKEYPROCINFO *)(*iterUKeyData);
+				if (!GetUKeyInfo(iIndex, iSlotIndex, pUKeyData))
+				{
+					bRet = FALSE;
+					break;
+				}
+
+				if (!pUKeyData->bFlags)
+				{
+					if (!UKeyVerify(pUKeyData))
+					{
+						bRet = FALSE;
+						break;
+					}
+				}
+
+				//UKEY设备输入用户数据
+				memcpy(&stcUKeyData, pUKeyData, sizeof(CK_UKEYPROCINFO));
+				stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEINPUTETYPE;
+				stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEWRITETYPE;
+				sprintf(stcUKeyUserData.szPromptText, _T("写入Key设备Slot:%d数据"), pUKeyData->ulSlotId);;
+				m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+
+				while (WaitForSingleObject(pUKeyData->hEvent, 0) != WAIT_OBJECT_0)
+				{
+					if (!UKeyWriteObjectData(pUKeyData, stcUKeyUserData.szUserNum, stcUKeyUserData.szUserPasswd))
+					{
+						bRet = FALSE;
+						break;
+					}
+				}
+
+				bRet = TRUE;
+			} while (FALSE);
+
+			if (!bRet)
+			{
+				if (iSlotIndex == -1 && iIndex == iSlotIndex)
+				{
+					break;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CUKeyVerifyThread::GetUKeyData(int iSlotIndex)
+{
+	BOOL bRet = FALSE;
+	int iIndex = 0;
+
+	CK_SESSION_HANDLE hSession = NULL;
+	CK_UKEYPROCINFO *pUKeyData = NULL;
+
+	std::vector<CK_UKEYPROCINFO *> vecUKeyData;
+	std::vector<CK_UKEYPROCINFO *>::iterator iterUKeyData;
+
+	do 
+	{
+		if (!UKeyEnum(vecUKeyData))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		for (iterUKeyData=vecUKeyData.begin(), iIndex=0; iterUKeyData!=vecUKeyData.end(); ++iterUKeyData, ++iIndex)
+		{
+			do 
+			{
+				pUKeyData = (CK_UKEYPROCINFO *)(*iterUKeyData);
+				if (!GetUKeyInfo(iIndex, iSlotIndex, pUKeyData))
+				{
+					bRet = FALSE;
+					break;
+				}
+
+				if (!pUKeyData->bFlags)
+				{
+					if (!UKeyVerify(pUKeyData))
+					{
+						bRet = FALSE;
+						break;
+					}
+				}
+
+				while (WaitForSingleObject(pUKeyData->hEvent, 0) != WAIT_OBJECT_0)
+				{
+					if (!UKeyReadObjectData(pUKeyData))
+					{
+						bRet = FALSE;
+						break;
+					}
+				}
+
+				bRet = TRUE;
+			} while (FALSE);
+
+			if (!bRet)
+			{
+				if (iSlotIndex == -1 && iIndex == iSlotIndex)
+				{
+					break;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CUKeyVerifyThread::UKeyEnum(std::vector<CK_UKEYPROCINFO *> &vecUKeyData)
+{
+	BOOL bRet = FALSE;
+
+	CK_UKEYPROCINFO stcUKeyData = {0};
+	CK_UKEYUSERDATA stcUKeyUserData = {0};
+
+	do 
+	{
+		if (!CUKeyVerify::Instance().GetSlotId(vecUKeyData))
+		{
+			bRet = FALSE;
+			stcUKeyData.bFlags = FALSE;
+			stcUKeyData.bExist = FALSE;
+
+			stcUKeyData.emUKeyType = CK_UKEYDEVEMPTYTYPE;
+			stcUKeyData.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
+			stcUKeyData.emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+
+			sprintf(stcUKeyUserData.szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
+			break;
+		}
+
+		if (vecUKeyData.size() == 0)
+		{
+			bRet = FALSE;
+			stcUKeyData.bFlags = FALSE;
+			stcUKeyData.bExist = FALSE;
+
+			stcUKeyData.emUKeyType = CK_UKEYDEVEMPTYTYPE;
+			stcUKeyData.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
+			stcUKeyData.emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+
+			sprintf(stcUKeyUserData.szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+	return bRet;
+}
+
+BOOL CUKeyVerifyThread::GetUKeyInfo(int iIndex, int iSlotIndex, CK_UKEYPROCINFO *pUKeyData)
+{
+	BOOL bRet = FALSE;
+	CK_SESSION_HANDLE hSession = NULL;
+
+	CK_UKEYPROCINFO stcUKeyData = {0};
+	CK_UKEYUSERDATA stcUKeyUserData = {0};
+
+	do 
+	{
+		if (pUKeyData == NULL)
+		{
+			bRet = FALSE;
+			stcUKeyData.bFlags = FALSE;
+			stcUKeyData.bExist = FALSE;
+
+			stcUKeyData.emUKeyType = CK_UKEYDEVEMPTYTYPE;
+			stcUKeyData.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
+			stcUKeyData.emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+
+			sprintf(stcUKeyUserData.szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
+			break;
+		}
+
+		if (iIndex != iSlotIndex && iSlotIndex != -1)
+		{
+			bRet = FALSE;
+			stcUKeyData.bFlags = FALSE;
+			stcUKeyData.bExist = FALSE;
+
+			stcUKeyData.emUKeyType = CK_UKEYDEVEMPTYTYPE;
+			stcUKeyData.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
+			stcUKeyData.emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+
+			sprintf(stcUKeyUserData.szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
+			break;
+		}
+
+		bRet = TRUE;
+		stcUKeyData.hEvent = pUKeyData->hEvent;
+		stcUKeyData.bExist = pUKeyData->bExist;
+		stcUKeyData.emUKeyType = pUKeyData->emUKeyType;
+		stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEINSERTTYPE;
+		stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+	} while (FALSE);
+
+	m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+	return bRet;
+}
+
+BOOL CUKeyVerifyThread::UKeyVerify(CK_UKEYPROCINFO *pUKeyData)
+{
+	BOOL bRet = FALSE;
+	CK_SESSION_HANDLE hSession = NULL;
+
+	CK_UKEYPROCINFO stcUKeyData = {0};
+	CK_UKEYUSERDATA stcUKeyUserData = {0};
+
+	if (pUKeyData == NULL)
 	{
 		return FALSE;
 	}
 
 	do 
 	{
-		if (!m_UKeyVerify.GetSlotList())
+		if (!CUKeyVerify::Instance().CreateSession(pUKeyData->ulSlotId, hSession))
 		{
 			bRet = FALSE;
-			pstcUKeyProc->bExist = FALSE;
-			pstcUKeyProc->bFlags = FALSE;
-			pstcUKeyProc->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
-			break;
-		}
-		
-		if (!m_UKeyVerify.GetSlotId(ulSlotIndex, ulSlotId))
-		{
-			bRet = FALSE;
-			pstcUKeyProc->bExist = FALSE;
-			pstcUKeyProc->bFlags = FALSE;
-			pstcUKeyProc->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
+			stcUKeyData.bFlags = FALSE;
+			stcUKeyData.bExist = pUKeyData->bExist;
+
+			stcUKeyData.emUKeyType = pUKeyData->emUKeyType;
+			stcUKeyData.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
+			stcUKeyData.emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+
+			sprintf(stcUKeyUserData.szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
 			break;
 		}
 
-		if (!m_UKeyVerify.GetSlotInfo(ulSlotId, ulFlags))
+		//UKEY设备插入成功
+		stcUKeyData.bExist = pUKeyData->bExist;
+		stcUKeyData.hSession = pUKeyData->hSession = (HANDLE)hSession;
+
+		stcUKeyData.emUKeyType = pUKeyData->emUKeyType;
+		stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEINSERTTYPE;
+		stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
+		sprintf(stcUKeyUserData.szPromptText, _T("获取Key设备Slot:%d"), pUKeyData->ulSlotId);
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+
+		//UKEY设备校验PIN输入
+		stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEINPUTETYPE;
+		stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEVERIFYTYPE;
+		sprintf(stcUKeyUserData.szPromptText, _T("校验Key设备Slot:%d"), pUKeyData->ulSlotId);
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+
+		if (!CUKeyVerify::Instance().LoginUser(hSession, stcUKeyUserData.szUserPIN, pUKeyData->ulFlags))
 		{
 			bRet = FALSE;
+			stcUKeyData.bFlags = FALSE;
+			stcUKeyData.hSession = pUKeyData->hSession = (HANDLE)hSession;
 
-			if (ulFlags & CKR_TOKEN_NOT_PRESENT)	//CKR_DEVICE_REMOVED	//CKF_REMOVABLE_DEVICE
-			{
-				pstcUKeyProc->bExist = FALSE;
-				pstcUKeyProc->emUKeyState = CK_UKEYREMOVETYPE;
-			}
+			stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+			stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEVERIFYTYPE;
 
-			pstcUKeyProc->bFlags = FALSE;
-			pstcUKeyProc->ulSlotId = ulSlotId;
-			pstcUKeyProc->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("获取UKey设备Slot:%d信息失败, 请检查!"), ulSlotId);
+			sprintf(stcUKeyUserData.szPromptText, _T("校验Key设备Slot:%d失败, 请检查!"), pUKeyData->ulSlotId);
 			break;
 		}
-		else
-		{
-			if (ulFlags & CKF_TOKEN_PRESENT)
-			{
-				if (ulFlags & CKF_PROTECTED_AUTHENTICATION_PATH)
-				{
-					pstcUKeyProc->emUKeyType = CK_UKFINGERTYPE;
-				}
-				else
-				{
-					pstcUKeyProc->emUKeyType = CK_UKNORMALTYPE;
-				}
 
-				pstcUKeyProc->bExist = TRUE;
-				pstcUKeyProc->ulSlotId = ulSlotId;
-				pstcUKeyProc->emUKeyState = CK_UKEYINSERTTYPE;
-			}
-			else
-			{
-				pstcUKeyProc->bExist = FALSE;
-				pstcUKeyProc->bFlags = FALSE;
-				pstcUKeyProc->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
-				sprintf(pstcUKeyUserData->szPromptText, _T("获取UKey设备Slot失败, 请检查!"));
-				break;
-			}
-		}
+		//UKEY设备校验PIN成功
+		stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+		stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEVERIFYTYPE;
+		sprintf(stcUKeyUserData.szPromptText, _T("校验Key设备Slot:%d成功!"), pUKeyData->ulSlotId);
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
 
 		bRet = TRUE;
 	} while (FALSE);
 
-	return bRet;
-}
-
-BOOL CUKeyVerifyThread::UKeySlotVerify(CK_ULONG ulSlotId, CK_ULONG ulFlags, CK_UKEYPROCINFO *pstcUKeyProc, CK_UKEYUSERDATA *pstcUKeyUserData)
-{
-	BOOL bRet = FALSE;
-	if (pstcUKeyProc == NULL || pstcUKeyUserData == NULL)
-	{
-		return FALSE;
-	}
-
-	do
-	{
-		if (!m_UKeyVerify.CreateSession(ulSlotId))
-		{
-			bRet = FALSE;
-			pstcUKeyProc->bFlags = FALSE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("UKey设备Slot:%d创建Session失败, 请检查!"), ulSlotId);
-			break;
-		}
-	
-		pstcUKeyProc->bFlags = TRUE;
-		pstcUKeyProc->emUKeyOperateType = CK_OPERATEVERIFYTYPE;
-		m_pfUKDataFunc(pstcUKeyProc, pstcUKeyUserData, m_lpParam);
-
-		if (!m_UKeyVerify.LoginUser(pstcUKeyUserData->szUserPIN, ulFlags))
-		{
-			bRet = FALSE;
-			pstcUKeyProc->bFlags = FALSE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("UKey设备Slot:%d口令校验失败, 请检查!"), ulSlotId);
-			break;
-		}
-		
-		bRet = TRUE;
-	} while (FALSE);
-	
 	if (!bRet)
 	{
-		ClearUKeyInfo();
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
 	}
 	
 	return bRet;
 }
 
-void CUKeyVerifyThread::ClearUKeyInfo()
-{
-	m_UKeyVerify.LogoutUser();
-	m_UKeyVerify.CloseSession();
-}
-
-BOOL CUKeyVerifyThread::SetObjectData(LPCTSTR lpszUserNum, LPCTSTR lpszUserPasswd, CK_UKEYPROCINFO *pstcUKeyProc, CK_UKEYUSERDATA *pstcUKeyUserData)
+BOOL CUKeyVerifyThread::UKeyWriteObjectData(CK_UKEYPROCINFO *pUKeyData, LPCTSTR lpszUserNum, LPCTSTR lpszUserPasswd)
 {
 	BOOL bRet = FALSE;
 	DWORD dwCount = 0;
-	
-	char szUserData[1024] = {0};
+	CK_SESSION_HANDLE hSession = NULL;
+
+	char szUserData[512] = {0};
 	DWORD dwUserDataLen = sizeof(szUserData)-1;
-	
-	if (pstcUKeyProc == NULL || pstcUKeyUserData == NULL)
+
+	CK_UKEYPROCINFO stcUKeyData = {0};
+	CK_UKEYUSERDATA stcUKeyUserData = {0};
+
+	if (pUKeyData == NULL || lpszUserNum == NULL || lpszUserPasswd == NULL)
 	{
 		return FALSE;
 	}
-	
-	if ((lpszUserNum != NULL && *lpszUserNum != '\0') && (lpszUserPasswd != NULL && *lpszUserPasswd != '\0'))
+
+	do 
 	{
+		hSession = (CK_SESSION_HANDLE)pUKeyData->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!CUKeyVerify::Instance().FindObject(hSession, dwCount))
+		{
+			bRet = FALSE;
+			stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+			stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEWRITETYPE;
+			sprintf(stcUKeyUserData.szPromptText, _T("校验Key设备Slot:%d失败, 请检查!"), pUKeyData->ulSlotId);
+			break;
+		}
+
 		dwUserDataLen  = strlen(lpszUserNum);
 		memcpy(szUserData, lpszUserNum, strlen(lpszUserNum));
 		dwUserDataLen += 1;
 		memcpy(szUserData+dwUserDataLen, lpszUserPasswd, strlen(lpszUserPasswd));
 		dwUserDataLen += strlen(lpszUserPasswd);
-	}
-	else
-	{
-		m_pfUKDataFunc(pstcUKeyProc, pstcUKeyUserData, m_lpParam);
 
-		dwUserDataLen  = strlen(pstcUKeyUserData->szUserNum);
-		memcpy(szUserData, pstcUKeyUserData->szUserNum, strlen(pstcUKeyUserData->szUserNum));
-		dwUserDataLen += 1;
-		memcpy(szUserData+dwUserDataLen, pstcUKeyUserData->szUserPasswd, strlen(pstcUKeyUserData->szUserPasswd));
-		dwUserDataLen += strlen(pstcUKeyUserData->szUserPasswd);
-	}
-
-	if (!m_UKeyVerify.FindObject(dwCount))
-	{
-		pstcUKeyProc->bFlags = FALSE;
-		sprintf(pstcUKeyUserData->szPromptText, _T("UKey设备查找对象失败, 请检查!"));
-		return FALSE;
-	}
-	
-	if (dwCount == 0)
-	{
-		if (!m_UKeyVerify.CreateObject(szUserData, dwUserDataLen))
+		if (dwCount == 0)
 		{
-			pstcUKeyProc->bFlags = FALSE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("UKey设备创建对象失败, 请检查!"));
-			return FALSE;
-		}
-	}
-	else
-	{
-		if (!m_UKeyVerify.SetObjectValue(szUserData, dwUserDataLen))
-		{
-			pstcUKeyProc->bFlags = FALSE;
-			sprintf(pstcUKeyUserData->szPromptText, _T("UKey设备修改对象失败, 请检查!"));
-			return FALSE;
-		}
-	}
-	
-	pstcUKeyProc->bFlags = TRUE;
-	return TRUE;
-}
-
-BOOL CUKeyVerifyThread::GetObjectData(char *pszUserNum, char *pszUserPasswd, CK_UKEYPROCINFO *pstcUKeyProc, CK_UKEYUSERDATA *pstcUKeyUserData)
-{
-	char szUserData[1024] = {0};
-	DWORD dwUserDataLen = sizeof(szUserData)-1;
-	
-	char *pValue = NULL;
-	CK_ULONG ulIndex = 0;
-	
-	if (pszUserNum == NULL || pszUserPasswd == NULL)
-	{
-		return FALSE;
-	}
-
-	if (pstcUKeyProc == NULL || pstcUKeyUserData == NULL)
-	{
-		return FALSE;
-	}
-	
-	if (!m_UKeyVerify.GetObjectValue((CK_BYTE*)szUserData, &dwUserDataLen))
-	{
-		pstcUKeyProc->bFlags = FALSE;
-		sprintf(pstcUKeyUserData->szPromptText, _T("UKey设备获取对象数据失败, 请检查!"));
-		return FALSE;
-	}
-	
-	pValue = szUserData;
-	while (*pValue != '\0')
-	{
-		if (ulIndex == 0)
-		{
-			memcpy(pszUserNum, pValue, strlen(pValue));
-		}
-		else if (ulIndex == 1)
-		{
-			memcpy(pszUserPasswd, pValue, strlen(pValue));
+			if (!CUKeyVerify::Instance().CreateObject(hSession, szUserData, dwUserDataLen))
+			{
+				bRet = FALSE;
+				stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+				stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEWRITETYPE;
+				sprintf(stcUKeyUserData.szPromptText, _T("写入Key设备Slot:%d用户数据失败, 请检查!"), pUKeyData->ulSlotId);
+				break;
+			}
 		}
 		else
 		{
-			break;
+			if (!CUKeyVerify::Instance().SetObjectValue(hSession, (CK_BYTE*)szUserData, dwUserDataLen))
+			{
+				bRet = FALSE;
+				stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+				stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEWRITETYPE;
+				sprintf(stcUKeyUserData.szPromptText, _T("写入Key设备Slot:%d用户数据失败, 请检查!"), pUKeyData->ulSlotId);
+				break;
+			}
 		}
+
+		//
+		bRet = TRUE;
+		SetEvent(pUKeyData->hEvent);
+
+		stcUKeyData.hEvent = pUKeyData->hEvent;
+		stcUKeyData.bFlags = pUKeyData->bFlags = TRUE;
 		
-		ulIndex++;
-		pValue += strlen(pValue);
-		pValue += 1;
-	};
-	
-	pstcUKeyProc->bFlags = TRUE;
-	return TRUE;
+		stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+		stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEWRITETYPE;
+		sprintf(stcUKeyUserData.szPromptText, _T("写入Key设备Slot:%d用户数据成功!"), pUKeyData->ulSlotId);
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+	} while (FALSE);
+
+	if (!bRet)
+	{
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+	}
+
+	return bRet;
 }
 
+BOOL CUKeyVerifyThread::UKeyReadObjectData(CK_UKEYPROCINFO *pUKeyData)
+{
+	BOOL bRet = FALSE;
+	DWORD dwCount = 0;
+	DWORD dwIndex = 0;
+
+	char szUserData[512] = {0};
+	DWORD dwUserDataLen = sizeof(szUserData)-1;
+
+	CK_UKEYPROCINFO stcUKeyData = {0};
+	CK_UKEYUSERDATA stcUKeyUserData = {0};
+
+	char *pValue = NULL;
+	CK_SESSION_HANDLE hSession = NULL;
+
+	if (pUKeyData == NULL)
+	{
+		return FALSE;
+	}
+
+	do 
+	{
+		memcpy(&stcUKeyData, pUKeyData, sizeof(CK_UKEYPROCINFO));
+
+		hSession = (CK_SESSION_HANDLE)pUKeyData->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!CUKeyVerify::Instance().GetObjectValue(hSession, (CK_BYTE*)szUserData, &dwUserDataLen))
+		{
+			bRet = FALSE;
+			stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATEOUTPUTTYPE;
+			stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEREADTYPE;
+			sprintf(stcUKeyUserData.szPromptText, _T("读取Key设备Slot:%d失败, 请检查！"), pUKeyData->ulSlotId);
+			break;
+		}
+
+		pValue = szUserData;
+		while (*pValue != '\0')
+		{
+			if (dwIndex == 0)
+			{
+				memcpy(stcUKeyUserData.szUserNum, pValue, strlen(pValue));
+			}
+			else if (dwIndex == 1)
+			{
+				memcpy(stcUKeyUserData.szUserPasswd, pValue, strlen(pValue));
+			}
+			else
+			{
+				break;
+			}
+
+			dwIndex++;
+			pValue = pValue + strlen(pValue) + 1;
+		}
+
+		//
+		bRet = TRUE;
+		SetEvent(pUKeyData->hEvent);
+
+		stcUKeyData.hEvent = pUKeyData->hEvent;
+		stcUKeyData.bFlags = pUKeyData->bFlags = TRUE;
+
+		stcUKeyData.emUKeyState = pUKeyData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+		stcUKeyData.emUKeyOperateType = pUKeyData->emUKeyOperateType = CK_OPERATEREADTYPE;
+		sprintf(stcUKeyUserData.szPromptText, _T("读取Key设备Slot:%d用户数据成功!"), pUKeyData->ulSlotId);
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+	} while (FALSE);
+
+	if (!bRet)
+	{
+		m_pfUKDataFunc(&stcUKeyData, &stcUKeyUserData, m_lpParam);
+	}
+
+	return bRet;
+}
 //////////////////////////////////////////////////////////////////////////
 //
 /*
@@ -405,6 +611,18 @@ BOOL CUKeyVerifyThread::CreateVerifyProc(BOOL bFlags, CK_UKDATA_CALLBACK_FUNC pf
 		m_hThread = CreateThread(NULL, 0, UKeyVerifyThreadProc, (LPVOID)this, CREATE_SUSPENDED, &m_dwThreadID);
 		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
 		{
+			ResetEvent(m_hStartEvent);
+			return FALSE;
+		}
+
+		if (!g_UKeyFindThread.CreateFindProc())
+		{
+			if (m_hThread != NULL)
+			{
+				CloseHandle(m_hThread);
+				m_hThread = NULL;
+			}
+
 			ResetEvent(m_hStartEvent);
 			return FALSE;
 		}

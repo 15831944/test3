@@ -48,5 +48,5 @@ protected:
 
 protected:
 	CStackedTreeCtrl				m_hTreeCtrl;
-	CUKeyVerifyThread				m_UKeyVerifyProc;
+	//CUKeyVerifyThread				m_UKeyVerifyProc;
 };

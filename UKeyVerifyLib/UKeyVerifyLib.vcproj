@@ -210,6 +210,14 @@
 			Name="Contrib"
 			>
 			<File
+				RelativePath=".\Contrib\UKeyFindThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Contrib\UKeyFindThread.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Contrib\UKeyVerifyThread.cpp"
 				>
 			</File>

@@ -58,8 +58,8 @@ protected:
 	BOOL					UKeySlotVerify(CK_UKPROCINFO *pstcUKeyProc);
 	void					ClearUKeyInfo();
 
-	BOOL					SetObjectData(LPCTSTR lpszUserNum, LPCTSTR lpszUserPasswd, CK_UKPROCINFO *pstcUKeyProc);
-	BOOL					GetObjectData(char *pszUserNum, char *pszUserPasswd, CK_UKPROCINFO *pstcUKeyProc);
+	BOOL					SetObjectData();
+	BOOL					GetObjectData();
 	
 protected:
 	HANDLE					m_hThread;
