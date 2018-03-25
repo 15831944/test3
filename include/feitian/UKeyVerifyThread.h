@@ -3,8 +3,6 @@
 
 #include <internal.h>
 
-typedef BOOL (*CK_UKDATA_CALLBACK_FUNC)(const CK_UKEYPROCINFO *pUKeyInfo, CK_UKEYUSERDATA *pUKeyUserData, LPVOID lpParam);
-
 using namespace std;
 class CUKeyVerifyThread
 {

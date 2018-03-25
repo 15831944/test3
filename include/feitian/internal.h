@@ -1,5 +1,5 @@
-#ifndef __PUBCLASS_H__
-#define __PUBCLASS_H__
+#ifndef __INTERNAL_H__
+#define __INTERNAL_H__
 
 #include <string>
 #include <map>
@@ -52,4 +52,5 @@ typedef struct {
 }CK_UKEYUSERDATA;
 
 typedef BOOL (*CK_UKDATA_CALLBACK_FUNC)(const CK_UKEYPROCINFO *pUKeyInfo, CK_UKEYUSERDATA *pUKeyUserData, LPVOID lpParam);
+
 #endif
