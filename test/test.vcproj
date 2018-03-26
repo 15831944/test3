@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\feitian&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\common&quot;;&quot;$(SolutionDir)Include\feitian\pkcs#11&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\feitian&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\feitian\pkcs#11&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				GeneratePreprocessedFile="0"
 				KeepComments="false"

@@ -243,6 +243,10 @@ BOOL CUKeyVerify::LoginUser(CK_SESSION_HANDLE hSession, LPCTSTR lpszUserPIN, CK_
 	
 		bRet = TRUE;
 	} while (FALSE);
+
+	if (!bRet)
+	{
+	}
 	
 	return bRet;
 }

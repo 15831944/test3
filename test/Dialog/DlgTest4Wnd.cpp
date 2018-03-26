@@ -93,7 +93,7 @@ void CDlgTest4Wnd::OnBnClickedButton2()
 {
 }
 
-/*
+
 BOOL test1(const CK_UKEYPROCINFO *pUKeyInfo, CK_UKEYUSERDATA *pUKeyUserData, LPVOID lpParam)
 {
 	char szUserNum[64] = {0};
@@ -143,7 +143,7 @@ BOOL test1(const CK_UKEYPROCINFO *pUKeyInfo, CK_UKEYUSERDATA *pUKeyUserData, LPV
 				if (pUKeyUserData != NULL)
 				{
 					TRACE(_T("录入UKEY设备用户PIN码数据!"));
-					strcpy(pUKeyUserData->szUserPIN, _T("12345678"));
+					strcpy(pUKeyUserData->szUserPIN, _T("123456789"));
 				}
 			}
 			else if (pUKeyInfo->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
@@ -190,7 +190,7 @@ BOOL test1(const CK_UKEYPROCINFO *pUKeyInfo, CK_UKEYUSERDATA *pUKeyUserData, LPV
 
 	return TRUE;
 }
-*/
+
 
 void CDlgTest4Wnd::OnBnClickedButton3()
 {
@@ -244,13 +244,13 @@ BOOL CDlgTest4Wnd::InitCtrl()
 
 BOOL CDlgTest4Wnd::InitInfo()
 {
-// 	if (!m_UKeyVerifyProc.CreateVerifyProc(TRUE, test1, FALSE))
-// 	{
-// 		return FALSE;
-// 	}
-// 
-// 	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
-// 	m_UKeyVerifyProc.SetThreadProcState(TRUE);
+	if (!m_UKeyVerifyProc.CreateVerifyProc(TRUE, test1, FALSE))
+	{
+		return FALSE;
+	}
+
+	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
+	m_UKeyVerifyProc.SetThreadProcState(TRUE);
 
 	return TRUE;
 }
