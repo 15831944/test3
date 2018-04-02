@@ -9,7 +9,7 @@
 			Name="Debug|Win32"
 			>
 			<DebugSettings
-				Command=""
+				Command="$(SolutionDir)Bin\$(TargetFileName)"
 				WorkingDirectory="$(SolutionDir)Bin"
 				CommandArguments=""
 				Attach="false"

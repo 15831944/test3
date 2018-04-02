@@ -1,66 +1,59 @@
 #include "stdafx.h"
-#include "UKeyVerify.h"
+#include "Pkcs11_Ukey.h"
 
-#include <wincrypt.h>
-#include <cryptoki_ext.h>
-#pragma comment(lib, "eps2003csp11_x86.lib")
+#include <string>
+#include <map>
+#include <vector>
 
-CUKeyVerify::CUKeyVerify()
-{
-	InitializeCriticalSection(&m_caUKeySection);
-}
+#ifdef WIN32
+	#ifdef _WIN64
+		#pragma comment(lib, "eps2003csp11_x64.lib")
+	#else
+		#pragma comment(lib, "eps2003csp11_x86.lib")
+	#endif
+#endif
 
-CUKeyVerify::~CUKeyVerify()
-{
-	DeleteCriticalSection(&m_caUKeySection);
-}
+static CRITICAL_SECTION		g_caUKeySection;
+static std::map<CK_SLOT_ID, CK_UKEYDEVICE*>	g_mapUKeyDevice;
 
-//
-CUKeyVerify& CUKeyVerify::Instance()
-{
-	static CUKeyVerify inst;
-	return inst;
-}
-
-//////////////////////////////////////////////////////////////////////////
-//
-BOOL CUKeyVerify::Initialize()
+bool PKCS11_Initialize()
 {
 	CK_RV rv;
 	rv = C_Initialize(NULL_PTR);
 	if (rv != CKR_OK)
 	{
-		return FALSE;
+		return false;
 	}
-
-	return TRUE;
+	
+	InitializeCriticalSection(&g_caUKeySection);
+	return true;
 }
 
-void CUKeyVerify::Finalize()
+void PKCS11_Finalize()
 {
 	C_Finalize(NULL_PTR);
+	DeleteCriticalSection(&g_caUKeySection);
 }
 
-BOOL CUKeyVerify::GetSlotList()
+bool PKCS11_GetSlotList()
 {
-	BOOL bRet = FALSE;
-
+	bool bRet = false;
+	
 	CK_RV rv;
 	CK_FLAGS flags = 0;
 	CK_ULONG ulSlotId = 0;
 	
 	CK_TOKEN_INFO tokenInfo = {0};
-	CK_UKEYPROCINFO *pUKeyInfo = NULL;
-
+	CK_UKEYDEVICE *pUKeyDevice= NULL;
+	
 	rv = C_WaitForSlotEvent(flags, &ulSlotId, NULL_PTR);
 	if (rv != CKR_OK)
 	{
-		return FALSE;
+		return false;
 	}
-
-	EnterCriticalSection(&m_caUKeySection);
-
-	do 
+	
+	EnterCriticalSection(&g_caUKeySection);
+	do
 	{
 		rv = C_GetTokenInfo(ulSlotId, &tokenInfo);
 		if (rv != CKR_OK)
@@ -71,143 +64,160 @@ BOOL CUKeyVerify::GetSlotList()
 			}
 			else
 			{
-				bRet = FALSE;
+				bRet = false;
 				break;
 			}
 		}
 		else
 		{
-			pUKeyInfo = new CK_UKEYPROCINFO;
-			if (pUKeyInfo == NULL)
+			pUKeyDevice = new CK_UKEYDEVICE;
+			if (pUKeyDevice == NULL)
 			{
 				bRet = FALSE;
 				break;
 			}
-			memset(pUKeyInfo, 0x0, sizeof(CK_UKEYPROCINFO));
-
+			memset(pUKeyDevice, 0x0, sizeof(CK_UKEYDEVICE));
+			
 			if (tokenInfo.flags & CKF_TOKEN_PRESENT)
 			{
-				pUKeyInfo->bFlags = FALSE;
-				pUKeyInfo->bExist = TRUE;
-				pUKeyInfo->ulSlotId = ulSlotId;
-				pUKeyInfo->ulFlags  = tokenInfo.flags;
+				pUKeyDevice->ulSlotId = ulSlotId;
+				pUKeyDevice->ulFlags  = tokenInfo.flags;
+				pUKeyDevice->hSession = NULL;
 
-				pUKeyInfo->hSession = NULL;
-				pUKeyInfo->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				pUKeyDevice->stcUKeyEnum.bExist = true;
+				pUKeyDevice->stcUKeyEnum.ulSlotId = ulSlotId;
+				pUKeyDevice->stcUKeyEnum.emUKeyState = CK_UKEYSTATEINSERTTYPE;
 
 				if (tokenInfo.flags & CKF_PROTECTED_AUTHENTICATION_PATH)
 				{
-					pUKeyInfo->emUKeyType = CK_UKEYDEVFINGERTYPE;
+					pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVFINGERTYPE;
 				}
 				else
 				{
-					pUKeyInfo->emUKeyType = CK_UKEYDEVNORMALTYPE;
+					pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVNORMALTYPE;
 				}
-
-				pUKeyInfo->emUKeyState = CK_UKEYSTATEINSERTTYPE;
-				pUKeyInfo->emUKeyOperateType = CK_OPERATEENUMSLOTTYPE;
-
-				m_mapUKeyInfo.insert(make_pair(ulSlotId, pUKeyInfo));
 				
+				g_mapUKeyDevice.insert(make_pair(ulSlotId, pUKeyDevice));
 			}
 			else
 			{
-				delete pUKeyInfo;
-				pUKeyInfo = NULL;
+				delete pUKeyDevice;
+				pUKeyDevice = NULL;
 			}
 		}
-
-		bRet = TRUE;
-	} while (FALSE);
+		
+		bRet = true;
+	} while (false);
 	
-	LeaveCriticalSection(&m_caUKeySection);
-	if (!bRet && pUKeyInfo != NULL)
+	LeaveCriticalSection(&g_caUKeySection);
+	if (!bRet && pUKeyDevice != NULL)
 	{
-		delete pUKeyInfo;
-		pUKeyInfo = NULL;
+		delete pUKeyDevice;
+		pUKeyDevice = NULL;
 	}
-
+	
 	return bRet;
 }
 
-BOOL CUKeyVerify::GetSlotId(std::vector<CK_UKEYPROCINFO*> &vecUKeyData)
+bool PKCS11_GetSlotId(std::vector<CK_UKEYDEVICE*> &vecUKeyDevice)
 {
-	CK_UKEYPROCINFO *pUKeyData = NULL;
-	std::map<CK_SLOT_ID, CK_UKEYPROCINFO*>::iterator iterUKeyData;
+	bool bRet = false;
+	CK_UKEYDEVICE *pUKeyDevice = NULL;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
 
-	EnterCriticalSection(&m_caUKeySection);
+	EnterCriticalSection(&g_caUKeySection);
 
-	for (iterUKeyData=m_mapUKeyInfo.begin(); iterUKeyData!=m_mapUKeyInfo.end(); ++iterUKeyData)
+	do
 	{
-		pUKeyData = (CK_UKEYPROCINFO *)iterUKeyData->second;
-		if (pUKeyData == NULL)
+		for (iterUKeyDevice=g_mapUKeyDevice.begin(); iterUKeyDevice!=g_mapUKeyDevice.end(); ++iterUKeyDevice)
 		{
-			continue;
+			pUKeyDevice = (CK_UKEYDEVICE *)iterUKeyDevice->second;
+			if (pUKeyDevice == NULL)
+			{
+				continue;
+			}
+
+			vecUKeyDevice.push_back(pUKeyDevice);
 		}
-
-		vecUKeyData.push_back(pUKeyData);
-	}
-
-	LeaveCriticalSection(&m_caUKeySection);
-	return TRUE;
+		
+		bRet = true;
+	} while (false);
+	
+	LeaveCriticalSection(&g_caUKeySection);
+	return bRet;
 }
 
-BOOL CUKeyVerify::CreateSession(CK_ULONG ulSlotId, CK_SESSION_HANDLE &hSession)
+bool PKCS11_CreateSession(CK_ULONG ulSlotId, CK_SESSION_HANDLE &hSession)
 {
-	BOOL bRet = FALSE;
-	
 	CK_RV rv;
+	bool bRet = false;
+	
+	EnterCriticalSection(&g_caUKeySection);
 	
 	do
 	{
 		rv = C_OpenSession(ulSlotId, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
 		
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
 		
-		bRet = TRUE;
-	} while(FALSE);
+		bRet = true;
+	} while(false);
 	
+	LeaveCriticalSection(&g_caUKeySection);
 	return bRet;
 }
 
-BOOL CUKeyVerify::CloseSession(CK_SESSION_HANDLE hSession)
+bool PKCS11_CloseSession(CK_SESSION_HANDLE hSession)
 {
 	CK_RV rv;
+	bool bRet = false;
+	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
-
-	rv = C_CloseSession(hSession);
-	if (rv != CKR_OK)
+	
+	EnterCriticalSection(&g_caUKeySection);
+	
+	do
 	{
-		return FALSE;
-	}
-
-	return TRUE;
+		rv = C_CloseSession(hSession);
+		if (rv != CKR_OK)
+		{
+			bRet = false;
+			break;
+		}
+		
+		bRet = true;
+	} while (false);
+	
+	LeaveCriticalSection(&g_caUKeySection);
+	return bRet;
 }
 
-BOOL CUKeyVerify::LoginUser(CK_SESSION_HANDLE hSession, LPCTSTR lpszUserPIN, CK_ULONG ulFlags)
+bool PKCS11_LoginUser(CK_SESSION_HANDLE hSession, const char *pszUserPIN, CK_ULONG ulFlags)
 {
-	BOOL bRet = FALSE;
-	
 	CK_RV rv;
+	bool bRet = false;
+	
 	CK_ULONG ulPINLen = 0;
 	CK_BYTE_PTR pPINBuffer = NULL_PTR;
 	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
+	
+	EnterCriticalSection(&g_caUKeySection);
 	
 	do
 	{
@@ -217,18 +227,18 @@ BOOL CUKeyVerify::LoginUser(CK_SESSION_HANDLE hSession, LPCTSTR lpszUserPIN, CK_
 		}
 		else
 		{
-			if (lpszUserPIN == NULL_PTR || *lpszUserPIN == '\0')
+			if (pszUserPIN == NULL_PTR || *pszUserPIN == '\0')
 			{
-				bRet = FALSE;
+				bRet = false;
 				break;
 			}
 
-			ulPINLen = strlen(lpszUserPIN);
-			pPINBuffer = (CK_BYTE_PTR)lpszUserPIN;
+			ulPINLen = strlen(pszUserPIN);
+			pPINBuffer = (CK_BYTE_PTR)pszUserPIN;
 
 			if (pPINBuffer == NULL_PTR)
 			{
-				bRet = FALSE;
+				bRet = false;
 				break;
 			}
 
@@ -237,71 +247,77 @@ BOOL CUKeyVerify::LoginUser(CK_SESSION_HANDLE hSession, LPCTSTR lpszUserPIN, CK_
 		
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
+		
+		bRet = true;
+	} while (false);
 	
-		bRet = TRUE;
-	} while (FALSE);
-
-	if (!bRet)
-	{
-	}
-	
+	LeaveCriticalSection(&g_caUKeySection);
 	return bRet;
 }
 
-BOOL CUKeyVerify::LogoutUser(CK_SESSION_HANDLE hSession)
+bool PKCS11_LogoutUser(CK_SESSION_HANDLE hSession)
 {
-	BOOL bRet = FALSE;
-	
 	CK_RV rv;
+	bool bRet = false;
+	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
 	
-	rv = C_Logout(hSession);
-	if (rv != CKR_OK)
+	EnterCriticalSection(&g_caUKeySection);
+	
+	do
 	{
-		return FALSE;
-	}
+		rv = C_Logout(hSession);
+		if (rv != CKR_OK)
+		{
+			return false;
+		}
+		
+		bRet = true;
+	} while (false);
 	
-	return TRUE;
+	LeaveCriticalSection(&g_caUKeySection);
+	return bRet;
 }
 
-BOOL CUKeyVerify::CreateObject(CK_SESSION_HANDLE hSession, LPCTSTR lpszUserData, CK_ULONG ulUserDataLen)
+bool PKCS11_CreateObject(CK_SESSION_HANDLE hSession, const char *pszUserData, CK_ULONG ulUserDataLen)
 {
-	BOOL bRet = FALSE;
-	
 	CK_RV rv;
+	bool bRet = false;
+	
 	CK_ULONG ulRetCount = 0;
 	CK_OBJECT_HANDLE hCKObj;
 	
-	CK_BYTE truevalue  = TRUE;
-	CK_BYTE falsevalue = FALSE;
+	CK_BYTE truevalue  = true;
+	CK_BYTE falsevalue = false;
 	CK_BYTE datalabel[] = "dataLabel";
-
+	
 	CK_OBJECT_CLASS objectclass = CKO_DATA;
-
+	
 	CK_BYTE databuff[512] = {0};
 	CK_ULONG databuflen = sizeof(databuff)-1;
-
+	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
+	
+	EnterCriticalSection(&g_caUKeySection);
 	
 	do
 	{
 		if (ulUserDataLen > databuflen)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
+		memcpy(databuff, pszUserData, ulUserDataLen);
 		
-		memcpy(databuff, lpszUserData, ulUserDataLen);
-
 		CK_ATTRIBUTE dataAttr[] = {
 				{ CKA_CLASS,	&objectclass,	sizeof(objectclass) },
 				{ CKA_TOKEN,	&truevalue,		sizeof(truevalue) },
@@ -310,58 +326,60 @@ BOOL CUKeyVerify::CreateObject(CK_SESSION_HANDLE hSession, LPCTSTR lpszUserData,
 				{ CKA_LABEL,	datalabel,		sizeof(datalabel)-1 },
 				{ CKA_VALUE,	databuff,		databuflen }
 		};
-
-// 		rv = C_FindObjectsInit(m_hSession, dataAttr, 2);
-// 		if (rv != CKR_OK)
-// 		{
-// 			bRet = FALSE;
-// 			break;
-// 		}
-// 		
-// 		rv = C_FindObjects(m_hSession, &hCKObj, 1, &ulRetCount);
-// 		if (rv != CKR_OK)
-// 		{
-// 			bRet = FALSE;
-// 			break;
-// 		}
+		
+//		rv = C_FindObjectsInit(m_hSession, dataAttr, 2);
+//		if (rv != CKR_OK)
+//		{
+//			bRet = false;
+//			break;
+//		}
+//		
+//		rv = C_FindObjects(m_hSession, &hCKObj, 1, &ulRetCount);
+//		{
+//			bRet = false;
+//			break;
+//		}
 		
 		rv = C_CreateObject(hSession, dataAttr, sizeof(dataAttr)/sizeof(dataAttr[0]), &hCKObj);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-
-		bRet = TRUE;
-	} while(FALSE);
+		
+		bRet = true;
+	} while (false);
 	
-	//C_FindObjectsFinal(m_hSession);
+//	C_FindObjectsFinal(m_hSession);
+	LeaveCriticalSection(&g_caUKeySection);
 	return bRet;
 }
 
-BOOL CUKeyVerify::FindObject(CK_SESSION_HANDLE hSession, CK_ULONG &ulObjectCount)
+bool PKCS11_FindObject(CK_SESSION_HANDLE hSession, CK_ULONG &ulObjectCount)
 {
-	BOOL bRet = FALSE;
-
 	CK_RV rv;
+	bool bRet = false;
+	
 	CK_ULONG ulRetCount = 0;
 	CK_OBJECT_HANDLE hCKObj;
-
-	CK_BYTE truevalue  = TRUE;
-	CK_BYTE falsevalue = FALSE;
+	
+	CK_BYTE truevalue  = true;
+	CK_BYTE falsevalue = false;
 	CK_BYTE datalabel[] = "dataLabel";
-
+	
 	CK_OBJECT_CLASS objectclass = CKO_DATA;
 
 	CK_BYTE databuff[512] = {0};
 	CK_ULONG databuflen = sizeof(databuff)-1;
-
+	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
-
-	do 
+	
+	EnterCriticalSection(&g_caUKeySection);
+	
+	do
 	{
 		CK_ATTRIBUTE dataAttr[] = {
 				{ CKA_CLASS, 	&objectclass, 	sizeof(objectclass) },
@@ -371,40 +389,42 @@ BOOL CUKeyVerify::FindObject(CK_SESSION_HANDLE hSession, CK_ULONG &ulObjectCount
 				{ CKA_LABEL, 	datalabel, 		sizeof(datalabel)-1 },
 				{ CKA_VALUE, 	databuff, 		databuflen }
 		};
-
+		
 		rv = C_FindObjectsInit(hSession, dataAttr, 2);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-
+		
 		rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-
-		bRet = TRUE;
+		
+		bRet = true;
 		ulObjectCount = ulRetCount;
-	} while (FALSE);
-
+	} while (false);
+	
 	C_FindObjectsFinal(hSession);
+	LeaveCriticalSection(&g_caUKeySection);
 	return bRet;
 }
 
-BOOL CUKeyVerify::SetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData, CK_ULONG ulUserDataLen)
+bool PKCS11_SetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData, CK_ULONG ulUserDataLen)
 {
-	BOOL bRet = FALSE;
-	
 	CK_RV rv;
+	bool bRet = false;
+	
 	CK_ULONG ulRetCount = 0;
 	CK_OBJECT_HANDLE hCKObj = NULL;
 	
-	CK_BYTE truevalue = TRUE;
-	CK_BYTE falsevalue = FALSE;
+	CK_BYTE truevalue = true;
+	CK_BYTE falsevalue = false;
 	CK_BYTE datalabel[] = "dataLabel";
+	
 	CK_OBJECT_CLASS objectclass = CKO_DATA;
 	
 	CK_BYTE databuff[512] = {0};
@@ -412,17 +432,18 @@ BOOL CUKeyVerify::SetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData,
 	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
-
+	
+	EnterCriticalSection(&g_caUKeySection);
+	
 	do
 	{
 		if (ulUserDataLen > databuflen)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-		
 		memcpy(databuff, pUserData, ulUserDataLen);
 		
 		CK_ATTRIBUTE dataAttr[] = {
@@ -433,62 +454,61 @@ BOOL CUKeyVerify::SetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData,
 				{ CKA_LABEL, 	datalabel, 		sizeof(datalabel)-1 },
 				{ CKA_VALUE, 	databuff, 		databuflen }
 		};
-	
+		
 		rv = C_FindObjectsInit(hSession, dataAttr, 2);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
 		
 		rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
  		if (rv != CKR_OK || ulRetCount != 1)
  		{
- 			bRet = FALSE;
+ 			bRet = false;
  			break;
  		}
 
 		rv = C_SetAttributeValue(hSession, hCKObj, dataAttr, 3);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
 		
-		bRet = TRUE;
-	} while(FALSE);
+		bRet = true;
+	} while (false);
 	
 	C_FindObjectsFinal(hSession);
+	LeaveCriticalSection(&g_caUKeySection);
 	return bRet;
 }
 
-BOOL CUKeyVerify::GetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData, CK_ULONG *pUserDataLen)
+bool PKCS11_GetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData, CK_ULONG *pUserDataLen)
 {
-	BOOL bRet = FALSE;
-
 	CK_RV rv;
+	bool bRet = false;
+	
 	CK_ULONG ulRetCount = 0;
 	CK_OBJECT_HANDLE hCKObj = NULL;
-	CK_OBJECT_CLASS objectclass = CKO_DATA;
-
-	CK_BYTE truevalue = TRUE;
-	CK_BYTE falsevalue = FALSE;
+	
+	CK_BYTE truevalue = true;
+	CK_BYTE falsevalue = false;
 	CK_BYTE datalabel[] = "dataLabel";
+	
+	CK_OBJECT_CLASS objectclass = CKO_DATA;
 	
 	CK_BYTE databuff[512] = {0};
 	CK_ULONG databuflen = sizeof(databuff)-1;
-
+	
 	if (hSession == NULL_PTR)
 	{
-		return FALSE;
+		return false;
 	}
-
-	if (pUserData == NULL || pUserDataLen == NULL)
-	{
-		return FALSE;
-	}
-
-	do 
+	
+	EnterCriticalSection(&g_caUKeySection);
+	
+	do
 	{
 		CK_ATTRIBUTE dataAttr[] = {
 				{ CKA_CLASS,	&objectclass,	sizeof(objectclass) },
@@ -496,45 +516,46 @@ BOOL CUKeyVerify::GetObjectValue(CK_SESSION_HANDLE hSession, CK_BYTE *pUserData,
 				{ CKA_LABEL,	datalabel,		sizeof(datalabel)-1 },
 				{ CKA_VALUE,	databuff,		databuflen }
 		};
-
+		
 		rv = C_FindObjectsInit(hSession, dataAttr, 2);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-
+		
 		rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
 		if (rv != CKR_OK)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-
+		
 		rv = C_GetAttributeValue(hSession, hCKObj, dataAttr, 3);
 		if (rv != CKR_OK)
 		{
-			continue;
+			bRet = false;
+			break;
 		}
-
+		
 		if (dataAttr[2].pValue == NULL || dataAttr[2].ulValueLen == 0)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
 
 		if (*pUserDataLen < dataAttr[2].ulValueLen)
 		{
-			bRet = FALSE;
+			bRet = false;
 			break;
 		}
-
+		
+		bRet = true;
 		*pUserDataLen = dataAttr[2].ulValueLen;
 		memcpy(pUserData, dataAttr[2].pValue, dataAttr[2].ulValueLen);
-
-		bRet = TRUE;
-	} while (FALSE);
-
+	} while (false);
+	
 	C_FindObjectsFinal(hSession);
+	LeaveCriticalSection(&g_caUKeySection);
 	return bRet;
 }

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="UKeyVerifyLib"
-	ProjectGUID="{495E273F-4642-4716-BC82-E7C531FD4072}"
-	RootNamespace="UKeyVerifyLib"
+	Name="UKeyVerify"
+	ProjectGUID="{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}"
+	RootNamespace="UKeyVerify"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -20,13 +20,12 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)Temp\Link\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)Temp\Compile\$(ProjectName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			UseOfMFC="2"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if not exist $(SolutionDir)\Lib\feitian\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)Lib\feitian\$(TargetFileName)&#x0D;&#x0A;:end&#x0D;&#x0A;"
+				CommandLine="if not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -44,12 +43,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\feitian&quot;;&quot;$(SolutionDir)Include\feitian\pkcs#11&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;UKEYVERIFY_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				ProgramDataBaseFileName="$(IntDir)\$(ProjectName).pdb"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -63,11 +61,18 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)Lib&quot;;&quot;$(SolutionDir)Lib\feitian&quot;;&quot;$(SolutionDir)Lib\feitian\pkcs#11&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -79,22 +84,24 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy  $(TargetPath) $(SolutionDir)Lib\feitian\$(TargetFileName)"
+				CommandLine="copy  $(TargetPath) $(SolutionDir)Bin\$(TargetFileName)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)Temp\Link\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)Temp\Compile\$(ProjectName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			UseOfMFC="2"
+			ConfigurationType="2"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if not exist $(SolutionDir)\Lib\feitian\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)Lib\feitian\$(TargetFileName)&#x0D;&#x0A;:end&#x0D;&#x0A;"
+				CommandLine="if not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -113,8 +120,8 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\feitian&quot;;&quot;$(SolutionDir)Include\feitian\pkcs#11&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;UKEYVERIFY_EXPORTS"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
@@ -130,11 +137,20 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)Lib&quot;;&quot;$(SolutionDir)Lib\feitian&quot;;&quot;$(SolutionDir)Lib\feitian\pkcs#11&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -146,8 +162,11 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy  $(TargetPath) $(SolutionDir)Lib\feitian\$(TargetFileName) "
+				CommandLine="copy  $(TargetPath) $(SolutionDir)Bin\$(TargetFileName)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -159,6 +178,28 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\dllmain.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						CompileAsManaged="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+						CompileAsManaged="0"
+					/>
+				</FileConfiguration>
+			</File>
 			<File
 				RelativePath=".\stdafx.cpp"
 				>
@@ -179,6 +220,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\UKeyVerify.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -193,16 +238,24 @@
 				RelativePath=".\targetver.h"
 				>
 			</File>
+			<File
+				RelativePath=".\UKeyVerify.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Inc"
 			>
 			<File
-				RelativePath=".\Inc\UKeyVerify.cpp"
+				RelativePath=".\inc\internal.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Inc\UKeyVerify.h"
+				RelativePath=".\inc\Pkcs11_Ukey.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Pkcs11_Ukey.h"
 				>
 			</File>
 		</Filter>
@@ -210,19 +263,19 @@
 			Name="Contrib"
 			>
 			<File
-				RelativePath=".\Contrib\UKeyFindThread.cpp"
+				RelativePath=".\contrib\UKeyEnumThread.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Contrib\UKeyFindThread.h"
+				RelativePath=".\contrib\UKeyEnumThread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Contrib\UKeyVerifyThread.cpp"
+				RelativePath=".\contrib\UKeyWorkThread.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Contrib\UKeyVerifyThread.h"
+				RelativePath=".\contrib\UKeyWorkThread.h"
 				>
 			</File>
 		</Filter>

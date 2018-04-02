@@ -14,13 +14,14 @@ if exist "opencv*.dll"			(del /a /q /f "opencv*.dll")
 if exist "lib*.dll"				(del /a /q /f "lib*.dll")
 if exist "tbb*.dll"				(del /a /q /f "tbb*.dll")	
 if exist "OpenCVRzt.dll"		(del /a /q /f "OpenCVRzt.dll")
+if exist "UKeyVerify.dll"		(del /a /q /f "UKeyVerify.dll")
 
 cd %s1%\temp\Compile
 if exist "test" 				(rmdir /Q /S "test")
 if exist "OpenCVRzt" 			(rmdir /Q /S "OpenCVRzt")
-if exist "UKeyVerifyLib" 		(rmdir /Q /S "UKeyVerifyLib")
+if exist "UKeyVerify" 			(rmdir /Q /S "UKeyVerify")
 
 cd %s1%\temp\Link
 if exist "test" 				(rmdir /Q /S "test")
 if exist "OpenCVRzt" 			(rmdir /Q /S "OpenCVRzt")
-if exist "UKeyVerifyLib" 		(rmdir /Q /S "UKeyVerifyLib")
+if exist "UKeyVerify" 			(rmdir /Q /S "UKeyVerify")
