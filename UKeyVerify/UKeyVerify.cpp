@@ -6,6 +6,8 @@
 #include "./contrib/UKeyWorkThread.h"
 
 static bool g_bIsInit = false;
+static std::vector<CK_UKEYHANDLE*> g_vecUKeyHandle;
+
 bool rzt_openUKeyProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, CK_UKEYVERIFY_CALLBACK_FUNC pfUkeyVerify, CK_UKEYREAD_CALLBACK_FUNC pfUkeyReadData, CK_UKEYWRITE_CALLBACK_FUNC pfUKeyWriteData, HANDLE &hUKeyProc)
 {
 	bool bRet = false;
@@ -26,33 +28,45 @@ bool rzt_openUKeyProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, CK_UKEYVERIFY_CALLBA
 			break;
 		}
 
-		if (g_bIsInit)
-		{
-			if (!PKCS11_Initialize())
-			{
-				bRet = false;
-				g_bIsInit = false;
-				break;
-			}
-		}
-
 		pUKeyHandle = new CK_UKEYHANDLE;
 		if (pUKeyHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
-		memset(pUKeyHandle, 0x0, sizeof(CK_UKEYHANDLE));
+
+		if (!g_bIsInit)
+		{
+			if (!PKCS11_Initialize(pUKeyHandle, false))
+			{
+				bRet = false;
+				g_bIsInit = false;
+				break;
+			}
+
+			g_bIsInit = true;
+		}
+		else
+		{
+			if (!PKCS11_Initialize(pUKeyHandle, true))
+			{
+				bRet = false;
+				break;
+			}
+		}
 
 		pUKeyHandle->bIsInited = g_bIsInit;
+		pUKeyHandle->pfUKeyEnum = pfUKeyEnum;
+		pUKeyHandle->pfUkeyVerify = pfUkeyVerify;
+		pUKeyHandle->pfUkeyReadData = pfUkeyReadData;
+		pUKeyHandle->pfUKeyWriteData = pfUKeyWriteData;
 
 		if (pfUKeyEnum != NULL)
 		{
-			UKeyEnumInitialize();
-
-			if (!openUKeyEnumProc(pfUKeyEnum, pUKeyHandle->hEnumThread))
+			UKeyEnumInitialize(pUKeyHandle);
+			if (!openUKeyEnumProc(pUKeyHandle))
 			{
-				bRet = FALSE;
+				bRet = false;
 				break;
 			}
 
@@ -61,30 +75,44 @@ bool rzt_openUKeyProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, CK_UKEYVERIFY_CALLBA
 
 		if (pfUkeyVerify != NULL)
 		{
-			UKeyWorkInitialize();
-
-			if (!openUKeyWorkProc(pfUkeyVerify, pfUkeyReadData, pfUKeyWriteData, pUKeyHandle->hWorkThread))
+			UKeyWorkInitialize(pUKeyHandle);
+			if (!openUKeyWorkProc(pUKeyHandle))
 			{
-				bRet = FALSE;
+				bRet = false;
 				break;
 			}
 
 			pUKeyHandle->bIsWorkThread = true;
 		}
-		
-		bRet = TRUE;
+	
+		bRet = true;
+		g_vecUKeyHandle.push_back(pUKeyHandle);
 	} while (false);
 
 	return bRet;
 }
 
-bool rzt_closeUKeyProc()
+bool rzt_closeUKeyProc(HANDLE hUKeyProc)
 {	
 	bool bRet = false;
+	CK_UKEYHANDLE *pUKeyHandle = NULL;
+	std::vector<CK_UKEYHANDLE*>::iterator iterUKeyHandle;
 
 	do 
 	{
-		int i = 0;
+		pUKeyHandle = (CK_UKEYHANDLE *)hUKeyProc;
+		if (pUKeyHandle == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		for (iterUKeyHandle=g_vecUKeyHandle.begin(); iterUKeyHandle!=g_vecUKeyHandle.end(); ++iterUKeyHandle)
+		{
+
+		}
+		
+		bRet = true;
 	} while (false);
 
 	return bRet;

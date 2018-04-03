@@ -25,7 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end"
+				CommandLine="if exist $(SolutionDir)\bin\$(ProjectName).dll   		del $(SolutionDir)bin\$(ProjectName).dll&#x0D;&#x0A;if exist $(SolutionDir)lib\feitian\$(ProjectName).lib 	del $(SolutionDir)lib\feitian\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -88,7 +88,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy  $(TargetPath) $(SolutionDir)Bin\$(TargetFileName)"
+				CommandLine="copy  $(OutDir)\$(ProjectName).dll  $(SolutionDir)Bin\$(ProjectName).dll&#x0D;&#x0A;copy  $(OutDir)\$(ProjectName).lib  $(SolutionDir)lib\feitian\$(ProjectName).lib&#x0D;&#x0A;copy $(SolutionDir)UKeyVerify\UKeyVerify.h  $(SolutionDir)include\feitian\UKeyVerify.h"
 			/>
 		</Configuration>
 		<Configuration
@@ -101,7 +101,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end"
+				CommandLine="if not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

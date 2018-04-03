@@ -2,33 +2,28 @@
 #include "UKeyEnumThread.h"
 #include "../inc/Pkcs11_Ukey.h"
 
-static bool     g_bExit;
-
-static ULONG 	g_ulThreadID;
-static ULONG	g_ulProcTimeOver;
-static ULONG	g_ulCloseTimeOver;
-
-static HANDLE	g_hThread;
-static HANDLE	g_hStartEvent;
-static HANDLE	g_hEndEvent;
-
-static CK_UKEYENUM_CALLBACK_FUNC g_pfUKeyEnum;
-static bool		GetUKeyEnumInfo();
+static bool	GetUKeyEnumInfo(CK_UKEYHANDLE *pUKeyHandle);
 
 ULONG WINAPI UKeyEnumThreadProc(LPVOID lpParam)
 {
-	while(WaitForSingleObject(g_hEndEvent, g_ulProcTimeOver) != WAIT_OBJECT_0)
+	CK_UKEYHANDLE *pUKeyHandle = (CK_UKEYHANDLE*)lpParam;
+	if (pUKeyHandle == NULL)
 	{
-		if (!g_bExit)
+		return -1;
+	}
+
+	while(WaitForSingleObject(pUKeyHandle->stcUKeyEnumThread.hEndEvent, pUKeyHandle->stcUKeyEnumThread.ulProcTimeOver) != WAIT_OBJECT_0)
+	{
+		if (!pUKeyHandle->stcUKeyEnumThread.bExit)
 		{
-			if (!GetUKeyEnumInfo())
+			if (!GetUKeyEnumInfo(pUKeyHandle))
 			{
 				continue;
 			}
 		}
 		else
 		{
-			SetEvent(g_hEndEvent);
+			SetEvent(pUKeyHandle->stcUKeyEnumThread.hEndEvent);
 		}
 	};
 	
@@ -37,61 +32,67 @@ ULONG WINAPI UKeyEnumThreadProc(LPVOID lpParam)
 
 //////////////////////////////////////////////////////////////////////////
 //
-void UKeyEnumInitialize()
+void UKeyEnumInitialize(CK_UKEYHANDLE *pUKeyHandle)
 {
-	g_bExit = false;
-	
-	g_ulThreadID = 0;
-	g_ulProcTimeOver = 500;
-	g_ulCloseTimeOver = 500;
-	
-	g_hThread = NULL;
-	g_pfUKeyEnum = NULL;
-
-	g_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	g_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
-}
-
-void UKeyEnumFinalize()
-{
-	if (g_hStartEvent != NULL)
+	if (pUKeyHandle == NULL)
 	{
-		CloseHandle(g_hStartEvent);
-		g_hStartEvent = NULL;
+		return;
 	}
 
-	if (g_hEndEvent != NULL)
+	pUKeyHandle->stcUKeyEnumThread.bExit = false;
+
+	pUKeyHandle->stcUKeyEnumThread.ulThreadID = 0;
+	pUKeyHandle->stcUKeyEnumThread.ulProcTimeOver = 500;
+	pUKeyHandle->stcUKeyEnumThread.ulCloseTimeOver = 500;
+	
+	pUKeyHandle->stcUKeyEnumThread.hThread = NULL;
+	pUKeyHandle->stcUKeyEnumThread.hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	pUKeyHandle->stcUKeyEnumThread.hEndEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+}
+
+void UKeyEnumFinalize(CK_UKEYHANDLE *pUKeyHandle)
+{
+	if (pUKeyHandle == NULL)
 	{
-		CloseHandle(g_hEndEvent);
-		g_hEndEvent = NULL;
+		return;
+	}
+
+	if (pUKeyHandle->stcUKeyEnumThread.hStartEvent != NULL)
+	{
+		CloseHandle(pUKeyHandle->stcUKeyEnumThread.hStartEvent);
+		pUKeyHandle->stcUKeyEnumThread.hStartEvent = NULL;
+	}
+
+	if (pUKeyHandle->stcUKeyEnumThread.hEndEvent != NULL)
+	{
+		CloseHandle(pUKeyHandle->stcUKeyEnumThread.hEndEvent);
+		pUKeyHandle->stcUKeyEnumThread.hEndEvent = NULL;
 	}
 }
 
-bool openUKeyEnumProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, HANDLE &hEnumHandle)
+bool openUKeyEnumProc(CK_UKEYHANDLE *pUKeyHandle)
 {
 	bool bRet = false;
 	
-	if (g_hThread != NULL || pfUKeyEnum == NULL)
+	if (pUKeyHandle == NULL || pUKeyHandle->stcUKeyEnumThread.hThread != NULL)
 	{
 		return false;
 	}
 	
-	if(WaitForSingleObject(g_hStartEvent, 0) != WAIT_OBJECT_0)
+	if(WaitForSingleObject(pUKeyHandle->stcUKeyEnumThread.hStartEvent, 0) != WAIT_OBJECT_0)
 	{
-		SetEvent(g_hStartEvent);
-		ResetEvent(g_hEndEvent);
+		SetEvent(pUKeyHandle->stcUKeyEnumThread.hStartEvent);
+		ResetEvent(pUKeyHandle->stcUKeyEnumThread.hEndEvent);
 
-		g_pfUKeyEnum = pfUKeyEnum;
-		
-		g_hThread = CreateThread(NULL, 0, UKeyEnumThreadProc, NULL, 0, &g_ulThreadID);
-		if(g_hThread == NULL || g_hThread == INVALID_HANDLE_VALUE)
+		pUKeyHandle->stcUKeyEnumThread.hThread = CreateThread(NULL, 0, UKeyEnumThreadProc, (LPVOID)pUKeyHandle, 0, &pUKeyHandle->stcUKeyEnumThread.ulThreadID);
+		if(pUKeyHandle->stcUKeyEnumThread.hThread == NULL || pUKeyHandle->stcUKeyEnumThread.hThread == INVALID_HANDLE_VALUE)
 		{
-			ResetEvent(g_hStartEvent);
+			ResetEvent(pUKeyHandle->stcUKeyEnumThread.hStartEvent);
 			return false;
 		}
 	
-		g_bExit = false;
-		hEnumHandle = g_hThread;
+		pUKeyHandle->stcUKeyEnumThread.bExit = false;
+		pUKeyHandle->hEnumThread = pUKeyHandle->stcUKeyEnumThread.hThread;
 
 		bRet = true;
 	}
@@ -99,56 +100,50 @@ bool openUKeyEnumProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, HANDLE &hEnumHandle)
 	return bRet;
 }
 
-bool closeUKeyEnumProc()
+bool closeUKeyEnumProc(CK_UKEYHANDLE *pUKeyHandle)
 {
-	g_bExit = true;
-	if (g_hThread == NULL || g_hThread == INVALID_HANDLE_VALUE)
+	if (pUKeyHandle = NULL)
+	{
+		return false;
+	}
+
+	pUKeyHandle->stcUKeyEnumThread.bExit = true;
+	if (pUKeyHandle->stcUKeyEnumThread.hThread == NULL || pUKeyHandle->stcUKeyEnumThread.hThread == INVALID_HANDLE_VALUE)
 	{
 		return false;
 	}
 	
-	WaitForSingleObject(g_hEndEvent, g_ulCloseTimeOver);
-	ResetEvent(g_hStartEvent);
+	WaitForSingleObject(pUKeyHandle->stcUKeyEnumThread.hEndEvent, pUKeyHandle->stcUKeyEnumThread.ulCloseTimeOver);
+	ResetEvent(pUKeyHandle->stcUKeyEnumThread.hStartEvent);
 	
-	if (g_hThread != NULL)
+	if (pUKeyHandle->stcUKeyEnumThread.hThread != NULL)
 	{
-		CloseHandle(g_hThread);
-		g_hThread = NULL;
+		CloseHandle(pUKeyHandle->stcUKeyEnumThread.hThread);
+		pUKeyHandle->stcUKeyEnumThread.hThread = NULL;
 	}
 
+	pUKeyHandle->hEnumThread = NULL;
 	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
-bool GetUKeyEnumInfo()
+bool GetUKeyEnumInfo(CK_UKEYHANDLE *pUKeyHandle)
 {
 	bool bRet = false;
-	std::vector<CK_UKEYDEVICE*> vecUKeyDevice;
 
 	do 
 	{
-		if (!PKCS11_GetSlotList())
+		if (pUKeyHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		if (!PKCS11_GetSlotId(vecUKeyDevice))
+		if (!PKCS11_GetSlotId(pUKeyHandle))
 		{
 			bRet = false;
 			break;
-		}
-
-		if (vecUKeyDevice.size() == 0)
-		{
-			bRet = false;
-			break;
-		}
-
-		if (g_pfUKeyEnum != NULL)
-		{
-			g_pfUKeyEnum(&vecUKeyDevice[0]->stcUKeyEnum);
 		}
 
 		bRet = true;

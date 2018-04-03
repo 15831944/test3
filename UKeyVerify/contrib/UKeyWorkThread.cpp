@@ -1,40 +1,31 @@
 #include "stdafx.h"
 #include "UKeyWorkThread.h"
+#include "../inc/Pkcs11_Ukey.h"
 
-static bool     g_bExit;
-
-static ULONG 	g_ulThreadID;
-static ULONG	g_ulProcTimeOver;
-static ULONG	g_ulCloseTimeOver;
-
-static HANDLE	g_hThread;
-static HANDLE	g_hStartEvent;
-static HANDLE	g_hEndEvent;
-
-static CK_UKEYVERIFY_CALLBACK_FUNC	g_pfUkeyVerify;
-static CK_UKEYREAD_CALLBACK_FUNC    g_pfUkeyReadData;
-static CK_UKEYWRITE_CALLBACK_FUNC   g_pfUKeyWriteData;
-
-static bool		SetUKeyWorkInfo();
-static bool		ReadUKeyData(int iSlotIndex);
-static bool		WriteUKeyData(int iSlotIndex);
+static bool	SetUKeyWorkInfo(CK_UKEYHANDLE *pUKeyHandle);
+static bool	ReadUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex);
+static bool	WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex);
 
 ULONG WINAPI UKeyWorkThreadProc(LPVOID lpParam)
 {
-	bool bRet = false;
-	
-	while(WaitForSingleObject(g_hEndEvent, g_ulProcTimeOver) != WAIT_OBJECT_0)
+	CK_UKEYHANDLE *pUKeyHandle = (CK_UKEYHANDLE*)lpParam;
+	if (pUKeyHandle == NULL)
 	{
-		if (!g_bExit)
+		return -1;
+	}
+
+	while(WaitForSingleObject(pUKeyHandle->strUKeyWorkThread.hEndEvent, pUKeyHandle->strUKeyWorkThread.ulProcTimeOver) != WAIT_OBJECT_0)
+	{
+		if (!pUKeyHandle->strUKeyWorkThread.bExit)
 		{
-			if (!SetUKeyWorkInfo())
+			if (!SetUKeyWorkInfo(pUKeyHandle))
 			{
 				continue;
 			}
 		}
 		else
 		{
-			SetEvent(g_hEndEvent);
+			SetEvent(pUKeyHandle->strUKeyWorkThread.hEndEvent);
 		}
 	}
 	
@@ -43,65 +34,67 @@ ULONG WINAPI UKeyWorkThreadProc(LPVOID lpParam)
 
 //////////////////////////////////////////////////////////////////////////
 //
-void UKeyWorkInitialize()
+void UKeyWorkInitialize(CK_UKEYHANDLE *pUKeyHandle)
 {
-	g_bExit = false;
-	
-	g_ulThreadID = 0;
-	g_ulProcTimeOver = 500;
-	g_ulCloseTimeOver = 500;
-	
-	g_hThread = NULL;
-	g_pfUkeyVerify = NULL;
-	g_pfUkeyReadData = NULL;
-	g_pfUKeyWriteData = NULL;
-	
-	g_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	g_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
-}
-
-void UKeyWorkFinalize()
-{
-	if (g_hStartEvent != NULL)
+	if (pUKeyHandle == NULL)
 	{
-		CloseHandle(g_hStartEvent);
-		g_hStartEvent = NULL;
+		return;
 	}
 
-	if (g_hEndEvent != NULL)
+	pUKeyHandle->strUKeyWorkThread.bExit = false;
+
+	pUKeyHandle->strUKeyWorkThread.ulThreadID = 0;
+	pUKeyHandle->strUKeyWorkThread.ulProcTimeOver = 500;
+	pUKeyHandle->strUKeyWorkThread.ulCloseTimeOver = 500;
+
+	pUKeyHandle->strUKeyWorkThread.hThread = NULL;
+	pUKeyHandle->strUKeyWorkThread.hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	pUKeyHandle->strUKeyWorkThread.hEndEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+}
+
+void UKeyWorkFinalize(CK_UKEYHANDLE *pUKeyHandle)
+{
+	if (pUKeyHandle == NULL)
 	{
-		CloseHandle(g_hEndEvent);
-		g_hEndEvent = NULL;
+		return;
+	}
+
+	if (pUKeyHandle->strUKeyWorkThread.hStartEvent != NULL)
+	{
+		CloseHandle(pUKeyHandle->strUKeyWorkThread.hStartEvent);
+		pUKeyHandle->strUKeyWorkThread.hStartEvent = NULL;
+	}
+
+	if (pUKeyHandle->strUKeyWorkThread.hEndEvent != NULL)
+	{
+		CloseHandle(pUKeyHandle->strUKeyWorkThread.hEndEvent);
+		pUKeyHandle->strUKeyWorkThread.hEndEvent = NULL;
 	}
 }
 
-bool openUKeyWorkProc(CK_UKEYVERIFY_CALLBACK_FUNC pfUkeyVerify, CK_UKEYREAD_CALLBACK_FUNC pfUkeyReadData, CK_UKEYWRITE_CALLBACK_FUNC pfUKeyWriteData, HANDLE &hWorkHandle)
+bool openUKeyWorkProc(CK_UKEYHANDLE *pUKeyHandle)
 {
 	bool bRet = false;
 	
-	if (g_hThread != NULL || pfUkeyVerify == NULL)
+	if (pUKeyHandle == NULL || pUKeyHandle->strUKeyWorkThread.hThread != NULL)
 	{
 		return false;
 	}
 	
-	if(WaitForSingleObject(g_hStartEvent, 0) != WAIT_OBJECT_0)
+	if(WaitForSingleObject(pUKeyHandle->strUKeyWorkThread.hStartEvent, 0) != WAIT_OBJECT_0)
 	{
-		SetEvent(g_hStartEvent);
-		ResetEvent(g_hEndEvent);
-
-		g_pfUkeyVerify = pfUkeyVerify;
-		g_pfUkeyReadData = pfUkeyReadData;
-		g_pfUKeyWriteData = pfUKeyWriteData;
+		SetEvent(pUKeyHandle->strUKeyWorkThread.hStartEvent);
+		ResetEvent(pUKeyHandle->strUKeyWorkThread.hEndEvent);
 		
-		g_hThread = CreateThread(NULL, 0, UKeyWorkThreadProc, NULL, 0, &g_ulThreadID);
-		if(g_hThread == NULL || g_hThread == INVALID_HANDLE_VALUE)
+		pUKeyHandle->strUKeyWorkThread.hThread = CreateThread(NULL, 0, UKeyWorkThreadProc, (LPVOID)pUKeyHandle, 0, &pUKeyHandle->strUKeyWorkThread.ulThreadID);
+		if(pUKeyHandle->strUKeyWorkThread.hThread == NULL || pUKeyHandle->strUKeyWorkThread.hThread == INVALID_HANDLE_VALUE)
 		{
-			ResetEvent(g_hStartEvent);
+			ResetEvent(pUKeyHandle->strUKeyWorkThread.hStartEvent);
 			return false;
 		}
 	
-		g_bExit = false;
-		hWorkHandle = g_hThread;
+		pUKeyHandle->strUKeyWorkThread.bExit = false;
+		pUKeyHandle->hEnumThread = pUKeyHandle->strUKeyWorkThread.hThread;
 
 		bRet = true;
 	}
@@ -109,43 +102,57 @@ bool openUKeyWorkProc(CK_UKEYVERIFY_CALLBACK_FUNC pfUkeyVerify, CK_UKEYREAD_CALL
 	return bRet;
 }
 
-bool closeUKeyWorkProc()
+bool closeUKeyWorkProc(CK_UKEYHANDLE *pUKeyHandle)
 {
-	g_bExit = true;
-	if (g_hThread == NULL || g_hThread == INVALID_HANDLE_VALUE)
+	if (pUKeyHandle = NULL)
+	{
+		return false;
+	}
+
+	pUKeyHandle->strUKeyWorkThread.bExit = true;
+	if (pUKeyHandle->strUKeyWorkThread.hThread == NULL || pUKeyHandle->strUKeyWorkThread.hThread == INVALID_HANDLE_VALUE)
 	{
 		return false;
 	}
 	
-	WaitForSingleObject(g_hEndEvent, g_ulCloseTimeOver);
-	ResetEvent(g_hStartEvent);
+	WaitForSingleObject(pUKeyHandle->strUKeyWorkThread.hEndEvent, pUKeyHandle->strUKeyWorkThread.ulCloseTimeOver);
+	ResetEvent(pUKeyHandle->strUKeyWorkThread.hStartEvent);
 	
-	if (g_hThread != NULL)
+	if (pUKeyHandle->strUKeyWorkThread.hThread != NULL)
 	{
-		CloseHandle(g_hThread);
-		g_hThread = NULL;
+		CloseHandle(pUKeyHandle->strUKeyWorkThread.hThread);
+		pUKeyHandle->strUKeyWorkThread.hThread = NULL;
 	}
+
+	pUKeyHandle->hEnumThread = NULL;
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
-bool SetUKeyWorkInfo()
+bool SetUKeyWorkInfo(CK_UKEYHANDLE *pUKeyHandle)
 {
 	bool bRet = false;
 
 	do 
 	{
-		if (g_pfUkeyReadData != NULL)
+		if (pUKeyHandle == NULL)
 		{
-			if (!ReadUKeyData(0))
+			bRet = false;
+			break;
+		}
+
+		if (pUKeyHandle->pfUkeyReadData != NULL)
+		{
+			if (!ReadUKeyData(pUKeyHandle, 0))
 			{
 				bRet = false;
 				break;
 			}
 		}
-		else if (g_pfUKeyWriteData != NULL)
+		else if (pUKeyHandle->pfUKeyWriteData != NULL)
 		{
-			if (!WriteUKeyData(0))
+			if (!WriteUKeyData(pUKeyHandle, 0))
 			{
 				bRet = false;
 				break;
@@ -163,12 +170,280 @@ bool SetUKeyWorkInfo()
 	return bRet;
 }
 
-bool ReadUKeyData(int iSlotIndex)
+bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlotId, bool *pbIsVerify, HANDLE *pUKeyReadEvent, HANDLE *pUKeyWriteEvent)
 {
-	return true;
+	bool bRet = false;
+
+	CK_UKEYENUM stcUKeyEnum = {0};
+	std::vector<CK_UKEYDEVICE *> vecUKeyDevice;
+
+	do 
+	{
+		if (pUKeyHandle == NULL || pulSlotId == NULL || pbIsVerify == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!PKCS11_GetSlotList(pUKeyHandle, vecUKeyDevice))
+		{
+			bRet = false;
+			break;
+		}
+
+		if (vecUKeyDevice.size() == 0 || vecUKeyDevice.size() < (iSlotIndex+1))
+		{
+			bRet = false;
+			break;
+		}
+
+		*pulSlotId = vecUKeyDevice[iSlotIndex]->ulSlotId;
+		*pbIsVerify = vecUKeyDevice[iSlotIndex]->bIsVerify;
+
+		if (pUKeyReadEvent != NULL)
+		{
+			*pUKeyReadEvent = vecUKeyDevice[iSlotIndex]->stcUKeyRead.hEvent;
+		}
+
+		if (pUKeyWriteEvent != NULL)
+		{
+			*pUKeyWriteEvent = vecUKeyDevice[iSlotIndex]->stcUKeyWrite.hEvent;
+		}
+
+		bRet = true;
+		memcpy(&stcUKeyEnum, &vecUKeyDevice[iSlotIndex]->stcUKeyEnum, sizeof(CK_UKEYENUM));
+	} while (false);
+
+	if (pUKeyHandle->pfUKeyEnum != NULL)
+	{
+		pUKeyHandle->pfUKeyEnum(&stcUKeyEnum);
+	}
+
+	return bRet;
 }
 
-bool WriteUKeyData(int iSlotIndex)
+bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 {
-	return true;
+	bool bRet = false;
+
+	CK_SESSION_HANDLE hSession;
+	CK_UKEYVERIFY stcUKeyVerify = {0};
+
+	do 
+	{
+		if (pUKeyHandle == NULL || ulSlotId == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!PKCS11_CreateSession(pUKeyHandle, ulSlotId))
+		{
+			bRet = false;
+			break;
+		}
+
+		if (pUKeyHandle->pfUkeyVerify != NULL)
+		{
+			stcUKeyVerify.emUKeyState = CK_UKEYSTATEINPUTETYPE;
+			pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
+		}
+
+		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN))
+		{
+			bRet = false;
+			stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+			break;
+		}
+
+		bRet = true;
+		stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+	} while (false);
+
+	if (pUKeyHandle->pfUkeyVerify != NULL)
+	{
+		pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
+	}
+
+	return bRet;
+}
+
+bool readUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, HANDLE hUKeyReadEvent)
+{
+	bool bRet = false;
+	CK_UKEYREADDATA stcUKeyReadData = {0};
+
+	do 
+	{
+		if (pUKeyHandle == NULL || hUKeyReadEvent == NULL || ulSlotId == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (pUKeyHandle->pfUkeyReadData)
+		{
+			stcUKeyReadData.emUKeyState = CK_UKEYSTATEINPUTETYPE;
+			stcUKeyReadData.hEvent = hUKeyReadEvent;
+			pUKeyHandle->pfUkeyReadData(&stcUKeyReadData);
+		}
+
+		if (!PKCS11_GetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyReadData))
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
+
+	if (pUKeyHandle->pfUkeyReadData)
+	{
+		pUKeyHandle->pfUkeyReadData(&stcUKeyReadData);
+	}
+
+	return bRet;
+}
+
+bool writeUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, HANDLE hUKeyWriteEvent)
+{
+	bool bRet = false;
+
+	CK_ULONG ulCount = 0;
+	CK_UKEYWRITEDATA stcUKeyWriteData = {0};
+
+	do 
+	{
+		if (pUKeyHandle == NULL || hUKeyWriteEvent == NULL || ulSlotId == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (pUKeyHandle->pfUKeyWriteData)
+		{
+			stcUKeyWriteData.emUKeyState = CK_UKEYSTATEINPUTETYPE;
+			stcUKeyWriteData.hEvent = hUKeyWriteEvent;
+			pUKeyHandle->pfUKeyWriteData(&stcUKeyWriteData);
+		}
+
+		if (!PKCS11_FindObject(pUKeyHandle, ulSlotId, ulCount))
+		{
+			bRet = false;
+			stcUKeyWriteData.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+			break;
+		}
+
+		if (ulCount == 0)
+		{
+			if (!PKCS11_CreateObject(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+			{
+				bRet = false;
+				break;
+			}
+		}
+		else
+		{
+			if (!PKCS11_SetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+			{
+				bRet = false;
+				break;
+			}
+		}
+
+		bRet = true;
+	} while (false);
+
+	if (pUKeyHandle->pfUKeyWriteData)
+	{
+		pUKeyHandle->pfUKeyWriteData(&stcUKeyWriteData);
+	}
+
+	return bRet;
+}
+
+bool ReadUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
+{
+	bool bRet = false;
+	bool bIsVerify = false;
+
+	CK_ULONG ulSlotId = 0;
+	HANDLE hUKeyReadEvent;
+
+	do 
+	{
+		if (pUKeyHandle == NULL || iSlotIndex < 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, &hUKeyReadEvent, NULL))
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!bIsVerify)
+		{
+			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId))
+			{
+				bRet = false;
+				break;
+			}
+		}
+
+		if (!readUKeyDeviceData(pUKeyHandle, ulSlotId, hUKeyReadEvent))
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
+
+	return bRet;
+}
+
+bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
+{
+	bool bRet = false;
+	bool bIsVerify = false;
+
+	CK_ULONG ulSlotId = 0;
+	HANDLE hUKeyWriteEvent;
+
+	do 
+	{
+		if (pUKeyHandle == NULL || iSlotIndex < 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, NULL, &hUKeyWriteEvent))
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!bIsVerify)
+		{
+			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId))
+			{
+				bRet = false;
+				break;
+			}
+		}
+
+		if (!writeUKeyDeviceData(pUKeyHandle, ulSlotId, hUKeyWriteEvent))
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
+
+	return bRet;
 }

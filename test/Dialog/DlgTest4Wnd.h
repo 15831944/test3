@@ -45,8 +45,5 @@ protected:
 protected:
 	CButton							m_btnTest3;
 	CReportCtrl						m_ListTest;
-
-protected:
 	CStackedTreeCtrl				m_hTreeCtrl;
-	CUKeyVerifyThread				m_UKeyVerifyProc;
 };

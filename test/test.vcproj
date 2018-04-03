@@ -89,7 +89,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib UKeyVerifyLib.lib"
+				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib UKeyVerify.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"

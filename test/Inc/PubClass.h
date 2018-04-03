@@ -31,7 +31,7 @@
 //#include <opencv2/opencv.hpp>
 #include "./common/Character.h"
 
-#include <UKeyVerifyThread.h>
+#include <UKeyVerify.h>
 
 //////////////////////////////////////////////////////////////////////////
 //
