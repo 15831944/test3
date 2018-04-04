@@ -1167,6 +1167,13 @@ typedef CK_ULONG          CK_RV;
 
 #define CKR_VENDOR_DEFINED                    0x80000000UL
 
+//////////////////////////////////////////////////////////////////////////
+// BioPass3000 return values									"BIO" 0x42494F
+#define CKR_BIO_FINGER_BASE										0x80000000 + 0x42494F
+#define CKR_BIO_ENROLL_TIMEOUT								CKR_BIO_FINGER_BASE + 1
+#define CKR_BIO_DELETE_LAST_FINGER						CKR_BIO_FINGER_BASE + 2
+#define CKR_BIO_FINGER_NEVER_LEFT							CKR_BIO_FINGER_BASE + 3
+#define CKR_BIO_VERIFY_TIMEOUT								CKR_BIO_FINGER_BASE + 4
 
 /* CK_NOTIFY is an application callback that processes events */
 typedef CK_CALLBACK_FUNCTION(CK_RV, CK_NOTIFY)(

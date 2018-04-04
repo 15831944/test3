@@ -22,17 +22,23 @@ NOTE:
 extern "C" {
 #endif
 
+const CK_BYTE AUX_FUNC_VERSION_MAJOR = 1;
+const CK_BYTE AUX_FUNC_VERSION_MINOR = 0;
 
 // ES_EVENT_XXXX must in range of 0x0001 to 0xFFFF
 // Event code returned in the parameter pulEvent of function E_WaitForSlotEvent
 #define ES_EVENT_TOKEN_INSERTED			0x0001
 #define ES_EVENT_TOKEN_REMOVED			0x0002
+
 #define ES_EVENT_OBJ_CREATE				0x0003
 #define ES_EVENT_OBJ_DELETE				0x0004
 #define ES_EVENT_OBJ_UPDATE				0x0005
+
 #define ES_EVENT_PIN_CHANGED			0x0006
 #define ES_EVENT_PIN_BLOCKED			0x0007
+
 #define ES_EVENT_TOKEN_NAME				0x0008
+
 #define ES_EVENT_CARDSTATE_CHANGED		0x0009
 #define ES_EVENT_CARD_TIMEOUT			0x000A
 
@@ -59,6 +65,7 @@ extern "C" {
 #define ES_EVENT_TOKEN_BLANK_BEGIN		0x010F
 #define ES_EVENT_TOKEN_BLANK_END		0x0110
 #define ES_EVENT_TOKEN_BLANK_ERR		0x0111
+
 #define ES_EVENT_FUS_SESSION_DISCONNECT	0x0112
 #define ES_EVENT_FUS_SESSION_CONNECT	0x0113
 #define ES_EVENT_FUS_MONITOR_CHANGED	0x0114
@@ -84,9 +91,19 @@ extern "C" {
 #define EP_BEGIN_TRANS_APDU				14
 #define EP_TRANSEMIT_APDU				15
 #define EP_END_TRANS_APDU				16
+//BioPass2003
+#define EP_GET_FINGER_COUNT				17
+#define EP_VERIFY_FINGER				18
+#define EP_ENROLL_FINGER				19
+#define EP_DELETE_FINGER				20
+#define EP_CLEAR_FINGER					21
+#define EP_IS_BIOACTIVE					22
+#define EP_CANCEL_FINGER_VERIFY			23
 
+#define BIO_DEST_VERIFY					0x00
+#define BIO_DEST_REGISTER				0x01
 
-#define EP_FUNC_MAX_COUNT				20
+#define EP_FUNC_MAX_COUNT				30
 
 //Token support system type 高位2字节表示文件系统类型;低位2字节表示子版本
 #define ES_DEFAULT_FILE_SYSTEM			0x00000000
@@ -95,6 +112,7 @@ extern "C" {
 #define ES_NG_FAT8_FILE_SYSTEM			0x00010003
 #define ES_BUDDY_FILE_SYSTEM			0x00020001
 #define ES_PKCS15_FILE_SYSTEM			0x00030001
+
 
 #pragma pack(push,1)
 typedef struct _AUX_INIT_TOKEN_LOWLEVL_PKI
@@ -121,9 +139,6 @@ typedef struct _AUX_INIT_TOKEN_LOWLEVL_PKI
 	//for 1.2 and later
 	CK_ULONG	ulTC;
 	char*		strTransmitCode;
-	//for 1.3 and later
-	CK_BYTE		nECKeyPairCount;
-
 } AUX_INIT_TOKEN_LOWLEVL_PKI, CK_PTR AUX_INIT_TOKEN_LOWLEVL_PKI_PTR;
 
 typedef struct	_AUX_INIT_TOKEN_LOWLEVL_PKI \
@@ -187,13 +202,44 @@ struct AUX_P12_BLOB
 
 typedef AUX_P12_BLOB CK_PTR AUX_P12_BLOB_PTR;
 
+struct AUX_PUBLIC_KEY
+{
+	CK_ULONG bit_len;
+	CK_BYTE_PTR ptrN;
+	CK_BYTE_PTR ptrE;
+};
 
-#define TAG_TYPE_PCERT		0xA0
+struct AUX_PRIVATE_KEY
+{
+	CK_ULONG bit_len;
+	CK_BYTE_PTR ptrN;
+	CK_BYTE_PTR ptrE;
+	CK_BYTE_PTR ptrD;
+	CK_BYTE_PTR ptrP;
+	CK_BYTE_PTR ptrQ;
+	CK_BYTE_PTR ptrDmodP;
+	CK_BYTE_PTR ptrDmodQ;
+	CK_BYTE_PTR ptrQmodP;
+};
+
+struct AUX_CERTIFICATE
+{
+	CK_ULONG cert_count;
+	CK_ULONG cert_len;
+	CK_BYTE_PTR cert_buff;
+};
+
+typedef AUX_PUBLIC_KEY CK_PTR AUX_PUBLIC_KEY_PTR;
+typedef AUX_PRIVATE_KEY CK_PTR AUX_PRIVATE_KEY_PTR;
+typedef AUX_CERTIFICATE CK_PTR AUX_CERTIFICATE_PTR;
+
+#define TAG_TYPE_PCERT			0xA0
 #define TAG_TYPE_CACERT			0xA1
 #define TAG_TYPE_PUBKEY			0xA2
 #define TAG_TYPE_PRIKEY			0xA3
 #define TAG_TYPE_FNAME			0xA4
 #define TAG_TYPE_FILETYPE		0xA5
+
 #pragma pack(pop)
 
 // Low level initialize the token
@@ -282,8 +328,9 @@ CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_ParseComboCertificate)
 	CK_ULONG				ulComboCertLen,	// (IN) buffer length
 	CK_BYTE_PTR				pPassword,		// (IN) password (for PKCS#12)
 	CK_ULONG				ulPasswordLen,	// (IN) password length	
-	CK_BYTE_PTR				pbTlvData,
-	CK_ULONG_PTR			pulTlvLen
+	AUX_CERTIFICATE_PTR		pCert,			// (IN/OUT) certificate
+	AUX_PUBLIC_KEY_PTR		pPubKey,		// (IN/OUT) public key
+	AUX_PRIVATE_KEY_PTR		pPrvKey			// (IN/OUT) private key
 );
 
 typedef
@@ -320,6 +367,54 @@ CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_GetAuxFunctionList)
 (
 	AUX_FUNC_LIST_PTR_PTR pAuxFunc
 );
+
+typedef
+CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_GetFingerCount)
+(
+	CK_SLOT_ID		slotID,				// Slot ID to retrive information
+	CK_BYTE_PTR		pIDList,				// Finger ID List
+	CK_ULONG_PTR	pulCount			// receives number of Finger ID
+);
+
+typedef
+CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_VerifyFinger)
+(
+	CK_SLOT_ID		slotID,				// Slot ID to retrive information
+	CK_ULONG_PTR	pulIndex			// return Finger ID of matched
+);
+
+typedef
+CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_EnrollFinger)
+(
+ CK_SLOT_ID			slotID,				// Slot ID to retrive information
+ CK_BYTE			ucFingerID,			// Finger ID
+ CK_BYTE			ucNumber			// Number of times to enroll
+ );
+
+typedef
+CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_DeleteFinger)
+(
+	CK_SLOT_ID		slotID,				// Slot ID to retrive information
+	CK_BYTE			ucFingerID			// Finger ID
+);
+
+typedef 
+CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_ClearFinger)
+(
+	CK_SLOT_ID		slotID				// Slot ID to retrive information
+);
+
+typedef
+CK_DECLARE_FUNCTION_POINTER(CK_BBOOL, EP_isBioActive)
+(
+	CK_SLOT_ID		slotID				// Slot ID to retrive information
+);
+
+typedef
+CK_DECLARE_FUNCTION_POINTER(CK_RV, EP_CancelFingerVerify)
+(
+ CK_SLOT_ID		slotID				// Slot ID to retrive information
+ );
 
 #ifdef __cplusplus
 }

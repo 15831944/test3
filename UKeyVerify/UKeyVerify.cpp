@@ -85,9 +85,17 @@ bool rzt_openUKeyProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, CK_UKEYVERIFY_CALLBA
 			pUKeyHandle->bIsWorkThread = true;
 		}
 	
-		bRet = true;
+		hUKeyProc = (HANDLE)pUKeyHandle;
 		g_vecUKeyHandle.push_back(pUKeyHandle);
+
+		bRet = true;
 	} while (false);
+
+	if (!bRet && pUKeyHandle != NULL)
+	{
+		delete pUKeyHandle;
+		pUKeyHandle = NULL;
+	}
 
 	return bRet;
 }
@@ -100,16 +108,48 @@ bool rzt_closeUKeyProc(HANDLE hUKeyProc)
 
 	do 
 	{
-		pUKeyHandle = (CK_UKEYHANDLE *)hUKeyProc;
-		if (pUKeyHandle == NULL)
+		if (hUKeyProc == NULL || hUKeyProc == INVALID_HANDLE_VALUE)
 		{
 			bRet = false;
 			break;
 		}
 
-		for (iterUKeyHandle=g_vecUKeyHandle.begin(); iterUKeyHandle!=g_vecUKeyHandle.end(); ++iterUKeyHandle)
+		for (iterUKeyHandle=g_vecUKeyHandle.begin(); iterUKeyHandle!=g_vecUKeyHandle.end(); )
 		{
+			pUKeyHandle = (CK_UKEYHANDLE *)(*iterUKeyHandle);
+			if (pUKeyHandle == NULL)
+			{
+				++iterUKeyHandle;
+				continue;
+			}
 
+			if (memcmp(hUKeyProc, pUKeyHandle, sizeof(CK_UKEYHANDLE)) == 0)
+			{
+				if (!closeUKeyWorkProc(pUKeyHandle))
+				{
+					++iterUKeyHandle;
+					continue;
+				}
+
+				if (!closeUKeyEnumProc(pUKeyHandle))
+				{
+					++iterUKeyHandle;
+					continue;
+				}
+
+				if (pUKeyHandle != NULL)
+				{
+					delete pUKeyHandle;
+					pUKeyHandle = NULL;
+				}
+
+				iterUKeyHandle = g_vecUKeyHandle.erase(iterUKeyHandle);
+				break;
+			}
+			else
+			{
+				++iterUKeyHandle;
+			}
 		}
 		
 		bRet = true;

@@ -124,6 +124,7 @@ int nItem = m_list.GetTopIndex();
 
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
+	rzt_closeUKeyProc(m_hUKeyProc);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -199,8 +200,7 @@ BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
 
 BOOL CDlgTest4Wnd::InitInfo()
 {
-	HANDLE hUKeyProc;
-	rzt_openUKeyProc(test1, test2, NULL, test4, hUKeyProc);
+	rzt_openUKeyProc(test1, test2, NULL, test4, m_hUKeyProc);
 	return TRUE;
 }
 

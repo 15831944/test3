@@ -102,7 +102,7 @@ bool openUKeyEnumProc(CK_UKEYHANDLE *pUKeyHandle)
 
 bool closeUKeyEnumProc(CK_UKEYHANDLE *pUKeyHandle)
 {
-	if (pUKeyHandle = NULL)
+	if (pUKeyHandle == NULL)
 	{
 		return false;
 	}

@@ -94,7 +94,7 @@ bool openUKeyWorkProc(CK_UKEYHANDLE *pUKeyHandle)
 		}
 	
 		pUKeyHandle->strUKeyWorkThread.bExit = false;
-		pUKeyHandle->hEnumThread = pUKeyHandle->strUKeyWorkThread.hThread;
+		pUKeyHandle->hWorkThread = pUKeyHandle->strUKeyWorkThread.hThread;
 
 		bRet = true;
 	}
@@ -104,7 +104,7 @@ bool openUKeyWorkProc(CK_UKEYHANDLE *pUKeyHandle)
 
 bool closeUKeyWorkProc(CK_UKEYHANDLE *pUKeyHandle)
 {
-	if (pUKeyHandle = NULL)
+	if (pUKeyHandle == NULL)
 	{
 		return false;
 	}
@@ -124,7 +124,7 @@ bool closeUKeyWorkProc(CK_UKEYHANDLE *pUKeyHandle)
 		pUKeyHandle->strUKeyWorkThread.hThread = NULL;
 	}
 
-	pUKeyHandle->hEnumThread = NULL;
+	pUKeyHandle->hWorkThread = NULL;
 	return true;
 }
 
