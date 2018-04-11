@@ -357,7 +357,7 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char 
 
 		iterUKeyDevice->second->bIsVerify = true;
 		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-		memcpy(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, pszUserPIN, ulPINLen);
+		memcpy(iterUKeyDevice->second->stcUKeyVerify.szOldUserPIN, pszUserPIN, ulPINLen);
 		
 		bRet = true;
 	} while (false);
@@ -366,7 +366,7 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char 
 	{
 		iterUKeyDevice->second->bIsVerify = false;
 		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
-		memset(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, 0x0, UKEYPIN_MAX_LEN);
+		memset(iterUKeyDevice->second->stcUKeyVerify.szOldUserPIN, 0x0, UKEYPIN_MAX_LEN);
 	}
 	
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
@@ -420,6 +420,79 @@ bool PKCS11_LogoutUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
 	} while (false);
 	
+	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
+	return bRet;
+}
+
+bool PKCS11_SetUserPin(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char *pszOldUserPIN, const char *pszNewUserPIN)
+{
+	CK_RV rv;
+	bool bRet = false;
+
+	CK_ULONG ulFlags = 0;
+	CK_ULONG ulOldPINLen = 0;
+	CK_BYTE_PTR pOldPINBuffer = NULL_PTR;
+
+	CK_ULONG ulNewPINLen = 0;
+	CK_BYTE_PTR pNewPINBuffer = NULL_PTR;
+
+	CK_SESSION_HANDLE hSession;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
+
+	if (pUKeyHandle == NULL)
+	{
+		return false;
+	}
+
+	EnterCriticalSection(&pUKeyHandle->caUKeySection);
+
+	do 
+	{
+		if (ulSlotId == 0 || pUKeyHandle->mapUKeyDevice.size() == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		iterUKeyDevice = pUKeyHandle->mapUKeyDevice.find(ulSlotId);
+		if (iterUKeyDevice == pUKeyHandle->mapUKeyDevice.end())
+		{
+			bRet = false;
+			break;
+		}
+
+		hSession = (CK_SESSION_HANDLE)iterUKeyDevice->second->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = false;
+			break;
+		}
+
+		ulFlags = iterUKeyDevice->second->ulFlags;
+		if (ulFlags & CKF_PROTECTED_AUTHENTICATION_PATH)
+		{
+			bRet = true;
+			break;
+		}
+		else
+		{
+			if (pszOldUserPIN == NULL || *pszOldUserPIN == '\0'
+				|| pszNewUserPIN == NULL || *pszNewUserPIN == '\0')
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			ulOldPINLen = strlen(pszOldUserPIN);
+			pOldPINBuffer = (CK_BYTE_PTR)pszOldUserPIN;
+
+			ulNewPINLen = strlen(pszNewUserPIN);
+			pNewPINBuffer = (CK_BYTE_PTR)pszNewUserPIN;
+
+			rv = C_SetPIN(hSession, )
+		}
+	} while (false);
+
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
 	return bRet;
 }

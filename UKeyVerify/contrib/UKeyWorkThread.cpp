@@ -249,11 +249,17 @@ bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 			pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
 		}
 
-		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN))
+		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szOldUserPIN))
 		{
 			bRet = false;
 			stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
 			break;
+		}
+
+		if (pUKeyHandle->pfUkeyVerify != NULL)
+		{
+			stcUKeyVerify.emUKeyState = CK_UKEYSTATEMODIFYTYPE;
+			pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
 		}
 
 		bRet = true;

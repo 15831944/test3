@@ -11,6 +11,8 @@
 #define USERNUM_MAX_LEN		64
 #define USERPASSWD_MAX_LEN	64
 
+#define DEFAULT_USERPIN		_T("12345678")
+
 typedef enum {
 	CK_UKEYDEVEMPTYTYPE = 0,								//空类型;
 	CK_UKEYDEVNORMALTYPE,									//普通UKey设备;
@@ -25,6 +27,7 @@ typedef enum {
 	CK_UKEYSTATEREMOVETYPE,									//UKEY设备拔除操作;
 	CK_UKEYSTATEINPUTETYPE,									//UKEY设备输入操作;
 	CK_UKEYSTATEOUTPUTTYPE,									//UKEY设备输出操作;
+	CK_UKEYSTATEMODIFYTYPE,									//UKEY设备修改操作;
 }CK_UKEYSTATETYPE;
 
 typedef struct {
@@ -36,9 +39,8 @@ typedef struct {
 
 typedef struct {
 	ULONG				ulRemainCount;						//UKey设备PIN口令剩余次数;
-	char				szUserPIN[UKEYPIN_MAX_LEN];			//UKey设备PIN码;
-	BYTE*				pFingerData;						//UKey设备指纹数据;
-	ULONG				ulFingerDataLen;					//UKey设备指纹数据长度;
+	char				szOldUserPIN[UKEYPIN_MAX_LEN];		//UKey设备原始PIN码;
+	char				szNewUserPIN[UKEYPIN_MAX_LEN];		//UKey设备新的PIN码;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYVERIFY; 
 
