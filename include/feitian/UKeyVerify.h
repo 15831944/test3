@@ -11,15 +11,15 @@
 #define USERNUM_MAX_LEN		64
 #define USERPASSWD_MAX_LEN	64
 
-#define DEFAULT_USERPIN		_T("12345678")
+#define DEFAULT_USERPIN		"12345678"
 
-typedef enum {
+typedef enum{
 	CK_UKEYDEVEMPTYTYPE = 0,								//空类型;
 	CK_UKEYDEVNORMALTYPE,									//普通UKey设备;
 	CK_UKEYDEVFINGERTYPE,									//指纹Key设备;
 }CK_UKEYDEVICETYPE;
 
-typedef enum {
+typedef enum{
 	CK_UKEYSTATEEMPTYTYPE = 0,								//空类型;
 	CK_UKEYSTATESUCCEDTYPE,									//UKEY设备成功操作;
 	CK_UKEYSTATEFAILEDTYPE,									//UKEY设备失败操作;
@@ -30,28 +30,32 @@ typedef enum {
 	CK_UKEYSTATEMODIFYTYPE,									//UKEY设备修改操作;
 }CK_UKEYSTATETYPE;
 
-typedef struct {
+typedef enum{
+
+};
+
+typedef struct{
 	bool				bExist;								//UKey设备是否存在;
 	ULONG				ulSlotId;							//UKey设备ID;
 	CK_UKEYDEVICETYPE	emUKeyType;							//UKey设备类型;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYENUM;
 
-typedef struct {
+typedef struct{
 	ULONG				ulRemainCount;						//UKey设备PIN口令剩余次数;
-	char				szOldUserPIN[UKEYPIN_MAX_LEN];		//UKey设备原始PIN码;
+	char				szUserPIN[UKEYPIN_MAX_LEN];			//UKey设备原始PIN码;
 	char				szNewUserPIN[UKEYPIN_MAX_LEN];		//UKey设备新的PIN码;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYVERIFY; 
 
-typedef struct {
+typedef struct{
 	char				szUserNum[USERNUM_MAX_LEN];			//调度登录号码;
 	char				szUserPasswd[USERPASSWD_MAX_LEN];	//调度登录密码;
 	HANDLE				hEvent;								//UKey设备读写事件;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYREADDATA;
 
-typedef struct {
+typedef struct{
 	char				szUserNum[USERNUM_MAX_LEN];			//调度登录号码;
 	char				szUserPasswd[USERPASSWD_MAX_LEN];	//调度登录密码;
 	HANDLE				hEvent;								//UKey设备读写事件;

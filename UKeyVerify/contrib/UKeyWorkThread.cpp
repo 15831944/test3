@@ -225,6 +225,7 @@ bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlo
 bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 {
 	bool bRet = false;
+	bool bIsFinger = false;
 
 	CK_SESSION_HANDLE hSession;
 	CK_UKEYVERIFY stcUKeyVerify = {0};
@@ -249,17 +250,29 @@ bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 			pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
 		}
 
-		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szOldUserPIN))
+		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN, bIsFinger))
 		{
 			bRet = false;
 			stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
 			break;
 		}
 
-		if (pUKeyHandle->pfUkeyVerify != NULL)
-		{
-			stcUKeyVerify.emUKeyState = CK_UKEYSTATEMODIFYTYPE;
-			pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
+		if (!bIsFinger)
+		{/*
+			if (pUKeyHandle->pfUkeyVerify != NULL)
+			{
+				stcUKeyVerify.emUKeyState = CK_UKEYSTATEMODIFYTYPE;
+				pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
+			}
+
+			if (!PKCS11_SetUserPin(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN, stcUKeyVerify.szNewUserPIN))
+			{
+				bRet = false;
+				stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+				break;
+			}
+		  */
+			PKCS11_FingerEnroll(pUKeyHandle, ulSlotId);
 		}
 
 		bRet = true;

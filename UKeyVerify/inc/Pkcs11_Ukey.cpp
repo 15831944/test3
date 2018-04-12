@@ -30,6 +30,8 @@ bool PKCS11_Initialize(CK_UKEYHANDLE *pUKeyHandle, bool bFlags)
 				bRet = false;
 				break;
 			}
+
+			E_GetAuxFunctionList(&pUKeyHandle->pAuxFunc);
 		}
 		
 		bRet = true;
@@ -114,16 +116,29 @@ bool PKCS11_GetSlotId(CK_UKEYHANDLE *pUKeyHandle)
 				pUKeyDevice->ulFlags  = tokenInfo.flags;
 				pUKeyDevice->hSession = NULL;
 
+				pUKeyDevice->bIsVerify = false;
+				pUKeyDevice->bIsDefaultUserPIN = false;
+
 				pUKeyDevice->stcUKeyEnum.bExist = true;
 				pUKeyDevice->stcUKeyEnum.ulSlotId = ulSlotId;
 				pUKeyDevice->stcUKeyEnum.emUKeyState = CK_UKEYSTATEINSERTTYPE;
 
-				if (tokenInfo.flags & CKF_PROTECTED_AUTHENTICATION_PATH)
+				if (((EP_isBioActive)(pUKeyHandle->pAuxFunc->pFunc[EP_IS_BIOACTIVE]))(ulSlotId))
 				{
-					pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVFINGERTYPE;
+					if (tokenInfo.flags & CKF_PROTECTED_AUTHENTICATION_PATH)
+					{
+						pUKeyDevice->bIsFinger = true;
+						pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVFINGERTYPE;
+					}
+					else
+					{
+						pUKeyDevice->bIsFinger = false;
+						pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVNORMALTYPE;
+					}
 				}
 				else
 				{
+					pUKeyDevice->bIsFinger = false;
 					pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVNORMALTYPE;
 				}
 				
@@ -283,7 +298,7 @@ bool PKCS11_CloseSession(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 	return bRet;
 }
 
-bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char *pszUserPIN)
+bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char *pszUserPIN, bool &bIsFinger)
 {
 	CK_RV rv;
 	bool bRet = false;
@@ -324,28 +339,27 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char 
 			break;
 		}
 
-		ulFlags = iterUKeyDevice->second->ulFlags;
-		if (ulFlags & CKF_PROTECTED_AUTHENTICATION_PATH)
+		if (((EP_isBioActive)(pUKeyHandle->pAuxFunc->pFunc[EP_IS_BIOACTIVE]))(ulSlotId))
 		{
-			rv = C_Login(hSession, CKU_USER, 0, 0);
+			ulFlags = iterUKeyDevice->second->ulFlags;
+			if (ulFlags & CKF_PROTECTED_AUTHENTICATION_PATH)
+			{
+				rv = C_Login(hSession, CKU_USER, 0, 0);
+			}
+
+			bIsFinger = true;
 		}
 		else
 		{
-			if (pszUserPIN == NULL_PTR || *pszUserPIN == '\0')
-			{
-				bRet = false;
-				break;
-			}
-
 			ulPINLen = strlen(pszUserPIN);
 			pPINBuffer = (CK_BYTE_PTR)pszUserPIN;
-
 			if (pPINBuffer == NULL_PTR)
 			{
 				bRet = false;
 				break;
 			}
 
+			bIsFinger = false;
 			rv = C_Login(hSession, CKU_USER, pPINBuffer, ulPINLen);
 		}
 		
@@ -355,9 +369,18 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char 
 			break;
 		}
 
+		if (strcmp(pszUserPIN, DEFAULT_USERPIN) == 0)
+		{
+			iterUKeyDevice->second->bIsDefaultUserPIN = true;
+		}
+		else
+		{
+			iterUKeyDevice->second->bIsDefaultUserPIN = false;
+		}
+
 		iterUKeyDevice->second->bIsVerify = true;
 		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-		memcpy(iterUKeyDevice->second->stcUKeyVerify.szOldUserPIN, pszUserPIN, ulPINLen);
+		memcpy(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, pszUserPIN, ulPINLen);
 		
 		bRet = true;
 	} while (false);
@@ -366,7 +389,7 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char 
 	{
 		iterUKeyDevice->second->bIsVerify = false;
 		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
-		memset(iterUKeyDevice->second->stcUKeyVerify.szOldUserPIN, 0x0, UKEYPIN_MAX_LEN);
+		memset(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, 0x0, UKEYPIN_MAX_LEN);
 	}
 	
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
@@ -479,7 +502,7 @@ bool PKCS11_SetUserPin(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char
 			if (pszOldUserPIN == NULL || *pszOldUserPIN == '\0'
 				|| pszNewUserPIN == NULL || *pszNewUserPIN == '\0')
 			{
-				bRet = FALSE;
+				bRet = false;
 				break;
 			}
 
@@ -489,9 +512,27 @@ bool PKCS11_SetUserPin(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char
 			ulNewPINLen = strlen(pszNewUserPIN);
 			pNewPINBuffer = (CK_BYTE_PTR)pszNewUserPIN;
 
-			rv = C_SetPIN(hSession, )
+			rv = C_SetPIN(hSession, pOldPINBuffer, ulOldPINLen, pNewPINBuffer, ulNewPINLen);
+			if (rv != CKR_OK)
+			{
+				bRet = false;
+				break;
+			}
+
+			iterUKeyDevice->second->bIsVerify = true;
+			iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+			memcpy(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, pszNewUserPIN, ulNewPINLen);
+
+			bRet = true;
 		}
 	} while (false);
+
+	if (!bRet)
+	{
+		iterUKeyDevice->second->bIsVerify = false;
+		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+		memset(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, 0x0, UKEYPIN_MAX_LEN);
+	}
 
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
 	return bRet;
@@ -921,6 +962,204 @@ bool PKCS11_GetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKE
 	}
 	
 	C_FindObjectsFinal(hSession);
+	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
+	return bRet;
+}
+
+bool PKCS11_GetFingerCount(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+{
+	CK_RV rv;
+	bool bRet = false;
+
+	CK_ULONG ulRetCount = 0;
+
+	CK_SESSION_HANDLE hSession;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
+
+	if (pUKeyHandle == NULL)
+	{
+		return false;
+	}
+
+	EnterCriticalSection(&pUKeyHandle->caUKeySection);
+
+	do 
+	{
+		if (ulSlotId == 0 || pUKeyHandle->mapUKeyDevice.size() == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		iterUKeyDevice = pUKeyHandle->mapUKeyDevice.find(ulSlotId);
+		if (iterUKeyDevice == pUKeyHandle->mapUKeyDevice.end())
+		{
+			bRet = false;
+			break;
+		}
+
+		hSession = (CK_SESSION_HANDLE)iterUKeyDevice->second->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!((EP_isBioActive)(pUKeyHandle->pAuxFunc->pFunc[EP_IS_BIOACTIVE]))(ulSlotId))
+		{
+			
+		}
+		else
+		{
+
+		}
+	} while (false);
+
+	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
+	return bRet;
+}
+
+bool PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+{
+	CK_RV rv;
+	bool bRet = false;
+
+	CK_ULONG ulRetCount = 0;
+
+	CK_SESSION_HANDLE hSession;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
+
+	if (pUKeyHandle == NULL)
+	{
+		return false;
+	}
+
+	EnterCriticalSection(&pUKeyHandle->caUKeySection);
+
+	do 
+	{
+		if (ulSlotId == 0 || pUKeyHandle->mapUKeyDevice.size() == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		iterUKeyDevice = pUKeyHandle->mapUKeyDevice.find(ulSlotId);
+		if (iterUKeyDevice == pUKeyHandle->mapUKeyDevice.end())
+		{
+			bRet = false;
+			break;
+		}
+
+		hSession = (CK_SESSION_HANDLE)iterUKeyDevice->second->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = false;
+			break;
+		}
+
+		rv = ((EP_EnrollFinger)pUKeyHandle->pAuxFunc->pFunc[EP_ENROLL_FINGER])(ulSlotId, 0, 1);
+		if (rv != CKR_OK)
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
+
+	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
+	return bRet;
+}
+
+bool PKCS11_FingerDelete(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+{
+	CK_RV rv;
+	bool bRet = false;
+
+	CK_ULONG ulRetCount = 0;
+
+	CK_SESSION_HANDLE hSession;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
+
+	if (pUKeyHandle == NULL)
+	{
+		return false;
+	}
+
+	EnterCriticalSection(&pUKeyHandle->caUKeySection);
+
+	do 
+	{
+		if (ulSlotId == 0 || pUKeyHandle->mapUKeyDevice.size() == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		iterUKeyDevice = pUKeyHandle->mapUKeyDevice.find(ulSlotId);
+		if (iterUKeyDevice == pUKeyHandle->mapUKeyDevice.end())
+		{
+			bRet = false;
+			break;
+		}
+
+		hSession = (CK_SESSION_HANDLE)iterUKeyDevice->second->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = false;
+			break;
+		}
+
+
+	} while (false);
+
+	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
+	return bRet;
+}
+
+bool PKCS11_FingerClear(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+{
+	CK_RV rv;
+	bool bRet = false;
+
+	CK_ULONG ulRetCount = 0;
+
+	CK_SESSION_HANDLE hSession;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
+
+	if (pUKeyHandle == NULL)
+	{
+		return false;
+	}
+
+	EnterCriticalSection(&pUKeyHandle->caUKeySection);
+
+	do 
+	{
+		if (ulSlotId == 0 || pUKeyHandle->mapUKeyDevice.size() == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		iterUKeyDevice = pUKeyHandle->mapUKeyDevice.find(ulSlotId);
+		if (iterUKeyDevice == pUKeyHandle->mapUKeyDevice.end())
+		{
+			bRet = false;
+			break;
+		}
+
+		hSession = (CK_SESSION_HANDLE)iterUKeyDevice->second->hSession;
+		if (hSession == NULL_PTR)
+		{
+			bRet = false;
+			break;
+		}
+
+
+	} while (false);
+
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
 	return bRet;
 }

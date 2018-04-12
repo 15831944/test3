@@ -146,16 +146,56 @@ BOOL CDlgTest4Wnd::InitCtrl()
 
 BOOL test1(const CK_UKEYENUM *pUKeyEnum)
 {
+	if (pUKeyEnum == NULL)
+	{
+		return FALSE;
+	}
+
+	if (!pUKeyEnum->bExist)
+	{
+		TRACE(_T("UKey Device is not Exist!"));
+		return FALSE;
+	}
+
+	if (pUKeyEnum->emUKeyState == CK_UKEYSTATEINSERTTYPE)
+	{
+		TRACE(_T("UKey Device ID:%d"), pUKeyEnum->ulSlotId);
+	}
+
+	if (pUKeyEnum->emUKeyType == CK_UKEYDEVFINGERTYPE)
+	{
+		TRACE(_T("UKey Device is FingerMode!"));
+	}
+	else
+	{
+		TRACE(_T("UKey Device is not FingerMode!"));
+	}
+
 	return TRUE;
 }
 
 BOOL test2(CK_UKEYVERIFY *pUKeyVerify)
 {
+	char szUserPIN[UKEYPIN_MAX_LEN] = {0};
+	char szNewUserPIN[UKEYPIN_MAX_LEN] = {0};
+
 	if (pUKeyVerify->emUKeyState == CK_UKEYSTATEINPUTETYPE)
 	{
-		strcpy(pUKeyVerify->szUserPIN, _T("12345678"));
+		//scanf(_T("%s"), szUserPIN);
+		strcpy(szUserPIN, _T("12345678"));	//12345678
+		TRACE(_T("UKey Input UserPIN:%s"), szUserPIN);
+
+		strcpy(pUKeyVerify->szUserPIN, szUserPIN);	
 	}
-	
+	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATEMODIFYTYPE)
+	{
+		//scanf(_T("%s"), szNewUserPIN);
+		strcpy(szNewUserPIN, _T("87654321"));
+		TRACE(_T("UKey Modify UserPIN:%s"), szNewUserPIN);
+
+		strcpy(pUKeyVerify->szNewUserPIN, szNewUserPIN);
+	}
+
 	return TRUE;
 }
 
@@ -181,8 +221,8 @@ BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
 {
 	if (pUKeyWrite->emUKeyState == CK_UKEYSTATEINPUTETYPE)
 	{
-		strcpy(pUKeyWrite->szUserNum, _T("111111"));
-		strcpy(pUKeyWrite->szUserPasswd, _T("111111"));
+		strcpy(pUKeyWrite->szUserNum, _T("16104010006"));
+		strcpy(pUKeyWrite->szUserPasswd, _T("123456"));
 		//ResetEvent(pUKeyWrite->hEvent);
 	}
 	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
@@ -200,7 +240,7 @@ BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
 
 BOOL CDlgTest4Wnd::InitInfo()
 {
-	rzt_openUKeyProc(test1, test2, NULL, test4, m_hUKeyProc);
+	rzt_openUKeyProc(test1, test2, test3, NULL, m_hUKeyProc);
 	return TRUE;
 }
 

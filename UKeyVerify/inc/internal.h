@@ -7,21 +7,24 @@
 
 #include <wincrypt.h>
 #include <cryptoki_ext.h>
+#include <auxiliary.h>
 
 #include "../UKeyVerify.h"
 
-typedef struct {
+typedef struct{
 	ULONG				ulSlotId;							//UKey设备ID;
 	ULONG				ulFlags;							//UKEY设备Flags;
 	HANDLE				hSession;							//UKey设备操作句柄;
 	bool				bIsVerify;							//UKey设备是否已经校验;
+	bool				bIsFinger;							//UKey设备是否开启指纹;
+	bool				bIsDefaultUserPIN;					//UKey设备是否缺省用户PIN;
 	CK_UKEYENUM			stcUKeyEnum;						//UKey设备枚举信息;
 	CK_UKEYVERIFY		stcUKeyVerify;						//UKey设备校验信息;
 	CK_UKEYREADDATA		stcUKeyRead;						//UKey设备读取信息;
 	CK_UKEYWRITEDATA	stcUKeyWrite;						//UKey设备写入信息;
 }CK_UKEYDEVICE;
 
-typedef struct {
+typedef struct{
 	bool				bExit;								//线程是否关闭;
 	ULONG 				ulThreadID;							//线程ID;
 	ULONG				ulProcTimeOver;						//线程循环执行时间;
@@ -31,7 +34,7 @@ typedef struct {
 	HANDLE				hEndEvent;							//线程关闭事件;
 }CK_UKEYTHREAD;
 
-typedef struct {
+typedef struct tagUKeyHandle{
 	bool				bIsInited;							//PKCS#11库是否初始化;
 	bool				bIsEnumThread;						//是否枚举设备;
 	bool				bIsWorkThread;						//是否校验设备;
@@ -40,11 +43,30 @@ typedef struct {
 	CK_UKEYTHREAD		stcUKeyEnumThread;					//UKey设备枚举线程;
 	CK_UKEYTHREAD		strUKeyWorkThread;					//UKey设备工作线程;	
 	CRITICAL_SECTION	caUKeySection;						//UKey设备临界区;
+	AUX_FUNC_LIST_PTR	pAuxFunc;							//UKey设备内部回调函数;
 	CK_UKEYENUM_CALLBACK_FUNC	pfUKeyEnum;					//UKey设备枚举回调;
 	CK_UKEYVERIFY_CALLBACK_FUNC	pfUkeyVerify;				//UKey设备校验回调;
 	CK_UKEYREAD_CALLBACK_FUNC   pfUkeyReadData;				//UKey设备数据读取回调;
 	CK_UKEYWRITE_CALLBACK_FUNC  pfUKeyWriteData;			//UKey设备数据写入回调;	
 	std::map<CK_SLOT_ID, CK_UKEYDEVICE*> mapUKeyDevice;		//UKey设备存储;
+
+	tagUKeyHandle::tagUKeyHandle()
+	{
+		bIsInited = false;
+		bIsEnumThread = false;
+		bIsWorkThread = false;
+		hEnumThread = NULL;
+		hWorkThread = NULL;
+		pAuxFunc = NULL;
+		pfUKeyEnum = NULL;
+		pfUkeyVerify = NULL;
+		pfUkeyReadData = NULL;
+		pfUKeyWriteData = NULL;
+
+		mapUKeyDevice.clear();
+		memset(&stcUKeyEnumThread, 0x0, sizeof(CK_UKEYTHREAD));
+		memset(&strUKeyWorkThread, 0x0, sizeof(CK_UKEYTHREAD));
+	}
 }CK_UKEYHANDLE;
 
 #endif

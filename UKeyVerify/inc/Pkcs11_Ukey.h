@@ -11,7 +11,7 @@ bool		PKCS11_GetSlotList(CK_UKEYHANDLE *pUKeyHandle, std::vector<CK_UKEYDEVICE*>
 bool		PKCS11_CreateSession(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
 bool		PKCS11_CloseSession(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
 
-bool		PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char *pszUserPIN);
+bool		PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char *pszUserPIN, bool &bIsFinger);
 bool		PKCS11_LogoutUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
 bool		PKCS11_SetUserPin(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, const char *pszOldUserPIN, const char *pszNewUserPIN);
 
@@ -20,5 +20,10 @@ bool		PKCS11_CreateObject(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEY
 bool		PKCS11_SetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYWRITEDATA *pUKeyWriteData);
 
 bool		PKCS11_GetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYREADDATA *pUKeyReadData);
+
+bool		PKCS11_GetFingerCount(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
+bool		PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
+bool		PKCS11_FingerDelete(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
+bool		PKCS11_FingerClear(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
 
 #endif
