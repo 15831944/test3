@@ -203,7 +203,7 @@ BOOL test3(CK_UKEYREADDATA *pUKeyRead)
 {
 	if (pUKeyRead->emUKeyState == CK_UKEYSTATEINPUTETYPE)
 	{
-		ResetEvent(pUKeyRead->hEvent);
+		//ResetEvent(pUKeyRead->hEvent);
 	}
 	else if (pUKeyRead->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
 	{

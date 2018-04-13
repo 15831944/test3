@@ -11,6 +11,7 @@
 #define USERNUM_MAX_LEN		64
 #define USERPASSWD_MAX_LEN	64
 
+#define USERFINGER_ENROLL_NUMBER 4
 #define DEFAULT_USERPIN		"12345678"
 
 typedef enum{
@@ -31,8 +32,17 @@ typedef enum{
 }CK_UKEYSTATETYPE;
 
 typedef enum{
-
-};
+	CK_UKEYLEFTLITTLEFINGER = 0,							//左手小拇指
+	CK_UKEYLEFTRINGFINGER,									//左手无名指
+	CK_UKEYLEFTMIDDLEFINGER,								//左手中指
+	CK_UKEYLEFTINDEXFINGER,									//左手食指
+	CK_UKEYLEFTTHUMBFINGER,									//左手大拇指
+	CK_UKEYRIGHTTHUMBFINGER,								//右手大拇指
+	CK_UKEYRIGHTINDEXFINGER,								//右手食指
+	CK_UKEYRIGHTMIDDLEFINGER,								//右手中指
+	CK_UKEYRIGHTRINGFINGER,									//右手无名指
+	CK_UKEYRIGHTLITTLEFINGER,								//右手小拇指
+}CK_UKEYFINGER;
 
 typedef struct{
 	bool				bExist;								//UKey设备是否存在;
@@ -45,6 +55,7 @@ typedef struct{
 	ULONG				ulRemainCount;						//UKey设备PIN口令剩余次数;
 	char				szUserPIN[UKEYPIN_MAX_LEN];			//UKey设备原始PIN码;
 	char				szNewUserPIN[UKEYPIN_MAX_LEN];		//UKey设备新的PIN码;
+	HANDLE				hEvent;								//UKey设备指纹录入事件;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYVERIFY; 
 

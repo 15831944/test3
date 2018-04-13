@@ -142,8 +142,10 @@ bool PKCS11_GetSlotId(CK_UKEYHANDLE *pUKeyHandle)
 					pUKeyDevice->stcUKeyEnum.emUKeyType = CK_UKEYDEVNORMALTYPE;
 				}
 				
+				pUKeyDevice->stcUKeyVerify.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 				pUKeyDevice->stcUKeyRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 				pUKeyDevice->stcUKeyWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
 				pUKeyHandle->mapUKeyDevice.insert(make_pair(ulSlotId, pUKeyDevice));
 			}
 			else
@@ -1019,12 +1021,12 @@ bool PKCS11_GetFingerCount(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 	return bRet;
 }
 
-bool PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+bool PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_ULONG ulFingerId)
 {
 	CK_RV rv;
 	bool bRet = false;
 
-	CK_ULONG ulRetCount = 0;
+	CK_ULONG ulNumber = 0;
 
 	CK_SESSION_HANDLE hSession;
 	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
@@ -1058,14 +1060,34 @@ bool PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 			break;
 		}
 
-		rv = ((EP_EnrollFinger)pUKeyHandle->pAuxFunc->pFunc[EP_ENROLL_FINGER])(ulSlotId, 0, 1);
-		if (rv != CKR_OK)
+		ulNumber = 1;
+		while (WaitForSingleObject(iterUKeyDevice->second->stcUKeyVerify.hEvent, 0) != WAIT_OBJECT_0)
 		{
-			bRet = false;
-			break;
-		}
+			if (ulNumber < USERFINGER_ENROLL_NUMBER)
+			{
+				rv = ((EP_EnrollFinger)pUKeyHandle->pAuxFunc->pFunc[EP_ENROLL_FINGER])(ulSlotId, ulFingerId, ulNumber);
+				if (rv != CKR_OK)
+				{
+					if (rv == CKR_BIO_ENROLL_TIMEOUT)
+					{
+						Sleep(100);
+						continue;
+					}
+					else
+					{
+						bRet = false;
+						break;
+					}
+				}
 
-		bRet = true;
+				ulNumber++;
+			}
+			else
+			{
+				bRet = true;
+				break;
+			}
+		}
 	} while (false);
 
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);

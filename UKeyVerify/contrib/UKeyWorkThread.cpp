@@ -272,7 +272,7 @@ bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 				break;
 			}
 		  */
-			PKCS11_FingerEnroll(pUKeyHandle, ulSlotId);
+			//PKCS11_FingerEnroll(pUKeyHandle, ulSlotId);
 		}
 
 		bRet = true;

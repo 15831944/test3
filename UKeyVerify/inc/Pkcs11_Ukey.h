@@ -22,7 +22,7 @@ bool		PKCS11_SetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UK
 bool		PKCS11_GetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYREADDATA *pUKeyReadData);
 
 bool		PKCS11_GetFingerCount(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
-bool		PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
+bool		PKCS11_FingerEnroll(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_ULONG ulFingerId);
 bool		PKCS11_FingerDelete(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
 bool		PKCS11_FingerClear(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId);
 

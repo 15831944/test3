@@ -11,6 +11,7 @@
 #define USERNUM_MAX_LEN		64
 #define USERPASSWD_MAX_LEN	64
 
+#define USERFINGER_ENROLL_NUMBER 4
 #define DEFAULT_USERPIN		"12345678"
 
 typedef enum{
@@ -54,6 +55,8 @@ typedef struct{
 	ULONG				ulRemainCount;						//UKey设备PIN口令剩余次数;
 	char				szUserPIN[UKEYPIN_MAX_LEN];			//UKey设备原始PIN码;
 	char				szNewUserPIN[UKEYPIN_MAX_LEN];		//UKey设备新的PIN码;
+	HANDLE				hEvent;								//UKey设备指纹录入事件;
+	ULONG				ulFingerNum;						//UKey设备指纹录入次数;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYVERIFY; 
 
