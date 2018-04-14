@@ -170,7 +170,7 @@ bool SetUKeyWorkInfo(CK_UKEYHANDLE *pUKeyHandle)
 	return bRet;
 }
 
-bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlotId, bool *pbIsVerify, HANDLE *pUKeyReadEvent, HANDLE *pUKeyWriteEvent)
+bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlotId, bool *pbIsVerify, CK_UKEYDEVICETYPE &emUKeyType, HANDLE *pUKeyReadEvent, HANDLE *pUKeyWriteEvent)
 {
 	bool bRet = false;
 
@@ -199,6 +199,7 @@ bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlo
 
 		*pulSlotId = vecUKeyDevice[iSlotIndex]->ulSlotId;
 		*pbIsVerify = vecUKeyDevice[iSlotIndex]->bIsVerify;
+		emUKeyType = vecUKeyDevice[iSlotIndex]->stcUKeyEnum.emUKeyType;
 
 		if (pUKeyReadEvent != NULL)
 		{
@@ -222,10 +223,9 @@ bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlo
 	return bRet;
 }
 
-bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYDEVICETYPE emUKeyType)
 {
 	bool bRet = false;
-	bool bIsFinger = false;
 
 	CK_SESSION_HANDLE hSession;
 	CK_UKEYVERIFY stcUKeyVerify = {0};
@@ -246,34 +246,34 @@ bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 
 		if (pUKeyHandle->pfUkeyVerify != NULL)
 		{
+			stcUKeyVerify.emUKeyType = emUKeyType;
 			stcUKeyVerify.emUKeyState = CK_UKEYSTATEINPUTETYPE;
 			pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
 		}
 
-		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN, bIsFinger))
+		if (!PKCS11_LoginUser(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN))
 		{
 			bRet = false;
 			stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
 			break;
 		}
 
-		if (!bIsFinger)
-		{/*
-			if (pUKeyHandle->pfUkeyVerify != NULL)
-			{
-				stcUKeyVerify.emUKeyState = CK_UKEYSTATEMODIFYTYPE;
-				pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
-			}
-
-			if (!PKCS11_SetUserPin(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN, stcUKeyVerify.szNewUserPIN))
-			{
-				bRet = false;
-				stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
-				break;
-			}
-		  */
-			//PKCS11_FingerEnroll(pUKeyHandle, ulSlotId);
+		/*
+		if (pUKeyHandle->pfUkeyVerify != NULL)
+		{
+		stcUKeyVerify.emUKeyState = CK_UKEYSTATEMODIFYTYPE;
+		pUKeyHandle->pfUkeyVerify(&stcUKeyVerify);
 		}
+
+		if (!PKCS11_SetUserPin(pUKeyHandle, ulSlotId, stcUKeyVerify.szUserPIN, stcUKeyVerify.szNewUserPIN))
+		{
+		bRet = false;
+		stcUKeyVerify.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+		break;
+		}
+
+		//PKCS11_FingerEnroll(pUKeyHandle, ulSlotId);
+		*/
 
 		bRet = true;
 		stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
@@ -388,6 +388,7 @@ bool ReadUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 
 	CK_ULONG ulSlotId = 0;
 	HANDLE hUKeyReadEvent;
+	CK_UKEYDEVICETYPE emUKeyType;
 
 	do 
 	{
@@ -397,7 +398,7 @@ bool ReadUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 			break;
 		}
 
-		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, &hUKeyReadEvent, NULL))
+		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, emUKeyType, &hUKeyReadEvent, NULL))
 		{
 			bRet = false;
 			break;
@@ -405,7 +406,7 @@ bool ReadUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 
 		if (!bIsVerify)
 		{
-			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId))
+			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
 			{
 				bRet = false;
 				break;
@@ -431,6 +432,7 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 
 	CK_ULONG ulSlotId = 0;
 	HANDLE hUKeyWriteEvent;
+	CK_UKEYDEVICETYPE emUKeyType;
 
 	do 
 	{
@@ -440,7 +442,7 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 			break;
 		}
 
-		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, NULL, &hUKeyWriteEvent))
+		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, emUKeyType, NULL, &hUKeyWriteEvent))
 		{
 			bRet = false;
 			break;
@@ -448,7 +450,7 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 
 		if (!bIsVerify)
 		{
-			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId))
+			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
 			{
 				bRet = false;
 				break;

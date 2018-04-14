@@ -57,6 +57,7 @@ typedef struct{
 	char				szNewUserPIN[UKEYPIN_MAX_LEN];		//UKey设备新的PIN码;
 	HANDLE				hEvent;								//UKey设备指纹录入事件;
 	ULONG				ulFingerNum;						//UKey设备指纹录入次数;
+	CK_UKEYDEVICETYPE	emUKeyType;							//UKey设备类型;
 	CK_UKEYSTATETYPE	emUKeyState;						//UKey设备状态;
 }CK_UKEYVERIFY; 
 

@@ -300,7 +300,7 @@ bool PKCS11_CloseSession(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 	return bRet;
 }
 
-bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char *pszUserPIN, bool &bIsFinger)
+bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char *pszUserPIN)
 {
 	CK_RV rv;
 	bool bRet = false;
@@ -348,8 +348,6 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char
 			{
 				rv = C_Login(hSession, CKU_USER, 0, 0);
 			}
-
-			bIsFinger = true;
 		}
 		else
 		{
@@ -361,7 +359,6 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char
 				break;
 			}
 
-			bIsFinger = false;
 			rv = C_Login(hSession, CKU_USER, pPINBuffer, ulPINLen);
 		}
 		
