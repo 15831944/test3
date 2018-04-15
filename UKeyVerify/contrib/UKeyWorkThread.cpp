@@ -390,31 +390,41 @@ bool writeUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYD
 			pUKeyHandle->pfUKeyWriteData(&stcUKeyWriteData);
 		}
 
-		if (!PKCS11_FindObject(pUKeyHandle, ulSlotId, ulCount))
+		if (WaitForSingleObject(hUKeyWriteEvent, 0) != WAIT_OBJECT_0)
 		{
-			bRet = false;
-			stcUKeyWriteData.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
-			break;
-		}
-
-		if (ulCount == 0)
-		{
-			if (!PKCS11_CreateObject(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
 			{
 				bRet = false;
 				break;
 			}
-		}
-		else
-		{
-			if (!PKCS11_SetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+
+			if (!PKCS11_FindObject(pUKeyHandle, ulSlotId, ulCount))
 			{
 				bRet = false;
+				stcUKeyWriteData.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
 				break;
 			}
+
+			if (ulCount == 0)
+			{
+				if (!PKCS11_CreateObject(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+				{
+					bRet = false;
+					break;
+				}
+			}
+			else
+			{
+				if (!PKCS11_SetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+				{
+					bRet = false;
+					break;
+				}
+			}
+
+			bRet = true;
 		}
 
-		bRet = true;
 	} while (false);
 
 	if (pUKeyHandle->pfUKeyWriteData)
@@ -468,7 +478,7 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 	CK_ULONG ulSlotId = 0;
 	HANDLE hUKeyWriteEvent;
 	CK_UKEYDEVICETYPE emUKeyType;
-/*
+
 	do 
 	{
 		if (pUKeyHandle == NULL || iSlotIndex < 0)
@@ -477,22 +487,13 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 			break;
 		}
 
-		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, emUKeyType, NULL, &hUKeyWriteEvent))
+		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, emUKeyType, NULL, &hUKeyWriteEvent))
 		{
 			bRet = false;
 			break;
 		}
 
-		if (!bIsVerify)
-		{
-			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
-			{
-				bRet = false;
-				break;
-			}
-		}
-
-		if (!writeUKeyDeviceData(pUKeyHandle, ulSlotId, hUKeyWriteEvent))
+		if (!writeUKeyDeviceData(pUKeyHandle, ulSlotId, emUKeyType, hUKeyWriteEvent))
 		{
 			bRet = false;
 			break;
@@ -500,6 +501,6 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 
 		bRet = true;
 	} while (false);
-	*/
+
 	return bRet;
 }

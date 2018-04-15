@@ -181,19 +181,37 @@ BOOL test2(CK_UKEYVERIFY *pUKeyVerify)
 
 	if (pUKeyVerify->emUKeyState == CK_UKEYSTATEINPUTETYPE)
 	{
-		//scanf(_T("%s"), szUserPIN);
-		strcpy(szUserPIN, _T("12345678"));	//12345678
-		TRACE(_T("UKey Input UserPIN:%s"), szUserPIN);
+		if (pUKeyVerify->emUKeyType == CK_UKEYDEVNORMALTYPE)
+		{
+			//scanf(_T("%s"), szUserPIN);
+			strcpy(szUserPIN, _T("12345678"));	//12345678
+			TRACE(_T("UKey Input UserPIN:%s"), szUserPIN);
 
-		strcpy(pUKeyVerify->szUserPIN, szUserPIN);	
+			strcpy(pUKeyVerify->szUserPIN, szUserPIN);
+		}
+		else
+		{
+			TRACE(_T("UKey Finger Verify!"));
+		}	
 	}
 	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATEMODIFYTYPE)
 	{
-		//scanf(_T("%s"), szNewUserPIN);
-		strcpy(szNewUserPIN, _T("87654321"));
-		TRACE(_T("UKey Modify UserPIN:%s"), szNewUserPIN);
+		if (pUKeyVerify->emUKeyType == CK_UKEYDEVNORMALTYPE)
+		{
+			//scanf(_T("%s"), szNewUserPIN);
+			strcpy(szNewUserPIN, _T("87654321"));
+			TRACE(_T("UKey Modify UserPIN:%s"), szNewUserPIN);
 
-		strcpy(pUKeyVerify->szNewUserPIN, szNewUserPIN);
+			strcpy(pUKeyVerify->szNewUserPIN, szNewUserPIN);
+		}
+	}
+	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
+	{
+		TRACE(_T("UKey Verify Successful!"));
+	}
+	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATEFAILEDTYPE)
+	{
+		TRACE(_T("UKey Verify Failed!"));
 	}
 
 	return TRUE;
@@ -203,16 +221,20 @@ BOOL test3(CK_UKEYREADDATA *pUKeyRead)
 {
 	if (pUKeyRead->emUKeyState == CK_UKEYSTATEINPUTETYPE)
 	{
-		//ResetEvent(pUKeyRead->hEvent);
+		TRACE(_T("UKey Read InputData!"));
+		ResetEvent(pUKeyRead->hEvent);
 	}
 	else if (pUKeyRead->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
 	{
+		TRACE(_T("UKey Read OutputData!"));
 	}
 	else if (pUKeyRead->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
 	{
+		TRACE(_T("UKey Read UserData Successful! UserName:%s UserPasswd:%s"), pUKeyRead->szUserNum, pUKeyRead->szUserPasswd);
 	}
 	else if (pUKeyRead->emUKeyState == CK_UKEYSTATEFAILEDTYPE)
 	{
+		TRACE(_T("UKey Read UserData Failed!"));
 	}
 	return TRUE;
 }
@@ -223,11 +245,12 @@ BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
 	{
 		strcpy(pUKeyWrite->szUserNum, _T("16104010006"));
 		strcpy(pUKeyWrite->szUserPasswd, _T("123456"));
+
+		TRACE(_T("UKey Write UserData!"));
 		//ResetEvent(pUKeyWrite->hEvent);
 	}
 	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
 	{
-		
 	}
 	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
 	{

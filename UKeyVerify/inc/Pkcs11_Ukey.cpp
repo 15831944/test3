@@ -44,6 +44,8 @@ bool PKCS11_Initialize(CK_UKEYHANDLE *pUKeyHandle, bool bFlags)
 void PKCS11_Finalize(CK_UKEYHANDLE *pUKeyHandle, bool bFlags)
 {
 	bool bRet = false;
+	CK_UKEYDEVICE *pUKeyDevice = NULL;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE *>::iterator iteUKeyDevice;
 
 	do 
 	{
@@ -51,6 +53,22 @@ void PKCS11_Finalize(CK_UKEYHANDLE *pUKeyHandle, bool bFlags)
 		{
 			bRet = false;
 			break;
+		}
+
+		for (iteUKeyDevice=pUKeyHandle->mapUKeyDevice.begin(); iteUKeyDevice!=pUKeyHandle->mapUKeyDevice.end(); )
+		{
+			pUKeyDevice = iteUKeyDevice->second;
+			if (pUKeyDevice != NULL)
+			{
+				delete pUKeyDevice;
+				pUKeyDevice = NULL;
+
+				pUKeyHandle->mapUKeyDevice.erase(iteUKeyDevice);
+			}
+			else
+			{
+				++iteUKeyDevice;
+			}
 		}
 
 		if (!bFlags)
@@ -72,6 +90,7 @@ bool PKCS11_GetSlotId(CK_UKEYHANDLE *pUKeyHandle)
 	
 	CK_TOKEN_INFO tokenInfo = {0};
 	CK_UKEYDEVICE *pUKeyDevice= NULL;
+	std::map<CK_SLOT_ID, CK_UKEYDEVICE *>::iterator iteUKeyDevice;
 
 	if (pUKeyHandle == NULL)
 	{
@@ -92,7 +111,18 @@ bool PKCS11_GetSlotId(CK_UKEYHANDLE *pUKeyHandle)
 		{
 			if (rv == CKR_TOKEN_NOT_PRESENT)
 			{
-				//m_mapUKeyInfo.
+				iteUKeyDevice = pUKeyHandle->mapUKeyDevice.find(ulSlotId);
+				if (iteUKeyDevice != pUKeyHandle->mapUKeyDevice.end())
+				{
+					pUKeyDevice = iteUKeyDevice->second;
+					if (pUKeyDevice != NULL)
+					{
+						delete pUKeyDevice;
+						pUKeyDevice = NULL;
+					}
+
+					pUKeyHandle->mapUKeyDevice.erase(iteUKeyDevice);
+				}
 			}
 			else
 			{
@@ -688,37 +718,27 @@ bool PKCS11_CreateObject(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYW
 			break;
 		}
 
-		if (WaitForSingleObject(iterUKeyDevice->second->stcUKeyWrite.hEvent, 0) != WAIT_OBJECT_0)
+		memcpy(databuff, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
+		databuflen = strlen(pUKeyWriteData->szUserNum);
+		databuflen += 1;
+		memcpy(databuff + databuflen, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
+		databuflen += strlen(pUKeyWriteData->szUserPasswd);
+
+		rv = C_CreateObject(hSession, dataAttr, sizeof(dataAttr) / sizeof(dataAttr[0]), &hCKObj);
+		if (rv != CKR_OK)
 		{
-			memcpy(databuff, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
-			databuflen = strlen(pUKeyWriteData->szUserNum);
-			databuflen += 1;
-			memcpy(databuff+databuflen, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
-			databuflen += strlen(pUKeyWriteData->szUserPasswd);
-
-			rv = C_CreateObject(hSession, dataAttr, sizeof(dataAttr)/sizeof(dataAttr[0]), &hCKObj);
-			if (rv != CKR_OK)
-			{
-				bRet = false;
-				break;
-			}
-
-			pUKeyWriteData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-			iterUKeyDevice->second->stcUKeyWrite.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-
-			memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserNum, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
-			memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserPasswd, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
-
-			bRet = true;
-			SetEvent(iterUKeyDevice->second->stcUKeyWrite.hEvent);
+			bRet = false;
+			break;
 		}
-		else
-		{
-			bRet = true;
-			pUKeyWriteData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-			memcpy(pUKeyWriteData->szUserNum, iterUKeyDevice->second->stcUKeyWrite.szUserNum, strlen(iterUKeyDevice->second->stcUKeyWrite.szUserNum));
-			memcpy(pUKeyWriteData->szUserPasswd, iterUKeyDevice->second->stcUKeyWrite.szUserPasswd, strlen(iterUKeyDevice->second->stcUKeyWrite.szUserPasswd));
-		}
+
+		pUKeyWriteData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+		iterUKeyDevice->second->stcUKeyWrite.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+
+		memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserNum, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
+		memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserPasswd, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
+
+		bRet = true;
+		SetEvent(iterUKeyDevice->second->stcUKeyWrite.hEvent);
 	} while (false);
 	
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
@@ -783,51 +803,41 @@ bool PKCS11_SetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKE
 			break;
 		}
 
-		if (WaitForSingleObject(iterUKeyDevice->second->stcUKeyWrite.hEvent, 0) != WAIT_OBJECT_0)
+		memcpy(databuff, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
+		databuflen = strlen(pUKeyWriteData->szUserNum);
+		databuflen += 1;
+		memcpy(databuff + databuflen, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
+		databuflen += strlen(pUKeyWriteData->szUserPasswd);
+
+		rv = C_FindObjectsInit(hSession, dataAttr, 2);
+		if (rv != CKR_OK)
 		{
-			memcpy(databuff, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
-			databuflen = strlen(pUKeyWriteData->szUserNum);
-			databuflen += 1;
-			memcpy(databuff+databuflen, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
-			databuflen += strlen(pUKeyWriteData->szUserPasswd);
-
-			rv = C_FindObjectsInit(hSession, dataAttr, 2);
-			if (rv != CKR_OK)
-			{
-				bRet = false;
-				break;
-			}
-
-			rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
-			if (rv != CKR_OK || ulRetCount != 1)
-			{
-				bRet = false;
-				break;
-			}
-
-			rv = C_SetAttributeValue(hSession, hCKObj, dataAttr, 3);
-			if (rv != CKR_OK)
-			{
-				bRet = false;
-				break;
-			}
-
-			pUKeyWriteData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-			iterUKeyDevice->second->stcUKeyWrite.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-
-			memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserNum, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
-			memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserPasswd, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
-
-			bRet = true;
-			SetEvent(iterUKeyDevice->second->stcUKeyWrite.hEvent);
+			bRet = false;
+			break;
 		}
-		else
+
+		rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
+		if (rv != CKR_OK || ulRetCount != 1)
 		{
-			bRet = true;
-			pUKeyWriteData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-			memcpy(pUKeyWriteData->szUserNum, iterUKeyDevice->second->stcUKeyWrite.szUserNum, strlen(iterUKeyDevice->second->stcUKeyWrite.szUserNum));
-			memcpy(pUKeyWriteData->szUserPasswd, iterUKeyDevice->second->stcUKeyWrite.szUserPasswd, strlen(iterUKeyDevice->second->stcUKeyWrite.szUserPasswd));
+			bRet = false;
+			break;
 		}
+
+		rv = C_SetAttributeValue(hSession, hCKObj, dataAttr, 3);
+		if (rv != CKR_OK)
+		{
+			bRet = false;
+			break;
+		}
+
+		pUKeyWriteData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+		iterUKeyDevice->second->stcUKeyWrite.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+
+		memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserNum, pUKeyWriteData->szUserNum, strlen(pUKeyWriteData->szUserNum));
+		memcpy(iterUKeyDevice->second->stcUKeyWrite.szUserPasswd, pUKeyWriteData->szUserPasswd, strlen(pUKeyWriteData->szUserPasswd));
+
+		bRet = true;
+		SetEvent(iterUKeyDevice->second->stcUKeyWrite.hEvent);
 	} while (false);
 
 	if (!bRet)
