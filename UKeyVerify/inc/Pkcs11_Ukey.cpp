@@ -233,15 +233,19 @@ bool PKCS11_CreateSession(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 			break;
 		}
 
-		rv = C_OpenSession(ulSlotId, CKF_RW_SESSION|CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
-		if (rv != CKR_OK)
+		if (iterUKeyDevice->second->hSession == NULL)
 		{
-			bRet = false;
-			break;
+			rv = C_OpenSession(ulSlotId, CKF_RW_SESSION | CKF_SERIAL_SESSION, NULL_PTR, NULL_PTR, &hSession);
+			if (rv != CKR_OK)
+			{
+				bRet = false;
+				break;
+			}
+
+			iterUKeyDevice->second->hSession = (HANDLE)hSession;
 		}
 		
 		bRet = true;
-		iterUKeyDevice->second->hSession = (HANDLE)hSession;
 	} while(false);
 	
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
@@ -341,45 +345,48 @@ bool PKCS11_LoginUser(CK_UKEYHANDLE *pUKeyHandle,  CK_ULONG ulSlotId, const char
 			break;
 		}
 
-		if (((EP_isBioActive)(pUKeyHandle->pAuxFunc->pFunc[EP_IS_BIOACTIVE]))(ulSlotId))
+		if (!iterUKeyDevice->second->bIsVerify)
 		{
-			ulFlags = iterUKeyDevice->second->ulFlags;
-			if (ulFlags & CKF_PROTECTED_AUTHENTICATION_PATH)
+			if (((EP_isBioActive)(pUKeyHandle->pAuxFunc->pFunc[EP_IS_BIOACTIVE]))(ulSlotId))
 			{
-				rv = C_Login(hSession, CKU_USER, 0, 0);
+				ulFlags = iterUKeyDevice->second->ulFlags;
+				if (ulFlags & CKF_PROTECTED_AUTHENTICATION_PATH)
+				{
+					rv = C_Login(hSession, CKU_USER, 0, 0);
+				}
 			}
-		}
-		else
-		{
-			ulPINLen = strlen(pszUserPIN);
-			pPINBuffer = (CK_BYTE_PTR)pszUserPIN;
-			if (pPINBuffer == NULL_PTR)
+			else
+			{
+				ulPINLen = strlen(pszUserPIN);
+				pPINBuffer = (CK_BYTE_PTR)pszUserPIN;
+				if (pPINBuffer == NULL_PTR)
+				{
+					bRet = false;
+					break;
+				}
+
+				rv = C_Login(hSession, CKU_USER, pPINBuffer, ulPINLen);
+			}
+
+			if (rv != CKR_OK)
 			{
 				bRet = false;
 				break;
 			}
 
-			rv = C_Login(hSession, CKU_USER, pPINBuffer, ulPINLen);
-		}
-		
-		if (rv != CKR_OK)
-		{
-			bRet = false;
-			break;
-		}
+			if (strcmp(pszUserPIN, DEFAULT_USERPIN) == 0)
+			{
+				iterUKeyDevice->second->bIsDefaultUserPIN = true;
+			}
+			else
+			{
+				iterUKeyDevice->second->bIsDefaultUserPIN = false;
+			}
 
-		if (strcmp(pszUserPIN, DEFAULT_USERPIN) == 0)
-		{
-			iterUKeyDevice->second->bIsDefaultUserPIN = true;
+			iterUKeyDevice->second->bIsVerify = true;
+			iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+			memcpy(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, pszUserPIN, ulPINLen);
 		}
-		else
-		{
-			iterUKeyDevice->second->bIsDefaultUserPIN = false;
-		}
-
-		iterUKeyDevice->second->bIsVerify = true;
-		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-		memcpy(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, pszUserPIN, ulPINLen);
 		
 		bRet = true;
 	} while (false);
@@ -438,8 +445,13 @@ bool PKCS11_LogoutUser(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
 			return false;
 		}
 		
-		bRet = true;
+		iterUKeyDevice->second->bIsVerify = false;
 		iterUKeyDevice->second->stcUKeyVerify.emUKeyState = CK_UKEYSTATEEMPTYTYPE;
+
+		memset(iterUKeyDevice->second->stcUKeyVerify.szUserPIN, 0x0, sizeof(UKEYPIN_MAX_LEN));
+		memset(iterUKeyDevice->second->stcUKeyVerify.szNewUserPIN, 0x0, sizeof(UKEYPIN_MAX_LEN));
+
+		bRet = true;
 	} while (false);
 	
 	LeaveCriticalSection(&pUKeyHandle->caUKeySection);
@@ -851,6 +863,13 @@ bool PKCS11_GetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKE
 	CK_SESSION_HANDLE hSession;
 	std::map<CK_SLOT_ID, CK_UKEYDEVICE*>::iterator iterUKeyDevice;
 
+	CK_ATTRIBUTE dataAttr[] = {
+		{ CKA_CLASS,	&objectclass,	sizeof(objectclass) },
+		//{ CKA_TOKEN,	&truevalue,		sizeof(truevalue) },
+		{ CKA_LABEL,	datalabel,		sizeof(datalabel) - 1 },
+		{ CKA_VALUE,	databuff,		databuflen }
+	};
+
 	if (pUKeyHandle == NULL || pUKeyReadData == NULL)
 	{
 		return false;
@@ -880,78 +899,61 @@ bool PKCS11_GetObjectValue(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKE
 			break;
 		}
 
-		if (WaitForSingleObject(iterUKeyDevice->second->stcUKeyRead.hEvent, 0) != WAIT_OBJECT_0)
+		rv = C_FindObjectsInit(hSession, dataAttr, 2);
+		if (rv != CKR_OK)
 		{
-			CK_ATTRIBUTE dataAttr[] = {
-				{ CKA_CLASS,	&objectclass,	sizeof(objectclass) },
-				//{ CKA_TOKEN,	&truevalue,		sizeof(truevalue) },
-				{ CKA_LABEL,	datalabel,		sizeof(datalabel)-1 },
-				{ CKA_VALUE,	databuff,		databuflen }
-			};
-
-			rv = C_FindObjectsInit(hSession, dataAttr, 2);
-			if (rv != CKR_OK)
-			{
-				bRet = false;
-				break;
-			}
-
-			rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
-			if (rv != CKR_OK)
-			{
-				bRet = false;
-				break;
-			}
-
-			rv = C_GetAttributeValue(hSession, hCKObj, dataAttr, 3);
-			if (rv != CKR_OK)
-			{
-				bRet = false;
-				break;
-			}
-
-			if (dataAttr[2].pValue == NULL || dataAttr[2].ulValueLen == 0)
-			{
-				bRet = false;
-				break;
-			}
-
-			pValue = (char*)dataAttr[2].pValue;
-			while (*pValue != '\0')
-			{
-				if (ulIndex == 0)
-				{
-					memcpy(pUKeyReadData->szUserNum, pValue, strlen(pValue));
-				}
-				else if (ulIndex == 1)
-				{
-					memcpy(pUKeyReadData->szUserPasswd, pValue, strlen(pValue));
-				}
-				else
-				{
-					break;
-				}
-
-				ulIndex++;
-				pValue = pValue + strlen(pValue) + 1;
-			}
-
-			pUKeyReadData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-			iterUKeyDevice->second->stcUKeyRead.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-
-			memcpy(iterUKeyDevice->second->stcUKeyRead.szUserNum, pUKeyReadData->szUserNum, strlen(pUKeyReadData->szUserNum));
-			memcpy(iterUKeyDevice->second->stcUKeyRead.szUserPasswd, pUKeyReadData->szUserPasswd, strlen(pUKeyReadData->szUserPasswd));
-
-			bRet = true;
-			SetEvent(iterUKeyDevice->second->stcUKeyRead.hEvent);
+			bRet = false;
+			break;
 		}
-		else
+
+		rv = C_FindObjects(hSession, &hCKObj, 1, &ulRetCount);
+		if (rv != CKR_OK)
 		{
-			bRet = true;
-			pUKeyReadData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
-			memcpy(pUKeyReadData->szUserNum, iterUKeyDevice->second->stcUKeyRead.szUserNum, strlen(iterUKeyDevice->second->stcUKeyRead.szUserNum));
-			memcpy(pUKeyReadData->szUserPasswd, iterUKeyDevice->second->stcUKeyRead.szUserPasswd, strlen(iterUKeyDevice->second->stcUKeyRead.szUserPasswd));
+			bRet = false;
+			break;
 		}
+
+		rv = C_GetAttributeValue(hSession, hCKObj, dataAttr, 3);
+		if (rv != CKR_OK)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (dataAttr[2].pValue == NULL || dataAttr[2].ulValueLen == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		pValue = (char*)dataAttr[2].pValue;
+		while (*pValue != '\0')
+		{
+			if (ulIndex == 0)
+			{
+				memcpy(pUKeyReadData->szUserNum, pValue, strlen(pValue));
+			}
+			else if (ulIndex == 1)
+			{
+				memcpy(pUKeyReadData->szUserPasswd, pValue, strlen(pValue));
+			}
+			else
+			{
+				break;
+			}
+
+			ulIndex++;
+			pValue = pValue + strlen(pValue) + 1;
+		}
+
+		pUKeyReadData->emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+		iterUKeyDevice->second->stcUKeyRead.emUKeyState = CK_UKEYSTATESUCCEDTYPE;
+
+		memcpy(iterUKeyDevice->second->stcUKeyRead.szUserNum, pUKeyReadData->szUserNum, strlen(pUKeyReadData->szUserNum));
+		memcpy(iterUKeyDevice->second->stcUKeyRead.szUserPasswd, pUKeyReadData->szUserPasswd, strlen(pUKeyReadData->szUserPasswd));
+
+		bRet = true;
+		SetEvent(iterUKeyDevice->second->stcUKeyRead.hEvent);
 	} while (false);
 
 	if (!bRet)

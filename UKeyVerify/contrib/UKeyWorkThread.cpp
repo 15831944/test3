@@ -170,7 +170,7 @@ bool SetUKeyWorkInfo(CK_UKEYHANDLE *pUKeyHandle)
 	return bRet;
 }
 
-bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlotId, bool *pbIsVerify, CK_UKEYDEVICETYPE &emUKeyType, HANDLE *pUKeyReadEvent, HANDLE *pUKeyWriteEvent)
+bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlotId, CK_UKEYDEVICETYPE &emUKeyType, HANDLE *pUKeyReadEvent, HANDLE *pUKeyWriteEvent)
 {
 	bool bRet = false;
 
@@ -179,7 +179,7 @@ bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlo
 
 	do 
 	{
-		if (pUKeyHandle == NULL || pulSlotId == NULL || pbIsVerify == NULL)
+		if (pUKeyHandle == NULL || pulSlotId == NULL)
 		{
 			bRet = false;
 			break;
@@ -198,7 +198,6 @@ bool enumUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex, CK_ULONG *pulSlo
 		}
 
 		*pulSlotId = vecUKeyDevice[iSlotIndex]->ulSlotId;
-		*pbIsVerify = vecUKeyDevice[iSlotIndex]->bIsVerify;
 		emUKeyType = vecUKeyDevice[iSlotIndex]->stcUKeyEnum.emUKeyType;
 
 		if (pUKeyReadEvent != NULL)
@@ -287,7 +286,37 @@ bool verifyUKeyDevice(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYDEVI
 	return bRet;
 }
 
-bool readUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, HANDLE hUKeyReadEvent)
+bool closeUKeySession(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId)
+{
+	bool bRet = false;
+
+	do 
+	{
+		if (pUKeyHandle == NULL || ulSlotId == 0)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!PKCS11_LogoutUser(pUKeyHandle, ulSlotId))
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!PKCS11_CloseSession(pUKeyHandle, ulSlotId))
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
+
+	return bRet;
+}
+
+bool readUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYDEVICETYPE emUKeyType, HANDLE hUKeyReadEvent)
 {
 	bool bRet = false;
 	CK_UKEYREADDATA stcUKeyReadData = {0};
@@ -307,13 +336,28 @@ bool readUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, HANDLE hU
 			pUKeyHandle->pfUkeyReadData(&stcUKeyReadData);
 		}
 
-		if (!PKCS11_GetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyReadData))
+		if (WaitForSingleObject(hUKeyReadEvent, 0) != WAIT_OBJECT_0)
 		{
-			bRet = false;
-			break;
-		}
+			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
+			{
+				bRet = false;
+				break;
+			}
 
-		bRet = true;
+			if (!PKCS11_GetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyReadData))
+			{
+				bRet = false;
+				break;
+			}
+
+			if (!closeUKeySession(pUKeyHandle, ulSlotId))
+			{
+				bRet = false;
+				break;
+			}
+
+			bRet = true;
+		}
 	} while (false);
 
 	if (pUKeyHandle->pfUkeyReadData)
@@ -324,7 +368,7 @@ bool readUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, HANDLE hU
 	return bRet;
 }
 
-bool writeUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, HANDLE hUKeyWriteEvent)
+bool writeUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYDEVICETYPE emUKeyType, HANDLE hUKeyWriteEvent)
 {
 	bool bRet = false;
 
@@ -398,22 +442,13 @@ bool ReadUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 			break;
 		}
 
-		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, &bIsVerify, emUKeyType, &hUKeyReadEvent, NULL))
+		if (!enumUKeyDevice(pUKeyHandle, iSlotIndex, &ulSlotId, emUKeyType, &hUKeyReadEvent, NULL))
 		{
 			bRet = false;
 			break;
 		}
 
-		if (!bIsVerify)
-		{
-			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
-			{
-				bRet = false;
-				break;
-			}
-		}
-
-		if (!readUKeyDeviceData(pUKeyHandle, ulSlotId, hUKeyReadEvent))
+		if (!readUKeyDeviceData(pUKeyHandle, ulSlotId, emUKeyType, hUKeyReadEvent))
 		{
 			bRet = false;
 			break;
@@ -433,7 +468,7 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 	CK_ULONG ulSlotId = 0;
 	HANDLE hUKeyWriteEvent;
 	CK_UKEYDEVICETYPE emUKeyType;
-
+/*
 	do 
 	{
 		if (pUKeyHandle == NULL || iSlotIndex < 0)
@@ -465,6 +500,6 @@ bool WriteUKeyData(CK_UKEYHANDLE *pUKeyHandle, int iSlotIndex)
 
 		bRet = true;
 	} while (false);
-
+	*/
 	return bRet;
 }
