@@ -43,7 +43,7 @@ void UKeyEnumInitialize(CK_UKEYHANDLE *pUKeyHandle)
 
 	pUKeyHandle->stcUKeyEnumThread.ulThreadID = 0;
 	pUKeyHandle->stcUKeyEnumThread.ulProcTimeOver = 500;
-	pUKeyHandle->stcUKeyEnumThread.ulCloseTimeOver = 500;
+	pUKeyHandle->stcUKeyEnumThread.ulCloseTimeOver = INFINITE;
 	
 	pUKeyHandle->stcUKeyEnumThread.hThread = NULL;
 	pUKeyHandle->stcUKeyEnumThread.hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);

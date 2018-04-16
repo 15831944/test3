@@ -45,7 +45,7 @@ void UKeyWorkInitialize(CK_UKEYHANDLE *pUKeyHandle)
 
 	pUKeyHandle->strUKeyWorkThread.ulThreadID = 0;
 	pUKeyHandle->strUKeyWorkThread.ulProcTimeOver = 500;
-	pUKeyHandle->strUKeyWorkThread.ulCloseTimeOver = 500;
+	pUKeyHandle->strUKeyWorkThread.ulCloseTimeOver = INFINITE;
 
 	pUKeyHandle->strUKeyWorkThread.hThread = NULL;
 	pUKeyHandle->strUKeyWorkThread.hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);

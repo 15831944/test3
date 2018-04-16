@@ -16,18 +16,6 @@ bool rzt_openUKeyProc(CK_UKEYENUM_CALLBACK_FUNC pfUKeyEnum, CK_UKEYVERIFY_CALLBA
 
 	do 
 	{
-		if (pfUKeyEnum == NULL || pfUkeyVerify == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		if (pfUkeyReadData != NULL && pfUKeyWriteData != NULL)
-		{
-			bRet = false;
-			break;
-		}
-
 		pUKeyHandle = new CK_UKEYHANDLE;
 		if (pUKeyHandle == NULL)
 		{
@@ -135,6 +123,16 @@ bool rzt_closeUKeyProc(HANDLE hUKeyProc)
 				{
 					++iterUKeyHandle;
 					continue;
+				}
+
+				if (g_vecUKeyHandle.size() <= 1)
+				{
+					g_bIsInit = false;
+					PKCS11_Finalize(pUKeyHandle, FALSE);
+				}
+				else
+				{
+					PKCS11_Finalize(pUKeyHandle, TRUE);
 				}
 
 				if (pUKeyHandle != NULL)

@@ -63,7 +63,7 @@ void PKCS11_Finalize(CK_UKEYHANDLE *pUKeyHandle, bool bFlags)
 				delete pUKeyDevice;
 				pUKeyDevice = NULL;
 
-				pUKeyHandle->mapUKeyDevice.erase(iteUKeyDevice);
+				iteUKeyDevice = pUKeyHandle->mapUKeyDevice.erase(iteUKeyDevice);
 			}
 			else
 			{
