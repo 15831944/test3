@@ -264,8 +264,8 @@ BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
 BOOL CDlgTest4Wnd::InitInfo()
 {
 	//rzt_openUKeyProc(NULL, NULL, NULL, NULL, m_hUKeyProc);
-	rzt_openUKeyProc(test1, test2, NULL, NULL, m_hUKeyProc);
-	//rzt_openUKeyProc(test1, test2, NULL, test4, m_hUKeyProc);
+	//rzt_openUKeyProc(test1, test2, NULL, NULL, m_hUKeyProc);
+	rzt_openUKeyProc(test1, test2, NULL, test4, m_hUKeyProc);
 	return TRUE;
 }
 
