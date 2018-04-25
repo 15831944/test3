@@ -338,32 +338,35 @@ bool readUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYDE
 
 		if (WaitForSingleObject(hUKeyReadEvent, 0) != WAIT_OBJECT_0)
 		{
-			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
+			do 
 			{
-				bRet = false;
-				break;
-			}
+				if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
+				{
+					bRet = false;
+					break;
+				}
 
-			if (!PKCS11_GetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyReadData))
+				if (!PKCS11_GetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyReadData))
+				{
+					bRet = false;
+					break;
+				}
+
+				if (!closeUKeySession(pUKeyHandle, ulSlotId))
+				{
+					bRet = false;
+					break;
+				}
+
+				bRet = true;
+			} while (false);
+			
+			if (pUKeyHandle->pfUkeyReadData)
 			{
-				bRet = false;
-				break;
+				pUKeyHandle->pfUkeyReadData(&stcUKeyReadData);
 			}
-
-			if (!closeUKeySession(pUKeyHandle, ulSlotId))
-			{
-				bRet = false;
-				break;
-			}
-
-			bRet = true;
 		}
 	} while (false);
-
-	if (pUKeyHandle->pfUkeyReadData)
-	{
-		pUKeyHandle->pfUkeyReadData(&stcUKeyReadData);
-	}
 
 	return bRet;
 }
@@ -390,47 +393,63 @@ bool writeUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYD
 			pUKeyHandle->pfUKeyWriteData(&stcUKeyWriteData);
 		}
 
-		if (WaitForSingleObject(hUKeyWriteEvent, 0) != WAIT_OBJECT_0)
+		if (strcmp(stcUKeyWriteData.szUserNum, "") == 0
+			|| strcmp(stcUKeyWriteData.szUserPasswd, "") == 0)
 		{
-			if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
-			{
-				bRet = false;
-				break;
-			}
-
-			if (!PKCS11_FindObject(pUKeyHandle, ulSlotId, ulCount))
-			{
-				bRet = false;
-				stcUKeyWriteData.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
-				break;
-			}
-
-			if (ulCount == 0)
-			{
-				if (!PKCS11_CreateObject(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
-				{
-					bRet = false;
-					break;
-				}
-			}
-			else
-			{
-				if (!PKCS11_SetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
-				{
-					bRet = false;
-					break;
-				}
-			}
-
-			bRet = true;
+			bRet = false;
+			break;
 		}
 
-	} while (false);
+		if (WaitForSingleObject(hUKeyWriteEvent, 0) != WAIT_OBJECT_0)
+		{
+			do 
+			{
+				if (!verifyUKeyDevice(pUKeyHandle, ulSlotId, emUKeyType))
+				{
+					bRet = false;
+					break;
+				}
 
-	if (pUKeyHandle->pfUKeyWriteData)
-	{
-		pUKeyHandle->pfUKeyWriteData(&stcUKeyWriteData);
-	}
+				if (!PKCS11_FindObject(pUKeyHandle, ulSlotId, ulCount))
+				{
+					bRet = false;
+					stcUKeyWriteData.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+					break;
+				}
+
+				if (!PKCS11_FindObject(pUKeyHandle, ulSlotId, ulCount))
+				{
+					bRet = false;
+					stcUKeyWriteData.emUKeyState = CK_UKEYSTATEFAILEDTYPE;
+					break;
+				}
+
+				if (ulCount == 0)
+				{
+					if (!PKCS11_CreateObject(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+					{
+						bRet = false;
+						break;
+					}
+				}
+				else
+				{
+					if (!PKCS11_SetObjectValue(pUKeyHandle, ulSlotId, &stcUKeyWriteData))
+					{
+						bRet = false;
+						break;
+					}
+				}
+
+				bRet = true;
+			} while (false);
+
+			if (pUKeyHandle->pfUKeyWriteData)
+			{
+				pUKeyHandle->pfUKeyWriteData(&stcUKeyWriteData);
+			}
+		}
+	} while (false);
 
 	return bRet;
 }

@@ -247,7 +247,7 @@ BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
 		strcpy(pUKeyWrite->szUserPasswd, _T("123456"));
 
 		TRACE(_T("UKey Write UserData!"));
-		//ResetEvent(pUKeyWrite->hEvent);
+		ResetEvent(pUKeyWrite->hEvent);
 	}
 	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
 	{

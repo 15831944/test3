@@ -9,7 +9,7 @@
 			Name="Debug|Win32"
 			>
 			<DebugSettings
-				Command="$(SolutionDir)Bin\$(TargetFileName)"
+				Command="E:\Test\w2\BRANCH_DEVELOP_170613_智能化演示版本\bin\TransmitPic.exe"
 				WorkingDirectory="$(SolutionDir)Bin"
 				CommandArguments=""
 				Attach="false"

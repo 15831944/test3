@@ -174,7 +174,7 @@ bool PKCS11_GetSlotId(CK_UKEYHANDLE *pUKeyHandle)
 				
 				pUKeyDevice->stcUKeyVerify.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 				pUKeyDevice->stcUKeyRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-				pUKeyDevice->stcUKeyWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+				pUKeyDevice->stcUKeyWrite.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 
 				pUKeyHandle->mapUKeyDevice.insert(make_pair(ulSlotId, pUKeyDevice));
 			}
