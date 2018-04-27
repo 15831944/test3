@@ -441,6 +441,12 @@ bool writeUKeyDeviceData(CK_UKEYHANDLE *pUKeyHandle, CK_ULONG ulSlotId, CK_UKEYD
 					}
 				}
 
+				if (!closeUKeySession(pUKeyHandle, ulSlotId))
+				{
+					bRet = false;
+					break;
+				}
+
 				bRet = true;
 			} while (false);
 

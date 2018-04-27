@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="E:\Test\w2\BRANCH_DEVELOP_170613_智能化演示版本\bin\$(ProjectName).dll"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)Lib&quot;;&quot;$(SolutionDir)Lib\feitian&quot;;&quot;$(SolutionDir)Lib\feitian\pkcs#11&quot;"
 				GenerateDebugInformation="true"
@@ -102,7 +102,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end&#x0D;&#x0A;"
+				CommandLine="if exist $(SolutionDir)\bin\$(ProjectName).dll     del $(SolutionDir)bin\$(ProjectName).dll&#x0D;&#x0A;if exist $(SolutionDir)lib\feitian\$(ProjectName).lib  del $(SolutionDir)lib\feitian\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -167,7 +167,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy  $(TargetPath) $(SolutionDir)Bin\$(TargetFileName)"
+				CommandLine="copy  $(OutDir)\$(ProjectName).dll  $(SolutionDir)Bin\$(ProjectName).dll&#x0D;&#x0A;copy  $(OutDir)\$(ProjectName).lib  $(SolutionDir)lib\feitian\$(ProjectName).lib&#x0D;&#x0A;copy $(SolutionDir)UKeyVerify\UKeyVerify.h  $(SolutionDir)include\feitian\UKeyVerify.h"
 			/>
 		</Configuration>
 	</Configurations>
