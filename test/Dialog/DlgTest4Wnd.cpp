@@ -109,24 +109,46 @@ int nItem = m_list.GetTopIndex();
     m_list.Scroll(sz);
     m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
 #endif
-
-#if 0
-	if (!m_UKeyVerifyProc.CreateVerifyProc(TRUE, test1))
-	{
-		return;
-	}
-
-	m_UKeyVerifyProc.SetUserData(_T("16104010016"), _T("123456"));
-	m_UKeyVerifyProc.SetThreadProcTime(500, 500);
-	m_UKeyVerifyProc.SetThreadProcState(TRUE);
-#endif
 }
 
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
-	rzt_closeUKeyProc(m_hUKeyProc);
+	m_CheckLinkProc.CloseCheckLinkProc();
 }
 
+BOOL test1(LINK_ADAPTER_INFO *pLinkAdapterInfo)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (pLinkAdapterInfo == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (pLinkAdapterInfo->emLinkStateType == LINK_STATEINPUTTYPE)
+		{
+			strcpy(pLinkAdapterInfo->szIpAddress, _T("192.168.2.113"));
+		}
+		else if (pLinkAdapterInfo->emLinkStateType == LINK_STATEOUTPUTTYPE)
+		{
+			if (pLinkAdapterInfo->bIsConnected)
+			{
+				TRACE(_T("%s-ÍøÂçÁ¬½Ó!"), pLinkAdapterInfo->szIpAddress);
+			}
+			else
+			{
+				TRACE(_T("%s-ÍøÂç¶Ï¿ª!"), pLinkAdapterInfo->szIpAddress);
+			}
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CDlgTest4Wnd::InitCtrl()
@@ -144,128 +166,9 @@ BOOL CDlgTest4Wnd::InitCtrl()
 	return TRUE;
 }
 
-BOOL test1(const CK_UKEYENUM *pUKeyEnum)
-{
-	if (pUKeyEnum == NULL)
-	{
-		return FALSE;
-	}
-
-	if (!pUKeyEnum->bExist)
-	{
-		TRACE(_T("UKey Device is not Exist!"));
-		return FALSE;
-	}
-
-	if (pUKeyEnum->emUKeyState == CK_UKEYSTATEINSERTTYPE)
-	{
-		TRACE(_T("UKey Device ID:%d"), pUKeyEnum->ulSlotId);
-	}
-
-	if (pUKeyEnum->emUKeyType == CK_UKEYDEVFINGERTYPE)
-	{
-		TRACE(_T("UKey Device is FingerMode!"));
-	}
-	else
-	{
-		TRACE(_T("UKey Device is not FingerMode!"));
-	}
-
-	return TRUE;
-}
-
-BOOL test2(CK_UKEYVERIFY *pUKeyVerify)
-{
-	char szUserPIN[UKEYPIN_MAX_LEN] = {0};
-	char szNewUserPIN[UKEYPIN_MAX_LEN] = {0};
-
-	if (pUKeyVerify->emUKeyState == CK_UKEYSTATEINPUTETYPE)
-	{
-		if (pUKeyVerify->emUKeyType == CK_UKEYDEVNORMALTYPE)
-		{
-			//scanf(_T("%s"), szUserPIN);
-			strcpy(szUserPIN, _T("12345678"));	//12345678
-			TRACE(_T("UKey Input UserPIN:%s"), szUserPIN);
-
-			strcpy(pUKeyVerify->szUserPIN, szUserPIN);
-		}
-		else
-		{
-			TRACE(_T("UKey Finger Verify!"));
-		}	
-	}
-	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATEMODIFYTYPE)
-	{
-		if (pUKeyVerify->emUKeyType == CK_UKEYDEVNORMALTYPE)
-		{
-			//scanf(_T("%s"), szNewUserPIN);
-			strcpy(szNewUserPIN, _T("87654321"));
-			TRACE(_T("UKey Modify UserPIN:%s"), szNewUserPIN);
-
-			strcpy(pUKeyVerify->szNewUserPIN, szNewUserPIN);
-		}
-	}
-	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
-	{
-		TRACE(_T("UKey Verify Successful!"));
-	}
-	else if (pUKeyVerify->emUKeyState == CK_UKEYSTATEFAILEDTYPE)
-	{
-		TRACE(_T("UKey Verify Failed!"));
-	}
-
-	return TRUE;
-}
-
-BOOL test3(CK_UKEYREADDATA *pUKeyRead)
-{
-	if (pUKeyRead->emUKeyState == CK_UKEYSTATEINPUTETYPE)
-	{
-		TRACE(_T("UKey Read InputData!"));
-		ResetEvent(pUKeyRead->hEvent);
-	}
-	else if (pUKeyRead->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
-	{
-		TRACE(_T("UKey Read OutputData!"));
-	}
-	else if (pUKeyRead->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
-	{
-		TRACE(_T("UKey Read UserData Successful! UserName:%s UserPasswd:%s"), pUKeyRead->szUserNum, pUKeyRead->szUserPasswd);
-	}
-	else if (pUKeyRead->emUKeyState == CK_UKEYSTATEFAILEDTYPE)
-	{
-		TRACE(_T("UKey Read UserData Failed!"));
-	}
-	return TRUE;
-}
-
-BOOL test4(CK_UKEYWRITEDATA *pUKeyWrite)
-{
-	if (pUKeyWrite->emUKeyState == CK_UKEYSTATEINPUTETYPE)
-	{
-		strcpy(pUKeyWrite->szUserNum, _T("16104010006"));
-		strcpy(pUKeyWrite->szUserPasswd, _T("123456"));
-
-		TRACE(_T("UKey Write UserData!"));
-		ResetEvent(pUKeyWrite->hEvent);
-	}
-	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATEOUTPUTTYPE)
-	{
-	}
-	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATESUCCEDTYPE)
-	{
-	}
-	else if (pUKeyWrite->emUKeyState == CK_UKEYSTATEFAILEDTYPE)
-	{
-	}
-	return TRUE;
-}
-
 BOOL CDlgTest4Wnd::InitInfo()
 {
-	//rzt_openUKeyProc(NULL, NULL, NULL, NULL, m_hUKeyProc);
-	//rzt_openUKeyProc(test1, test2, NULL, NULL, m_hUKeyProc);
-	rzt_openUKeyProc(test1, test2, NULL, test4, m_hUKeyProc);
+	m_CheckLinkProc.CreateCheckLinkProc(test1);
 	return TRUE;
 }
 

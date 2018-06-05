@@ -30,8 +30,7 @@
 #include "./common/MemDCEx.h"
 //#include <opencv2/opencv.hpp>
 #include "./common/Character.h"
-
-#include <UKeyVerify.h>
+#include "./Contrib/CheckLinkThread.h"
 
 //////////////////////////////////////////////////////////////////////////
 //

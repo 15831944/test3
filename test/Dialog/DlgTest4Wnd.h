@@ -46,5 +46,6 @@ protected:
 	CButton							m_btnTest3;
 	CReportCtrl						m_ListTest;
 	CStackedTreeCtrl				m_hTreeCtrl;
-	HANDLE							m_hUKeyProc;
+
+	CCheckLinkThread				m_CheckLinkProc;
 };

@@ -89,7 +89,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib UKeyVerify.lib"
+				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -952,6 +952,14 @@
 		<Filter
 			Name="Contrib"
 			>
+			<File
+				RelativePath=".\Contrib\CheckLinkThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Contrib\CheckLinkThread.h"
+				>
+			</File>
 			<File
 				RelativePath=".\contrib\update_file_name.cpp"
 				>
