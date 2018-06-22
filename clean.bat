@@ -6,7 +6,19 @@ if exist "*.suo"				(del /a /q /f "*.suo")
 
 cd %s1%\test
 if exist "*.aps"				(del /a /q /f "*.aps")
-rem if exist "*.user"			(del /a /q /f "*.user")
+if exist "*.user"				(del /a /q /f "*.user")
+
+cd %s1%\UKeyVerify
+if exist "*.aps"				(del /a /q /f "*.aps")
+if exist "*.user"				(del /a /q /f "*.user")
+
+cd %s1%\OpenCVRzt
+if exist "*.aps"				(del /a /q /f "*.aps")
+if exist "*.user"				(del /a /q /f "*.user")
+
+cd %s1%\FaceVerify
+if exist "*.aps"				(del /a /q /f "*.aps")
+if exist "*.user"				(del /a /q /f "*.user")				
 
 cd %s1%\bin
 if exist "test.exe"				(del /a /q /f "test.exe")
