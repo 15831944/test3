@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{78a53f7a-38e5-4d82-b3e1-790f105619e2}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{02328b0c-b829-4921-b1bc-ab03cd34ec6e}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{578b1278-919a-4d91-84dc-c1c461c76096}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{356d851c-5699-4d69-a1c3-3ff0f46c3329}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\algorithm">
+      <UniqueIdentifier>{75debf76-0349-4fde-bf7b-cb698f21ebcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\audio">
+      <UniqueIdentifier>{a5ee91b3-f217-4dd6-99af-d193f21f9ac3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\video">
+      <UniqueIdentifier>{543c4020-20c1-4eb8-b551-519be87bb2f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\common">
+      <UniqueIdentifier>{b008f9f3-e3a3-4583-9745-c75d32f970ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control">
+      <UniqueIdentifier>{c940fccc-d23b-4b9a-9e2a-220eba0909fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\Combox">
+      <UniqueIdentifier>{adb9ca73-85dc-4932-b5c0-d8521fb95da3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\Button">
+      <UniqueIdentifier>{2107f169-f8d9-4b40-a7cb-cc9043b9b20e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\ListBox">
+      <UniqueIdentifier>{f0923dcc-7997-4c21-9d97-47b194ab4ea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\TreeCtrl">
+      <UniqueIdentifier>{1f99a2b1-0858-4ece-93d3-bbcb53ac9112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\WndCtrl">
+      <UniqueIdentifier>{e36f94a1-e07c-47f7-9d9a-538f09f985e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\ListCtrl">
+      <UniqueIdentifier>{70e8c5c1-a0f0-4a02-a29d-113c23357ec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib">
+      <UniqueIdentifier>{d081f46d-2b00-4d8b-a262-e14015572f8b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Dialog\DlgTest1Wnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\DlgTest2Wnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\DlgTest3Wnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\DlgTest4Wnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\DlgTest5Wnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="testDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\GlobalInfo.cpp">
+      <Filter>Inc</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\PubClass.cpp">
+      <Filter>Inc</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\audio\MixerDevice.cpp">
+      <Filter>Inc\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\audio\multimediastream.cpp">
+      <Filter>Inc\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\audio\waveindevice.cpp">
+      <Filter>Inc\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\audio\waveoutdevice.cpp">
+      <Filter>Inc\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\audio\waveplayer.cpp">
+      <Filter>Inc\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\video\gdi_wnd_draw_video.cpp">
+      <Filter>Inc\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\video\opengl_wnd_draw_video.cpp">
+      <Filter>Inc\video</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\Character.cpp">
+      <Filter>Inc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\ETSLayout.cpp">
+      <Filter>Inc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\ResizableDialog.cpp">
+      <Filter>Inc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\ResizeCtrl.cpp">
+      <Filter>Inc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\ShellClass.cpp">
+      <Filter>Inc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\ComboBox\CustomCombox.cpp">
+      <Filter>Control\Combox</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Button\DrawButton.cpp">
+      <Filter>Control\Button</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\ListBox\DrawListBox.cpp">
+      <Filter>Control\ListBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\ListBox\UserListBox.cpp">
+      <Filter>Control\ListBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\TreeCtrl\ShellCtrlClass.cpp">
+      <Filter>Control\TreeCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\TreeCtrl\StackedClass.cpp">
+      <Filter>Control\TreeCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\TreeCtrl\StackedTreeCtrl.cpp">
+      <Filter>Control\TreeCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp">
+      <Filter>Control\WndCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\ListCtrl\ReportCtrl.cpp">
+      <Filter>Control\ListCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Contrib\CheckLinkThread.cpp">
+      <Filter>Contrib</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\update_file_name.cpp">
+      <Filter>Contrib</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\variable_test.cpp">
+      <Filter>Contrib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Dialog\DlgTest1Wnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\DlgTest2Wnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\DlgTest3Wnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\DlgTest4Wnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\DlgTest5Wnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="testDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\GlobalInfo.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\PubClass.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\algorithm\thread_queue.h">
+      <Filter>Inc\algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\MixerDevice.hpp">
+      <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\multimediastream.hpp">
+      <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\wavebase.hpp">
+      <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\waveindevice.hpp">
+      <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\waveoutdevice.hpp">
+      <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\waveplayer.h">
+      <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\video\gdi_wnd_draw_video.h">
+      <Filter>Inc\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\video\opengl_wnd_draw_video.h">
+      <Filter>Inc\video</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Character.h">
+      <Filter>Inc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\ETSLayout.h">
+      <Filter>Inc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\ResizableDialog.h">
+      <Filter>Inc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\ResizeCtrl.h">
+      <Filter>Inc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\ShellClass.h">
+      <Filter>Inc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\ComboBox\CustomCombox.h">
+      <Filter>Control\Combox</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\Button\DrawButton.h">
+      <Filter>Control\Button</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\ListBox\DrawListBox.h">
+      <Filter>Control\ListBox</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\ListBox\UserListBox.h">
+      <Filter>Control\ListBox</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\TreeCtrl\ShellCtrlClass.h">
+      <Filter>Control\TreeCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\TreeCtrl\StackedClass.h">
+      <Filter>Control\TreeCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\TreeCtrl\StackedTreeCtrl.h">
+      <Filter>Control\TreeCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h">
+      <Filter>Control\WndCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\ListCtrl\ReportCtrl.h">
+      <Filter>Control\ListCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Contrib\CheckLinkThread.h">
+      <Filter>Contrib</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\update_file_name.h">
+      <Filter>Contrib</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\variable_test.h">
+      <Filter>Contrib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\3.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\4.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\5.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bk.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Shell16_001.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Shell16_002.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\test.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="test.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\test.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

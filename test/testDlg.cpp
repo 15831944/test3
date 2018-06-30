@@ -1,19 +1,18 @@
 #include "stdafx.h"
 #include "test.h"
 #include "testDlg.h"
-              
-CAboutDlg::CAboutDlg() 
-	: CSkinDialog(CAboutDlg::IDD, TEXT("360Safe.xml"))
+
+CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 {
 	m_bInited = FALSE;
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CSkinDialog::DoDataExchange(pDX);
+	CDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CSkinDialog)
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
 	ON_WM_QUERYDRAGICON()
@@ -21,7 +20,7 @@ END_MESSAGE_MAP()
 
 BOOL CAboutDlg::OnInitDialog()
 {
-	CSkinDialog::OnInitDialog();
+	CDialog::OnInitDialog();
 	
 	SetIcon(m_hIcon, TRUE);
 	SetIcon(m_hIcon, FALSE);
@@ -51,13 +50,13 @@ void CAboutDlg::OnPaint()
 	}
 	else
 	{
-		CSkinDialog::OnPaint();
+		CDialog::OnPaint();
 	}
 }
 
 void CAboutDlg::OnSize(UINT nType, int cx, int cy)
 {
-	CSkinDialog::OnSize(nType, cx, cy);
+	CDialog::OnSize(nType, cx, cy);
 
 	if (!m_bInited)
 	{
@@ -69,7 +68,6 @@ HCURSOR CAboutDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
 /////////////////////////////////////////////////////////////////////////////
 // CTestDlg dialog
 CTestDlg::CTestDlg(CWnd* pParent /*=NULL*/)
@@ -128,8 +126,8 @@ void CTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
 	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
+		//CAboutDlg dlgAbout;
+		//dlgAbout.DoModal();
 	}
 	else
 	{

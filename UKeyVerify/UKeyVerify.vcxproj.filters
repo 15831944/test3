@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{88cd2cda-8abe-47fc-a323-5f8854b9db07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib">
+      <UniqueIdentifier>{6bc1fc04-0169-40a6-ab5b-4a0a38ea82c9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UKeyVerify.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\Pkcs11_Ukey.cpp">
+      <Filter>Inc</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\UKeyEnumThread.cpp">
+      <Filter>Contrib</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\UKeyWorkThread.cpp">
+      <Filter>Contrib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UKeyVerify.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\internal.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Pkcs11_Ukey.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\UKeyEnumThread.h">
+      <Filter>Contrib</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\UKeyWorkThread.h">
+      <Filter>Contrib</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

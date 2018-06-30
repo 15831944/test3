@@ -9,61 +9,73 @@
 
 #define	WM_UPDATEFILENAME_MSG				WM_USER	+ 0x1001
 
-typedef enum tagConfigType
-{
-	CONFIG_EMPTYTYPE = 0,
+typedef enum{
+	CONFIG_EMPTYTYPE	= 0,
 	CONFIG_EXTTYPE,
 	CONFIG_FILENAMETYPE
-}ENUM_CONFIGTYPE;
+}UPDATE_CONFIGTYPE;
 
-typedef enum tagEvalType
-{
-	EVAL_EMPTYTYPE = 0,
+typedef enum{
+	EVAL_EMPTYTYPE		= 0,
 	EVAL_ALLFILENAME,
 	EVAL_SPECIFYNAME,
 	EVAL_SPECIFYNUMINDEX
-}ENUM_EVALTYPE;
+}UPDATE_EVALTYPE;
 
-typedef struct tagUpdateResult
-{
-	unsigned long	ulError;
-	unsigned long	ulResult;
-}DATA_UPDATERESULT;
+typedef enum {
+	STATE_EMPTYTYPE		= 0,
+	STATE_SUCCEDTYPE,
+	STATE_FAILEDTYPE,
+	STATE_INPUTETYPE,
+	STATE_OUTPUTTYPE,
+	STATE_MODIFYTYPE,
+}UPDATE_STATETYPE;
 
-typedef struct tagEnumFileInfo
-{
-	DWORD		dwFileSize;
-	DWORD		dwFileAttrib;
-	__time64_t	time_create;
-	__time64_t	time_access;
-	__time64_t	time_write;
-	char		szFileName[MAX_PATH];
-	char		szParentPath[MAX_PATH];
-	char		szFilePath[MAX_PATH];
-	char		szFileExt[MAX_PATH];
-}ENUM_FILEINFO;
+typedef struct{
+	unsigned int			uiError;
+	unsigned int			uiResult;
+}UPDATE_RESULTDATA;
 
-typedef struct tagItemData
-{
-	ENUM_EVALTYPE	hEvalType;
-	char			szItemName[MAX_PATH];
+typedef struct{
+	unsigned int			uiFileSize;
+	unsigned int			uiFileAttrib;
+	__time64_t				time_create;
+	__time64_t				time_access;
+	__time64_t				time_write;
+	char					szFileName[MAX_PATH];
+	char					szParentPath[MAX_PATH];
+	char					szFilePath[MAX_PATH];
+	char					szFileExt[MAX_PATH];
+}UPDATE_FILEINFO;
+
+typedef struct {
+	UPDATE_EVALTYPE			emEvalType;
+	char					szItemName[MAX_PATH];
 }EVAL_ITEMDATA;
 
 typedef struct tagEvalFileInfo
 {
-	ENUM_CONFIGTYPE	hConfigType;
-	ENUM_EVALTYPE	hEvalType;
+	UPDATE_CONFIGTYPE		emConfigType;
+	UPDATE_EVALTYPE			emEvalType;
 	std::vector<std::string> vecString;
 
 	tagEvalFileInfo::tagEvalFileInfo()
 	{
-		hConfigType = CONFIG_EMPTYTYPE;
-		hEvalType   = EVAL_EMPTYTYPE;
-
+		emConfigType = CONFIG_EMPTYTYPE;
+		emEvalType   = EVAL_EMPTYTYPE;
 		vecString.clear();
 	}
 }EVAL_FILEINFO;
 
+typedef struct {
+	char					szFilePath[MAX_PATH];
+	char					szFindName[MAX_PATH];
+	char					szFileSubName[MAX_PATH];
+	UPDATE_EVALTYPE			emEvalType;
+	UPDATE_STATETYPE		emStateType;
+}UPDATE_FILEDATA;
+
+typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILEDATA *pFileData);
 //////////////////////////////////////////////////////////////////////////
 //
 using namespace std;
@@ -74,7 +86,7 @@ public:
 	~update_file_name();
 	
 public:
-	BOOL							CreateUpdateProc(HWND hWnd, const char* pszShellPath, const char* pszFindName, const char* pszSubName, ENUM_EVALTYPE hEvalType);
+	BOOL							CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData);
 	BOOL							CloseUpdateProc();
 	
 	static 	update_file_name&		Instance();
@@ -104,7 +116,7 @@ protected:
 	HANDLE							m_hEndEvent;
 	
 	HWND							m_hWnd;
-	ENUM_EVALTYPE					m_hEvalType;
+	UPDATE_EVALTYPE					m_hEvalType;
 
 private:
 	BOOL							m_bExit;
@@ -119,6 +131,7 @@ private:
 	std::string						m_strFindName;
 	std::string						m_strSubName;
 
+	UPDATE_FILEDATA_CALLBACK_FUNC	m_pfFileData;
 	std::map<std::string, ENUM_FILEINFO*>	m_mapEnumInfo;
 };
 

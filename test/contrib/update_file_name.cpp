@@ -10,14 +10,12 @@ update_file_name::update_file_name()
 	m_dwError = 0;
 	m_dwThreadID = 0;
 
-	m_dwProcTimeOver = 80;
+	m_dwProcTimeOver = 200;
 	m_dwCloseTimeOver = 500;
 	
-	m_strShellPath = _T("");
-	m_strFindName  = _T("");
-	m_strSubName   = _T("");
-	
 	m_hThread = NULL;
+	m_pfFileData = NULL;
+
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -25,7 +23,6 @@ update_file_name::update_file_name()
 update_file_name::~update_file_name()
 {
 	CloseUpdateProc();
-
 	if (m_hStartEvent != NULL)
 	{
 		CloseHandle(m_hStartEvent);
@@ -56,23 +53,15 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 	return 0;
 }
 
-BOOL update_file_name::CreateUpdateProc(HWND hWnd, const char* pszShellPath, const char* pszFindName, const char* pszSubName, ENUM_EVALTYPE hEvalType)
+BOOL update_file_name::CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData)
 {
 	BOOL bRet = FALSE;
-	
 	if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 	{
 		SetEvent(m_hStartEvent);
 		ResetEvent(m_hEndEvent);
-
-		m_hWnd = hWnd;
-		
-		m_strShellPath = pszShellPath;
-		m_strFindName  = pszFindName;
-		m_strSubName   = pszSubName;
-
-		m_hEvalType    = hEvalType;
-		
+	
+		m_pfFileData = pfFileData;
 		m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
 		{
@@ -81,10 +70,6 @@ BOOL update_file_name::CreateUpdateProc(HWND hWnd, const char* pszShellPath, con
 		}
 
 		bRet = TRUE;
-		m_bExit = FALSE;
-		
-		CloseHandle(m_hThread);
-		m_hThread = NULL;
 	}
 	
 	return bRet;
@@ -92,14 +77,12 @@ BOOL update_file_name::CreateUpdateProc(HWND hWnd, const char* pszShellPath, con
 
 BOOL update_file_name::CloseUpdateProc()
 {
-	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
-
 	m_bExit = TRUE;
 	WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
 	
 	if (m_mapEnumInfo.size() > 0)
 	{
-		for (mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
+		for (std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
 		{
 			if (mapIter->second != NULL)
 			{
@@ -120,50 +103,17 @@ BOOL update_file_name::CloseUpdateProc()
 void update_file_name::UpdateFileInfo()
 {
 	BOOL bRet = FALSE;
-	EVAL_FILEINFO hEvalTag;
-
-	if (!EnumFileInfo())
+	
+	do
 	{
-		bRet = FALSE;
-		m_dwError = ERROR_ENUM_FILEINFO;
-		goto part1;
-	}
-
-	if (!GetEvalResult(&hEvalTag))
-	{
-		bRet = FALSE;
-		m_dwError = ERROR_ENUM_FILEINFO;
-		goto part1;
-	}
-
-	if (hEvalTag.hConfigType ==  CONFIG_EXTTYPE)
-	{
-		if (!SetFileExtInfo(&hEvalTag))
+		if (!EnumFileInfo())
 		{
 			bRet = FALSE;
-			goto part1;
+			break;
 		}
-	}
-	else if (hEvalTag.hConfigType ==  CONFIG_FILENAMETYPE)
-	{
-		if (!SetFileNameInfo(&hEvalTag))
-		{
-			bRet = FALSE;
-			goto part1;
-		}
-	}
-	else
-	{
-		bRet = FALSE;
-		goto part1;
-	}
 
-	bRet = TRUE;
-	SetEvent(m_hEndEvent);
 
-part1:
-	CloseUpdateProc();
-	SetUpdateResult(bRet);
+	} while (FALSE);
 }
 
 void update_file_name::SetUpdateResult(BOOL bRet)
@@ -191,7 +141,7 @@ BOOL update_file_name::EnumFileInfo()
 
 	struct _stat	s_file ={0};
 	_finddata_t		c_file;
-	ENUM_FILEINFO* pFileInfo = NULL;
+	UPDATE_FILEINFO* pFileInfo = NULL;
 
 	char szFindPath[MAX_PATH+1] = {0};
 	char szFilePath[MAX_PATH+1] = {0};
@@ -270,15 +220,15 @@ BOOL update_file_name::EnumFileInfo()
 				continue;
 			}
 
-			pFileInfo = new ENUM_FILEINFO;
+			pFileInfo = new UPDATE_FILEINFO;
 			if (pFileInfo == NULL)
 			{
 				continue;
 			}
-			memset(pFileInfo, 0x0, sizeof(ENUM_FILEINFO));
+			memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
 
-			pFileInfo->dwFileSize = c_file.size;
-			pFileInfo->dwFileAttrib = c_file.attrib;
+			pFileInfo->uiFileSize = c_file.size;
+			pFileInfo->uiFileAttrib = c_file.attrib;
 			pFileInfo->time_create = c_file.time_create;
 			pFileInfo->time_access = c_file.time_access;
 			pFileInfo->time_write  = c_file.time_write;
@@ -344,7 +294,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 
 	vector<std::string> vecString1;
 	vector<std::string> vecString2;
-	ENUM_CONFIGTYPE hConfigType = CONFIG_EMPTYTYPE;
+	UPDATE_CONFIGTYPE hConfigType = CONFIG_EMPTYTYPE;
 	
 	if (pEvalTag == NULL)
 	{
@@ -424,8 +374,8 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 
 	if (bRet)
 	{
-		pEvalTag->hConfigType = hConfigType;
-		pEvalTag->hEvalType = m_hEvalType;
+		pEvalTag->emConfigType = hConfigType;
+		pEvalTag->emEvalType = m_hEvalType;
 
 		if (hConfigType == CONFIG_EXTTYPE)
 		{
@@ -444,9 +394,9 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 	char szSpecFileExt[MAX_PATH] = {0};
 	char szSpecFilePath[MAX_PATH] = {0};
 
-	ENUM_FILEINFO* pFileInfo = NULL;
+	UPDATE_FILEINFO* pFileInfo = NULL;
 	std::vector<std::string>::iterator vecIter;
-	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
+	std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter;
 
 	if (pEvalTag == NULL)
 	{
@@ -534,11 +484,11 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 	BOOL bRet = FALSE;
 	unsigned long ulIndex = 0;
 
-	ENUM_FILEINFO* pFileInfo = NULL;
+	UPDATE_FILEINFO* pFileInfo = NULL;
 	std::vector<std::string>::iterator vecIter;
-	std::map<std::string, ENUM_FILEINFO*>::iterator mapIter;
+	std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter;
 
-	if (pEvalTag == NULL || pEvalTag->hEvalType == EVAL_EMPTYTYPE)
+	if (pEvalTag == NULL || pEvalTag->emEvalType == EVAL_EMPTYTYPE)
 	{
 		return FALSE;
 	}
@@ -580,15 +530,15 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 			continue;
 		}
 
-		if (pEvalTag->hEvalType == EVAL_ALLFILENAME)
+		if (pEvalTag->emEvalType == EVAL_ALLFILENAME)
 		{
 			SetAllFileName(pFileInfo->szParentPath, pFileInfo->szFileName, NULL, m_strSubName.c_str(), pFileInfo->szFileExt, ulIndex);
 		}
-		else if (pEvalTag->hEvalType == EVAL_SPECIFYNAME)
+		else if (pEvalTag->emEvalType == EVAL_SPECIFYNAME)
 		{
 			SetSpecifyName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt);
 		}
-		else if (pEvalTag->hEvalType == EVAL_SPECIFYNUMINDEX)
+		else if (pEvalTag->emEvalType == EVAL_SPECIFYNUMINDEX)
 		{
 			SetNumIndexName(pFileInfo->szParentPath, pFileInfo->szFileName, m_strFindName.c_str(), m_strSubName.c_str(), pFileInfo->szFileExt, ulIndex);
 		}

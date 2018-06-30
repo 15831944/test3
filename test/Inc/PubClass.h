@@ -1,6 +1,7 @@
 #ifndef __PUBCLASS_H__
 #define __PUBCLASS_H__
 
+#define	SKINUI_VERSION							1
 #include <io.h>
 #include <math.h>
 #include <time.h>

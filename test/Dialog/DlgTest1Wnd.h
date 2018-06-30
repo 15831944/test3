@@ -52,7 +52,7 @@ protected:
 	CComboBox						m_hComboEval;
 
 	update_file_name				m_hUpdateFile;
-	ENUM_EVALTYPE					m_hEvalType;
+	UPDATE_EVALTYPE					m_hEvalType;
 
 private:
 	CString							m_strDefaultPath;

@@ -5,10 +5,11 @@
 #include "Dialog/DlgTest3Wnd.h"
 #include "Dialog/DlgTest4Wnd.h"
 #include "Dialog/DlgTest5Wnd.h"
-/////////////////////////////////////////////////////////////////////////////
-// 
+
 using namespace std;
-class CAboutDlg : public CSkinDialog
+/////////////////////////////////////////////////////////////////////////////
+//
+class CAboutDlg : public CDialog
 {
 public:
 	CAboutDlg();

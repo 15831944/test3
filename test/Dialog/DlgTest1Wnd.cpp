@@ -108,22 +108,22 @@ void CDlgTest1Wnd::InitInfo()
 
 	memset(&hEvalItem, 0x0, sizeof(hEvalItem));
 
-	hEvalItem[0].hEvalType = EVAL_EMPTYTYPE;
+	hEvalItem[0].emEvalType = EVAL_EMPTYTYPE;
 	strcpy(hEvalItem[0].szItemName, _T("请选择..."));
 
-	hEvalItem[1].hEvalType = EVAL_ALLFILENAME;
+	hEvalItem[1].emEvalType = EVAL_ALLFILENAME;
 	strcpy(hEvalItem[1].szItemName, _T("全部名称"));
 
-	hEvalItem[2].hEvalType = EVAL_SPECIFYNAME;
+	hEvalItem[2].emEvalType = EVAL_SPECIFYNAME;
 	strcpy(hEvalItem[2].szItemName, _T("指定名称"));
 
-	hEvalItem[3].hEvalType = EVAL_SPECIFYNUMINDEX;
+	hEvalItem[3].emEvalType = EVAL_SPECIFYNUMINDEX;
 	strcpy(hEvalItem[3].szItemName, _T("数字索引"));
 
 	for (nIndex=0; nIndex<sizeof(hEvalItem)/sizeof(EVAL_ITEMDATA); nIndex++)
 	{
 		m_hComboEval.InsertString(nIndex, hEvalItem[nIndex].szItemName);
-		m_hComboEval.SetItemData(nIndex, hEvalItem[nIndex].hEvalType);
+		m_hComboEval.SetItemData(nIndex, hEvalItem[nIndex].emEvalType);
 	}
 
 	m_hComboEval.SetCurSel(0);
@@ -477,69 +477,63 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 
 void CDlgTest1Wnd::OnBnClickedButton3()
 {
-	int nIndex = 0;
+	BOOL bRet = FALSE;
+
+	int nIndex = -1;
 	DWORD dwDataPtr = 0;
 
 	CString strFindName;
 	CString strSubName;
+	CString strPrompt;
 
-	if (m_strShellPath == _T("") || m_strShellPath.GetLength() <= 0)
+	do
 	{
-		MessageBox(_T("请选择正确的文件路径!"), _T("警告!"), MB_ICONWARNING|MB_OK);
-		return;
-	}
+		if (m_strShellPath == _T(""))
+		{
+			bRet = FALSE;
+			strPrompt = _T("请选择正确的文件路径!");
+			break;
+		}
 
-	GetDlgItem(IDC_EDIT_FINDNAME)->GetWindowText(strFindName);
-	GetDlgItem(IDC_EDIT_SUBNAME)->GetWindowText(strSubName);
+		GetDlgItem(IDC_EDIT_FINDNAME)->GetWindowText(strFindName);
+		GetDlgItem(IDC_EDIT_SUBNAME)->GetWindowText(strSubName);
 
-	switch(m_hEvalType)
+		if (strSubName == _T(""))
+		{
+			bRet = FALSE;
+			GetDlgItem(IDC_EDIT_FINDNAME)->GetFocus();
+			strPrompt = _T("新文件名称不能为空, 请检查!");
+			break;
+		}
+
+		if (m_hEvalType == EVAL_ALLFILENAME)
+		{
+		}
+		else if (m_hEvalType == EVAL_SPECIFYNAME)
+		{
+		}
+		else if (m_hEvalType == EVAL_SPECIFYNUMINDEX)
+		{
+		}
+
+		if (!m_hUpdateFile.CreateUpdateProc(this->GetSafeHwnd(), m_strShellPath, strFindName, strSubName, m_hEvalType))
+		{
+			bRet = FALSE;
+			strPrompt = _T("文件名称修改失败, 请检查!");
+			break;
+		}
+
+		GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
+		GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON3)->EnableWindow(FALSE);
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	if (!bRet && strPrompt != _T(""))
 	{
-	case EVAL_EMPTYTYPE:
-		{
-			MessageBox(_T("请选择正确的更新规则!"), _T("警告!"), MB_ICONWARNING|MB_OK);
-			return;
-		}
-		break;
-
-	case EVAL_ALLFILENAME:
-		{
-			
-		}
-		break;
-
-	case EVAL_SPECIFYNAME:
-		{
-			if (strFindName == _T("") || strFindName.GetLength() <= 0)
-			{
-				GetDlgItem(IDC_EDIT_FINDNAME)->GetFocus();
-				MessageBox(_T("查找的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
-				return;
-			}
-		}
-		break;
-
-	case EVAL_SPECIFYNUMINDEX:
-		{
-
-		}
-		break;
+		::MessageBox(NULL, strPrompt, _T("警告!"), MB_ICONWARNING | MB_OK);
 	}
-
-	if (strSubName == _T("") || strSubName.GetLength() <= 0)
-	{
-		GetDlgItem(IDC_EDIT_SUBNAME)->GetFocus();
-		MessageBox(_T("替换的名称为空, 请检查!"), _T("警告!"), MB_ICONWARNING|MB_OK);
-		return;
-	}
-
-	if (!m_hUpdateFile.CreateUpdateProc(this->GetSafeHwnd(), m_strShellPath, strFindName, strSubName, m_hEvalType))
-	{
-		return;
-	}
-
-	GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
-	GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(FALSE);
-	GetDlgItem(IDC_BUTTON3)->EnableWindow(FALSE);
 }
 
 /*
@@ -586,7 +580,7 @@ LRESULT CDlgTest1Wnd::OnUpdateFileName(WPARAM wParam, LPARAM lParam)
 	DWORD dwTypeMsg = 0;
 	DWORD dwTypeValue = 0;
 
-	ENUM_EVALTYPE hEvalType = EVAL_EMPTYTYPE;
+	UPDATE_EVALTYPE hEvalType = EVAL_EMPTYTYPE;
 
 	dwTypeMsg = wParam;
 	if (dwTypeMsg == 0)
