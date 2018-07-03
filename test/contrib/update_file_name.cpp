@@ -7,9 +7,7 @@ update_file_name::update_file_name()
 {
 	m_bExit = FALSE;
 	
-	m_dwError = 0;
 	m_dwThreadID = 0;
-
 	m_dwProcTimeOver = 200;
 	m_dwCloseTimeOver = 500;
 	
@@ -56,22 +54,33 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 BOOL update_file_name::CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData)
 {
 	BOOL bRet = FALSE;
-	if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
-	{
-		SetEvent(m_hStartEvent);
-		ResetEvent(m_hEndEvent);
 	
-		m_pfFileData = pfFileData;
-		m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
-		if(m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
+	do
+	{
+		if (WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 		{
-			ResetEvent(m_hStartEvent);
-			return FALSE;
+			SetEvent(m_hStartEvent);
+			ResetEvent(m_hEndEvent);
+
+			m_pfFileData = pfFileData;
+
+			m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
+			if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			bRet = TRUE;
 		}
 
-		bRet = TRUE;
+	} while(FALSE);
+
+	if (!bRet)
+	{
+		ResetEvent(m_hStartEvent);
 	}
-	
+
 	return bRet;
 }
 

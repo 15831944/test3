@@ -114,22 +114,13 @@ protected:
 
 	HANDLE							m_hStartEvent;
 	HANDLE							m_hEndEvent;
-	
-	HWND							m_hWnd;
-	UPDATE_EVALTYPE					m_hEvalType;
 
 private:
 	BOOL							m_bExit;
-	
-	DWORD							m_dwError;
-	DWORD							m_dwThreadID;
 
+	DWORD							m_dwThreadID;
 	DWORD							m_dwProcTimeOver;
 	DWORD							m_dwCloseTimeOver;
-	
-	std::string						m_strShellPath;
-	std::string						m_strFindName;
-	std::string						m_strSubName;
 
 	UPDATE_FILEDATA_CALLBACK_FUNC	m_pfFileData;
 	std::map<std::string, ENUM_FILEINFO*>	m_mapEnumInfo;
