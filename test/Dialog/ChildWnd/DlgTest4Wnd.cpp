@@ -1,9 +1,5 @@
 #include "stdafx.h"
-#include "../test.h"
 #include "DlgTest4Wnd.h"
-
-#include "../inc/GlobalInfo.h"
-#include "DlgPTZControlWnd.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest4Wnd, CDialog)
 CDlgTest4Wnd::CDlgTest4Wnd(CWnd* pParent /*=NULL*/)
@@ -18,17 +14,17 @@ CDlgTest4Wnd::~CDlgTest4Wnd()
 void CDlgTest4Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BUTTON3,	m_btnTest3);
-	DDX_Control(pDX, IDC_LIST_TEST, m_ListTest);
+	DDX_Control(pDX, IDC_BTN4_TEST3,			m_btnTest3);
+	DDX_Control(pDX, IDC_LIST4_SHOWINFO,		m_ListTest);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
 	ON_WM_PAINT()
 
-	ON_BN_CLICKED(IDC_BUTTON1, &CDlgTest4Wnd::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2, &CDlgTest4Wnd::OnBnClickedButton2)
-	ON_BN_CLICKED(IDC_BUTTON3, &CDlgTest4Wnd::OnBnClickedButton3)
-	ON_BN_CLICKED(IDC_BUTTON4, &CDlgTest4Wnd::OnBnClickedButton4)
+	ON_BN_CLICKED(IDC_BTN4_TEST1,				OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BTN4_TEST2,				OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BTN4_TEST3,				OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BTN4_TEST4,				OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -37,12 +33,6 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 {
 	USES_CONVERSION;
 	CDialog::OnInitDialog();
-
-	CGlobalInfo* pGlobal = CGlobalInfo::CreateInstance();
-	if (pGlobal == NULL)
-	{
-		return FALSE;
-	}
 
 #if 0
 	DWORD dwStyle;

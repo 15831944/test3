@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "test.h"
-#include "testDlg.h"
+#include "./Dialog/testDlg.h"
 
 BEGIN_MESSAGE_MAP(CTestApp, CWinApp)
 	ON_COMMAND(ID_HELP, CWinApp::OnHelp)

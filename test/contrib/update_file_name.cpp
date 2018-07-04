@@ -51,64 +51,8 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 	return 0;
 }
 
-BOOL update_file_name::CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData)
-{
-	BOOL bRet = FALSE;
-	
-	do
-	{
-		if (WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
-		{
-			SetEvent(m_hStartEvent);
-			ResetEvent(m_hEndEvent);
-
-			m_pfFileData = pfFileData;
-
-			m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
-			if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
-			{
-				bRet = FALSE;
-				break;
-			}
-
-			bRet = TRUE;
-		}
-
-	} while(FALSE);
-
-	if (!bRet)
-	{
-		ResetEvent(m_hStartEvent);
-	}
-
-	return bRet;
-}
-
-BOOL update_file_name::CloseUpdateProc()
-{
-	m_bExit = TRUE;
-	WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
-	
-	if (m_mapEnumInfo.size() > 0)
-	{
-		for (std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
-		{
-			if (mapIter->second != NULL)
-			{
-				delete mapIter->second;
-				mapIter->second = NULL;
-			}
-
-			mapIter = m_mapEnumInfo.erase(mapIter);
-		}
-
-		m_mapEnumInfo.clear();
-	}
-
-	ResetEvent(m_hStartEvent);
-	return TRUE;
-}
-
+//////////////////////////////////////////////////////////////////////////
+//
 void update_file_name::UpdateFileInfo()
 {
 	BOOL bRet = FALSE;
@@ -123,22 +67,6 @@ void update_file_name::UpdateFileInfo()
 
 
 	} while (FALSE);
-}
-
-void update_file_name::SetUpdateResult(BOOL bRet)
-{
-	unsigned long ulRetMsg = 0;
-
-	if (bRet)
-	{
-		ulRetMsg = UPDATE_FILENAME_SUCCESSUL_RESULT;
-	}
-	else
-	{
-		ulRetMsg = UPDATE_FILENAME_FAILED_RESULT;
-	}
-
-	::PostMessage(m_hWnd, WM_UPDATEFILENAME_MSG, (WPARAM)ulRetMsg, (LPARAM)m_dwError);
 }
 
 BOOL update_file_name::EnumFileInfo()
@@ -327,11 +255,11 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 		vecString1 = pGlobal->SplitString2(m_strFindName.c_str(), pSpecTag);
 		if (vecString1.size() > 1)
 		{
-			hConfigType = CONFIG_EXTTYPE;
+			hConfigType = CONFIG_EXTNAMETYPE;
 		}
 		else
 		{
-			hConfigType = CONFIG_EXTTYPE;
+			hConfigType = CONFIG_EXTNAMETYPE;
 		}
 	}
 	else
@@ -355,7 +283,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 			{
 				bRet = FALSE;
 			}
-			else if (hConfigType == CONFIG_EXTTYPE)
+			else if (hConfigType == CONFIG_EXTNAMETYPE)
 			{
 				bRet = TRUE;
 			}
@@ -371,7 +299,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 		{
 			bRet = TRUE;
 		}
-		else if (hConfigType == CONFIG_EXTTYPE)
+		else if (hConfigType == CONFIG_EXTNAMETYPE)
 		{
 			bRet = FALSE;
 		}
@@ -386,7 +314,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 		pEvalTag->emConfigType = hConfigType;
 		pEvalTag->emEvalType = m_hEvalType;
 
-		if (hConfigType == CONFIG_EXTTYPE)
+		if (hConfigType == CONFIG_EXTNAMETYPE)
 		{
 			pEvalTag->vecString.assign(vecString1.begin(), vecString1.end());
 		}
@@ -986,4 +914,63 @@ BOOL update_file_name::SetNumIndexName(const char* pszFilePath, const char* pszS
 	}
 
 	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL update_file_name::CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData)
+{
+	BOOL bRet = FALSE;
+
+	do
+	{
+		if (WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
+		{
+			SetEvent(m_hStartEvent);
+			ResetEvent(m_hEndEvent);
+
+			m_pfFileData = pfFileData;
+
+			m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
+			if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+
+		bRet = TRUE;
+	} while(FALSE);
+
+	if (!bRet)
+	{
+		ResetEvent(m_hStartEvent);
+	}
+
+	return bRet;
+}
+
+BOOL update_file_name::CloseUpdateProc()
+{
+	m_bExit = TRUE;
+	WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
+
+	if (m_mapEnumInfo.size() > 0)
+	{
+		for (std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
+		{
+			if (mapIter->second != NULL)
+			{
+				delete mapIter->second;
+				mapIter->second = NULL;
+			}
+
+			mapIter = m_mapEnumInfo.erase(mapIter);
+		}
+
+		m_mapEnumInfo.clear();
+	}
+
+	ResetEvent(m_hStartEvent);
+	return TRUE;
 }

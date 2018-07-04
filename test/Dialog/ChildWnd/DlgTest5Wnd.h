@@ -1,15 +1,11 @@
 #pragma once
 #include "afxwin.h"
-#include <atlconv.h>
-
-#include "../Control/ListBox/UserListBox.h"
 
 using namespace std;
 using namespace Gdiplus;
 class CDlgTest5Wnd : public CDialog
 {
 	DECLARE_DYNAMIC(CDlgTest5Wnd)
-
 public:
 	CDlgTest5Wnd(CWnd* pParent = NULL); 
 	virtual ~CDlgTest5Wnd();

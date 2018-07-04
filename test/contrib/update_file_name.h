@@ -1,17 +1,9 @@
 #ifndef __UPDATE_FILE_NAME_H__
 #define __UPDATE_FILE_NAME_H__
 
-#define ERROR_ENUM_FILEINFO					0x0F000001
-#define ERROR_ENUM_EVALINFO					0x0F000002
-
-#define UPDATE_FILENAME_SUCCESSUL_RESULT	0x08000001
-#define UPDATE_FILENAME_FAILED_RESULT		0x08000002
-
-#define	WM_UPDATEFILENAME_MSG				WM_USER	+ 0x1001
-
 typedef enum{
 	CONFIG_EMPTYTYPE	= 0,
-	CONFIG_EXTTYPE,
+	CONFIG_EXTNAMETYPE,
 	CONFIG_FILENAMETYPE
 }UPDATE_CONFIGTYPE;
 
@@ -32,11 +24,6 @@ typedef enum {
 }UPDATE_STATETYPE;
 
 typedef struct{
-	unsigned int			uiError;
-	unsigned int			uiResult;
-}UPDATE_RESULTDATA;
-
-typedef struct{
 	unsigned int			uiFileSize;
 	unsigned int			uiFileAttrib;
 	__time64_t				time_create;
@@ -47,6 +34,15 @@ typedef struct{
 	char					szFilePath[MAX_PATH];
 	char					szFileExt[MAX_PATH];
 }UPDATE_FILEINFO;
+
+typedef struct {
+	char					szFilePath[MAX_PATH];
+	char					szFindName[MAX_PATH];
+	char					szFileSubName[MAX_PATH];
+	UPDATE_EVALTYPE			emEvalType;
+	UPDATE_STATETYPE		emStateType;
+	UPDATE_CONFIGTYPE		emConfigType;
+}UPDATE_FILEDATA;
 
 typedef struct {
 	UPDATE_EVALTYPE			emEvalType;
@@ -66,14 +62,6 @@ typedef struct tagEvalFileInfo
 		vecString.clear();
 	}
 }EVAL_FILEINFO;
-
-typedef struct {
-	char					szFilePath[MAX_PATH];
-	char					szFindName[MAX_PATH];
-	char					szFileSubName[MAX_PATH];
-	UPDATE_EVALTYPE			emEvalType;
-	UPDATE_STATETYPE		emStateType;
-}UPDATE_FILEDATA;
 
 typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILEDATA *pFileData);
 //////////////////////////////////////////////////////////////////////////

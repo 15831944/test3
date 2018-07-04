@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "../test.h"
 #include "DlgTest5Wnd.h"
 
 IMPLEMENT_DYNAMIC(CDlgTest5Wnd, CDialog)
@@ -15,7 +14,7 @@ CDlgTest5Wnd::~CDlgTest5Wnd()
 void CDlgTest5Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST_USERLIST, m_UserListbox);
+	DDX_Control(pDX, IDC_LIST5_SHOWINFO,		m_UserListbox);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest5Wnd, CDialog)

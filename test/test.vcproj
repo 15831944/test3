@@ -455,26 +455,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\Dialog\DlgTest1Wnd.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest2Wnd.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest3Wnd.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest4Wnd.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest5Wnd.cpp"
-				>
-			</File>
-			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -550,67 +530,11 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath="testDlg.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath=".\Dialog\DlgTest1Wnd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest2Wnd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest3Wnd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest4Wnd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Dialog\DlgTest5Wnd.h"
-				>
-			</File>
 			<File
 				RelativePath="Resource.h"
 				>
@@ -621,10 +545,6 @@
 			</File>
 			<File
 				RelativePath="test.h"
-				>
-			</File>
-			<File
-				RelativePath="testDlg.h"
 				>
 			</File>
 		</Filter>
@@ -961,14 +881,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\contrib\update_file_name.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\contrib\update_file_name.h"
-				>
-			</File>
-			<File
 				RelativePath=".\contrib\variable_test.cpp"
 				>
 			</File>
@@ -976,6 +888,62 @@
 				RelativePath=".\contrib\variable_test.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="Dialog"
+			>
+			<File
+				RelativePath=".\Dialog\testDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Dialog\testDlg.h"
+				>
+			</File>
+			<Filter
+				Name="ChildWnd"
+				>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest1Wnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest1Wnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest2Wnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest2Wnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest3Wnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest3Wnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest4Wnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest4Wnd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest5Wnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\ChildWnd\DlgTest5Wnd.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

@@ -12,6 +12,7 @@ public:
 public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
+
 	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt);
 	DECLARE_MESSAGE_MAP()
 };
