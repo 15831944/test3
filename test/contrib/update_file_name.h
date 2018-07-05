@@ -44,11 +44,6 @@ typedef struct {
 	UPDATE_CONFIGTYPE		emConfigType;
 }UPDATE_FILEDATA;
 
-typedef struct {
-	UPDATE_EVALTYPE			emEvalType;
-	char					szItemName[MAX_PATH];
-}EVAL_ITEMDATA;
-
 typedef struct tagEvalFileInfo
 {
 	UPDATE_CONFIGTYPE		emConfigType;
@@ -111,7 +106,7 @@ private:
 	DWORD							m_dwCloseTimeOver;
 
 	UPDATE_FILEDATA_CALLBACK_FUNC	m_pfFileData;
-	std::map<std::string, ENUM_FILEINFO*>	m_mapEnumInfo;
+	std::map<std::string, EVAL_FILEINFO*>	m_mapEnumFile;
 };
 
 #endif

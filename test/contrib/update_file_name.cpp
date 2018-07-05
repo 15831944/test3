@@ -84,12 +84,8 @@ BOOL update_file_name::EnumFileInfo()
 	char szFilePath[MAX_PATH+1] = {0};
 	char szFileExt[MAX_PATH+1]  = {0};
 	char szFileTitle[MAX_PATH+1] = {0};
-
-	if(m_strShellPath == _T("") || m_strShellPath.size() == 0)
-	{
-		return FALSE;
-	}
 	
+/*
 	if (_stat(m_strShellPath.c_str(), &s_file) != 0)
 	{
 		return FALSE;
@@ -185,7 +181,7 @@ BOOL update_file_name::EnumFileInfo()
 	{
 		_findclose(file);
 	}
-
+*/
 	return bRet;
 }
 
@@ -237,7 +233,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 	{
 		return FALSE;
 	}
-
+/*
 	if (m_strSubName == _T("") && m_strSubName.size() == 0)
 	{
 		return FALSE;
@@ -319,7 +315,7 @@ BOOL update_file_name::GetEvalResult(EVAL_FILEINFO* pEvalTag)
 			pEvalTag->vecString.assign(vecString1.begin(), vecString1.end());
 		}
 	}
-
+*/
 	return bRet;
 }
 
@@ -339,7 +335,7 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 	{
 		return FALSE;
 	}
-
+/*
 	if (m_strFindName == _T("") && m_strFindName.size() == 0)
 	{
 		return FALSE;
@@ -412,7 +408,7 @@ BOOL update_file_name::SetFileExtInfo(EVAL_FILEINFO* pEvalTag)
 			continue;
 		}
 	}
-
+*/
 	return bRet;
 }
 
@@ -429,7 +425,7 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 	{
 		return FALSE;
 	}
-
+/*
 	if (m_strSubName == _T("") && m_strSubName.size() == 0)
 	{
 		return FALSE;
@@ -482,7 +478,7 @@ BOOL update_file_name::SetFileNameInfo(EVAL_FILEINFO* pEvalTag)
 
 		bRet = TRUE;
 	}
-
+*/
 	return bRet;
 }
 
@@ -954,7 +950,7 @@ BOOL update_file_name::CloseUpdateProc()
 {
 	m_bExit = TRUE;
 	WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
-
+/*
 	if (m_mapEnumInfo.size() > 0)
 	{
 		for (std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
@@ -970,7 +966,7 @@ BOOL update_file_name::CloseUpdateProc()
 
 		m_mapEnumInfo.clear();
 	}
-
+*/
 	ResetEvent(m_hStartEvent);
 	return TRUE;
 }

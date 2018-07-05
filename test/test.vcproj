@@ -744,6 +744,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Inc\common\FileFunc.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\common\FileFunc.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\common\ResizableDialog.cpp"
 					>
 				</File>
@@ -878,6 +886,14 @@
 			</File>
 			<File
 				RelativePath=".\Contrib\CheckLinkThread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Contrib\update_file_name.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Contrib\update_file_name.h"
 				>
 			</File>
 			<File
