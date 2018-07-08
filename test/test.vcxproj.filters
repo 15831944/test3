@@ -2,80 +2,71 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{78a53f7a-38e5-4d82-b3e1-790f105619e2}</UniqueIdentifier>
+      <UniqueIdentifier>{57960c46-f8c6-4635-bec1-34119e783a04}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{02328b0c-b829-4921-b1bc-ab03cd34ec6e}</UniqueIdentifier>
+      <UniqueIdentifier>{03e536af-4d6f-4789-89f5-8c5c115572f8}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{578b1278-919a-4d91-84dc-c1c461c76096}</UniqueIdentifier>
+      <UniqueIdentifier>{47a9cd09-1221-4efd-9a4a-877cd48dbcb1}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
     <Filter Include="Inc">
-      <UniqueIdentifier>{356d851c-5699-4d69-a1c3-3ff0f46c3329}</UniqueIdentifier>
+      <UniqueIdentifier>{6bc6073d-f256-496d-ba29-d8f2f5f4d748}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\algorithm">
-      <UniqueIdentifier>{75debf76-0349-4fde-bf7b-cb698f21ebcd}</UniqueIdentifier>
+      <UniqueIdentifier>{4cd21ec2-98e8-4b3e-a3c6-c8892a0192b1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\audio">
-      <UniqueIdentifier>{a5ee91b3-f217-4dd6-99af-d193f21f9ac3}</UniqueIdentifier>
+      <UniqueIdentifier>{4c1afc9a-9f64-4ae0-a73a-6f314fe05a1e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\video">
-      <UniqueIdentifier>{543c4020-20c1-4eb8-b551-519be87bb2f9}</UniqueIdentifier>
+      <UniqueIdentifier>{102050d3-d888-440a-8033-88c022a9244b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\common">
-      <UniqueIdentifier>{b008f9f3-e3a3-4583-9745-c75d32f970ae}</UniqueIdentifier>
+      <UniqueIdentifier>{a2009dba-5fb1-4813-9c81-b076d862cdf4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control">
-      <UniqueIdentifier>{c940fccc-d23b-4b9a-9e2a-220eba0909fe}</UniqueIdentifier>
+      <UniqueIdentifier>{8d9099ee-b531-4a68-bf2e-fdfca0c762cc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control\Combox">
-      <UniqueIdentifier>{adb9ca73-85dc-4932-b5c0-d8521fb95da3}</UniqueIdentifier>
+      <UniqueIdentifier>{8821eeb3-cbd1-44c7-8aec-9b7a84043eae}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control\Button">
-      <UniqueIdentifier>{2107f169-f8d9-4b40-a7cb-cc9043b9b20e}</UniqueIdentifier>
+      <UniqueIdentifier>{c305df74-04fe-49f1-9b2e-dca47662c5fd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control\ListBox">
-      <UniqueIdentifier>{f0923dcc-7997-4c21-9d97-47b194ab4ea7}</UniqueIdentifier>
+      <UniqueIdentifier>{65c54716-c4c0-4045-a5df-6220144f571e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control\TreeCtrl">
-      <UniqueIdentifier>{1f99a2b1-0858-4ece-93d3-bbcb53ac9112}</UniqueIdentifier>
+      <UniqueIdentifier>{7bd05dd3-fdab-4157-bd03-538075bedb73}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control\WndCtrl">
-      <UniqueIdentifier>{e36f94a1-e07c-47f7-9d9a-538f09f985e3}</UniqueIdentifier>
+      <UniqueIdentifier>{3350ac89-d473-4a33-9226-877cfa4b12a3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Control\ListCtrl">
-      <UniqueIdentifier>{70e8c5c1-a0f0-4a02-a29d-113c23357ec1}</UniqueIdentifier>
+      <UniqueIdentifier>{d18b8710-9d6e-4a91-9fec-cc69c55e7ca4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Contrib">
-      <UniqueIdentifier>{d081f46d-2b00-4d8b-a262-e14015572f8b}</UniqueIdentifier>
+      <UniqueIdentifier>{e9026ae6-f45b-4fdd-9461-5174c2cb1864}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dialog">
+      <UniqueIdentifier>{d062e76b-692c-4004-8cf5-4cbdec4a3508}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dialog\ChildWnd">
+      <UniqueIdentifier>{529c5780-a48b-4039-ac91-ac8e0ca49aaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dialog\FuncWnd">
+      <UniqueIdentifier>{53a2408a-346f-49a2-ba4e-9607d692638c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Dialog\DlgTest1Wnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dialog\DlgTest2Wnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dialog\DlgTest3Wnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dialog\DlgTest4Wnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dialog\DlgTest5Wnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="testDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Inc\GlobalInfo.cpp">
@@ -109,6 +100,9 @@
       <Filter>Inc\common</Filter>
     </ClCompile>
     <ClCompile Include="Inc\common\ETSLayout.cpp">
+      <Filter>Inc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\FileFunc.cpp">
       <Filter>Inc\common</Filter>
     </ClCompile>
     <ClCompile Include="Inc\common\ResizableDialog.cpp">
@@ -150,29 +144,53 @@
     <ClCompile Include="Contrib\CheckLinkThread.cpp">
       <Filter>Contrib</Filter>
     </ClCompile>
-    <ClCompile Include="contrib\update_file_name.cpp">
+    <ClCompile Include="Contrib\update_file_name.cpp">
       <Filter>Contrib</Filter>
     </ClCompile>
     <ClCompile Include="contrib\variable_test.cpp">
       <Filter>Contrib</Filter>
     </ClCompile>
+    <ClCompile Include="Dialog\testDlg.cpp">
+      <Filter>Dialog</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\ChildWnd\DlgTest1Wnd.cpp">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\ChildWnd\DlgTest2Wnd.cpp">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\ChildWnd\DlgTest3Wnd.cpp">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\ChildWnd\DlgTest4Wnd.cpp">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\ChildWnd\DlgTest5Wnd.cpp">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameAdd.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameDate.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameDel.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameExt.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameIndex.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameReplace.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog\FuncWnd\DlgShowLogoWnd.cpp">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dialog\DlgTest1Wnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dialog\DlgTest2Wnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dialog\DlgTest3Wnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dialog\DlgTest4Wnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dialog\DlgTest5Wnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -180,9 +198,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="testDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Inc\GlobalInfo.h">
@@ -224,6 +239,9 @@
     <ClInclude Include="Inc\common\ETSLayout.h">
       <Filter>Inc\common</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\common\FileFunc.h">
+      <Filter>Inc\common</Filter>
+    </ClInclude>
     <ClInclude Include="Inc\common\ResizableDialog.h">
       <Filter>Inc\common</Filter>
     </ClInclude>
@@ -263,11 +281,50 @@
     <ClInclude Include="Contrib\CheckLinkThread.h">
       <Filter>Contrib</Filter>
     </ClInclude>
-    <ClInclude Include="contrib\update_file_name.h">
+    <ClInclude Include="Contrib\update_file_name.h">
       <Filter>Contrib</Filter>
     </ClInclude>
     <ClInclude Include="contrib\variable_test.h">
       <Filter>Contrib</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\testDlg.h">
+      <Filter>Dialog</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\ChildWnd\DlgTest1Wnd.h">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\ChildWnd\DlgTest2Wnd.h">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\ChildWnd\DlgTest3Wnd.h">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\ChildWnd\DlgTest4Wnd.h">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\ChildWnd\DlgTest5Wnd.h">
+      <Filter>Dialog\ChildWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameAdd.h">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameDate.h">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameDel.h">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameExt.h">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameIndex.h">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameReplace.h">
+      <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Dialog\FuncWnd\DlgShowLogoWnd.h">
+      <Filter>Dialog\FuncWnd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

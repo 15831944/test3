@@ -10,10 +10,10 @@
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Inc">
-      <UniqueIdentifier>{88cd2cda-8abe-47fc-a323-5f8854b9db07}</UniqueIdentifier>
+      <UniqueIdentifier>{19b50f83-a002-4ea4-b4f1-d52b11ac315f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Contrib">
-      <UniqueIdentifier>{6bc1fc04-0169-40a6-ab5b-4a0a38ea82c9}</UniqueIdentifier>
+      <UniqueIdentifier>{96699c6a-4c54-4c3d-9bbb-6df052a79a82}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

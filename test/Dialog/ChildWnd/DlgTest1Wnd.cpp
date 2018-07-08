@@ -7,16 +7,20 @@ IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent /*=NULL*/)
 	: CDialog(CDlgTest1Wnd::IDD, pParent)
 {
-	m_hEditWnd = NULL;
+	m_bInited = FALSE;
+	m_bShowing = FALSE;
+
+	m_nIndex = 0;
+	m_nPrePage = 0;
+	m_nDefaultSel = 0;
 
 	m_strAppPath = _T("");
 	m_strShellPath = _T("");
 	m_strDefaultPath = _T("");
 	
+	m_hEditWnd = NULL;
 	m_OldEditProc = NULL;
 	m_pfCallRingFunc = NULL;
-
-	//m_emEvalType = EVAL_EMPTYTYPE;
 }
 
 CDlgTest1Wnd::~CDlgTest1Wnd()
@@ -32,6 +36,9 @@ void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
+	ON_WM_SIZE()
+	ON_WM_SHOWWINDOW()
+
 	ON_BN_CLICKED(IDC_BTN1_OPENFLODER,			OnBnClickedBtnOpenFloder)
 	ON_CBN_SELCHANGE(IDC_COMBO1_EVALNAME,		OnCbnSelchangeComboEvalname)
 END_MESSAGE_MAP()
@@ -48,6 +55,23 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	}
 
 	return TRUE;  
+}
+
+void CDlgTest1Wnd::OnSize(UINT nType, int cx, int cy)
+{
+	CDialog::OnSize(nType, cx, cy);
+	if (!m_bInited)
+	{
+		return;
+	}
+
+	SetWndControlLayout();
+}
+
+void CDlgTest1Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	m_bShowing = bShow;
+	CDialog::OnShowWindow(bShow, nStatus);
 }
 
 void CDlgTest1Wnd::OnBnClickedBtnOpenFloder()
@@ -103,65 +127,22 @@ void CDlgTest1Wnd::OnBnClickedBtnRunModify()
 void CDlgTest1Wnd::OnCbnSelchangeComboEvalname()
 {
 	int nIndex = 0;
+	int nCurSel = 0;
 	DWORD dwDataPtr = 0;
 
-#if 0
 	nIndex = m_hComboEval.GetCurSel();
 	if (nIndex == -1)
 	{
 		return;
 	}
 
-	dwDataPtr = m_hComboEval.GetItemData(nIndex);
-	if (dwDataPtr == CB_ERR)
+	nCurSel = nIndex+1;
+	if (nCurSel != m_nPrePage)
 	{
-		return;
+		((CDialog*)m_pArPage[m_nPrePage])->ShowWindow(SW_HIDE);
+		((CDialog*)m_pArPage[nCurSel])->ShowWindow(SW_SHOW);
+		m_nPrePage = nCurSel;
 	}
-
-	switch(dwDataPtr)
-	{
-	case EVAL_EMPTYTYPE:
-		{
-			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
-			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
-
-			GetDlgItem(IDC_EDIT_FINDNAME)->SetWindowText(_T(""));
-			GetDlgItem(IDC_EDIT_SUBNAME)->SetWindowText(_T(""));
-
-			m_emEvalType = EVAL_EMPTYTYPE;
-		}
-		break;
-
-	case EVAL_ALLFILENAME:
-		{
-			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(FALSE);
-			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
-
-			GetDlgItem(IDC_EDIT_SUBNAME)->SetWindowText(_T(""));
-
-			m_emEvalType = EVAL_ALLFILENAME;
-		}
-		break;
-
-	case EVAL_SPECIFYNAME:
-		{
-			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
-			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
-
-			m_emEvalType = EVAL_SPECIFYNAME;
-		}
-		break;
-
-	case EVAL_SPECIFYNUMINDEX:
-		{
-			GetDlgItem(IDC_EDIT_FINDNAME)->EnableWindow(TRUE);
-			GetDlgItem(IDC_EDIT_SUBNAME)->EnableWindow(TRUE);
-
-			m_emEvalType = EVAL_SPECIFYNUMINDEX;
-		}
-		break;
-	}
-#endif
 }
 //////////////////////////////////////////////////////////////////////////
 //
@@ -269,40 +250,16 @@ BOOL CDlgTest1Wnd::Init()
 
 BOOL CDlgTest1Wnd::InitCtrl()
 {
-	m_hSysDirTree.InitializeCtrl();
-	m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
-
-	m_hSysDirTree.SetSelectList(m_hSysDirList);
-//	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
-
-/*
-	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
-	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
+	if (!CreateChildWnd())
 	{
-		m_strDefaultPath = lpszDesktopPath;
-	}
-	else
-	{
-		m_strDefaultPath = _T("C:\\");
+		return FALSE;
 	}
 
-	m_strAppPath = pGlobal->GetAppPath();
-
-	CEdit *pEdit = (CEdit*)GetDlgItem(IDC_EDIT_PATH);
-	if (pEdit)
+	if (!SetWndCtrlInfo())
 	{
-		pEdit->SetReadOnly(TRUE);
+		return FALSE;
+	}
 	
-		m_hEditWnd = pEdit->GetSafeHwnd();
-
-		SetWindowLong(m_hEditWnd, GWL_USERDATA, (DWORD)this);
-		m_OldEditProc = (WNDPROC)GetWindowLong(m_hEditWnd, GWL_WNDPROC);
-		SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
-	}
-*/
-	//this->GetDlgItem(IDC_EDIT_FINDNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入查找的名称...");
-	//this->GetDlgItem(IDC_EDIT_SUBNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入替换的名称...");
-
 	return TRUE;
 }
 
@@ -338,4 +295,92 @@ BOOL CDlgTest1Wnd::InitInfo()
 	m_hComboEval.SetCurSel(0);
 #endif
 	return TRUE;
+}
+
+BOOL CDlgTest1Wnd::CreateChildWnd()
+{
+	int nIndex = 0;
+	CRect rcSubWnd;
+
+	m_dlgShowLogoWnd.Create(CDlgShowLogoWnd::IDD, this);
+	m_dlgFileNameAdd.Create(CDlgFileNameAdd::IDD, this);
+	m_dlgFileNameDate.Create(CDlgFileNameDate::IDD, this);
+	m_dlgFileNameDel.Create(CDlgFileNameDel::IDD, this);
+	m_dlgFileNameExt.Create(CDlgFileNameExt::IDD, this);
+	m_dlgFileNameIndex.Create(CDlgFileNameIndex::IDD, this);
+	m_dlgFileNameReplace.Create(CDlgFileNameReplace::IDD, this);
+
+	m_pArPage.Add(&m_dlgShowLogoWnd);
+	m_pArPage.Add(&m_dlgFileNameAdd);
+	m_pArPage.Add(&m_dlgFileNameDate);
+	m_pArPage.Add(&m_dlgFileNameDel);
+	m_pArPage.Add(&m_dlgFileNameExt);
+	m_pArPage.Add(&m_dlgFileNameIndex);
+	m_pArPage.Add(&m_dlgFileNameReplace);
+
+	m_hComboEval.AddString(_T("1"));
+	m_hComboEval.AddString(_T("2"));
+	m_hComboEval.AddString(_T("3"));
+	m_hComboEval.AddString(_T("4"));
+	m_hComboEval.AddString(_T("5"));
+	m_hComboEval.AddString(_T("6"));
+
+	GetDlgItem(IDC_STATIC1_RECT)->GetWindowRect(&rcSubWnd);
+	GetDlgItem(IDC_STATIC1_RECT)->ShowWindow(SW_HIDE);
+	ScreenToClient(&rcSubWnd);
+
+	for (nIndex=0; nIndex<m_pArPage.GetSize(); nIndex++)
+	{
+		((CDialog*)m_pArPage[nIndex])->ShowWindow(SW_HIDE);
+		((CDialog*)m_pArPage[nIndex])->MoveWindow(&rcSubWnd);
+	}
+
+	((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
+	((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
+
+	m_nPrePage = m_nDefaultSel;
+	return TRUE;
+}
+
+BOOL CDlgTest1Wnd::SetWndCtrlInfo()
+{
+	m_hSysDirTree.InitializeCtrl();
+	m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
+
+	m_hSysDirTree.SetSelectList(m_hSysDirList);
+//	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
+
+	/*
+	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
+	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
+	{
+	m_strDefaultPath = lpszDesktopPath;
+	}
+	else
+	{
+	m_strDefaultPath = _T("C:\\");
+	}
+
+	m_strAppPath = pGlobal->GetAppPath();
+
+	CEdit *pEdit = (CEdit*)GetDlgItem(IDC_EDIT_PATH);
+	if (pEdit)
+	{
+	pEdit->SetReadOnly(TRUE);
+
+	m_hEditWnd = pEdit->GetSafeHwnd();
+
+	SetWindowLong(m_hEditWnd, GWL_USERDATA, (DWORD)this);
+	m_OldEditProc = (WNDPROC)GetWindowLong(m_hEditWnd, GWL_WNDPROC);
+	SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
+	}
+	*/
+	//this->GetDlgItem(IDC_EDIT_FINDNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入查找的名称...");
+	//this->GetDlgItem(IDC_EDIT_SUBNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入替换的名称...");
+
+	return TRUE;
+}
+
+void CDlgTest1Wnd::SetWndControlLayout()
+{
 }

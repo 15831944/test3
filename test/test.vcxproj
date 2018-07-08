@@ -345,7 +345,7 @@ del $(SolutionDir)bin\$(TargetFileName)
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Contrib\CheckLinkThread.cpp" />
-    <ClCompile Include="contrib\update_file_name.cpp" />
+    <ClCompile Include="Contrib\update_file_name.cpp" />
     <ClCompile Include="contrib\variable_test.cpp" />
     <ClCompile Include="Control\Button\DrawButton.cpp" />
     <ClCompile Include="Control\ComboBox\CustomCombox.cpp" />
@@ -356,11 +356,19 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Control\TreeCtrl\StackedClass.cpp" />
     <ClCompile Include="Control\TreeCtrl\StackedTreeCtrl.cpp" />
     <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp" />
-    <ClCompile Include="Dialog\DlgTest1Wnd.cpp" />
-    <ClCompile Include="Dialog\DlgTest2Wnd.cpp" />
-    <ClCompile Include="Dialog\DlgTest3Wnd.cpp" />
-    <ClCompile Include="Dialog\DlgTest4Wnd.cpp" />
-    <ClCompile Include="Dialog\DlgTest5Wnd.cpp" />
+    <ClCompile Include="Dialog\ChildWnd\DlgTest1Wnd.cpp" />
+    <ClCompile Include="Dialog\ChildWnd\DlgTest2Wnd.cpp" />
+    <ClCompile Include="Dialog\ChildWnd\DlgTest3Wnd.cpp" />
+    <ClCompile Include="Dialog\ChildWnd\DlgTest4Wnd.cpp" />
+    <ClCompile Include="Dialog\ChildWnd\DlgTest5Wnd.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameAdd.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameDate.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameDel.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameExt.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameIndex.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgFileNameReplace.cpp" />
+    <ClCompile Include="Dialog\FuncWnd\DlgShowLogoWnd.cpp" />
+    <ClCompile Include="Dialog\testDlg.cpp" />
     <ClCompile Include="Inc\audio\MixerDevice.cpp" />
     <ClCompile Include="Inc\audio\multimediastream.cpp" />
     <ClCompile Include="Inc\audio\waveindevice.cpp" />
@@ -368,6 +376,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Inc\audio\waveplayer.cpp" />
     <ClCompile Include="Inc\common\Character.cpp" />
     <ClCompile Include="Inc\common\ETSLayout.cpp" />
+    <ClCompile Include="Inc\common\FileFunc.cpp" />
     <ClCompile Include="Inc\common\ResizableDialog.cpp" />
     <ClCompile Include="Inc\common\ResizeCtrl.cpp" />
     <ClCompile Include="Inc\common\ShellClass.cpp" />
@@ -382,11 +391,10 @@ del $(SolutionDir)bin\$(TargetFileName)
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="testDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Contrib\CheckLinkThread.h" />
-    <ClInclude Include="contrib\update_file_name.h" />
+    <ClInclude Include="Contrib\update_file_name.h" />
     <ClInclude Include="contrib\variable_test.h" />
     <ClInclude Include="Control\Button\DrawButton.h" />
     <ClInclude Include="Control\ComboBox\CustomCombox.h" />
@@ -397,11 +405,19 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Control\TreeCtrl\StackedClass.h" />
     <ClInclude Include="Control\TreeCtrl\StackedTreeCtrl.h" />
     <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h" />
-    <ClInclude Include="Dialog\DlgTest1Wnd.h" />
-    <ClInclude Include="Dialog\DlgTest2Wnd.h" />
-    <ClInclude Include="Dialog\DlgTest3Wnd.h" />
-    <ClInclude Include="Dialog\DlgTest4Wnd.h" />
-    <ClInclude Include="Dialog\DlgTest5Wnd.h" />
+    <ClInclude Include="Dialog\ChildWnd\DlgTest1Wnd.h" />
+    <ClInclude Include="Dialog\ChildWnd\DlgTest2Wnd.h" />
+    <ClInclude Include="Dialog\ChildWnd\DlgTest3Wnd.h" />
+    <ClInclude Include="Dialog\ChildWnd\DlgTest4Wnd.h" />
+    <ClInclude Include="Dialog\ChildWnd\DlgTest5Wnd.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameAdd.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameDate.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameDel.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameExt.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameIndex.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgFileNameReplace.h" />
+    <ClInclude Include="Dialog\FuncWnd\DlgShowLogoWnd.h" />
+    <ClInclude Include="Dialog\testDlg.h" />
     <ClInclude Include="Inc\algorithm\thread_queue.h" />
     <ClInclude Include="Inc\audio\MixerDevice.hpp" />
     <ClInclude Include="Inc\audio\multimediastream.hpp" />
@@ -411,6 +427,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Inc\audio\waveplayer.h" />
     <ClInclude Include="Inc\common\Character.h" />
     <ClInclude Include="Inc\common\ETSLayout.h" />
+    <ClInclude Include="Inc\common\FileFunc.h" />
     <ClInclude Include="Inc\common\ResizableDialog.h" />
     <ClInclude Include="Inc\common\ResizeCtrl.h" />
     <ClInclude Include="Inc\common\ShellClass.h" />
@@ -421,7 +438,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="test.h" />
-    <ClInclude Include="testDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\1.bmp" />

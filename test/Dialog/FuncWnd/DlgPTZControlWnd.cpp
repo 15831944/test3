@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "../test.h"
 #include "DlgPTZControlWnd.h"
 
 #include <GdiPlus.h>

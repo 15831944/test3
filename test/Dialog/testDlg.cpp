@@ -168,13 +168,13 @@ HCURSOR CTestDlg::OnQueryDragIcon()
 
 void CTestDlg::OnTcnSelchangeTabWndctrl(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	int nCulSel = m_hTabCtrl.GetCurSel();
+	int nCurSel = m_hTabCtrl.GetCurSel();
 	
-	if (nCulSel != m_nPrePage)
+	if (nCurSel != m_nPrePage)
 	{
 		((CDialog*)m_pArPage[m_nPrePage])->ShowWindow(SW_HIDE);
-		((CDialog*)m_pArPage[nCulSel])->ShowWindow(SW_SHOW);
-		m_nPrePage = nCulSel;
+		((CDialog*)m_pArPage[nCurSel])->ShowWindow(SW_SHOW);
+		m_nPrePage = nCurSel;
 	}
 
 	*pResult = 0;
