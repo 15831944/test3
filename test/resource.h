@@ -12,14 +12,13 @@
 #define IDD_DIALOG4                     0x0116
 #define IDD_DIALOG5                     0x0117
 #define IDD_PTZ_DIALOG                  0x0118
-#define IDD_SHOWLOGO_DIALOG				0x0119
-#define IDD_FILENAMEADD_DIALOG			0x0120
-#define IDD_FILENAMEDEL_DIALOG			0x0121
+#define IDD_SHOWLOGO_DIALOG             0x0119
+#define IDD_FILENAMEADD_DIALOG          0x0120
+#define IDD_FILENAMEDEL_DIALOG          0x0121
 #define IDD_FILENAMEEXT_DIALOG          0x0122
-#define IDD_FILENAMEDATE_DIALOG			0x0123
-#define IDD_FILENAMEINDEX_DIALOG		0x0124
-#define IDD_FILENAMEREPLACE_DIALOG		0x0125
-
+#define IDD_FILENAMEDATE_DIALOG         0x0123
+#define IDD_FILENAMEINDEX_DIALOG        0x0124
+#define IDD_FILENAMEREPLACE_DIALOG      0x0125
 #define IDR_MAINFRAME                   0x0200
 #define IDI_ICON1                       0x0201
 #define IDI_ICON2                       0x0202
@@ -29,6 +28,14 @@
 #define IDB_BITMAP3                     0x0213
 #define IDB_BITMAP4                     0x0214
 #define IDB_BITMAP5                     0x0215
+#define IDC_EDIT1                       1038
+#define IDC_SPIN1                       1039
+#define IDC_EDIT5                       1039
+#define IDC_EDIT2                       1040
+#define IDC_EDIT3                       1041
+#define IDC_COMBO1                      1041
+#define IDC_SPIN2                       1042
+#define IDC_EDIT4                       1042
 #define IDC_TAB1                        0x1000
 #define IDC_STATIC_VERSION              0x1001
 #define IDC_TREE1_SYSDIR                0x1100
@@ -61,9 +68,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        155
+#define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1038
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

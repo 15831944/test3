@@ -28,6 +28,8 @@ protected:
 	
 private:
 	BOOL							m_bInited;	
+public:
+	afx_msg void OnEnChangeEdit1();
 };
 
 #endif

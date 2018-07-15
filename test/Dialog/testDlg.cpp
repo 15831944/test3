@@ -199,7 +199,7 @@ void CTestDlg::InitCtrl()
 	m_pArPage.Add(&m_hDlgTest4Wnd);
 	m_pArPage.Add(&m_hDlgTest5Wnd);
 
-	m_hTabCtrl.InsertItem(0, _T("test1"));
+	m_hTabCtrl.InsertItem(0, _T("文件名修改"));
 	m_hTabCtrl.InsertItem(1, _T("test2"));
 	m_hTabCtrl.InsertItem(2, _T("test3"));
 	m_hTabCtrl.InsertItem(3, _T("test4"));
