@@ -39,5 +39,6 @@ protected:
 	CReportCtrl						m_ListTest;
 	CStackedTreeCtrl				m_hTreeCtrl;
 
+	WavePlayer						m_WavePlayer;
 	CCheckLinkThread				m_CheckLinkProc;
 };

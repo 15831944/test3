@@ -77,6 +77,14 @@ void CDlgTest4Wnd::OnPaint()
 //
 void CDlgTest4Wnd::OnBnClickedButton1()
 {
+	DWORD dwIndex = 0;
+	CString strFilePath;
+
+	strFilePath.Format(_T("%s\\1.wav"), CGlobalInfo::CreateInstance()->GetAppPath());
+	if (!CGlobalInfo::CreateInstance()->IsFileExists(strFilePath))
+	{
+		return;
+	}
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()

@@ -3,6 +3,12 @@
 
 #pragma comment(lib,"Winmm")
 
+/************************************************************************/
+/* author : wl
+ * email  : lysgwl@163.com
+ * date   : 2017.07.17 17:39
+ */
+/************************************************************************/
 WavePlayer::WavePlayer()
 {
 	m_bExit = FALSE;
@@ -31,6 +37,24 @@ WavePlayer::WavePlayer()
 WavePlayer::~WavePlayer()
 {
 	ClosePlayerProc();
+
+	if (m_hStartEvent != NULL)
+	{
+		CloseHandle(m_hStartEvent);
+		m_hStartEvent = NULL;
+	}
+
+	if (m_hEndEvent != NULL)
+	{
+		CloseHandle(m_hEndEvent);
+		m_hEndEvent = NULL;
+	}
+
+	if (m_hPlayEvent != NULL)
+	{
+		CloseHandle(m_hPlayEvent);
+		m_hPlayEvent = NULL;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,7 +150,7 @@ part:
 
 		SetEvent(m_hEndEvent);
 	}
-	ResetEvent(m_hStartEvent);
+
 }
 
 void CALLBACK WavePlayer::WaveOutCallBackProc(HWAVEOUT hWavOut, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
@@ -178,6 +202,7 @@ BOOL WavePlayer::CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT 
 		
 		m_nDevID = nDevID;
 		m_nCount = nCount;
+
 		m_dwWaitTime = nSpanTime;
 		m_strWavFilePath =  pszWavFilePath;
 		
@@ -201,12 +226,11 @@ BOOL WavePlayer::CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT 
 BOOL WavePlayer::ClosePlayerProc()
 {
 	MMRESULT hResult = 0;
-
 	m_bExit = TRUE;
-	if (m_hWaveOut != NULL)
+	if (m_hWaveOut != NULL && m_hWaveOut != INVALID_HANDLE_VALUE)
 	{
-		SetEvent(m_hPlayEvent);
 		waveOutPause(m_hWaveOut);
+		SetEvent(m_hPlayEvent);
 	}
 	else
 	{
@@ -214,15 +238,13 @@ BOOL WavePlayer::ClosePlayerProc()
 	}
 
 	WaitForSingleObject(m_hEndEvent, INFINITE);
-	
 	if (m_hWaveOut != NULL)
 	{
 		hResult = waveOutClose(m_hWaveOut);
-		if (hResult != 0)
+		if (hResult == 0)
 		{
-			return FALSE;
+			m_hWaveOut = NULL;
 		}
-		m_hWaveOut = NULL;
 	}
 	
 	if (m_pWavData != NULL)
@@ -231,6 +253,9 @@ BOOL WavePlayer::ClosePlayerProc()
 		m_pWavData = NULL;
 	}
 
+	m_bExit = FALSE;
+	ResetEvent(m_hPlayEvent);
+	ResetEvent(m_hStartEvent);
 	return TRUE;
 }
 
@@ -239,95 +264,113 @@ BOOL WavePlayer::ClosePlayerProc()
 BOOL WavePlayer::OpenWavFile()
 {
 	BOOL bRet = FALSE;
-	
 	LONG lReadBytes = 0;
 
-	MMCKINFO mmckinfoParent;
-	MMCKINFO mmckinfoSubChunk;
+	MMCKINFO mmckinfoParent = {0};
+	MMCKINFO mmckinfoSubChunk = {0};
 
 	MMRESULT hResult = 0;
+	CString strPrompt;
 	
-	if(m_strWavFilePath == _T(""))
+	do 
 	{
-		return FALSE;
-	}
-	
-	m_hMmioFile = mmioOpen((LPSTR)m_strWavFilePath.c_str(), NULL, MMIO_READ|MMIO_ALLOCBUF);
-	if(m_hMmioFile == NULL)
-	{
-		m_bOpenFile = FALSE;
-		return FALSE;
-	}
-	
-	mmckinfoParent.fccType =mmioFOURCC('W','A','V','E');
-	hResult = mmioDescend(m_hMmioFile, (LPMMCKINFO)&mmckinfoParent, NULL, MMIO_FINDRIFF);
-	if(hResult != 0)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
+		if(m_strWavFilePath == _T(""))
+		{
+			bRet = FALSE;
+			strPrompt = _T("播放文件路径不能为空, 请检查!");
+			break;
+		}
 
- 	mmckinfoSubChunk.ckid = mmioFOURCC('f','m','t',' ');
-	hResult = mmioDescend(m_hMmioFile, &mmckinfoSubChunk, &mmckinfoParent, MMIO_FINDCHUNK);
-	if(hResult != 0)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
-	
-	m_dwFmtSize = mmckinfoSubChunk.cksize;
-	m_hFormat=LocalAlloc(LMEM_MOVEABLE,LOWORD(m_dwFmtSize)); 
-	if(m_hFormat == NULL)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
-	
-	m_lpFormat = (WAVEFORMATEX*)LocalLock(m_hFormat);
-	if(m_lpFormat == NULL)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
- 	
- 	lReadBytes = mmioRead(m_hMmioFile, (HPSTR)m_lpFormat, m_dwFmtSize);
-	if (lReadBytes != m_dwFmtSize)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
+		m_hMmioFile = mmioOpen((LPSTR)m_strWavFilePath.c_str(), NULL, MMIO_READ|MMIO_ALLOCBUF);
+		if(m_hMmioFile == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("打开媒体文件失败, 请检查!");
+			break;
+		}
 
-	hResult = mmioAscend(m_hMmioFile, &mmckinfoSubChunk, 0);
-	if (hResult != 0)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
+		mmckinfoParent.fccType =mmioFOURCC('W','A','V','E');
+		hResult = mmioDescend(m_hMmioFile, (LPMMCKINFO)&mmckinfoParent, NULL, MMIO_FINDRIFF);
+		if(hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("错误的媒体格式,请检查!");
+			break;
+		}
 
-	mmckinfoSubChunk.ckid=mmioFOURCC('d','a','t','a'); 
-	hResult = mmioDescend(m_hMmioFile,&mmckinfoSubChunk,&mmckinfoParent,MMIO_FINDCHUNK);
-	if (hResult != 0)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
+		mmckinfoSubChunk.ckid = mmioFOURCC('f','m','t',' ');
+		hResult = mmioDescend(m_hMmioFile, &mmckinfoSubChunk, &mmckinfoParent, MMIO_FINDCHUNK);
+		if(hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("媒体标识检测错误, 请检查!");
+			break;
+		}
 
-	m_dwDataSize = mmckinfoSubChunk.cksize;
-	m_dwDataOffset = mmckinfoSubChunk.dwDataOffset;
+		m_dwFmtSize = mmckinfoSubChunk.cksize;
+		m_hFormat=LocalAlloc(LMEM_MOVEABLE,LOWORD(m_dwFmtSize)); 
+		if(m_hFormat == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("媒体内存空间分配失败, 请检查!");
+			break;
+		}
 
-	if (m_dwDataSize == 0L)
-	{
-		bRet = FALSE;
-		goto part1;
-	}
+		m_lpFormat = (WAVEFORMATEX*)LocalLock(m_hFormat);
+		if(m_lpFormat == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("媒体内存空间加锁失败, 请检查!");
+			break;
+		}
 
-	bRet = TRUE;
-	m_bOpenFile = TRUE;
+		lReadBytes = mmioRead(m_hMmioFile, (HPSTR)m_lpFormat, m_dwFmtSize);
+		if (lReadBytes != m_dwFmtSize)
+		{
+			bRet = FALSE;
+			strPrompt = _T("读取媒体文件失败, 请检查!");
+			break;
+		}
 
- part1:
+		hResult = mmioAscend(m_hMmioFile, &mmckinfoSubChunk, 0);
+		if (hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("媒体句柄mmioAscend失败, 请检查!");
+			break;
+		}
+
+		mmckinfoSubChunk.ckid=mmioFOURCC('d','a','t','a'); 
+		hResult = mmioDescend(m_hMmioFile,&mmckinfoSubChunk,&mmckinfoParent,MMIO_FINDCHUNK);
+		if (hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("媒体句柄mmioDescend失败, 请检查!");
+			break;
+		}
+
+		m_dwDataSize = mmckinfoSubChunk.cksize;
+		m_dwDataOffset = mmckinfoSubChunk.dwDataOffset;
+		if (m_dwDataSize == 0L)
+		{
+			bRet = FALSE;
+			strPrompt = _T("媒体文件大小获取失败, 请检查!");
+			break;
+		}
+
+		m_bOpenFile = TRUE;
+		bRet = TRUE;
+	} while (FALSE);
+
 	if (!bRet)
 	{
 		m_bOpenFile = FALSE;
+
+		if (m_hMmioFile != NULL)
+		{
+			mmioClose(m_hMmioFile, 0);
+			m_hMmioFile = NULL;
+		}
 
 		if (m_hFormat != NULL || m_lpFormat != NULL)
 		{
@@ -337,11 +380,10 @@ BOOL WavePlayer::OpenWavFile()
 			m_hFormat = NULL;
 			m_lpFormat = NULL;
 		}
-		
-		if (m_hMmioFile != NULL)
+
+		if (strPrompt != _T(""))
 		{
-			mmioClose(m_hMmioFile, 0);
-			m_hMmioFile = NULL;
+			MessageBox(NULL, strPrompt, _T("提示!"), MB_ICONERROR|MB_OK);
 		}
 	}
 
@@ -354,39 +396,55 @@ BOOL WavePlayer::ReadWavFile()
 
 	LONG lReadBytes = 0;
 	LONG lSeekOffset = 0;
+
 	MMRESULT hResult = 0;
+	CString strPrompt;
 
-	if (m_hMmioFile == NULL)
+	do 
 	{
-		return FALSE;
-	}
+		if (m_hMmioFile == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("错误的媒体句柄, 请检查!");
+			break;
+		}
 
-	m_pWavData = (HPSTR)malloc(m_dwDataSize);
-	if (m_pWavData == NULL)
-	{
-		return FALSE;
-	}
-	memset(m_pWavData, 0x0, m_dwDataSize);
+		m_pWavData = (HPSTR)malloc(m_dwDataSize);
+		if (m_pWavData == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("数据内存空间分配失败, 请检查!");
+			break;
+		}
+		memset(m_pWavData, 0x0, m_dwDataSize);
 
-	lSeekOffset = mmioSeek(m_hMmioFile, m_dwDataOffset, SEEK_SET);
-	if (lSeekOffset < 0)
-	{
-		bRet = FALSE;
-		goto part2;
-	}
+		lSeekOffset = mmioSeek(m_hMmioFile, m_dwDataOffset, SEEK_SET);
+		if (lSeekOffset < 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("数据指针移动失败, 请检查!");
+			break;
+		}
 
-	lReadBytes = mmioRead(m_hMmioFile, m_pWavData, m_dwDataSize);
-	if (lReadBytes < 0)
-	{
-		bRet = FALSE;
-		goto part2;
-	}
+		lReadBytes = mmioRead(m_hMmioFile, m_pWavData, m_dwDataSize);
+		if (lReadBytes < 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("读取数据文件失败, 请检查!");
+			break;
+		}
 
-	bRet = TRUE;
+		bRet = TRUE;
+	} while (FALSE);
 
-part2:
 	if (!bRet)
 	{
+		if (m_pWavData != NULL)
+		{
+			free(m_pWavData);
+			m_pWavData = NULL;
+		}
+
 		if (m_hFormat != NULL || m_lpFormat != NULL)
 		{
 			GlobalUnlock(m_hFormat);
@@ -396,10 +454,9 @@ part2:
 			m_lpFormat = NULL;
 		}
 
-		if (m_pWavData != NULL)
+		if (strPrompt != _T(""))
 		{
-			free(m_pWavData);
-			m_pWavData = NULL;
+			MessageBox(NULL, strPrompt, _T("提示!"), MB_ICONERROR|MB_OK);
 		}
 	}
 
@@ -424,60 +481,85 @@ BOOL WavePlayer::OpenPlayWav()
 	UINT uDevNum = 0;
 	MMRESULT hResult = 0;
 
-	WAVEOUTCAPS pwoc; 
+	WAVEOUTCAPS pwoc;
+	CString strPrompt;
 
-	if (m_lpFormat == NULL)
+	do 
 	{
-		return FALSE;
+		if (m_lpFormat == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("错误的媒体格式数据, 请检查!");
+			break;
+		}
+
+		if (m_pWavData == NULL)
+		{
+			bRet = FALSE;
+			strPrompt = _T("错误的媒体数据, 请检查!");
+			break;
+		}
+
+		uDevNum = waveOutGetNumDevs();
+		if (uDevNum == 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("获取媒体输出设备失败, 请检查!");
+			break;
+		}
+
+		if (m_nDevID > (uDevNum-1))
+		{
+			bRet = FALSE;
+			strPrompt = _T("选择的媒体设备ID与设备数量错误, 请检查!");
+			break;
+		}
+
+		hResult = waveOutGetDevCaps(m_nDevID, &pwoc, sizeof(WAVEOUTCAPS));	//WAVE_MAPPER
+		if (hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("waveOutGetDevCaps失败, 请检查!");
+			break;
+		}
+
+		hResult = waveOutOpen(&m_hWaveOut, m_nDevID, m_lpFormat, (DWORD_PTR)WaveOutCallBackProc, (DWORD)this, CALLBACK_FUNCTION);	//WAVE_MAPPER //CALLBACK_FUNCTION	//CALLBACK_NULL
+		if (hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("waveOutOpen失败, 请检查!");
+			break;
+		}
+
+		m_pWaveOutHdr.lpData  = (HPSTR)m_pWavData;
+		m_pWaveOutHdr.dwBufferLength = m_dwDataSize;
+		m_pWaveOutHdr.dwFlags = 0;
+		m_pWaveOutHdr.dwBytesRecorded = 0;
+		m_pWaveOutHdr.dwUser  = NULL;
+		m_pWaveOutHdr.dwLoops = 0;
+		m_pWaveOutHdr.lpNext  = NULL;
+		m_pWaveOutHdr.reserved = NULL;
+
+		hResult = waveOutPrepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
+		if (hResult != 0)
+		{
+			bRet = FALSE;
+			strPrompt = _T("waveOutPrepareHeader失败, 请检查!");
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	if (m_hFormat != NULL || m_lpFormat != NULL)
+	{
+		GlobalUnlock(m_hFormat);
+		GlobalFree(m_hFormat);
+
+		m_hFormat = NULL;
+		m_lpFormat = NULL;
 	}
 
-	if (m_pWavData == NULL)
-	{
-		return FALSE;
-	}
-
-	uDevNum = waveOutGetNumDevs();
-	if (uDevNum == 0)
-	{
-		return FALSE;
-	}
-
-	if (m_nDevID > (uDevNum-1))
-	{
-		return FALSE;
-	}
-
-	hResult = waveOutGetDevCaps(m_nDevID, &pwoc, sizeof(WAVEOUTCAPS));	//WAVE_MAPPER
-	if (hResult != 0)
-	{
-		return FALSE;
-	}
-
-	hResult = waveOutOpen(&m_hWaveOut, m_nDevID, m_lpFormat, (DWORD_PTR)WaveOutCallBackProc, (DWORD)this, CALLBACK_FUNCTION);	//WAVE_MAPPER //CALLBACK_FUNCTION	//CALLBACK_NULL
-	if (hResult != 0)
-	{
-		return FALSE;
-	}
-
-	m_pWaveOutHdr.lpData  = (HPSTR)m_pWavData;
-	m_pWaveOutHdr.dwBufferLength = m_dwDataSize;
-	m_pWaveOutHdr.dwFlags = 0;
-	m_pWaveOutHdr.dwBytesRecorded = 0;
-	m_pWaveOutHdr.dwUser  = NULL;
-	m_pWaveOutHdr.dwLoops = 0;
-	m_pWaveOutHdr.lpNext  = NULL;
-	m_pWaveOutHdr.reserved = NULL;
-
-	hResult = waveOutPrepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
-	if (hResult != 0)
-	{
-		bRet = FALSE;
-		goto part3;
-	}
-
-	bRet = TRUE;
-
-part3:
 	if (!bRet)
 	{
 		hResult = waveOutUnprepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
@@ -490,15 +572,11 @@ part3:
 				m_hWaveOut = NULL;
 			}
 		}
-	}
 
-	if (m_hFormat != NULL || m_lpFormat != NULL)
-	{
-		GlobalUnlock(m_hFormat);
-		GlobalFree(m_hFormat);
-
-		m_hFormat = NULL;
-		m_lpFormat = NULL;
+		if (strPrompt != _T(""))
+		{
+			MessageBox(NULL, strPrompt, _T("提示!"), MB_ICONERROR|MB_OK);
+		}
 	}
 
 	return bRet;
@@ -510,6 +588,11 @@ BOOL WavePlayer::PlayWavData()
 	MMRESULT hResult = 0;
 
 	if (m_hWaveOut == NULL)
+	{
+		return FALSE;
+	}
+	
+	if (m_pWaveOutHdr.lpData == NULL)
 	{
 		return FALSE;
 	}

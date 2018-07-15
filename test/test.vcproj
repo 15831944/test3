@@ -960,6 +960,66 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="FuncWnd"
+				>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameAdd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameAdd.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameDate.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameDate.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameDel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameDel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameExt.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameExt.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameIndex.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameIndex.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameReplace.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgFileNameReplace.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgShowLogoWnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Dialog\FuncWnd\DlgShowLogoWnd.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
