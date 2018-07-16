@@ -12,24 +12,46 @@ WavePlayer::WavePlayer()
 {
 	m_bExit = FALSE;
 
-	m_nDevID = 0;
-	m_nCount = 0;
+	m_dwThreadID = 0;
 	m_dwWaitTime = 0;
 	
+	m_dwDataSize = 0;
+	m_pWavData = NULL;
+
 	m_hThread = NULL;
-	
 	m_hWaveOut = NULL;
-	m_pWavData = NULL; 
-	m_hMmioFile = NULL;
 	
+	m_stcWaveformat.wFormatTag = WAVE_FORMAT_PCM;
+	m_stcWaveformat.nChannels = 2;
+	m_stcWaveformat.cbSize = 0;
+	m_stcWaveformat.wBitsPerSample = 16;
+	m_stcWaveformat.nSamplesPerSec = 44100;
+	m_stcWaveformat.nBlockAlign = (m_stcWaveformat.wBitsPerSample*m_stcWaveformat.nChannels) >> 3;
+	m_stcWaveformat.nAvgBytesPerSec = m_stcWaveformat.nBlockAlign*m_stcWaveformat.nSamplesPerSec;
+	memset(&m_stcWaveOutHdr, 0x0, sizeof(WAVEHDR));
+
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
-	m_hPlayEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	m_hStartPlayEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hEndPlayEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 WavePlayer::~WavePlayer()
 {
 	ClosePlayerProc();
+
+	if (m_hStartPlayEvent != NULL)
+	{
+		CloseHandle(m_hStartPlayEvent);
+		m_hStartPlayEvent = NULL;
+	}
+
+	if (m_hEndPlayEvent != NULL)
+	{
+		CloseHandle(m_hEndPlayEvent);
+		m_hEndPlayEvent = NULL;
+	}
 
 	if (m_hStartEvent != NULL)
 	{
@@ -43,11 +65,7 @@ WavePlayer::~WavePlayer()
 		m_hEndEvent = NULL;
 	}
 
-	if (m_hPlayEvent != NULL)
-	{
-		CloseHandle(m_hPlayEvent);
-		m_hPlayEvent = NULL;
-	}
+	
 }
 
 WavePlayer& WavePlayer::Instance()
@@ -72,53 +90,39 @@ DWORD WavePlayer::WavePlayerThreadProc(LPVOID lpParam)
 void WavePlayer::PlayWavInfo()
 {
 	BOOL bRet = FALSE;
-	DWORD dwIndex = 0;
-	
-	if(!OpenPlayWav())
-	{
-		bRet = FALSE;
-		goto part;
-	}
-	else
-	{
-		bRet = TRUE;
-	}
 
-	while(WaitForSingleObject(m_hEndEvent, m_dwWaitTime) != WAIT_OBJECT_0)
+	do 
 	{
-		if (!m_bExit)
+		while(WaitForSingleObject(m_hEndEvent, m_dwWaitTime) != WAIT_OBJECT_0)
 		{
-			if (dwIndex < m_nCount)
+			if (!m_bExit)
 			{
-				if (!PlayWavData())
+				if (WaitForSingleObject(m_hStartPlayEvent, 0) == WAIT_OBJECT_0)
 				{
-					m_dwWaitTime = 500;
+					if (!PlayDevData(m_hWaveOut, m_stcWaveOutHdr, m_hEndPlayEvent))
+					{
+						m_dwWaitTime = 200;
+						continue;
+					}
+				}
+				else
+				{
+					m_dwWaitTime = 200;
 					continue;
 				}
-
-				dwIndex++;
 			}
 			else
 			{
-				m_bExit = TRUE;
-			}
-		}
-		else
-		{
-			if (ClearWavData())
-			{
+				m_dwWaitTime = 0;
+				ClearPlayDev(m_hWaveOut, m_stcWaveOutHdr);
+				
 				SetEvent(m_hEndEvent);
+				continue;
 			}
 		}
-	};
 
-part:
-	if (!bRet)
-	{
-		m_bExit = FALSE;
-		SetEvent(m_hEndEvent);
-	}
-
+		bRet = TRUE;
+	} while (FALSE);
 }
 
 void CALLBACK WavePlayer::WaveOutCallBackProc(HWAVEOUT hWavOut, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
@@ -154,12 +158,77 @@ void CALLBACK WavePlayer::WaveOutCallBackProc(HWAVEOUT hWavOut, UINT uMsg, DWORD
 
 void WavePlayer::WavePlayDone()
 {
-	SetEvent(m_hPlayEvent);
+	SetEvent(m_hEndPlayEvent);
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL WavePlayer::OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCKINFO &ckSubChunk, HMMIO &hMmioFile, WAVEFORMATEX *pWavFormat)
+BOOL WavePlayer::GetWavData(const char* pszWavFilePath, WAVEFORMATEX *pWaveformat, BYTE **pWavData, DWORD &dwWavDataSize)
+{
+	BOOL bRet = FALSE;
+
+	UINT uiWaveSize = 0;
+	UINT uiReadSize = 0;
+
+	MMCKINFO mmckinfoParent = {0};
+	MMCKINFO mmckinfoSubChunk = {0};
+
+	HMMIO hMmioFile;
+	WAVEFORMATEX *lpFormat = NULL;
+
+	do 
+	{
+		if (pszWavFilePath == NULL || pWaveformat == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!OpenWavFile(pszWavFilePath, mmckinfoParent, mmckinfoSubChunk, hMmioFile, &lpFormat))
+		{
+			bRet = FALSE;
+			break;
+		}
+	
+		if (!ResetWavFile(hMmioFile, mmckinfoParent, mmckinfoSubChunk))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		uiWaveSize = mmckinfoSubChunk.cksize;
+		if ((*pWavData = (BYTE*)GlobalAlloc(GMEM_FIXED, uiWaveSize)) == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!ReadWavFile(hMmioFile, uiWaveSize, pWavData, mmckinfoSubChunk, uiReadSize))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		dwWavDataSize = uiWaveSize;
+		memcpy(pWaveformat, lpFormat, sizeof(WAVEFORMATEX));
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	if (!bRet)
+	{
+		if (pWavData != NULL)
+		{
+			GlobalFree(pWavData);
+			pWavData = NULL;
+		}
+	}
+
+	CloseWavFile(hMmioFile, lpFormat);
+	return bRet;
+}
+
+BOOL WavePlayer::OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCKINFO &ckSubChunk, HMMIO &hMmioFile, WAVEFORMATEX **pWavFormat)
 {
 	BOOL bRet = FALSE;
 
@@ -227,17 +296,17 @@ BOOL WavePlayer::OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCK
 
 		if (pcmWaveFormat.wf.wFormatTag == WAVE_FORMAT_PCM)
 		{
-			pWavFormat = (WAVEFORMATEX*)new char[sizeof(WAVEFORMATEX)];
-			if (pWavFormat == NULL)
+			*pWavFormat = (WAVEFORMATEX*)new char[sizeof(WAVEFORMATEX)];
+			if (*pWavFormat == NULL)
 			{
 				bRet = FALSE;
 				strPrompt = _T("WAVEFORMATEX结构内存创建, 请检查!");
 				break;
 			}
-			memset(pWavFormat, 0x0, sizeof(WAVEFORMATEX));
+			memset(*pWavFormat, 0x0, sizeof(WAVEFORMATEX));
 
-			memcpy(pWavFormat, &pcmWaveFormat, sizeof(pcmWaveFormat));
-			pWavFormat->cbSize = 0;
+			memcpy(*pWavFormat, &pcmWaveFormat, sizeof(pcmWaveFormat));
+			(*pWavFormat)->cbSize = 0;
 		}
 		else
 		{
@@ -249,19 +318,19 @@ BOOL WavePlayer::OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCK
 				break;
 			}
 
-			pWavFormat = (WAVEFORMATEX *)new char[sizeof(WAVEFORMATEX) + cbExtraBytes];
-			if (pWavFormat == NULL)
+			*pWavFormat = (WAVEFORMATEX *)new char[sizeof(WAVEFORMATEX) + cbExtraBytes];
+			if (*pWavFormat == NULL)
 			{
 				bRet = FALSE;
 				strPrompt = _T("WAVEFORMATEX结构内存创建, 请检查!");
 				break;
 			}
-			memset(pWavFormat, 0x0, sizeof(WAVEFORMATEX));
+			memset(*pWavFormat, 0x0, sizeof(WAVEFORMATEX));
 
-			memcpy(pWavFormat, &pcmWaveFormat, sizeof(pcmWaveFormat));
-			pWavFormat->cbSize = cbExtraBytes;
+			memcpy(*pWavFormat, &pcmWaveFormat, sizeof(pcmWaveFormat));
+			(*pWavFormat)->cbSize = cbExtraBytes;
 
-			if (mmioRead(hMmioFile, (CHAR*)(((BYTE*)&(pWavFormat->cbSize)) + sizeof(WORD)), cbExtraBytes) != cbExtraBytes)
+			if (mmioRead(hMmioFile, (CHAR*)(((BYTE*)&((*pWavFormat)->cbSize)) + sizeof(WORD)), cbExtraBytes) != cbExtraBytes)
 			{
 				bRet = FALSE;
 				strPrompt = _T("媒体文件读取扩展数据失败, 请检查!");
@@ -282,10 +351,10 @@ BOOL WavePlayer::OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCK
 
 	if (!bRet)
 	{
-		if (pWavFormat != NULL)
+		if (*pWavFormat != NULL)
 		{
-			delete[] pWavFormat;
-			pWavFormat = NULL;
+			delete[] *pWavFormat;
+			*pWavFormat = NULL;
 		}
 
 		if (hMmioFile != NULL)
@@ -301,6 +370,21 @@ BOOL WavePlayer::OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCK
 	}
 
 	return bRet;
+}
+
+void WavePlayer::CloseWavFile(HMMIO hMmioFile, WAVEFORMATEX *pWavFormat)
+{
+	if (pWavFormat != NULL)
+	{
+		delete[] pWavFormat;
+		pWavFormat = NULL;
+	}
+
+	if (hMmioFile != NULL)
+	{
+		mmioClose(hMmioFile, 0);
+		hMmioFile = NULL;
+	}
 }
 
 BOOL WavePlayer::ResetWavFile(HMMIO hMmioFile, MMCKINFO &ckParent, MMCKINFO &ckSubChunk)
@@ -346,7 +430,7 @@ BOOL WavePlayer::ResetWavFile(HMMIO hMmioFile, MMCKINFO &ckParent, MMCKINFO &ckS
 	return bRet;
 }
 
-BOOL WavePlayer::ReadWavFile(HMMIO hMmioFile, UINT uiRead, BYTE *pbDataBuf, MMCKINFO &ckSubChunk, UINT &uiReadSize)
+BOOL WavePlayer::ReadWavFile(HMMIO hMmioFile, UINT uiRead, BYTE **pbDataBuf, MMCKINFO &ckSubChunk, UINT &uiReadSize)
 {
 	BOOL bRet = FALSE;
 	
@@ -402,7 +486,8 @@ BOOL WavePlayer::ReadWavFile(HMMIO hMmioFile, UINT uiRead, BYTE *pbDataBuf, MMCK
 				}
 			}
 
-			*((BYTE*)pbDataBuf+uiIndex) = *((BYTE*&)mmioinfoIn.pchNext)++;
+			bRet = TRUE;
+			*((BYTE*)*pbDataBuf+uiIndex) = *((BYTE*&)mmioinfoIn.pchNext)++;
 		}
 
 		if (!bRet)
@@ -432,19 +517,13 @@ BOOL WavePlayer::ReadWavFile(HMMIO hMmioFile, UINT uiRead, BYTE *pbDataBuf, MMCK
 	return bRet;
 }
 
-void WavePlayer::CloseWavFile()
-{
-	if (m_hMmioFile != NULL)
-	{
-		mmioClose(m_hMmioFile, 0);
-		m_hMmioFile = NULL;
-	}
-}
 
-BOOL WavePlayer::OpenPlayWav()
+
+BOOL WavePlayer::OpenPlayDev(UINT uiDevID, WAVEFORMATEX *pWaveformat, HWAVEOUT &hWaveOut)
 {
 	BOOL bRet = FALSE;
-	UINT uDevNum = 0;
+
+	UINT uiDevNum = 0;
 	MMRESULT hResult = 0;
 
 	WAVEOUTCAPS pwoc;
@@ -452,29 +531,23 @@ BOOL WavePlayer::OpenPlayWav()
 
 	do 
 	{
-		if (m_pWavData == NULL)
-		{
-			bRet = FALSE;
-			strPrompt = _T("错误的媒体数据, 请检查!");
-			break;
-		}
-
-		uDevNum = waveOutGetNumDevs();
-		if (uDevNum == 0)
+		uiDevNum = waveOutGetNumDevs();
+		if (uiDevNum == 0)
 		{
 			bRet = FALSE;
 			strPrompt = _T("获取媒体输出设备失败, 请检查!");
 			break;
 		}
 
-		if (m_nDevID > (uDevNum-1))
+		if (uiDevID > (uiDevNum-1))
 		{
 			bRet = FALSE;
-			strPrompt = _T("选择的媒体设备ID与设备数量错误, 请检查!");
+			strPrompt = _T("媒体设备输出ID发生错误, 请检查!");
 			break;
 		}
 
-		hResult = waveOutGetDevCaps(m_nDevID, &pwoc, sizeof(WAVEOUTCAPS));	//WAVE_MAPPER
+		//查询输出设备的性能
+		hResult = waveOutGetDevCaps(uiDevID, &pwoc, sizeof(WAVEOUTCAPS));	//WAVE_MAPPER
 		if (hResult != 0)
 		{
 			bRet = FALSE;
@@ -482,7 +555,7 @@ BOOL WavePlayer::OpenPlayWav()
 			break;
 		}
 
-		hResult = waveOutOpen(&m_hWaveOut, m_nDevID, m_lpFormat, (DWORD_PTR)WaveOutCallBackProc, (DWORD)this, CALLBACK_FUNCTION);	//WAVE_MAPPER //CALLBACK_FUNCTION	//CALLBACK_NULL
+		hResult = waveOutOpen(&hWaveOut, uiDevID, pWaveformat, (DWORD_PTR)WaveOutCallBackProc, (DWORD)this, CALLBACK_FUNCTION);	//WAVE_MAPPER //CALLBACK_FUNCTION	//CALLBACK_NULL
 		if (hResult != 0)
 		{
 			bRet = FALSE;
@@ -490,17 +563,56 @@ BOOL WavePlayer::OpenPlayWav()
 			break;
 		}
 
-		m_pWaveOutHdr.lpData  = (HPSTR)m_pWavData;
-		m_pWaveOutHdr.dwBufferLength = m_dwDataSize;
-		m_pWaveOutHdr.dwFlags = 0;
-		m_pWaveOutHdr.dwBytesRecorded = 0;
-		m_pWaveOutHdr.dwUser  = NULL;
-		m_pWaveOutHdr.dwLoops = 0;
-		m_pWaveOutHdr.lpNext  = NULL;
-		m_pWaveOutHdr.reserved = NULL;
+		bRet = TRUE;
+	} while (FALSE);
 
-		hResult = waveOutPrepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
-		if (hResult != 0)
+	if (!bRet)
+	{
+		if (strPrompt != _T(""))
+		{
+			MessageBox(NULL, strPrompt, _T("提示!"), MB_ICONERROR|MB_OK);
+		}
+	}
+
+	return bRet;
+}
+
+void WavePlayer::ClosePlayDev(HWAVEOUT hWaveOut)
+{
+	if (m_hWaveOut == NULL)
+	{
+		return;
+	}
+
+	if (waveOutClose(m_hWaveOut) == 0)
+	{
+		m_hWaveOut = NULL;
+	}
+}
+
+BOOL WavePlayer::SetPlayData(HWAVEOUT hWaveOut, HPSTR pWavData, DWORD dwWavDataSize, WAVEHDR &stcWaveOutHdr)
+{
+	BOOL bRet = FALSE;
+	CString strPrompt;
+
+	do 
+	{
+		if (hWaveOut == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		stcWaveOutHdr.lpData  = (HPSTR)pWavData;
+		stcWaveOutHdr.dwBufferLength = dwWavDataSize;
+		stcWaveOutHdr.dwFlags = 0;
+		stcWaveOutHdr.dwBytesRecorded = 0;
+		stcWaveOutHdr.dwUser  = NULL;
+		stcWaveOutHdr.dwLoops = 0;
+		stcWaveOutHdr.lpNext  = NULL;
+		stcWaveOutHdr.reserved = NULL;
+
+		if (waveOutPrepareHeader(hWaveOut, &stcWaveOutHdr, sizeof(WAVEHDR)) != 0)
 		{
 			bRet = FALSE;
 			strPrompt = _T("waveOutPrepareHeader失败, 请检查!");
@@ -510,25 +622,13 @@ BOOL WavePlayer::OpenPlayWav()
 		bRet = TRUE;
 	} while (FALSE);
 
-	if (m_hFormat != NULL || m_lpFormat != NULL)
-	{
-		GlobalUnlock(m_hFormat);
-		GlobalFree(m_hFormat);
-
-		m_hFormat = NULL;
-		m_lpFormat = NULL;
-	}
-
 	if (!bRet)
 	{
-		hResult = waveOutUnprepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
-		if (hResult == 0)
+		if (waveOutUnprepareHeader(hWaveOut, &stcWaveOutHdr, sizeof(WAVEHDR)) == 0)
 		{
-			if (m_hWaveOut != NULL)
+			if (hWaveOut != NULL)
 			{
-				waveOutReset(m_hWaveOut);
-				waveOutClose(m_hWaveOut);
-				m_hWaveOut = NULL;
+				waveOutReset(hWaveOut);
 			}
 		}
 
@@ -542,77 +642,90 @@ BOOL WavePlayer::OpenPlayWav()
 }
 
 //libmad解码
-BOOL WavePlayer::PlayWavData()
-{
-	MMRESULT hResult = 0;
-
-	if (m_hWaveOut == NULL)
-	{
-		return FALSE;
-	}
-	
-	if (m_pWaveOutHdr.lpData == NULL)
-	{
-		return FALSE;
-	}
-
-	hResult = waveOutWrite(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
-	if (hResult != 0)
-	{
-		return FALSE;
-	}
-
-	WaitForSingleObject(m_hPlayEvent, INFINITE);
-	ResetEvent(m_hPlayEvent);
-
-	return TRUE;
-}
-
-BOOL WavePlayer::ClearWavData()
+BOOL WavePlayer::PlayDevData(HWAVEOUT hWaveOut, WAVEHDR stcWaveOutHdr, HANDLE hEvent)
 {
 	BOOL bRet = FALSE;
 	MMRESULT hResult = 0;
 
-	if (m_hWaveOut == NULL)
+	do 
 	{
-		return FALSE;
-	}
+		if (hWaveOut == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	hResult = waveOutReset(m_hWaveOut);
-	if (hResult != 0)
-	{
-		return FALSE;
-	}
+		if (stcWaveOutHdr.lpData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	hResult = waveOutUnprepareHeader(m_hWaveOut, &m_pWaveOutHdr, sizeof(WAVEHDR));
-	if (hResult != 0)
-	{
-		if (hResult == MMSYSERR_INVALHANDLE)
+		hResult = waveOutWrite(hWaveOut, &stcWaveOutHdr, sizeof(WAVEHDR));
+		if (hResult != 0)
 		{
-			OutputDebugString("waveOutUnprepareHeader error: MMSYSERR_INVALHANDLE");
+			bRet = FALSE;
+			break;
 		}
-		else if (hResult == MMSYSERR_NODRIVER)
-		{
-			OutputDebugString("waveOutUnprepareHeader error: MMSYSERR_NODRIVER");
-		}
-		else if (hResult == MMSYSERR_NOMEM)
-		{
-			OutputDebugString("waveOutUnprepareHeader error: MMSYSERR_NOMEM");
-		}
-		else if (hResult == WAVERR_STILLPLAYING)
-		{
-			OutputDebugString("waveOutUnprepareHeader error: WAVERR_STILLPLAYING");
-		}
-		return FALSE;
-	}
 
-	memset(&m_pWaveOutHdr, 0x0, sizeof(WAVEHDR));
-	return TRUE;
+		WaitForSingleObject(hEvent, INFINITE);
+		ResetEvent(hEvent);
+
+		bRet = TRUE;
+	} while (FALSE);
+	
+	return bRet;
 }
 
+void WavePlayer::ClearPlayDev(HWAVEOUT hWaveOut, WAVEHDR &stcWaveOutHdr)
+{
+	BOOL bRet = FALSE;
+	MMRESULT hResult = 0;
+
+	do 
+	{
+		if (hWaveOut == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		hResult = waveOutReset(hWaveOut);
+		if (hResult != 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		hResult = waveOutUnprepareHeader(hWaveOut, &stcWaveOutHdr, sizeof(WAVEHDR));
+		if (hResult != 0)
+		{
+			if (hResult == MMSYSERR_INVALHANDLE)
+			{
+				OutputDebugString("waveOutUnprepareHeader error: MMSYSERR_INVALHANDLE");
+			}
+			else if (hResult == MMSYSERR_NODRIVER)
+			{
+				OutputDebugString("waveOutUnprepareHeader error: MMSYSERR_NODRIVER");
+			}
+			else if (hResult == MMSYSERR_NOMEM)
+			{
+				OutputDebugString("waveOutUnprepareHeader error: MMSYSERR_NOMEM");
+			}
+			else if (hResult == WAVERR_STILLPLAYING)
+			{
+				OutputDebugString("waveOutUnprepareHeader error: WAVERR_STILLPLAYING");
+			}
+			break;
+		}
+
+		memset(&stcWaveOutHdr, 0x0, sizeof(WAVEHDR));
+		bRet = TRUE;
+	} while (FALSE);
+}
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL WavePlayer::CreatePlayerProc(UINT nDevID, UINT nCount, UINT nSpanTime)
+BOOL WavePlayer::CreatePlayerProc(UINT nSpanTime)
 {
 	BOOL bRet = FALSE;
 
@@ -621,10 +734,8 @@ BOOL WavePlayer::CreatePlayerProc(UINT nDevID, UINT nCount, UINT nSpanTime)
 		SetEvent(m_hStartEvent);
 		ResetEvent(m_hEndEvent);
 
-		m_nDevID = nDevID;
-		m_nCount = nCount;
-
 		m_dwWaitTime = nSpanTime;
+
 		m_hThread = CreateThread(NULL, 0, WavePlayerThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 		if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
 		{
@@ -632,11 +743,8 @@ BOOL WavePlayer::CreatePlayerProc(UINT nDevID, UINT nCount, UINT nSpanTime)
 			return FALSE;
 		}
 
-		bRet = TRUE;
 		m_bExit = FALSE;
-
-		CloseHandle(m_hThread);
-		m_hThread = NULL;
+		bRet = TRUE;
 	}
 
 	return bRet;
@@ -644,12 +752,11 @@ BOOL WavePlayer::CreatePlayerProc(UINT nDevID, UINT nCount, UINT nSpanTime)
 
 BOOL WavePlayer::ClosePlayerProc()
 {
-	MMRESULT hResult = 0;
 	m_bExit = TRUE;
 	if (m_hWaveOut != NULL && m_hWaveOut != INVALID_HANDLE_VALUE)
 	{
 		waveOutPause(m_hWaveOut);
-		SetEvent(m_hPlayEvent);
+		SetEvent(m_hEndPlayEvent);
 	}
 	else
 	{
@@ -657,95 +764,89 @@ BOOL WavePlayer::ClosePlayerProc()
 	}
 
 	WaitForSingleObject(m_hEndEvent, INFINITE);
-	if (m_hWaveOut != NULL)
-	{
-		hResult = waveOutClose(m_hWaveOut);
-		if (hResult == 0)
-		{
-			m_hWaveOut = NULL;
-		}
-	}
-
+	ClosePlayDev(m_hWaveOut);
+	
 	if (m_pWavData != NULL)
 	{
-		free(m_pWavData);
+		GlobalFree(m_pWavData);
 		m_pWavData = NULL;
 	}
 
 	m_bExit = FALSE;
-	ResetEvent(m_hPlayEvent);
+	ResetEvent(m_hEndPlayEvent);
 	ResetEvent(m_hStartEvent);
 	return TRUE;
 }
 
-BOOL WavePlayer::OpenWavPlayerFile(const char* pszWavFilePath)
+BOOL WavePlayer::SetPlayerProcData(const char* pszWavFilePath, UINT uiDevID)
 {
 	BOOL bRet = FALSE;
+	WAVEFORMATEX stcWaveformat = {0};
 
-	UINT uiWaveSize = 0;
-	UINT uiReadSize = 0;
-
-	MMCKINFO mmckinfoParent = {0};
-	MMCKINFO mmckinfoSubChunk = {0};
-
-	WAVEFORMATEX *lpFormat = NULL;
 	do 
 	{
-		if (pszWavFilePath == NULL || *pszWavFilePath == '\0')
-		{
-			bRet = FALSE;
-			break;
-		}
+		SetPlayerProcEvent(FALSE);
+		ClearPlayDev(m_hWaveOut, m_stcWaveOutHdr);
 
-		if (!OpenWavFile(pszWavFilePath, mmckinfoParent, mmckinfoSubChunk, m_hMmioFile, lpFormat))
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		if (!ResetWavFile(m_hMmioFile, mmckinfoParent, mmckinfoSubChunk))
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		uiWaveSize = mmckinfoSubChunk.cksize;
-		if ((m_pWavData = (HPSTR)GlobalAlloc(GMEM_FIXED, uiWaveSize)) == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		if (!ReadWavFile(m_hMmioFile, uiWaveSize, (BYTE*)m_pWavData, mmckinfoSubChunk, uiReadSize))
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		CloseWavFile();
-		bRet = TRUE;
-	} while (FALSE);
-
-	if (!bRet)
-	{
 		if (m_pWavData != NULL)
 		{
 			GlobalFree(m_pWavData);
 			m_pWavData = NULL;
 		}
 
-		if (m_hMmioFile != NULL)
+		if (!GetWavData(pszWavFilePath, &stcWaveformat, (BYTE**)&m_pWavData, m_dwDataSize))
 		{
-			mmioClose(m_hMmioFile, 0);
-			m_hMmioFile = NULL;
+			bRet = FALSE;
+			break;
 		}
 
-		if (lpFormat != NULL)
+		if (memcmp(&stcWaveformat, &m_stcWaveformat, sizeof(WAVEFORMATEX)) != 0)
 		{
-			delete[] lpFormat;
-			lpFormat = NULL;
+			ClosePlayDev(m_hWaveOut);
+			memcpy(&m_stcWaveformat, &stcWaveformat, sizeof(WAVEFORMATEX));
 		}
-	}
+
+		if (m_hWaveOut == NULL)
+		{
+			if (!OpenPlayDev(uiDevID, &stcWaveformat, m_hWaveOut))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+
+		if (!SetPlayData(m_hWaveOut, m_pWavData, m_dwDataSize, m_stcWaveOutHdr))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
 
 	return bRet;
+}
+
+void WavePlayer::SetPlayerProcEvent(BOOL bFlag)
+{
+	if (m_hWaveOut == NULL)
+	{
+		return;
+	}
+
+	if (bFlag)
+	{//从新播放
+		waveOutRestart(m_hWaveOut);
+
+		SetEvent(m_hStartPlayEvent);
+		ResetEvent(m_hEndPlayEvent);
+	}
+	else
+	{//暂停播放
+		waveOutPause(m_hWaveOut);
+		waveOutReset(m_hWaveOut);
+
+		ResetEvent(m_hStartPlayEvent);
+		SetEvent(m_hEndPlayEvent);
+	}
 }

@@ -77,18 +77,52 @@ void CDlgTest4Wnd::OnPaint()
 //
 void CDlgTest4Wnd::OnBnClickedButton1()
 {
+	static BOOL bFlag = FALSE;
+
 	DWORD dwIndex = 0;
+
+	CString strFileName;
 	CString strFilePath;
 
-	strFilePath.Format(_T("%s\\1.wav"), CGlobalInfo::CreateInstance()->GetAppPath());
+	if (!bFlag)
+	{
+		bFlag = TRUE;
+		strFileName = _T("1.wav");
+	}
+	else
+	{
+		bFlag = FALSE;
+		strFileName = _T("2.wav");
+	}
+
+	strFilePath.Format(_T("%s\\%s"), CGlobalInfo::CreateInstance()->GetAppPath(), strFileName);
 	if (!CGlobalInfo::CreateInstance()->IsFileExists(strFilePath))
 	{
 		return;
 	}
+
+	m_WavePlayer.SetPlayerProcEvent(FALSE);
+	if (!m_WavePlayer.SetPlayerProcData(strFilePath, 0))
+	{
+		return;
+	}
+
+	m_WavePlayer.SetPlayerProcEvent(TRUE);
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()
 {
+	static BOOL bFlag = FALSE;
+	if (!bFlag)
+	{
+		bFlag = TRUE;
+		m_WavePlayer.SetPlayerProcEvent(FALSE);
+	}
+	else
+	{
+		bFlag = FALSE;
+		m_WavePlayer.SetPlayerProcEvent(TRUE);
+	}
 }
 
 void CDlgTest4Wnd::OnBnClickedButton3()
@@ -167,6 +201,12 @@ BOOL CDlgTest4Wnd::InitCtrl()
 BOOL CDlgTest4Wnd::InitInfo()
 {
 	m_CheckLinkProc.CreateCheckLinkProc(test1);
+
+	if (!m_WavePlayer.CreatePlayerProc())
+	{
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
