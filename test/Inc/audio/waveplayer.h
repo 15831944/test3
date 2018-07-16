@@ -12,7 +12,8 @@ public:
 	~WavePlayer();
 	
 public:
-	BOOL					CreatePlayerProc(const char* pszWavFilePath, UINT nDevID, UINT nCount, UINT nSpanTime=500);
+	BOOL					OpenWavPlayerFile(const char* pszWavFilePath);
+	BOOL					CreatePlayerProc(UINT nDevID, UINT nCount, UINT nSpanTime=500);
 	BOOL					ClosePlayerProc();
 	
 	static 	WavePlayer&		Instance();
@@ -25,8 +26,9 @@ protected:
 	void					PlayWavInfo();
 	void					WavePlayDone();
 	
-	BOOL					OpenWavFile();
-	BOOL					ReadWavFile();
+	BOOL					OpenWavFile(const char *pszPlayerFile, MMCKINFO &ckParent, MMCKINFO &ckSubChunk, HMMIO &hMmioFile, WAVEFORMATEX *pWavFormat);
+	BOOL					ResetWavFile(HMMIO hMmioFile, MMCKINFO &ckParent, MMCKINFO &ckSubChunk);
+	BOOL					ReadWavFile(HMMIO hMmioFile, UINT uiRead, BYTE *pbDataBuf, MMCKINFO &ckSubChunk, UINT &uiReadSize);
 	void					CloseWavFile();
 
 	BOOL					OpenPlayWav();
@@ -40,29 +42,21 @@ protected:
 	HANDLE					m_hEndEvent;
 	HANDLE					m_hPlayEvent;
 	
-	HANDLE					m_hFormat;
 	HMMIO					m_hMmioFile;
-	
-	WAVEFORMATEX * 			m_lpFormat;
 	WAVEHDR					m_pWaveOutHdr; 
 	HWAVEOUT				m_hWaveOut;
 	
 private:
 	BOOL					m_bExit;
-	BOOL					m_bOpenFile;
-	
+
 	UINT					m_nDevID;
 	UINT					m_nCount;
 	
-	DWORD					m_dwFmtSize;
-	DWORD					m_dwDataSize;
-	DWORD					m_dwDataOffset;
-
 	DWORD					m_dwThreadID;
 	DWORD					m_dwWaitTime;
 
+	DWORD					m_dwDataSize;
 	HPSTR					m_pWavData;
-	std::string				m_strWavFilePath;
 };
 
 #endif
