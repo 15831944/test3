@@ -5,11 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{3C0E867A-52BF-4C15-A318-E67221F03E0B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCVRzt", "OpenCVRzt\OpenCVRzt.vcxproj", "{C13570B2-6323-4A79-BE9B-B358918B6CD6}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UKeyVerify", "UKeyVerify\UKeyVerify.vcxproj", "{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FaceVerify", "FaceVerify\FaceVerify.vcxproj", "{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,24 +23,12 @@ Global
 		{3C0E867A-52BF-4C15-A318-E67221F03E0B}.Release|Win32.Build.0 = Release|Win32
 		{3C0E867A-52BF-4C15-A318-E67221F03E0B}.Release|x64.ActiveCfg = Release|x64
 		{3C0E867A-52BF-4C15-A318-E67221F03E0B}.Release|x64.Build.0 = Release|x64
-		{C13570B2-6323-4A79-BE9B-B358918B6CD6}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C13570B2-6323-4A79-BE9B-B358918B6CD6}.Debug|Win32.Build.0 = Debug|Win32
-		{C13570B2-6323-4A79-BE9B-B358918B6CD6}.Debug|x64.ActiveCfg = Debug|Win32
-		{C13570B2-6323-4A79-BE9B-B358918B6CD6}.Release|Win32.ActiveCfg = Release|Win32
-		{C13570B2-6323-4A79-BE9B-B358918B6CD6}.Release|Win32.Build.0 = Release|Win32
-		{C13570B2-6323-4A79-BE9B-B358918B6CD6}.Release|x64.ActiveCfg = Release|Win32
 		{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}.Debug|Win32.ActiveCfg = Debug|Win32
 		{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}.Debug|Win32.Build.0 = Debug|Win32
 		{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}.Debug|x64.ActiveCfg = Debug|Win32
 		{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}.Release|Win32.ActiveCfg = Release|Win32
 		{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}.Release|Win32.Build.0 = Release|Win32
 		{4A024AAB-04B5-45B1-99D6-B6BB89B07AFA}.Release|x64.ActiveCfg = Release|Win32
-		{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}.Debug|Win32.Build.0 = Debug|Win32
-		{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}.Debug|x64.ActiveCfg = Debug|Win32
-		{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}.Release|Win32.ActiveCfg = Release|Win32
-		{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}.Release|Win32.Build.0 = Release|Win32
-		{C92EC1CB-DEF6-41DB-87F2-1B9985B9C001}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
