@@ -2,61 +2,71 @@
 #define __UPDATE_FILE_NAME_H__
 
 typedef enum{
-	CONFIG_EMPTYTYPE	= 0,
-	CONFIG_EXTNAMETYPE,
-	CONFIG_FILENAMETYPE
+	CONFIG_EMPTYTYPE = 0,						//空类型
+	CONFIG_ADDFILENAME_TYPE,					//文件名添加字符串信息
+	CONFIG_DATEFILENAME_TYPE,					//文件名按照日期格式修改
+	CONFIG_DELFILENAME_TYPE,					//文件名删除指定字符串信息
+	CONFIG_EXTFILENAME_TYPE,					//文件名修改扩展名称
+	CONFIG_INDEXFILENAME_TYPE,					//文件名按照指定索引修改信息
+	CONFIG_REPLACEFILENAME_TYPE,				//文件名替换为指定字符串信息
 }UPDATE_CONFIGTYPE;
 
 typedef enum{
-	EVAL_EMPTYTYPE		= 0,
-	EVAL_ALLFILENAME,
-	EVAL_SPECIFYNAME,
-	EVAL_SPECIFYNUMINDEX
-}UPDATE_EVALTYPE;
-
-typedef enum {
-	STATE_EMPTYTYPE		= 0,
-	STATE_SUCCEDTYPE,
-	STATE_FAILEDTYPE,
-	STATE_INPUTETYPE,
-	STATE_OUTPUTTYPE,
-	STATE_MODIFYTYPE,
+	STATE_EMPTYTYPE = 0,						//空类型
+	STATE_UPDATESUCCED_TYPE,					//更新成功	
+	STATE_UPDATEFAILED_TYPE,					//更新失败
+	STATE_UPDATEINPUTE_TYPE,					//更新输入
+	STATE_UPDATEOUTPUT_TYPE,					//更新输出
+	STATE_UPDATEMODIFY_TYPE,					//更新修改
 }UPDATE_STATETYPE;
 
 typedef struct{
-	unsigned int			uiFileSize;
-	unsigned int			uiFileAttrib;
-	__time64_t				time_create;
-	__time64_t				time_access;
-	__time64_t				time_write;
-	char					szFileName[MAX_PATH];
-	char					szParentPath[MAX_PATH];
-	char					szFilePath[MAX_PATH];
-	char					szFileExt[MAX_PATH];
+	unsigned int		uiFileSize;				//文件大小
+	unsigned int		uiFileAttrib;			//文件属性
+	__time64_t			time_create;			//文件创建时间
+	__time64_t			time_access;			//文件访问时间
+	__time64_t			time_write;				//文件写入时间
+	char				szFileName[MAX_PATH];	//文件名称
+	char				szParentPath[MAX_PATH];	//文件父路径
+	char				szFilePath[MAX_PATH];	//文件路径
+	char				szFileExt[MAX_PATH];	//文件扩展名
 }UPDATE_FILEINFO;
 
-typedef struct {
-	char					szFilePath[MAX_PATH];
-	char					szFindName[MAX_PATH];
-	char					szFileSubName[MAX_PATH];
-	UPDATE_EVALTYPE			emEvalType;
-	UPDATE_STATETYPE		emStateType;
-	UPDATE_CONFIGTYPE		emConfigType;
+typedef struct{
+	UPDATE_FILEINFO		stcSrcFileInfo;			//原文件信息	
+	UPDATE_FILEINFO		stcDestFileInfo;		//修改后文件信息
 }UPDATE_FILEDATA;
 
-typedef struct tagEvalFileInfo
-{
-	UPDATE_CONFIGTYPE		emConfigType;
-	UPDATE_EVALTYPE			emEvalType;
-	std::vector<std::string> vecString;
+typedef struct{
+}UPDATE_ADDFILENAME;
 
-	tagEvalFileInfo::tagEvalFileInfo()
-	{
-		emConfigType = CONFIG_EMPTYTYPE;
-		emEvalType   = EVAL_EMPTYTYPE;
-		vecString.clear();
-	}
-}EVAL_FILEINFO;
+typedef struct{
+}UPDATE_DATEFILENAME;
+
+typedef struct{
+}UPDATE_DELFILENAME;
+
+typedef struct{
+}UPDATE_EXTFILENAME;
+
+typedef struct{
+}UPDATE_INDEXFILENAME;
+
+typedef struct{
+}UPDATE_REPLACEFILENAME;
+
+typedef struct{
+	UPDATE_CONFIGTYPE		emConfigType;
+	UPDATE_FILEDATA			stcFileData;
+	union{
+		UPDATE_ADDFILENAME	stcAddFileName;
+		UPDATE_DATEFILENAME	stcDateFileName;
+		UPDATE_DELFILENAME	stcDelFileName;
+		UPDATE_EXTFILENAME	stcExtFileName;
+		UPDATE_INDEXFILENAME stcIndexFileName;
+		UPDATE_REPLACEFILENAME stcReplaceFileName;
+	};
+}UPDATE_FILENAME;
 
 typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILEDATA *pFileData);
 //////////////////////////////////////////////////////////////////////////
@@ -71,8 +81,6 @@ public:
 public:
 	BOOL							CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData);
 	BOOL							CloseUpdateProc();
-	
-	static 	update_file_name&		Instance();
 	
 protected:
 	static  DWORD WINAPI			UpdateFileThreadProc(LPVOID lpParam);

@@ -20,7 +20,6 @@ update_file_name::update_file_name()
 
 update_file_name::~update_file_name()
 {
-	CloseUpdateProc();
 	if (m_hStartEvent != NULL)
 	{
 		CloseHandle(m_hStartEvent);
@@ -32,12 +31,6 @@ update_file_name::~update_file_name()
 		CloseHandle(m_hEndEvent);
 		m_hEndEvent = NULL;
 	}
-}
-
-update_file_name& update_file_name::Instance()
-{
-	static update_file_name inst;
-	return inst;
 }
 
 DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
