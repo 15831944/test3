@@ -68,7 +68,7 @@ typedef struct{
 	};
 }UPDATE_FILENAME;
 
-typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILEDATA *pFileData);
+typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILENAME *pFileName);
 //////////////////////////////////////////////////////////////////////////
 //
 using namespace std;
@@ -87,18 +87,6 @@ protected:
 	
 protected:
 	void							UpdateFileInfo();
-	BOOL							EnumFileInfo();
-	void							SetUpdateResult(BOOL bRet);
-
-	BOOL							GetFileTitle(const char *pszFileName, char *pszTitle, char *pszExt);
-	BOOL							GetEvalResult(EVAL_FILEINFO* pEvalTag);
-
-	BOOL							SetFileExtInfo(EVAL_FILEINFO* pEvalTag);
-	BOOL							SetFileNameInfo(EVAL_FILEINFO* pEvalTag);
-
-	BOOL							SetAllFileName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex);
-	BOOL							SetSpecifyName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt);
-	BOOL							SetNumIndexName(const char* pszFilePath, const char* pszSrcName, const char* pszFindName, const char* pszSpecName, const char* pszFileExt, unsigned long ulIndex);
 
 protected:
 	HANDLE							m_hThread;
@@ -114,7 +102,6 @@ private:
 	DWORD							m_dwCloseTimeOver;
 
 	UPDATE_FILEDATA_CALLBACK_FUNC	m_pfFileData;
-	std::map<std::string, EVAL_FILEINFO*>	m_mapEnumFile;
 };
 
 #endif

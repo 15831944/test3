@@ -10,16 +10,23 @@
 
 CShellClass::CShellClass()
 {
+	CoInitialize(NULL);
 }
 
 CShellClass::~CShellClass()
 {
+	CoUninitialize();
+}
+
+CShellClass& CShellClass::Instance()
+{
+	static CShellClass inst;
+	return inst;
 }
 
 void CShellClass::SetTvMask(TVITEM *tvi, ULONG ulAttrs, BOOL bChildValid)
 {
 	tvi->mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
-
 	if (ulAttrs & SFGAO_HASSUBFOLDER)
 	{
 		if(bChildValid)
@@ -53,32 +60,19 @@ void CShellClass::SetTvMask(TVITEM *tvi, ULONG ulAttrs, BOOL bChildValid)
 
 void CShellClass::GetNormalAndSelectedIcons(LPITEMIDLIST lpifq, LPTV_ITEM lptvitem)
 {
-	lptvitem->iImage = GetIcon (lpifq, 
-								SHGFI_PIDL | 
-								CSIDL_DESKTOP |
-								SHGFI_ICON |
-								SHGFI_SYSICONINDEX | 
-								SHGFI_SMALLICON);
-
-	lptvitem->iSelectedImage = GetIcon (lpifq, 
-										SHGFI_PIDL | 
-										SHGFI_SYSICONINDEX | 
-										SHGFI_SMALLICON | 
-										SHGFI_OPENICON);
-
-	return;
+	lptvitem->iImage = GetIcon(lpifq, SHGFI_PIDL|CSIDL_DESKTOP|SHGFI_ICON|SHGFI_SYSICONINDEX|SHGFI_SMALLICON);
+	lptvitem->iSelectedImage = GetIcon(lpifq, SHGFI_PIDL|SHGFI_SYSICONINDEX|SHGFI_SMALLICON|SHGFI_OPENICON);
 }
 
 //bRoot :		是否根目录
-//pszBufName :	返回的文件夹名称
-//tvins :		返回的Tree结构体信息	
 //hParent :		Tree父节点信息
 //hPrev :		Tree前一个节点信息
 //lpsf  :		IShellFolder接口
 //lpifq :		LPITEMIDLIST指针
 //lpi   :		LPITEMIDLIST指针
-//bChildValid :
-BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* tvins, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid)
+//pszBufName :	返回的文件夹名称
+//tvins :		返回的Tree结构体信息
+BOOL CShellClass::InsertTreeItem(BOOL bRoot, BOOL bChildValid, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, char* pszBufName, TVINSERTSTRUCT* tvins)
 {
 	BOOL bRet = FALSE;
 
@@ -95,44 +89,49 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 	LPTVITEMDATA* lptvid = NULL;
 	
 	char szShellName[MAX_PATH] = {0};
-	ULONG ulAttrs = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE ;
+	ULONG ulAttrs = SFGAO_FOLDER | SFGAO_HASSUBFOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_SHARE | SFGAO_LINK;
 
-	if(!(lpi) || (lpi->mkid.cb >= MAX_PATH))
+	do 
 	{
-		return FALSE;
-	}
+		if(!lpi || (lpi->mkid.cb >= MAX_PATH))
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	CoInitialize(NULL);
-	
-	hr = lpsf->GetAttributesOf(1, (const struct _ITEMIDLIST **)&lpi, &ulAttrs);
-	if (FAILED(hr) || ulAttrs == 0)
-	{
-		return FALSE;
-	}
-	else
-	{
+		hr = lpsf->GetAttributesOf(1, (const struct _ITEMIDLIST **)&lpi, &ulAttrs);
+		if (FAILED(hr) || ulAttrs == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		SetTvMask(&tvi, ulAttrs, bChildValid);
-	}
 
-	hr = SHGetMalloc(&lpMalloc);
-	if(FAILED(hr))
-	{
-		return FALSE;
-	}
+		hr = SHGetMalloc(&lpMalloc);
+		if(FAILED(hr))
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	if (ulAttrs & SFGAO_FOLDER | SFGAO_FILESYSTEM)
-	{
-		lptvid = (LPTVITEMDATA*) lpMalloc->Alloc(sizeof (LPTVITEMDATA));
+		if (!(ulAttrs&(SFGAO_FOLDER|SFGAO_FILESYSTEM)))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		lptvid = (LPTVITEMDATA*)lpMalloc->Alloc(sizeof (LPTVITEMDATA));
 		if (!lptvid)
 		{
 			bRet = FALSE;
-			goto part1; 
+			break;
 		}
 
 		if (!GetName(lpsf, lpi, SHGDN_NORMAL, pszBufName))
 		{
 			bRet = FALSE;
-			goto part1;
+			break;
 		}
 
 		tvi.pszText = pszBufName;
@@ -143,7 +142,7 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 		lptvid->lpsfParent = lpsf;
 		lpsf->AddRef();
 
-        lptvid->bRoot = bRoot;
+		lptvid->bRoot = bRoot;
 		lptvid->lpifq = Concatenate(lpMalloc, lpifq, lpi);
 
 		GetNormalAndSelectedIcons(lptvid->lpifq, &tvi);
@@ -155,255 +154,297 @@ BOOL CShellClass::InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* t
 		tvins->hParent = hParent;
 
 		bRet = TRUE;
+	} while (FALSE);
+	
+	if (!bRet)
+	{
+		lpMalloc->Release();
+		//lpsf->Release();
 	}
-	
-part1:
-	lpMalloc->Release();
-//	lpsf->Release();
-    CoUninitialize();
-	
+
 	return bRet;
 }
 
 HIMAGELIST CShellClass::GetImageList(BOOL bSmall)
 {
-	SHFILEINFO sfi;
-	HIMAGELIST himl;
+	SHFILEINFO sfi = {0};
+	HIMAGELIST himl = NULL;
 	
-	if(bSmall)
+	if(!bSmall)
 	{
-		himl = (HIMAGELIST)SHGetFileInfo( "", 
-                                       0,
-                                       &sfi, 
-                                       sizeof(SHFILEINFO), 
-                                       SHGFI_SYSICONINDEX |
-									   SHGFI_SMALLICON);
+		himl = (HIMAGELIST)SHGetFileInfo(_T(""), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX|SHGFI_LARGEICON);
 	}
 	else
 	{
-		himl = (HIMAGELIST)SHGetFileInfo( "", 
-                                       0,
-                                       &sfi, 
-                                       sizeof(SHFILEINFO), 
-                                       SHGFI_SYSICONINDEX |
-									   SHGFI_LARGEICON);
+		himl = (HIMAGELIST)SHGetFileInfo(_T(""), 0, &sfi, sizeof(SHFILEINFO), SHGFI_SYSICONINDEX|SHGFI_SMALLICON);
 	}
 	
 	return himl;
 }
 
-int CShellClass::GetIcon (LPITEMIDLIST lpi, UINT uFlags)
+int CShellClass::GetIcon(LPITEMIDLIST lpi, UINT uFlags)
 {
-	SHFILEINFO sfi;
+	SHFILEINFO sfi = {0};
 	SHGetFileInfo ((LPCSTR)lpi, 0, &sfi, sizeof (SHFILEINFO), uFlags);
+
 	return sfi.iIcon;
 }
 
 int CShellClass::GetNormalIcon(LPITEMIDLIST lpifq)
 {
 	int nIconIndex;
-	nIconIndex = GetIcon (lpifq, 
-				 		SHGFI_PIDL | 
-						CSIDL_DESKTOP |
-						SHGFI_ICON |
-						SHGFI_SYSICONINDEX | 
-						SHGFI_SMALLICON);
+	nIconIndex = GetIcon (lpifq, SHGFI_PIDL|CSIDL_DESKTOP|SHGFI_ICON|SHGFI_SYSICONINDEX|SHGFI_SMALLICON);
 
 	return nIconIndex;
 }
 
 BOOL CShellClass::GetParentID(LPITEMIDLIST pidl)
 {
-	BOOL fRemoved = FALSE;
+	BOOL bRet = FALSE;
+	LPITEMIDLIST pidlNext = NULL;
 	
-	if (pidl == NULL)
+	do 
 	{
-        return(FALSE);
-	}
-	
-	if (pidl->mkid.cb)
-	{
-		LPITEMIDLIST pidlNext = pidl;
+		if (pidl == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!pidl->mkid.cb)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		pidlNext = pidl;
 		while (pidlNext)
-        {
-           pidl = pidlNext;
-		   pidlNext = GetNextItemID(pidl);
-        }
-		
+		{
+			pidl = pidlNext;
+			pidlNext = GetNextItemID(pidl);
+		}
+
 		pidl->mkid.cb = 0; 
-        fRemoved = TRUE;
-	}
+		bRet = TRUE;
+	} while (FALSE);
 	
-	return fRemoved;
+	return bRet;
 }
 
-BOOL CShellClass::GetName (LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, DWORD dwFlags, LPSTR lpFriendlyName)
+BOOL CShellClass::GetName(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, DWORD dwFlags, LPSTR lpFriendlyName)
 {
-	BOOL bSuccess = TRUE;
+	BOOL bRet = FALSE;
 	STRRET str;
 	
-	if (NOERROR == lpsf->GetDisplayNameOf(lpi, dwFlags, &str))
+	do 
 	{
+		if (lpsf->GetDisplayNameOf(lpi, dwFlags, &str) != NOERROR)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		switch (str.uType)
 		{
 		case STRRET_WSTR:
 			{
-				WideCharToMultiByte (CP_ACP, // code page
-									0, // dwFlags
-									str.pOleStr, // lpWideCharStr
-									-1, // cchWideChar
-									lpFriendlyName, // lpMultiByteStr
-							//		sizeof (lpFriendlyName), // cchMultiByte
-							        sizeof(str), 
-									NULL, // lpDefaultChar
-									NULL); // lpUsedDefaultChar
+				WideCharToMultiByte (CP_ACP, 0, str.pOleStr, -1,lpFriendlyName, sizeof(str), NULL, NULL);
 			}
 			break;
-			
+
 		case STRRET_OFFSET:
 			{
 				lstrcpy (lpFriendlyName, (LPSTR)lpi + str.uOffset);
 			}
 			break;
-			
+
 		case STRRET_CSTR:
 			{
 				lstrcpy (lpFriendlyName, (LPSTR) str.cStr);
 			}
 			break;
-			
-		default:
-			{
-				bSuccess = FALSE;
-			}
-			break;
-		}	
-	}
-	else
-	{
-		bSuccess = FALSE;
-	}
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
 	
-	return bSuccess;
+	return bRet;
 }
 
 UINT CShellClass::GetSize(LPCITEMIDLIST pidl)
 {
+	BOOL bRet = FALSE;
+
 	UINT cbTotal = 0; 
-	LPITEMIDLIST pidlTemp = (LPITEMIDLIST) pidl; 
+	LPITEMIDLIST pidlTemp = NULL;
 	
-	if(pidlTemp)    
-	{    
+	do 
+	{
+		pidlTemp = (LPITEMIDLIST)pidl;
+		if (pidlTemp == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		while(pidlTemp->mkid.cb)       
 		{       
 			cbTotal += pidlTemp->mkid.cb;       
 			pidlTemp = GetNextItem(pidlTemp);       
-		}      
-		//add the size of the NULL terminating ITEMIDLIST    
-		cbTotal += sizeof(ITEMIDLIST);   
-	 } 
-	 
-	return (cbTotal); 
+		}  
+
+		cbTotal += sizeof(ITEMIDLIST);
+		bRet = TRUE;
+	} while (FALSE);
+
+	return cbTotal; 
 }
 
 LPITEMIDLIST CShellClass::GetNextItemID(LPCITEMIDLIST pidl)
 {
-	if(pidl == NULL)
+	BOOL bRet = FALSE;
+
+	int cb = -1;
+	LPITEMIDLIST pidlTemp = NULL;
+
+	do 
 	{
-		return NULL;
-	}
+		if(pidl == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		cb = pidl->mkid.cb;
+		if (cb == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		pidlTemp = (LPITEMIDLIST)(((LPBYTE) pidl) + cb); 
+	} while (FALSE);
 	
-	int cb = pidl->mkid.cb; 
-	if (cb == 0) 
-	{
-		return NULL; 
-	}
-	
-	pidl = (LPITEMIDLIST) (((LPBYTE) pidl) + cb); 
-	return (pidl->mkid.cb == 0) ? NULL : (LPITEMIDLIST) pidl;
+	return (pidlTemp->mkid.cb == 0)?NULL:(LPITEMIDLIST)pidlTemp;
 }
 
 LPITEMIDLIST CShellClass::GetNextItem(LPCITEMIDLIST pidl)
 {
-	if(pidl == NULL)  
-	{		
-		return NULL;
-	}		
+	BOOL bRet = FALSE;
 	
-	return (LPITEMIDLIST)(LPBYTE)(((LPBYTE)pidl) + pidl->mkid.cb); 
+	LPITEMIDLIST pidlTemp = NULL;
+
+	do 
+	{
+		if(pidl == NULL)  
+		{		
+			return NULL;
+		}		
+
+		pidlTemp = (LPITEMIDLIST)(LPBYTE)(((LPBYTE)pidl) + pidl->mkid.cb);
+		bRet = TRUE;
+	} while (FALSE);
+	
+	return pidlTemp; 
 }
 
 LPITEMIDLIST CShellClass::Copy(LPMALLOC lpMalloc , LPCITEMIDLIST pidlSource)
 {
-	LPITEMIDLIST pidlTarget = NULL; 
+	BOOL bRet = FALSE;
+
 	UINT cbSource = 0;
+	LPITEMIDLIST pidlTarget = NULL; 
 	
-	if(NULL == pidlSource)
+	do 
 	{
-		return (NULL);
-	}
-	
-	cbSource = GetSize(pidlSource);
-	
-	pidlTarget = (LPITEMIDLIST)lpMalloc->Alloc(cbSource); 
-	if(!pidlTarget)
-	{		
-		return (NULL);
-	}
-	
-	CopyMemory(pidlTarget, pidlSource, cbSource);  
+		if(NULL == pidlSource)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		cbSource = GetSize(pidlSource);
+
+		pidlTarget = (LPITEMIDLIST)lpMalloc->Alloc(cbSource); 
+		if(!pidlTarget)
+		{		
+			bRet = FALSE;
+			break;
+		}
+		
+		CopyMemory(pidlTarget, pidlSource, cbSource);
+		bRet = TRUE;
+	} while (FALSE);
+	  
 	return pidlTarget; 
 }
 
 LPITEMIDLIST CShellClass::CopyItemID(LPMALLOC g_pMalloc , LPITEMIDLIST pidl)
 {
-	int cb = pidl->mkid.cb; 
+	BOOL bRet = FALSE;
 
-	LPITEMIDLIST pidlNew = (LPITEMIDLIST)g_pMalloc->Alloc(cb + sizeof(USHORT)); 
-    if (pidlNew == NULL)
+	int cb = -1;
+	LPITEMIDLIST pidlNew = NULL;
+
+	do 
 	{
-		return NULL; 
-	}
+		cb = pidl->mkid.cb;
+		pidlNew = (LPITEMIDLIST)g_pMalloc->Alloc(cb + sizeof(USHORT)); 
+		if (pidlNew == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	CopyMemory(pidlNew, pidl, cb); 
+		CopyMemory(pidlNew, pidl, cb); 
+		*((USHORT *) (((LPBYTE) pidlNew) + cb)) = 0; 
 
-	*((USHORT *) (((LPBYTE) pidlNew) + cb)) = 0; 
+		bRet = TRUE;
+	} while (FALSE);
+
 	return pidlNew; 
 }
 
 LPITEMIDLIST CShellClass::Concatenate(LPMALLOC lpMalloc ,LPCITEMIDLIST pidl1, LPCITEMIDLIST pidl2)
 {
+	BOOL bRet = FALSE;
+
 	UINT cb1 = 0;
 	UINT cb2 = 0;
+	LPITEMIDLIST pidlNew = NULL; 
 	
-	LPITEMIDLIST pidlNew; 
-	
-	if(!pidl1 && !pidl2)
-	{		
-		return NULL;
-	}
-	
-	if(!pidl1)    
-	{    
-		pidlNew = Copy(lpMalloc , pidl2);     
-		return pidlNew;    
-	} 
-	
-	if(!pidl2)    
-	{    
-		pidlNew = Copy(lpMalloc, pidl1);     
-		return pidlNew;    
-	}  
-	
-	cb1 = GetSize(pidl1) - sizeof(ITEMIDLIST);  
-	cb2 = GetSize(pidl2);
-	
-	pidlNew = (LPITEMIDLIST)lpMalloc->Alloc(cb1 + cb2);  
-	if(pidlNew)    
-	{ 
-		CopyMemory(pidlNew, pidl1, cb1);         
-		CopyMemory(((LPBYTE)pidlNew) + cb1, pidl2, cb2);    
-	}  
+	do 
+	{
+		if(!pidl1 && !pidl2)
+		{		
+			bRet = FALSE;
+			break;
+		}
+
+		if(!pidl1)    
+		{    
+			pidlNew = Copy(lpMalloc , pidl2);     
+			return pidlNew;    
+		}
+
+		if(!pidl2)    
+		{    
+			pidlNew = Copy(lpMalloc, pidl1);     
+			return pidlNew;    
+		}
+
+		cb1 = GetSize(pidl1) - sizeof(ITEMIDLIST);  
+		cb2 = GetSize(pidl2);
+
+		pidlNew = (LPITEMIDLIST)lpMalloc->Alloc(cb1 + cb2);  
+		if(pidlNew)    
+		{ 
+			CopyMemory(pidlNew, pidl1, cb1);         
+			CopyMemory(((LPBYTE)pidlNew) + cb1, pidl2, cb2);    
+		} 
+
+		bRet = TRUE;
+	} while (FALSE);
 
 	return pidlNew;
 }

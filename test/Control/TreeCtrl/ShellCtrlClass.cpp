@@ -1,18 +1,10 @@
 #include "stdafx.h"
 #include "ShellCtrlClass.h"
 
-/////////////////////////////////////////////////////////////////////////////
-//
 CShellTreeCtrl::CShellTreeCtrl()
 {
 	m_pShellListCtrl = NULL;
 	m_pSelectedItem = NULL;
-	
-	HRESULT hr = SHGetMalloc(&m_pMalloc);
-	if(FAILED(hr))
-	{
-		AfxMessageBox(IDS_MEMORY_ERROR);
-	}
 }
 
 CShellTreeCtrl::~CShellTreeCtrl()
@@ -20,12 +12,12 @@ CShellTreeCtrl::~CShellTreeCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CShellTreeCtrl, CTreeCtrl)
-	//{{AFX_MSG_MAP(CShellTreeCtrl)
-	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, OnItemexpanding)
-	ON_NOTIFY_REFLECT(TVN_SELCHANGING,   OnSelchanging)
-	//}}AFX_MSG_MAP
+	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING,	OnItemexpanding)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGING,		OnSelchanging)
 END_MESSAGE_MAP()
 
+/////////////////////////////////////////////////////////////////////////////
+//
 void CShellTreeCtrl::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
@@ -95,197 +87,228 @@ void CShellTreeCtrl::OnSelchanging(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-BOOL CShellTreeCtrl::SubclassDlgItem(UINT nID, CWnd* pParent)
-{
-	return CTreeCtrl::SubclassDlgItem(nID, pParent);
-}
 
 BOOL CShellTreeCtrl::PopulateTree(NMHDR* pNMHDR)
 {
 	HRESULT hr;
+	BOOL bRet = FALSE;
 
 	ULONG celtFetched = 0;
 	ULONG uAttr = 0;
+	char szBufName[MAX_PATH] = {0};
 
 	HTREEITEM hItem = NULL;
 	HTREEITEM hParent = NULL;
-
- 	CShellClass csc;
- 	TVINSERTSTRUCT tvins;
 
 	LPENUMIDLIST lpe = NULL;	
 	LPITEMIDLIST pidlItems = NULL;
 	LPENUMIDLIST ppenum = NULL;
 
-	LPTVITEMDATA* lptvid = NULL;
+	LPTVITEMDATA *lptvid = NULL;
 	IShellFolder *psfProgFiles = NULL;
+	NM_TREEVIEW  *pNMTreeView = NULL;
 
-	char szBufName[MAX_PATH] = {0};
 	CWaitCursor wait;
+	TVINSERTSTRUCT tvins;
 	
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
-	if (pNMTreeView == NULL)
+	do 
 	{
-		return FALSE;
-	}
-	else
-	{
+		pNMTreeView = (NM_TREEVIEW*)pNMHDR;
+		if (pNMTreeView == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		hItem = pNMTreeView->itemNew.hItem;
-	}
-	
-	lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
-	if (!lptvid)
-	{
-		AfxMessageBox(IDS_MEMORY_ERROR);
-		return FALSE;
-	}
-
-	lptvid = (LPTVITEMDATA*)pNMTreeView->itemNew.lParam;
-	if(lptvid == NULL)
-	{
-		return FALSE;
-	}
-
-	if(lptvid->bRoot)
-	{
-		psfProgFiles = lptvid->lpsfParent;
-	}
-	else
-	{
-		hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *) &psfProgFiles);
-		if(FAILED(hr) || psfProgFiles == NULL)
+		lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+		if (lptvid == NULL)
 		{
-			return FALSE;
-		}
-	}
-
-	hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
-	if(FAILED(hr) || ppenum == NULL)
-	{
-		return FALSE;
-	}
-	
-	DeleteChildren(hItem);
-
-	if(m_pShellListCtrl != NULL)
-	{
-		m_pShellListCtrl->MyDeleteAllItems();
-	}
-
-	while(((hr = ppenum->Next(1, &pidlItems, &celtFetched)) == S_OK) && ((celtFetched) == 1))
-	{
-		memset(&tvins, 0x0, sizeof(TVINSERTSTRUCT));
-
-		if (pidlItems == NULL)
-		{
-			continue;
+			bRet = FALSE;
+			break;
 		}
 
-		uAttr = SFGAO_FOLDER;
-		hr =psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *)&pidlItems, &uAttr);
-		if (FAILED(hr) || uAttr == 0)
+		lptvid = (LPTVITEMDATA*)pNMTreeView->itemNew.lParam;
+		if(lptvid == NULL)
 		{
-			continue;
+			bRet = FALSE;
+			break;
 		}
 
-		if(m_pShellListCtrl == NULL)
+		if(lptvid->bRoot)
 		{
-			if (!csc.InsertTreeItem(FALSE, szBufName, &tvins, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, TRUE))
+			psfProgFiles = lptvid->lpsfParent;
+		}
+		else
+		{
+			hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *) &psfProgFiles);
+			if (FAILED(hr))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+
+		if (psfProgFiles == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
+		if(FAILED(hr) || ppenum == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		DeleteChildren(hItem);
+		if(m_pShellListCtrl != NULL)
+		{
+			m_pShellListCtrl->MyDeleteAllItems();
+		}
+
+		while(((hr = ppenum->Next(1, &pidlItems, &celtFetched)) == S_OK) && ((celtFetched) == 1))
+		{
+			memset(&tvins, 0x0, sizeof(TVINSERTSTRUCT));
+
+			if (pidlItems == NULL)
 			{
 				continue;
 			}
-			else
+
+			uAttr = SFGAO_FOLDER;
+			hr =psfProgFiles->GetAttributesOf(1, (LPCITEMIDLIST *)&pidlItems, &uAttr);
+			if (FAILED(hr) || uAttr == 0)
 			{
-				HTREEITEM hPrev = InsertItem(&tvins);
+				continue;
+			}
+
+			if(m_pShellListCtrl == NULL)
+			{
+				if (!CShellClass::Instance().InsertTreeItem(FALSE, TRUE, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, szBufName, &tvins))
+				{
+					continue;
+				}
+				else
+				{
+					HTREEITEM hPrev = InsertItem(&tvins);
+				}
+			}
+			else 
+			{
+				if(uAttr & SFGAO_FOLDER)
+				{
+					CShellClass::Instance().InsertTreeItem(FALSE, TRUE, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, szBufName, &tvins);
+					HTREEITEM hPrev = InsertItem(&tvins);
+				}
 			}
 		}
-		else 
-		{
-			if(uAttr & SFGAO_FOLDER)
-			{
-				csc.InsertTreeItem(FALSE, szBufName, &tvins, hItem, NULL, psfProgFiles, lptvid->lpifq, pidlItems, TRUE);
-				HTREEITEM hPrev = InsertItem(&tvins);
-			}
-		}
-	}
 
-	return TRUE;
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-void CShellTreeCtrl::InitializeCtrl()
+void CShellTreeCtrl::SetTreeImages()
 {
-	HRESULT hr;
-	HTREEITEM hParent = NULL;
-	LPSHELLFOLDER lpsf = NULL;
-
-	ModifyStyle(NULL, TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT, 0);
-	SetupImages();
-
-	hr = SHGetDesktopFolder(&lpsf);
-	if (SUCCEEDED (hr))
-	{
-		hParent = InsertDesktopItem(lpsf);
-		lpsf->Release ();
-	}
-}
-
-void CShellTreeCtrl::SetSelectList(CShellListCtrl& hListCtrl)
-{
-	m_pShellListCtrl = &hListCtrl;
-}
-
-void CShellTreeCtrl::SetupImages()
-{
-	CShellClass csc;
-	
 	HIMAGELIST himagelist;
-	himagelist = csc.GetImageList();
-	
+	himagelist = CShellClass::Instance().GetImageList();
+
 	SetImageList(m_pImageList.FromHandle(himagelist), TVSIL_NORMAL); 
 	SetImageList(m_pImageList.FromHandle(himagelist), TVSIL_STATE); 
-}
-
-void CShellTreeCtrl::SelectThisItem(const char *szBuff)
-{
-}
-
-HTREEITEM CShellTreeCtrl::InsertDesktopItem(LPSHELLFOLDER lpsf)
-{
-	CShellClass csc;
-	TVINSERTSTRUCT tvins = {0};
-	
-	LPITEMIDLIST lpi = NULL;
-	HTREEITEM hParent = NULL;	
-	char szBufName[MAX_PATH] = {0};
-
-	SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOP, &lpi);
-
-	if (!csc.InsertTreeItem(TRUE, szBufName, &tvins, NULL, NULL , lpsf , NULL, lpi , TRUE))
-	{
-		return NULL;
-	}
-	else
-	{
-		hParent = InsertItem(&tvins);
-		Expand(hParent, TVE_EXPAND);
-	}
-
-	return hParent;
 }
 
 UINT CShellTreeCtrl::DeleteChildren(HTREEITEM hItem)
 {
 	UINT nCount = 0;
-    HTREEITEM hChild = GetChildItem (hItem);
+	HTREEITEM hChild = GetChildItem (hItem);
 
-    while (hChild != NULL) {
-        HTREEITEM hNextItem = GetNextSiblingItem (hChild);
-        DeleteItem (hChild);
-        hChild = hNextItem;
-        nCount++;
-    }
+	while (hChild != NULL) {
+		HTREEITEM hNextItem = GetNextSiblingItem (hChild);
+		DeleteItem (hChild);
+		hChild = hNextItem;
+		nCount++;
+	}
+
+	return nCount;
+}
+
+HTREEITEM CShellTreeCtrl::InsertDesktopItem(LPSHELLFOLDER lpsf)
+{
+	BOOL bRet = FALSE;
 	
-    return nCount;
+	LPITEMIDLIST lpi = NULL;
+	HTREEITEM hParent = NULL;	
+
+	TVINSERTSTRUCT tvins = {0};
+	char szBufName[MAX_PATH] = {0};
+
+	do 
+	{
+		SHGetSpecialFolderLocation(NULL, CSIDL_DESKTOP, &lpi);
+		if (!CShellClass::Instance().InsertTreeItem(TRUE, TRUE, NULL, NULL , lpsf , NULL, lpi, szBufName, &tvins))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		hParent = InsertItem(&tvins);
+		Expand(hParent, TVE_EXPAND);
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return hParent;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CShellTreeCtrl::InitializeCtrl()
+{
+	BOOL bRet = FALSE;
+
+	HRESULT hr;
+	HTREEITEM hParent = NULL;
+	LPSHELLFOLDER lpsf = NULL;
+
+	do 
+	{
+		hr = SHGetMalloc(&m_pMalloc);
+		if (FAILED(hr))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		SetTreeImages();
+		ModifyStyle(NULL, TVS_HASBUTTONS|TVS_HASLINES|TVS_LINESATROOT, 0);
+
+		hr = SHGetDesktopFolder(&lpsf);
+		if (FAILED(hr))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		hParent = InsertDesktopItem(lpsf);
+		lpsf->Release();
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CShellTreeCtrl::SubclassDlgItem(UINT nID, CWnd* pParent)
+{
+	return CTreeCtrl::SubclassDlgItem(nID, pParent);
+}
+
+void CShellTreeCtrl::SetSelectList(CShellListCtrl& hListCtrl)
+{
+	m_pShellListCtrl = &hListCtrl;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -334,7 +357,6 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 	SHFILEINFO sfi;
 	SYSTEMTIME st;
 	SHFILEINFO fileInfo;
-	CShellClass csc;
 	
 	WIN32_FIND_DATA fd;
 	LPTVITEMDATA* lptvid = NULL;
@@ -345,7 +367,7 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+	lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
 	if (lptvid == NULL)
 	{
 		return;
@@ -360,7 +382,7 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (pDispInfo->item.mask & LVIF_IMAGE)
 	{
-		pDispInfo->item.iImage = csc.GetNormalIcon(lptvid->lpifq);
+		pDispInfo->item.iImage = CShellClass::Instance().GetNormalIcon(lptvid->lpifq);
 
 		lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
 		if (uAttr & SFGAO_GHOSTED)
@@ -391,7 +413,7 @@ void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 		case ID_COL_NAME:
 			{
-				csc.GetName(lptvid->lpsfParent, lptvid->lpi, SHGDN_NORMAL, szBuff);
+				CShellClass::Instance().GetName(lptvid->lpsfParent, lptvid->lpi, SHGDN_NORMAL, szBuff);
 				_tcscpy(pDispInfo->item.pszText, szBuff);
 			}
 			break;
@@ -504,8 +526,6 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 	UINT uFlags;
 
 	LV_ITEM lvi;
-	CShellClass csc;
-
 	char szBuff[MAX_PATH] = {0};
 	LPTVITEMDATA* lptvid = NULL;
 
@@ -517,7 +537,7 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 	
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
 	uFlags = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
-	csc.GetName (lpsf, lpi, SHGDN_NORMAL, szBuff);
+	CShellClass::Instance().GetName (lpsf, lpi, SHGDN_NORMAL, szBuff);
 
 	lvi.iItem = giCtr++;
 	lvi.iSubItem = ID_COL_NAME;
@@ -525,8 +545,8 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 
 	lvi.iImage = I_IMAGECALLBACK; 
 	lptvid->lpsfParent = lpsf;
-	lptvid->lpi = csc.CopyItemID(m_pMalloc, lpi);
-	lptvid->lpifq = csc.Concatenate(m_pMalloc, lpifq,lpi); 
+	lptvid->lpi = CShellClass::Instance().CopyItemID(m_pMalloc, lpi);
+	lptvid->lpifq = CShellClass::Instance().Concatenate(m_pMalloc, lpifq,lpi); 
 	lvi.lParam = (LPARAM)lptvid;
 
 	iItem = InsertItem (&lvi);
@@ -563,11 +583,10 @@ int CShellListCtrl::InitilizeCtrl(void* pParam, GETSHELLTREE_PATH_CALLBACK_FUNC 
 
 void CShellListCtrl::SetupImageLists()
 {
-	CShellClass csc;
 	HIMAGELIST himlSmall, himlLarge;
 
-	himlSmall = csc.GetImageList(TRUE);
-	himlLarge = csc.GetImageList(FALSE);
+	himlSmall = CShellClass::Instance().GetImageList(TRUE);
+	himlLarge = CShellClass::Instance().GetImageList(FALSE);
 
 	SetImageList(m_pImageListL.FromHandle(himlLarge), LVSIL_NORMAL); 
 	SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_SMALL); 

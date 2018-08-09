@@ -22,12 +22,13 @@ public:
 	~CShellClass();
 	
 public:
+	static CShellClass&	Instance();
 		
 public:
 	void 				SetTvMask(TVITEM *tvi, ULONG ulAttrs, BOOL bChildValid);
 	void 				GetNormalAndSelectedIcons(LPITEMIDLIST lpifq, LPTV_ITEM lptvitem);
 	
-	BOOL	 			InsertTreeItem(BOOL bRoot, char* pszBufName, TVINSERTSTRUCT* tvins, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, BOOL bChildValid);
+	BOOL	 			InsertTreeItem(BOOL bRoot, BOOL bChildValid, HTREEITEM hParent, HTREEITEM hPrev, LPSHELLFOLDER lpsf, LPITEMIDLIST lpifq, LPITEMIDLIST lpi, char *pszBufName, TVINSERTSTRUCT *tvins);
 	
 public:	
 	HIMAGELIST			GetImageList(BOOL bSmall = TRUE);

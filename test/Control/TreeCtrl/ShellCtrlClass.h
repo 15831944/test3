@@ -23,33 +23,31 @@ public:
 	CShellTreeCtrl();
 	virtual ~CShellTreeCtrl();
 
+public:
+	BOOL 			InitializeCtrl();
+	BOOL 			SubclassDlgItem(UINT nID, CWnd* pParent);
+
+	void			SetSelectList(CShellListCtrl& hListCtrl);
+
 protected:
 	afx_msg void 	OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void 	OnSelchanging(NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
-	
-public:
-	BOOL 			SubclassDlgItem(UINT nID, CWnd* pParent);
-	BOOL 			PopulateTree(NMHDR* pNMHDR);
-	
-	void 			InitializeCtrl();
-	void			SetSelectList(CShellListCtrl& hListCtrl);
-	
-	HTREEITEM 		InsertDesktopItem(LPSHELLFOLDER lpsf);
-	UINT 			DeleteChildren(HTREEITEM hItem);
 
 protected:
-	void 			SelectThisItem(const char *szBuff);
-	void 			SetupImages();
-
+	BOOL 			PopulateTree(NMHDR* pNMHDR);
+	
+	void 			SetTreeImages();
+	UINT 			DeleteChildren(HTREEITEM hItem);
+	HTREEITEM 		InsertDesktopItem(LPSHELLFOLDER lpsf);
+	
 protected:
 	CImageList		m_pImageList;
 	HTREEITEM       m_pSelectedItem;
 
-	CShellListCtrl* m_pShellListCtrl;
-
 private:
-	LPMALLOC        m_pMalloc;		
+	LPMALLOC        m_pMalloc;
+	CShellListCtrl* m_pShellListCtrl;
 };
 
 /////////////////////////////////////////////////////////////////////////////
