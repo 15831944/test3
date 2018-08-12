@@ -1,7 +1,7 @@
 #ifndef __UPDATE_FILE_NAME_H__
 #define __UPDATE_FILE_NAME_H__
 
-typedef enum{
+typedef enum {
 	CONFIG_EMPTYTYPE = 0,						//空类型
 	CONFIG_ADDFILENAME_TYPE,					//文件名添加字符串信息
 	CONFIG_DATEFILENAME_TYPE,					//文件名按照日期格式修改
@@ -11,7 +11,7 @@ typedef enum{
 	CONFIG_REPLACEFILENAME_TYPE,				//文件名替换为指定字符串信息
 }UPDATE_CONFIGTYPE;
 
-typedef enum{
+typedef enum {
 	STATE_EMPTYTYPE = 0,						//空类型
 	STATE_UPDATESUCCED_TYPE,					//更新成功	
 	STATE_UPDATEFAILED_TYPE,					//更新失败
@@ -20,7 +20,7 @@ typedef enum{
 	STATE_UPDATEMODIFY_TYPE,					//更新修改
 }UPDATE_STATETYPE;
 
-typedef struct{
+typedef struct {
 	unsigned int		uiFileSize;				//文件大小
 	unsigned int		uiFileAttrib;			//文件属性
 	__time64_t			time_create;			//文件创建时间
@@ -32,33 +32,29 @@ typedef struct{
 	char				szFileExt[MAX_PATH];	//文件扩展名
 }UPDATE_FILEINFO;
 
-typedef struct{
-	UPDATE_FILEINFO		stcSrcFileInfo;			//原文件信息	
-	UPDATE_FILEINFO		stcDestFileInfo;		//修改后文件信息
-}UPDATE_FILEDATA;
-
-typedef struct{
+typedef struct {
 }UPDATE_ADDFILENAME;
 
-typedef struct{
+typedef struct {
 }UPDATE_DATEFILENAME;
 
-typedef struct{
+typedef struct {
 }UPDATE_DELFILENAME;
 
-typedef struct{
+typedef struct {
 }UPDATE_EXTFILENAME;
 
-typedef struct{
+typedef struct {
 }UPDATE_INDEXFILENAME;
 
-typedef struct{
+typedef struct {
 }UPDATE_REPLACEFILENAME;
 
-typedef struct{
+typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_STATETYPE *pUpdateStatus);
+
+typedef struct {
 	UPDATE_CONFIGTYPE		emConfigType;
-	UPDATE_FILEDATA			stcFileData;
-	union{
+	union {
 		UPDATE_ADDFILENAME	stcAddFileName;
 		UPDATE_DATEFILENAME	stcDateFileName;
 		UPDATE_DELFILENAME	stcDelFileName;
@@ -66,12 +62,27 @@ typedef struct{
 		UPDATE_INDEXFILENAME stcIndexFileName;
 		UPDATE_REPLACEFILENAME stcReplaceFileName;
 	};
-}UPDATE_FILENAME;
+	
+	UPDATE_FILEINFO			stcFileInfo;
+	UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateStatus;
+}UPDATE_FILEDATA;
 
-typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILENAME *pFileName);
-//////////////////////////////////////////////////////////////////////////
-//
 using namespace std;
+class update_file_data
+{
+public:
+	update_file_data();
+	~update_file_data();
+
+public:
+	BOOL				SetUpdateFileData(UPDATE_FILEDATA stcUpdateFileData, std::vector<UPDATE_FILEINFO*> &vecFileData);
+	BOOL				GetUpdateFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
+
+protected:
+private:
+	std::vector<UPDATE_FILEDATA*> m_vecFileData;
+};
+
 class update_file_name
 {
 public:
@@ -79,29 +90,28 @@ public:
 	~update_file_name();
 	
 public:
-	BOOL							CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData);
-	BOOL							CloseUpdateProc();
+	BOOL				CreateUpdateProc(update_file_data fileData);
+	BOOL				CloseUpdateProc();
 	
 protected:
-	static  DWORD WINAPI			UpdateFileThreadProc(LPVOID lpParam);
+	static  DWORD WINAPI UpdateFileThreadProc(LPVOID lpParam);
 	
 protected:
-	void							UpdateFileInfo();
+	void				UpdateFileInfo();
 
 protected:
-	HANDLE							m_hThread;
+	HANDLE				m_hThread;
 
-	HANDLE							m_hStartEvent;
-	HANDLE							m_hEndEvent;
+	HANDLE				m_hStartEvent;
+	HANDLE				m_hEndEvent;
 
 private:
-	BOOL							m_bExit;
+	BOOL				m_bExit;
+	update_file_data	m_fileData;
 
-	DWORD							m_dwThreadID;
-	DWORD							m_dwProcTimeOver;
-	DWORD							m_dwCloseTimeOver;
-
-	UPDATE_FILEDATA_CALLBACK_FUNC	m_pfFileData;
+	DWORD				m_dwThreadID;
+	DWORD				m_dwProcTimeOver;
+	DWORD				m_dwCloseTimeOver;
 };
 
 #endif

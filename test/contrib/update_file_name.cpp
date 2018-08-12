@@ -1,8 +1,39 @@
 #include "stdafx.h"
 #include "update_file_name.h"
 
-#include "../Inc/GlobalInfo.h"
+update_file_data::update_file_data()
+{
+}
 
+update_file_data::~update_file_data()
+{
+
+}
+
+BOOL update_file_data::SetUpdateFileData(UPDATE_FILEDATA stcUpdateFileData, std::vector<UPDATE_FILEINFO *> &vecFileData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (vecFileData.size() == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+
+	} while (FALSE);
+	return bRet;
+}
+
+BOOL update_file_data::GetUpdateFileData(std::vector<UPDATE_FILEDATA *> &vecFileData)
+{
+	BOOL bRet = FALSE;
+	return bRet;
+}
+//////////////////////////////////////////////////////////////////////////
+//
 update_file_name::update_file_name()
 {
 	m_bExit = FALSE;
@@ -12,8 +43,6 @@ update_file_name::update_file_name()
 	m_dwCloseTimeOver = 0;
 	
 	m_hThread = NULL;
-	m_pfFileData = NULL;
-
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -44,21 +73,16 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//
 void update_file_name::UpdateFileInfo()
 {
 	BOOL bRet = FALSE;
-	
+
 	do
 	{
 	} while (FALSE);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//
-BOOL update_file_name::CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData)
+BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 {
 	BOOL bRet = FALSE;
 
@@ -68,8 +92,6 @@ BOOL update_file_name::CreateUpdateProc(UPDATE_FILEDATA_CALLBACK_FUNC pfFileData
 		{
 			SetEvent(m_hStartEvent);
 			ResetEvent(m_hEndEvent);
-
-			m_pfFileData = pfFileData;
 
 			m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 			if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
