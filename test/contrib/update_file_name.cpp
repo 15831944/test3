@@ -10,13 +10,13 @@ update_file_data::~update_file_data()
 
 }
 
-BOOL update_file_data::SetUpdateFileData(UPDATE_FILEDATA stcUpdateFileData, std::vector<UPDATE_FILEINFO *> &vecFileData)
+BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData)
 {
 	BOOL bRet = FALSE;
 
 	do 
 	{
-		if (vecFileData.size() == 0)
+		if (vecFileData.size() == 0 || pfUpdateFileData == NULL)
 		{
 			bRet = FALSE;
 			break;

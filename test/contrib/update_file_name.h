@@ -50,10 +50,10 @@ typedef struct {
 typedef struct {
 }UPDATE_REPLACEFILENAME;
 
-typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_STATETYPE *pUpdateStatus);
-
 typedef struct {
 	UPDATE_CONFIGTYPE		emConfigType;
+	UPDATE_STATETYPE		emUpdateStatus;
+	UPDATE_FILEINFO			stcFileInfo;
 	union {
 		UPDATE_ADDFILENAME	stcAddFileName;
 		UPDATE_DATEFILENAME	stcDateFileName;
@@ -62,10 +62,9 @@ typedef struct {
 		UPDATE_INDEXFILENAME stcIndexFileName;
 		UPDATE_REPLACEFILENAME stcReplaceFileName;
 	};
-	
-	UPDATE_FILEINFO			stcFileInfo;
-	UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateStatus;
 }UPDATE_FILEDATA;
+
+typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILEDATA *pUpdateFileData);
 
 using namespace std;
 class update_file_data
@@ -75,10 +74,9 @@ public:
 	~update_file_data();
 
 public:
-	BOOL				SetUpdateFileData(UPDATE_FILEDATA stcUpdateFileData, std::vector<UPDATE_FILEINFO*> &vecFileData);
+	BOOL				SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData);
 	BOOL				GetUpdateFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
 
-protected:
 private:
 	std::vector<UPDATE_FILEDATA*> m_vecFileData;
 };
