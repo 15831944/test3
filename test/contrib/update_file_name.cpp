@@ -13,6 +13,9 @@ update_file_data::~update_file_data()
 BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData)
 {
 	BOOL bRet = FALSE;
+	UPDATE_FILEINFO *pFileInfo = NULL;
+	UPDATE_FILEDATA stcUpdateFileData;
+	std::vector<UPDATE_FILEINFO*>::iterator iterFileData;
 
 	do 
 	{
@@ -22,14 +25,51 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 			break;
 		}
 
+		if (!pfUpdateFileData(&stcUpdateFileData))
+		{
+			bRet = FALSE;
+			break;
+		}
 
+		m_vecFileData.clear();
+		memset(&stcUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
+
+		for (iterFileData = vecFileData.begin(); iterFileData!=vecFileData.end(); ++iterFileData)
+		{
+			pFileInfo = (UPDATE_FILEINFO *)(*iterFileData);
+			if (pFileInfo == NULL)
+			{
+				continue;
+			}
+
+			memcpy(&stcUpdateFileData.stcFileInfo, pFileInfo, sizeof(UPDATE_FILEINFO));
+			m_vecFileData.push_back(&stcUpdateFileData);
+		}
+
+		bRet = TRUE;
 	} while (FALSE);
+
 	return bRet;
 }
 
 BOOL update_file_data::GetUpdateFileData(std::vector<UPDATE_FILEDATA *> &vecFileData)
 {
 	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (m_vecFileData.size() == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		vecFileData.clear();
+		vecFileData.assign(m_vecFileData.begin(), m_vecFileData.end());
+
+		bRet = TRUE;
+	} while (FALSE);
+
 	return bRet;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -38,11 +78,12 @@ update_file_name::update_file_name()
 {
 	m_bExit = FALSE;
 	
-	m_dwThreadID = 0;
-	m_dwProcTimeOver = 0;
-	m_dwCloseTimeOver = 0;
+	m_dwProcTimeOver = 500;
+	m_dwCloseTimeOver = INFINITE;
 	
 	m_hThread = NULL;
+	m_dwThreadID = 0;
+
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent   = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
@@ -90,24 +131,20 @@ BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 	{
 		if (WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 		{
-			SetEvent(m_hStartEvent);
-			ResetEvent(m_hEndEvent);
-
 			m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
 			if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
 			{
 				bRet = FALSE;
 				break;
 			}
-		}
 
-		bRet = TRUE;
+			SetEvent(m_hStartEvent);
+			ResetEvent(m_hEndEvent);
+			
+			bRet = TRUE;
+			m_fileData = fileData;
+		}		
 	} while(FALSE);
-
-	if (!bRet)
-	{
-		ResetEvent(m_hStartEvent);
-	}
 
 	return bRet;
 }

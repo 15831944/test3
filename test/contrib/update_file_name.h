@@ -63,7 +63,6 @@ typedef struct {
 		UPDATE_REPLACEFILENAME stcReplaceFileName;
 	};
 }UPDATE_FILEDATA;
-
 typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(UPDATE_FILEDATA *pUpdateFileData);
 
 using namespace std;
