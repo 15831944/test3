@@ -38,13 +38,15 @@
 #define IDC_EDIT4                       1042
 #define IDC_TAB1                        0x1000
 #define IDC_STATIC_VERSION              0x1001
-#define IDC_TREE1_SYSDIR                0x1100
-#define IDC_LIST1_SYSDIR                0x1101
-#define IDC_COMBO1_EVALNAME             0x1102
-#define IDC_BTN1_OPENFLODER             0x1103
-#define IDC_BTN1_RUNMODIFY              0x1104
-#define IDC_STATIC1_RECT                0x1105
-#define IDC_LIST2_SHOWINFO              0x1200
+#define IDC_LIST1_SHOWINFO              0x1100
+
+#define IDC_TREE2_SYSDIR                0x1200
+#define IDC_LIST2_SYSDIR                0x1201
+#define IDC_COMBO2_EVALNAME             0x1202
+#define IDC_BTN2_OPENFLODER             0x1203
+#define IDC_BTN2_RUNMODIFY              0x1204
+#define IDC_STATIC2_RECT                0x1205
+
 #define IDC_BTN3_TEST1                  0x1300
 #define IDC_BTN3_TEST2                  0x1301
 #define IDC_BTN3_TEST3                  0x1302
