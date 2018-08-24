@@ -141,8 +141,6 @@ void CTestDlg::OnPaint()
 
 	if (IsIconic())
 	{
-		SendMessage(WM_ICONERASEBKGND, (WPARAM) dc.GetSafeHdc(), 0);
-
 		int cxIcon = GetSystemMetrics(SM_CXICON);
 		int cyIcon = GetSystemMetrics(SM_CYICON);
 		
@@ -150,13 +148,13 @@ void CTestDlg::OnPaint()
 		int x = (rect.Width() - cxIcon + 1) / 2;
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
+		SendMessage(WM_ICONERASEBKGND, (WPARAM) dc.GetSafeHdc(), 0);
 		dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
 	{
 //		GetClientRect(&rect);
 //		dc.Draw3dRect(rect, RGB(255,0,0), RGB(0,255,0));
-
 		CDialog::OnPaint();
 	}
 }
@@ -183,6 +181,7 @@ void CTestDlg::OnTcnSelchangeTabWndctrl(NMHDR *pNMHDR, LRESULT *pResult)
 void CTestDlg::Init()
 {
 	InitCtrl();
+	InitInfo();
 }
 
 void CTestDlg::InitCtrl()
@@ -223,4 +222,8 @@ void CTestDlg::InitCtrl()
 
 	m_hTabCtrl.SetCurSel(m_nDefaultSel);
 	m_nPrePage = m_nDefaultSel;
+}
+
+void CTestDlg::InitInfo()
+{
 }

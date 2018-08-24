@@ -262,6 +262,24 @@ BOOL CDlgTest2Wnd::InitCtrl()
 	return TRUE;
 }
 
+#include "../../Contrib/update_file_name.h"
+BOOL test1(void *pUpdateData)
+{
+	UPDATE_FILEDATA *pFileData = (UPDATE_FILEDATA*)pUpdateData;
+	if (pFileData == NULL)
+	{
+		return FALSE;
+	}
+
+	if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
+	{
+		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
+		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
+	}
+
+	return TRUE;
+}
+
 BOOL CDlgTest2Wnd::InitInfo()
 {
 	int nIndex = 0;
@@ -293,6 +311,54 @@ BOOL CDlgTest2Wnd::InitInfo()
 
 	m_hComboEval.SetCurSel(0);
 #endif
+
+	UPDATE_FILEINFO *pFileInfo = NULL;
+	UPDATE_FILEDATA *pFileData = NULL;
+
+	std::vector<UPDATE_FILEINFO*> vecFileInfo;
+	std::vector<UPDATE_FILEDATA*> vecFileData;
+
+	pFileInfo = new UPDATE_FILEINFO;
+	if (pFileInfo == NULL)
+	{
+		return FALSE;
+	}
+	memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
+
+	pFileInfo->uiFileSize = 1;
+	pFileInfo->uiFileAttrib = 1;
+	pFileInfo->time_create = 12;
+	pFileInfo->time_access = 13;
+	pFileInfo->time_write = 14;
+	sprintf(pFileInfo->szFileName, _T("test1.txt"));
+	sprintf(pFileInfo->szParentPath, _T("C:\\"));
+	sprintf(pFileInfo->szFilePath, _T("C:\\test1.txt"));
+	sprintf(pFileInfo->szFileExt, _T(".txt"));
+	vecFileInfo.push_back(pFileInfo);
+
+	update_file_data filedata;
+	if (!filedata.SetUpdateFileData(vecFileInfo, test1))
+	{
+		return FALSE;
+	}
+	
+	if (!filedata.GetUpdateFileData(vecFileData))
+	{
+		return FALSE;
+	}
+	
+	pFileData = vecFileData[0];
+	if (pFileData == NULL)
+	{
+		return FALSE;
+	}
+
+	pFileData->emUpdateStatus = STATE_UPDATESUCCED_TYPE;
+	if (!pFileData->pfUpdateFunc(pFileData))
+	{
+		return FALSE;
+	}
+
 	return TRUE;
 }
 

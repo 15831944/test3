@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "update_file_name.h"
 
+//////////////////////////////////////////////////////////////////////////
+//update_file_data
 update_file_data::update_file_data()
 {
 }
@@ -13,26 +15,28 @@ update_file_data::~update_file_data()
 BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData)
 {
 	BOOL bRet = FALSE;
+	
 	UPDATE_FILEINFO *pFileInfo = NULL;
+	UPDATE_FILEDATA *pFileData = NULL;
+
 	UPDATE_FILEDATA stcUpdateFileData;
 	std::vector<UPDATE_FILEINFO*>::iterator iterFileData;
 
 	do 
 	{
+		memset(&stcUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
 		if (vecFileData.size() == 0 || pfUpdateFileData == NULL)
 		{
 			bRet = FALSE;
 			break;
 		}
 
+		stcUpdateFileData.emUpdateStatus = STATE_UPDATEINPUTE_TYPE;
 		if (!pfUpdateFileData(&stcUpdateFileData))
 		{
 			bRet = FALSE;
 			break;
 		}
-
-		m_vecFileData.clear();
-		memset(&stcUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
 
 		for (iterFileData = vecFileData.begin(); iterFileData!=vecFileData.end(); ++iterFileData)
 		{
@@ -42,8 +46,18 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 				continue;
 			}
 
-			memcpy(&stcUpdateFileData.stcFileInfo, pFileInfo, sizeof(UPDATE_FILEINFO));
-			m_vecFileData.push_back(&stcUpdateFileData);
+			pFileData = new UPDATE_FILEDATA;
+			if (pFileData == NULL)
+			{
+				continue;
+			}
+			memset(pFileData, 0x0, sizeof(UPDATE_FILEDATA));
+
+			memcpy(pFileData, &stcUpdateFileData, sizeof(UPDATE_FILEDATA));
+			memcpy(&pFileData->stcFileInfo, pFileInfo, sizeof(UPDATE_FILEINFO));
+			pFileData->pfUpdateFunc = pfUpdateFileData;
+
+			m_vecFileData.push_back(pFileData);
 		}
 
 		bRet = TRUE;
@@ -72,8 +86,37 @@ BOOL update_file_data::GetUpdateFileData(std::vector<UPDATE_FILEDATA *> &vecFile
 
 	return bRet;
 }
+
+void update_file_data::ClearFileData()
+{
+	BOOL bRet = FALSE;
+	UPDATE_FILEDATA *pFileData = NULL;
+	std::vector<UPDATE_FILEDATA *>::iterator iterFileData;
+
+	do 
+	{
+		for (iterFileData=m_vecFileData.begin(); iterFileData!=m_vecFileData.end();)
+		{
+			pFileData = (UPDATE_FILEDATA *)(*iterFileData);
+			if (pFileData != NULL)
+			{
+				delete pFileData;
+				pFileData = NULL;
+
+				iterFileData = m_vecFileData.erase(iterFileData);
+			}
+			else
+			{
+				++iterFileData;
+			}
+		}
+
+		m_vecFileData.clear();
+		bRet = TRUE;
+	} while (FALSE);
+}
 //////////////////////////////////////////////////////////////////////////
-//
+//update_file_name
 update_file_name::update_file_name()
 {
 	m_bExit = FALSE;
@@ -123,6 +166,8 @@ void update_file_name::UpdateFileInfo()
 	} while (FALSE);
 }
 
+//////////////////////////////////////////////////////////////////////////
+//
 BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 {
 	BOOL bRet = FALSE;
