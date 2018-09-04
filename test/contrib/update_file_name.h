@@ -83,6 +83,27 @@ private:
 	std::vector<UPDATE_FILEDATA*> m_vecFileData;
 };
 
+class update_file_func
+{
+public:
+	update_file_func();
+	~update_file_func();
+
+public:
+	BOOL				SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, update_file_data fileData);
+
+protected:
+	BOOL				SetAddFileName();
+	BOOL				SetDateFileName();
+	BOOL				SetDelFileName();
+	BOOL				SetExtFileName();
+	BOOL				SetIndexFileName();
+	BOOL				SetReplaceFileName();
+
+protected:
+	update_file_data	m_fileData;
+};
+
 class update_file_name
 {
 public:
@@ -106,6 +127,7 @@ protected:
 	HANDLE				m_hEndEvent;
 
 	update_file_data	m_fileData;
+	update_file_func	m_fileFunc;
 
 private:
 	BOOL				m_bExit;

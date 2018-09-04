@@ -1,7 +1,13 @@
 #include "stdafx.h"
 #include "update_file_name.h"
 
-//////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/* author : wl
+ * email  : lysgwl@163.com
+ * date   : 2018.09.01 17:39
+ */
+/************************************************************************/
+
 //update_file_data
 update_file_data::update_file_data()
 {
@@ -115,6 +121,132 @@ void update_file_data::ClearFileData()
 		bRet = TRUE;
 	} while (FALSE);
 }
+
+//////////////////////////////////////////////////////////////////////////
+//
+update_file_func::update_file_func()
+{
+
+}
+
+update_file_func::~update_file_func()
+{
+
+}
+
+BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, update_file_data fileData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		switch (emConfigType)
+		{
+		case CONFIG_ADDFILENAME_TYPE:
+			{
+				if (!SetAddFileName())
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+			break;
+
+		case CONFIG_DATEFILENAME_TYPE:
+			{
+				if (!SetDateFileName())
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+			break;
+
+		case CONFIG_DELFILENAME_TYPE:
+			{
+				if (!SetDelFileName())
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+			break;
+
+		case CONFIG_EXTFILENAME_TYPE:
+			{
+				if (!SetExtFileName())
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+			break;
+
+		case CONFIG_INDEXFILENAME_TYPE:
+			{
+				if (!SetIndexFileName())
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+			break;
+
+		case CONFIG_REPLACEFILENAME_TYPE:
+			{
+				if (!SetReplaceFileName())
+				{
+					bRet = FALSE;
+					break;
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+
+		if (!bRet)
+		{
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL update_file_func::SetAddFileName()
+{
+	return TRUE;
+}
+
+BOOL update_file_func::SetDateFileName()
+{
+	return TRUE;
+}
+
+BOOL update_file_func::SetDelFileName()
+{
+	return TRUE;
+}
+
+BOOL update_file_func::SetExtFileName()
+{
+	return TRUE;
+}
+
+BOOL update_file_func::SetIndexFileName()
+{
+	return TRUE;
+}
+
+BOOL update_file_func::SetReplaceFileName()
+{
+	return TRUE;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //update_file_name
 update_file_name::update_file_name()
@@ -163,6 +295,11 @@ void update_file_name::UpdateFileInfo()
 
 	do
 	{
+		while(WaitForSingleObject(m_hEndEvent, m_dwProcTimeOver) != WAIT_OBJECT_0)
+		{
+			
+		}
+
 	} while (FALSE);
 }
 
@@ -183,12 +320,13 @@ BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 				break;
 			}
 
+			m_fileData = fileData;
+
 			SetEvent(m_hStartEvent);
 			ResetEvent(m_hEndEvent);
 			
 			bRet = TRUE;
-			m_fileData = fileData;
-		}		
+		}	
 	} while(FALSE);
 
 	return bRet;
