@@ -35,7 +35,7 @@ protected:
 	BOOL							DrawRectFrameLine(CDC *pDC);
 	
 protected:
-	CButton							m_btnTest3;
+	CImageButton					m_btnTest3;
 	CReportCtrl						m_ListTest;
 	CStackedTreeCtrl				m_hTreeCtrl;
 

@@ -8,17 +8,16 @@ END_MESSAGE_MAP()
 
 CTestApp::CTestApp()
 {
+	m_ulGdiPlusToken = NULL;
 }
 
 CTestApp theApp;
 BOOL CTestApp::InitInstance()
 {
-	ULONG_PTR gdiplusToken;
-	GdiplusStartupInput gdiplusStartupInput;
-	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-
 	CTestDlg dlg;
 	m_pMainWnd = &dlg;
+
+	GdiplusStartup(&m_ulGdiPlusToken, &m_GdiPlusStartupInput, NULL);
 
 	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
@@ -28,7 +27,6 @@ BOOL CTestApp::InitInstance()
 	{
 	}
 	
-	GdiplusShutdown(gdiplusToken);
 	return FALSE;
 }
 
@@ -39,5 +37,6 @@ int CTestApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt)
 
 int CTestApp::ExitInstance()
 {
+	GdiplusShutdown(m_ulGdiPlusToken);
 	return CWinApp::ExitInstance();
 }

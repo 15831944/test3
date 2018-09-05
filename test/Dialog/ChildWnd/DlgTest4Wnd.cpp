@@ -50,8 +50,8 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 	m_hTreeCtrl.Create(dwStyle, rcTreeWnd, this, 0+1);
 #endif
 
-#if 0
-	m_btnTest3.SetImage(_T("D:\\s1_Normal.png"), NULL, NULL, _T("D:\\s1_Hover.png"));
+#if 1
+	m_btnTest3.SetImage(_T("C:\\s1.png"), NULL, _T("C:\\s2.png"), NULL);
 #endif
 
 	if (!InitCtrl())
@@ -127,6 +127,7 @@ void CDlgTest4Wnd::OnBnClickedButton2()
 
 void CDlgTest4Wnd::OnBnClickedButton3()
 {
+	static BOOL bIsButtonDown = FALSE;
 #if 0
 	CDlgPTZControlWnd	dlgPTZControl;
 	dlgPTZControl.DoModal();
@@ -141,6 +142,17 @@ int nItem = m_list.GetTopIndex();
     m_list.Scroll(sz);
     m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
 #endif
+
+	if (!bIsButtonDown)
+	{
+		bIsButtonDown = TRUE;
+		m_btnTest3.SetBtnDownFlag(TRUE);
+	}
+	else
+	{
+		bIsButtonDown = FALSE;
+		m_btnTest3.SetBtnDownFlag(FALSE);
+	}
 }
 
 void CDlgTest4Wnd::OnBnClickedButton4()

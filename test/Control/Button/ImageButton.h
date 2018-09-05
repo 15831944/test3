@@ -6,7 +6,7 @@ class CImageButton : public CButton
 public:
 	CImageButton();
 	virtual ~CImageButton();
-	
+
 protected:
 	virtual void 	PreSubclassWindow();
 	virtual BOOL 	PreTranslateMessage(MSG* pMsg);
@@ -18,6 +18,9 @@ protected:
 	afx_msg void 	OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg LRESULT OnMouseLeave(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnMouseHover(WPARAM wparam, LPARAM lparam);
+	
+	//afx_msg void	OnLButtonDown(UINT nFlags, CPoint point);
+	//afx_msg void	OnLButtonUp(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -25,7 +28,10 @@ protected:
 	void			DrawWndBtn(CDC *pDC);
 	
 public:
-	BOOL			SetImage(LPCTSTR lpszImageNormal, LPCTSTR lpszImageHover, LPCTSTR lpszImageDown, LPCTSTR lpszImageDisable);	
+	void			SetBtnDownFlag(BOOL bFlag);
+
+	BOOL			SetImage(LPCTSTR lpszImageNormal, LPCTSTR lpszImageHover, LPCTSTR lpszImageDown, LPCTSTR lpszImageDisable);
+	BOOL			SetImageText(int iFontSize, LPCTSTR lpszBtnText, LPCTSTR lpszFaceName, COLORREF crTextColor);
 	
 protected:
 	CDC				m_dcWndBkDC;
@@ -33,12 +39,15 @@ protected:
 	CDC				m_dcStandDC;
 	CDC				m_dcStandPressDC;
 	CDC				m_dcStandHotLightDC;
-	
-	CDC				m_dcDisableDC;
+	CDC				m_dcStandDisableDC;
+
 	CDC*			m_pCurBtnDC;
 	
 private:
+	BOOL			m_bIsDownFlag;
+	BOOL			m_bIsBtnDown;
 	BOOL			m_bInitedBitmap;
+	
 	BOOL			m_bIsTracking;
 	BOOL			m_bIsHovering;
 	BOOL			m_bIsDisabled;
@@ -47,9 +56,10 @@ private:
 	Bitmap*			m_pImageHover;
 	Bitmap*			m_pImageDown;
 	Bitmap*			m_pImageDisable;
-	
-	CString			m_strImageNormal;
-	CString			m_strImageHover;
-	CString			m_strImageDown;
-	CString			m_strImageDisable;
+
+	CString			m_strBtnText;
+	COLORREF		m_crTextColor;
+
+	LOGFONT			m_lfFont;
+	CFont			m_Font;
 };
