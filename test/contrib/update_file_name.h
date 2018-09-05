@@ -119,6 +119,7 @@ protected:
 	
 protected:
 	void				UpdateFileInfo();
+	BOOL				UpdateFileName();
 
 protected:
 	HANDLE				m_hThread;

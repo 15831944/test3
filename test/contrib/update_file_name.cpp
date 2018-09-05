@@ -291,18 +291,28 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 
 void update_file_name::UpdateFileInfo()
 {
-	BOOL bRet = FALSE;
-
-	do
+	if (!UpdateFileName())
 	{
-		while(WaitForSingleObject(m_hEndEvent, m_dwProcTimeOver) != WAIT_OBJECT_0)
-		{
-			
-		}
-
-	} while (FALSE);
+	}
 }
 
+BOOL update_file_name::UpdateFileName()
+{
+	BOOL bRet = FALSE;
+
+	std::vector<UPDATE_FILEDATA*> vecFileData;
+	std::vector<UPDATE_FILEDATA*>::iterator iterFileData;
+
+	do 
+	{
+		if (!m_fileData.GetUpdateFileData(vecFileData))
+		{
+			bRet = FALSE;
+			break;
+		}
+		
+	} while (FALSE);
+}
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
