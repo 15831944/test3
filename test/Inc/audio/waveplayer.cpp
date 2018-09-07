@@ -517,8 +517,6 @@ BOOL WavePlayer::ReadWavFile(HMMIO hMmioFile, UINT uiRead, BYTE **pbDataBuf, MMC
 	return bRet;
 }
 
-
-
 BOOL WavePlayer::OpenPlayDev(UINT uiDevID, WAVEFORMATEX *pWaveformat, HWAVEOUT &hWaveOut)
 {
 	BOOL bRet = FALSE;
@@ -775,6 +773,7 @@ BOOL WavePlayer::ClosePlayerProc()
 	m_bExit = FALSE;
 	ResetEvent(m_hEndPlayEvent);
 	ResetEvent(m_hStartEvent);
+	
 	return TRUE;
 }
 

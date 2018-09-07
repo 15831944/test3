@@ -50,7 +50,7 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 	m_hTreeCtrl.Create(dwStyle, rcTreeWnd, this, 0+1);
 #endif
 
-#if 1
+#if 0
 	m_btnTest3.SetImage(_T("C:\\s1.png"), NULL, _T("C:\\s2.png"), NULL);
 #endif
 
@@ -79,8 +79,6 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 {
 	static BOOL bFlag = FALSE;
 
-	DWORD dwIndex = 0;
-
 	CString strFileName;
 	CString strFilePath;
 
@@ -101,6 +99,7 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 		return;
 	}
 
+#if 0
 	m_WavePlayer.SetPlayerProcEvent(FALSE);
 	if (!m_WavePlayer.SetPlayerProcData(strFilePath, 0))
 	{
@@ -108,10 +107,17 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 	}
 
 	m_WavePlayer.SetPlayerProcEvent(TRUE);
+#endif
+
+	if (!m_WavePlayer.CreatePlayerProc(strFilePath, 0, PlayMode_Loop))
+	{
+		return;
+	}
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()
 {
+#if 0
 	static BOOL bFlag = FALSE;
 	if (!bFlag)
 	{
@@ -123,11 +129,13 @@ void CDlgTest4Wnd::OnBnClickedButton2()
 		bFlag = FALSE;
 		m_WavePlayer.SetPlayerProcEvent(TRUE);
 	}
+#endif
+
+	m_WavePlayer.ClosePlayerProc();
 }
 
 void CDlgTest4Wnd::OnBnClickedButton3()
 {
-	static BOOL bIsButtonDown = FALSE;
 #if 0
 	CDlgPTZControlWnd	dlgPTZControl;
 	dlgPTZControl.DoModal();
@@ -142,17 +150,6 @@ int nItem = m_list.GetTopIndex();
     m_list.Scroll(sz);
     m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
 #endif
-
-	if (!bIsButtonDown)
-	{
-		bIsButtonDown = TRUE;
-		m_btnTest3.SetBtnDownFlag(TRUE);
-	}
-	else
-	{
-		bIsButtonDown = FALSE;
-		m_btnTest3.SetBtnDownFlag(FALSE);
-	}
 }
 
 void CDlgTest4Wnd::OnBnClickedButton4()
@@ -214,11 +211,13 @@ BOOL CDlgTest4Wnd::InitInfo()
 {
 	m_CheckLinkProc.CreateCheckLinkProc(test1);
 
+#if 0
 	if (!m_WavePlayer.CreatePlayerProc())
 	{
 		return FALSE;
 	}
-
+#endif
+	
 	return TRUE;
 }
 
