@@ -20,6 +20,13 @@ typedef enum {
 	STATE_UPDATEMODIFY_TYPE,					//更新修改
 }UPDATE_STATETYPE;
 
+typedef enum {
+	DATE_EMPTYTYPE = 0,
+	DATE_CREATETIME_TYPE,						//创建时间
+	DATE_MODIFYTIME_TYPE,						//修改时间
+	DATE_ACCESSTIME_TYPE,						//访问时间
+}UPDATE_DATETYPE;
+
 typedef struct {
 	unsigned int		uiFileSize;				//文件大小
 	unsigned int		uiFileAttrib;			//文件属性
@@ -33,21 +40,37 @@ typedef struct {
 }UPDATE_FILEINFO;
 
 typedef struct {
+	int					iPos;					//文件名添加的位置, iPos=-1为文件名前添加;
+	char				szFileName[MAX_PATH];	//文件名新添加的字符名;
 }UPDATE_ADDFILENAME;
 
 typedef struct {
+	BOOL				bIsReadPicExif;			//是否读取图片Exif信息;	
+	char				szDateFormat[MAX_PATH];	//日期格式;
+	UPDATE_DATETYPE		emDateType;				//日期类型;
 }UPDATE_DATEFILENAME;
 
 typedef struct {
+	int					iPos;					//删除字符开始位置, iPos=-1为从末尾开始删除;
+	int					iCount;					//删除字符的个数;
+	char				szFileName[MAX_PATH];	//文件名中待删除的字符名;
 }UPDATE_DELFILENAME;
 
 typedef struct {
+	BOOL				bIsUppercase;			//是否大写;
+	char				szExtName[MAX_PATH];	//待替换的文件扩展名;
 }UPDATE_EXTFILENAME;
 
 typedef struct {
+	BOOL				bAutoAlign;				//自动对齐;
+	int					iBit;					//序号位数;
+	int					iStartIndex;			//开始序号;
+	int					iEndIndex;				//结束序号;
+	char				szIndexFormat[MAX_PATH]; //序号格式;
 }UPDATE_INDEXFILENAME;
 
 typedef struct {
+	char				szFileName[MAX_PATH];	//待替换的文件名字符;
 }UPDATE_REPLACEFILENAME;
 
 typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(void *pUpdateData);
@@ -90,18 +113,15 @@ public:
 	~update_file_func();
 
 public:
-	BOOL				SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, update_file_data fileData);
+	BOOL				SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
 
 protected:
-	BOOL				SetAddFileName();
-	BOOL				SetDateFileName();
-	BOOL				SetDelFileName();
-	BOOL				SetExtFileName();
-	BOOL				SetIndexFileName();
-	BOOL				SetReplaceFileName();
-
-protected:
-	update_file_data	m_fileData;
+	BOOL				SetAddFileName(UPDATE_FILEDATA *pFileData);
+	BOOL				SetDateFileName(UPDATE_FILEDATA *pFileData);
+	BOOL				SetDelFileName(UPDATE_FILEDATA *pFileData);
+	BOOL				SetExtFileName(UPDATE_FILEDATA *pFileData);
+	BOOL				SetIndexFileName(UPDATE_FILEDATA *pFileData);
+	BOOL				SetReplaceFileName(UPDATE_FILEDATA *pFileData);
 };
 
 class update_file_name

@@ -134,7 +134,7 @@ update_file_func::~update_file_func()
 
 }
 
-BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, update_file_data fileData)
+BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
@@ -144,61 +144,73 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, update_
 		{
 		case CONFIG_ADDFILENAME_TYPE:
 			{
-				if (!SetAddFileName())
+				if (!SetAddFileName(pFileData))
 				{
 					bRet = FALSE;
 					break;
 				}
+
+				bRet = TRUE;
 			}
 			break;
 
 		case CONFIG_DATEFILENAME_TYPE:
 			{
-				if (!SetDateFileName())
+				if (!SetDateFileName(pFileData))
 				{
 					bRet = FALSE;
 					break;
 				}
+
+				bRet = TRUE;
 			}
 			break;
 
 		case CONFIG_DELFILENAME_TYPE:
 			{
-				if (!SetDelFileName())
+				if (!SetDelFileName(pFileData))
 				{
 					bRet = FALSE;
 					break;
 				}
+
+				bRet = TRUE;
 			}
 			break;
 
 		case CONFIG_EXTFILENAME_TYPE:
 			{
-				if (!SetExtFileName())
+				if (!SetExtFileName(pFileData))
 				{
 					bRet = FALSE;
 					break;
 				}
+
+				bRet = TRUE;
 			}
 			break;
 
 		case CONFIG_INDEXFILENAME_TYPE:
 			{
-				if (!SetIndexFileName())
+				if (!SetIndexFileName(pFileData))
 				{
 					bRet = FALSE;
 					break;
 				}
+
+				bRet = TRUE;
 			}
 			break;
 
 		case CONFIG_REPLACEFILENAME_TYPE:
 			{
-				if (!SetReplaceFileName())
+				if (!SetReplaceFileName(pFileData))
 				{
 					bRet = FALSE;
 					break;
 				}
+
+				bRet = TRUE;
 			}
 			break;
 
@@ -217,34 +229,76 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, update_
 	return bRet;
 }
 
-BOOL update_file_func::SetAddFileName()
+BOOL update_file_func::SetAddFileName(UPDATE_FILEDATA *pFileData)
 {
-	return TRUE;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-BOOL update_file_func::SetDateFileName()
+BOOL update_file_func::SetDateFileName(UPDATE_FILEDATA *pFileData)
 {
-	return TRUE;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-BOOL update_file_func::SetDelFileName()
+BOOL update_file_func::SetDelFileName(UPDATE_FILEDATA *pFileData)
 {
-	return TRUE;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-BOOL update_file_func::SetExtFileName()
+BOOL update_file_func::SetExtFileName(UPDATE_FILEDATA *pFileData)
 {
-	return TRUE;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-BOOL update_file_func::SetIndexFileName()
+BOOL update_file_func::SetIndexFileName(UPDATE_FILEDATA *pFileData)
 {
-	return TRUE;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-BOOL update_file_func::SetReplaceFileName()
+BOOL update_file_func::SetReplaceFileName(UPDATE_FILEDATA *pFileData)
 {
-	return TRUE;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -291,15 +345,25 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 
 void update_file_name::UpdateFileInfo()
 {
-	if (!UpdateFileName())
+	BOOL bRet = FALSE;
+
+	do 
 	{
-	}
+		if (!UpdateFileName())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
 }
 
 BOOL update_file_name::UpdateFileName()
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_FILEDATA *pUpdateFileData;
 	std::vector<UPDATE_FILEDATA*> vecFileData;
 	std::vector<UPDATE_FILEDATA*>::iterator iterFileData;
 
@@ -310,7 +374,22 @@ BOOL update_file_name::UpdateFileName()
 			bRet = FALSE;
 			break;
 		}
+
+		for (iterFileData=vecFileData.begin(); iterFileData!=vecFileData.end(); ++iterFileData)
+		{
+			pUpdateFileData = (UPDATE_FILEDATA *)(*iterFileData);
+			if (pUpdateFileData == NULL)
+			{
+				continue;
+			}
+
+			if (!m_fileFunc.SetUpdateFileFunc(pUpdateFileData->emConfigType, pUpdateFileData))
+			{
+				continue;
+			}
+		}
 		
+		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
@@ -323,6 +402,7 @@ BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 
 	do
 	{
+		CloseUpdateProc();
 		if (WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 		{
 			m_hThread = CreateThread(NULL, 0, UpdateFileThreadProc, (LPVOID)this, 0, &m_dwThreadID);
@@ -346,25 +426,44 @@ BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 
 BOOL update_file_name::CloseUpdateProc()
 {
-	m_bExit = TRUE;
-	WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
-/*
-	if (m_mapEnumInfo.size() > 0)
-	{
-		for (std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
-		{
-			if (mapIter->second != NULL)
-			{
-				delete mapIter->second;
-				mapIter->second = NULL;
-			}
+	BOOL bRet = FALSE;
 
-			mapIter = m_mapEnumInfo.erase(mapIter);
+	do 
+	{
+		if (m_hThread == NULL || m_hThread == INVALID_HANDLE_VALUE)
+		{
+			bRet = FALSE;
+			break;
 		}
 
-		m_mapEnumInfo.clear();
-	}
+		m_bExit = TRUE;
+		WaitForSingleObject(m_hEndEvent, m_dwCloseTimeOver);
+
+/*
+		if (m_mapEnumInfo.size() > 0)
+		{
+			for (std::map<std::string, UPDATE_FILEINFO*>::iterator mapIter mapIter = m_mapEnumInfo.begin(); mapIter != m_mapEnumInfo.end();)
+			{
+				if (mapIter->second != NULL)
+				{
+					delete mapIter->second;
+					mapIter->second = NULL;
+				}
+
+				mapIter = m_mapEnumInfo.erase(mapIter);
+			}
+
+			m_mapEnumInfo.clear();
+		}
 */
-	ResetEvent(m_hStartEvent);
-	return TRUE;
+		CloseHandle(m_hThread);
+		m_hThread = NULL;
+
+		ResetEvent(m_hStartEvent);
+		ResetEvent(m_hEndEvent);
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
