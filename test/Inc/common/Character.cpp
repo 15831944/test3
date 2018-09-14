@@ -3,6 +3,185 @@
 
 #include <assert.h>
 
+//////////////////////////////////////////////////////////////////////////
+//
+CControl::CControl()
+{
+
+}
+
+CControl::~CControl()
+{
+
+}
+
+int CControl::IsStringANSI(const char* pszString)
+{
+	return 0;
+}
+
+int CControl::IsStringUtf8(const char* pszString)
+{
+	bool bRet = false;
+	bool bIsAllAscii = false;
+
+	unsigned int uiIndex = 0;
+	unsigned int uiBytes = 0;		//UTF-8可用1-6个字节编码, ASCII用一个字节
+	unsigned char uChar = '\0';
+
+	uChar = *pszString;
+	for (uiIndex=0; pszString[uiIndex]!='\0'; ++uiIndex)
+	{
+		uChar = *(pszString + uiIndex);
+		if ((uChar&0x80) != 0 && uiBytes == 0)	//判断是否ASCII编码, 如果不是则为UTF8; ASCII用7位编码, 最高位标记为0, 0xxxxxxx
+		{
+			bIsAllAscii = false;
+		}
+		else
+		{
+			bIsAllAscii = true;
+		}
+
+		if (uiBytes == 0)
+		{//
+			if (uChar >= 0x80)			//如果不是ASCII码, 则是多字节符, 计算字节数
+			{
+				if (uChar >= 0xFC && uChar <= 0xFD)
+				{
+					uiBytes = 6;
+				}
+				else if (uChar >= 0xF8)
+				{
+					uiBytes = 5;
+				}
+				else if (uChar >= 0xF0)
+				{
+					uiBytes = 4;
+				}
+				else if (uChar >= 0xE0)
+				{
+					uiBytes = 3;
+				}
+				else if (uChar >= 0xC0)
+				{
+					uiBytes = 2;
+				}
+				else
+				{
+					bRet = false;
+					break;
+				}
+
+				uiBytes--;
+			}
+		}
+		else
+		{
+			if ((uChar&0xC0) != 0x80)	//多字节符的非首字节, 应为10xxxxxx
+			{
+				bRet = false;
+				break;
+			}
+
+			uiBytes--;
+		}
+	}
+
+	if (uiBytes != 0)
+	{
+		bRet = false;
+	}
+	else
+	{
+		if (bIsAllAscii)
+		{
+			bRet = true;
+		}
+		else
+		{
+			bRet = true;
+		}
+	}
+
+	return bRet ? 1 : 0;
+}
+
+int CControl::IsStringGBK(const char* pszString)
+{
+	bool bRet = false;
+	bool bIsAllAscii = false;
+
+	unsigned int uiIndex = 0;
+	unsigned int uiBytes = 0;
+	unsigned char uChar = '\0';
+
+	uChar = *pszString;
+	for (uiIndex=0; pszString[uiIndex]!='\0'; ++uiIndex)
+	{
+		uChar = *(pszString+uiIndex);
+		if ((uChar&0x80) != 0 && uiBytes == 0)	//判断是否ASCII编码, 如果不是则是GBK编码
+		{
+			bIsAllAscii = false;
+		}
+		else
+		{
+			bIsAllAscii = true;
+		}
+
+		if (uiBytes == 0)
+		{
+			if (uChar >= 0x80)
+			{
+				if (uChar >= 0x81 && uChar <= 0xFE)
+				{
+					uiBytes = 2;
+				}
+				else
+				{
+					bRet = false;
+					break;
+				}
+
+				uiBytes--;
+			}
+		}
+		else
+		{
+			if (uChar < 0x40 || uChar > 0xFE)
+			{
+				bRet = false;
+				break;
+			}
+
+			uiBytes--;
+		}
+	}
+
+	if (uiBytes != 0)
+	{
+		bRet = false;
+	}
+	else
+	{
+		if (bIsAllAscii)
+		{
+			bRet = true;
+		}
+		else
+		{
+			bRet = true;
+		}
+	}
+
+	return bRet ? 1 : 0;
+}
+
+int CControl::IsStringUnicode(const char* pszString)
+{
+	return 0;
+}
+//////////////////////////////////////////////////////////////////////////
+//
 CConvert::CConvert()
 {
 }

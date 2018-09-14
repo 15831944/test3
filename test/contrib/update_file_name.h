@@ -40,7 +40,7 @@ typedef struct {
 }UPDATE_FILEINFO;
 
 typedef struct {
-	int					iPos;					//文件名添加的位置, iPos=-1为文件名前添加;
+	int					iPos;					//文件名添加的位置, iPos=-1为从末尾开始添加;
 	char				szFileName[MAX_PATH];	//文件名新添加的字符名;
 }UPDATE_ADDFILENAME;
 
@@ -116,12 +116,12 @@ public:
 	BOOL				SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
 
 protected:
-	BOOL				SetAddFileName(UPDATE_FILEDATA *pFileData);
-	BOOL				SetDateFileName(UPDATE_FILEDATA *pFileData);
-	BOOL				SetDelFileName(UPDATE_FILEDATA *pFileData);
-	BOOL				SetExtFileName(UPDATE_FILEDATA *pFileData);
-	BOOL				SetIndexFileName(UPDATE_FILEDATA *pFileData);
-	BOOL				SetReplaceFileName(UPDATE_FILEDATA *pFileData);
+	BOOL				SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
+	BOOL				SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
+	BOOL				SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
+	BOOL				SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
+	BOOL				SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
+	BOOL				SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
 };
 
 class update_file_name

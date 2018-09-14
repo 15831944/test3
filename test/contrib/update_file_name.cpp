@@ -144,7 +144,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 		{
 		case CONFIG_ADDFILENAME_TYPE:
 			{
-				if (!SetAddFileName(pFileData))
+				if (!SetAddFileName(emConfigType, pFileData))
 				{
 					bRet = FALSE;
 					break;
@@ -156,7 +156,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 
 		case CONFIG_DATEFILENAME_TYPE:
 			{
-				if (!SetDateFileName(pFileData))
+				if (!SetDateFileName(emConfigType, pFileData))
 				{
 					bRet = FALSE;
 					break;
@@ -168,7 +168,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 
 		case CONFIG_DELFILENAME_TYPE:
 			{
-				if (!SetDelFileName(pFileData))
+				if (!SetDelFileName(emConfigType, pFileData))
 				{
 					bRet = FALSE;
 					break;
@@ -180,7 +180,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 
 		case CONFIG_EXTFILENAME_TYPE:
 			{
-				if (!SetExtFileName(pFileData))
+				if (!SetExtFileName(emConfigType, pFileData))
 				{
 					bRet = FALSE;
 					break;
@@ -192,7 +192,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 
 		case CONFIG_INDEXFILENAME_TYPE:
 			{
-				if (!SetIndexFileName(pFileData))
+				if (!SetIndexFileName(emConfigType, pFileData))
 				{
 					bRet = FALSE;
 					break;
@@ -204,7 +204,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 
 		case CONFIG_REPLACEFILENAME_TYPE:
 			{
-				if (!SetReplaceFileName(pFileData))
+				if (!SetReplaceFileName(emConfigType, pFileData))
 				{
 					bRet = FALSE;
 					break;
@@ -229,72 +229,172 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 	return bRet;
 }
 
-BOOL update_file_func::SetAddFileName(UPDATE_FILEDATA *pFileData)
+BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_ADDFILENAME stcAddFileName = {0};
+
 	do 
 	{
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (emConfigType != pFileData->emConfigType)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(&stcAddFileName, &pFileData->stcAddFileName, sizeof(UPDATE_ADDFILENAME));
+
+		if (strcmp(stcAddFileName.szFileName, _T("")) == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (stcAddFileName.iPos != -1)
+		{
+		}
+		else
+		{
+
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOL update_file_func::SetDateFileName(UPDATE_FILEDATA *pFileData)
+BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
+	
+	UPDATE_DATEFILENAME stcDateFileName = {0};
 
 	do 
 	{
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (emConfigType != pFileData->emConfigType)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOL update_file_func::SetDelFileName(UPDATE_FILEDATA *pFileData)
+BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_DELFILENAME stcDelFileName  = {0};
+
 	do 
 	{
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (emConfigType != pFileData->emConfigType)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOL update_file_func::SetExtFileName(UPDATE_FILEDATA *pFileData)
+BOOL update_file_func::SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_EXTFILENAME stcExtFileName = {0};
+
 	do 
 	{
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (emConfigType != pFileData->emConfigType)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOL update_file_func::SetIndexFileName(UPDATE_FILEDATA *pFileData)
+BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_INDEXFILENAME stcIndexFileName = {0};
+
 	do 
 	{
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (emConfigType != pFileData->emConfigType)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOL update_file_func::SetReplaceFileName(UPDATE_FILEDATA *pFileData)
+BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_REPLACEFILENAME stcReplaceFileName = {0};
+
 	do 
 	{
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (emConfigType != pFileData->emConfigType)
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 

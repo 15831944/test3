@@ -93,11 +93,16 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 		strFileName = _T("2.wav");
 	}
 
+	std::string s1 = "²âÊÔÒ»";
+	int i = s1.size();
+
+#if 0
 	strFilePath.Format(_T("%s\\%s"), CGlobalInfo::CreateInstance()->GetAppPath(), strFileName);
 	if (!CGlobalInfo::CreateInstance()->IsFileExists(strFilePath))
 	{
 		return;
 	}
+#endif
 
 #if 0
 	m_WavePlayer.SetPlayerProcEvent(FALSE);
@@ -109,10 +114,12 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 	m_WavePlayer.SetPlayerProcEvent(TRUE);
 #endif
 
+#if 0
 	if (!m_WavePlayer.CreatePlayerProc(strFilePath, 0, PlayMode_Loop))
 	{
 		return;
 	}
+#endif
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()
@@ -131,7 +138,9 @@ void CDlgTest4Wnd::OnBnClickedButton2()
 	}
 #endif
 
+#if 0
 	m_WavePlayer.ClosePlayerProc();
+#endif
 }
 
 void CDlgTest4Wnd::OnBnClickedButton3()
@@ -143,18 +152,23 @@ void CDlgTest4Wnd::OnBnClickedButton3()
 
 #if 0
 	int nSel = 50;
-int nItem = m_list.GetTopIndex();
+	int nItem = m_list.GetTopIndex();
+
     CRect rc;
     m_list.GetItemRect(nItem, rc, LVIR_BOUNDS);
-    CSize sz(0, (nSel - nItem)*rc.Height());
-    m_list.Scroll(sz);
+    
+	CSize sz(0, (nSel - nItem)*rc.Height());
+    
+	m_list.Scroll(sz);
     m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
 #endif
 }
 
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
+#if 0
 	m_CheckLinkProc.CloseCheckLinkProc();
+#endif
 }
 
 BOOL test1(LINK_ADAPTER_INFO *pLinkAdapterInfo)
@@ -209,15 +223,16 @@ BOOL CDlgTest4Wnd::InitCtrl()
 
 BOOL CDlgTest4Wnd::InitInfo()
 {
+#if 0
 	m_CheckLinkProc.CreateCheckLinkProc(test1);
-
+#endif
+	
 #if 0
 	if (!m_WavePlayer.CreatePlayerProc())
 	{
 		return FALSE;
 	}
 #endif
-	
 	return TRUE;
 }
 
@@ -311,6 +326,5 @@ BOOL CDlgTest4Wnd::DrawRectFrameLine(CDC *pDC)
 	graphics.DrawLine(&pen, ptLeftTop,    ptLeftBottom);
 	graphics.DrawLine(&pen, ptLeftBottom, ptRightBottom);
 	graphics.DrawLine(&pen, ptRightTop,   ptRightBottom);
-	
 	return TRUE;
 }
