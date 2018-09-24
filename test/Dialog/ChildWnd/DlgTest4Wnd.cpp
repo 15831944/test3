@@ -93,9 +93,6 @@ void CDlgTest4Wnd::OnBnClickedButton1()
 		strFileName = _T("2.wav");
 	}
 
-	std::string s1 = "²âÊÔÒ»";
-	int i = s1.size();
-
 #if 0
 	strFilePath.Format(_T("%s\\%s"), CGlobalInfo::CreateInstance()->GetAppPath(), strFileName);
 	if (!CGlobalInfo::CreateInstance()->IsFileExists(strFilePath))

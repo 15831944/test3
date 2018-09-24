@@ -35,11 +35,9 @@ protected:
 	BOOL							DrawRectFrameLine(CDC *pDC);
 	
 protected:
-	CImageButton					m_btnTest3;
+	CButton							m_btnTest3;
 	CReportCtrl						m_ListTest;
 	CStackedTreeCtrl				m_hTreeCtrl;
-
-	CWavePlayer						m_WavePlayer;
 
 	//WavePlayer					m_WavePlayer;
 	CCheckLinkThread				m_CheckLinkProc;

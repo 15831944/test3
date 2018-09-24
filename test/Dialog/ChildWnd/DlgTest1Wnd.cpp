@@ -1,6 +1,7 @@
 #include  "stdafx.h"
 #include  "DlgTest1Wnd.h"
 
+#include "../../contrib/update_file_name.h"
 IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent)
 	: CDialog(CDlgTest1Wnd::IDD, pParent)
@@ -179,13 +180,14 @@ BOOL CDlgTest1Wnd::InitCtrl()
 
 BOOL CDlgTest1Wnd::InitInfo()
 {
-	LOGFONT lf;
-	lf.lfCharSet		= DEFAULT_CHARSET;
-	lf.lfFaceName[0]	= NULL;
-	lf.lfPitchAndFamily = 0;
+	BOOL bRet = FALSE;
 
-	::EnumFontFamiliesEx(GetDC()->GetSafeHdc(), &lf, (FONTENUMPROC)EnumFontProc, (LPARAM)this, 0);
-	return TRUE;
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
 void CDlgTest1Wnd::CreateImageList()

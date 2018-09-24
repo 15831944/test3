@@ -282,84 +282,83 @@ BOOL test1(void *pUpdateData)
 
 BOOL CDlgTest2Wnd::InitInfo()
 {
+	BOOL bRet = FALSE;
+
 	int nIndex = 0;
 	int nCount = 0;
-
-#if 0
-	CString strItemString;
-	EVAL_ITEMDATA hEvalItem[4];
-
-	memset(&hEvalItem, 0x0, sizeof(hEvalItem));
-
-	hEvalItem[0].emEvalType = EVAL_EMPTYTYPE;
-	strcpy(hEvalItem[0].szItemName, _T("请选择..."));
-
-	hEvalItem[1].emEvalType = EVAL_ALLFILENAME;
-	strcpy(hEvalItem[1].szItemName, _T("全部名称"));
-
-	hEvalItem[2].emEvalType = EVAL_SPECIFYNAME;
-	strcpy(hEvalItem[2].szItemName, _T("指定名称"));
-
-	hEvalItem[3].emEvalType = EVAL_SPECIFYNUMINDEX;
-	strcpy(hEvalItem[3].szItemName, _T("数字索引"));
-
-	for (nIndex=0; nIndex<sizeof(hEvalItem)/sizeof(EVAL_ITEMDATA); nIndex++)
-	{
-		m_hComboEval.InsertString(nIndex, hEvalItem[nIndex].szItemName);
-		m_hComboEval.SetItemData(nIndex, hEvalItem[nIndex].emEvalType);
-	}
-
-	m_hComboEval.SetCurSel(0);
-#endif
 
 	UPDATE_FILEINFO *pFileInfo = NULL;
 	UPDATE_FILEDATA *pFileData = NULL;
 
+	update_file_data filedata;
+	update_file_name filenameFunc;
+
 	std::vector<UPDATE_FILEINFO*> vecFileInfo;
 	std::vector<UPDATE_FILEDATA*> vecFileData;
 
-	pFileInfo = new UPDATE_FILEINFO;
-	if (pFileInfo == NULL)
+	do 
 	{
-		return FALSE;
-	}
-	memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
+#if 0
+		CString strItemString;
+		EVAL_ITEMDATA hEvalItem[4];
 
-	pFileInfo->uiFileSize = 1;
-	pFileInfo->uiFileAttrib = 1;
-	pFileInfo->time_create = 12;
-	pFileInfo->time_access = 13;
-	pFileInfo->time_write = 14;
-	sprintf(pFileInfo->szFileName, _T("test1.txt"));
-	sprintf(pFileInfo->szParentPath, _T("C:\\"));
-	sprintf(pFileInfo->szFilePath, _T("C:\\test1.txt"));
-	sprintf(pFileInfo->szFileExt, _T(".txt"));
-	vecFileInfo.push_back(pFileInfo);
+		memset(&hEvalItem, 0x0, sizeof(hEvalItem));
 
-	update_file_data filedata;
-	if (!filedata.SetUpdateFileData(vecFileInfo, test1))
-	{
-		return FALSE;
-	}
-	
-	if (!filedata.GetUpdateFileData(vecFileData))
-	{
-		return FALSE;
-	}
-	
-	pFileData = vecFileData[0];
-	if (pFileData == NULL)
-	{
-		return FALSE;
-	}
+		hEvalItem[0].emEvalType = EVAL_EMPTYTYPE;
+		strcpy(hEvalItem[0].szItemName, _T("请选择..."));
 
-	pFileData->emUpdateStatus = STATE_UPDATESUCCED_TYPE;
-	if (!pFileData->pfUpdateFunc(pFileData))
-	{
-		return FALSE;
-	}
+		hEvalItem[1].emEvalType = EVAL_ALLFILENAME;
+		strcpy(hEvalItem[1].szItemName, _T("全部名称"));
 
-	return TRUE;
+		hEvalItem[2].emEvalType = EVAL_SPECIFYNAME;
+		strcpy(hEvalItem[2].szItemName, _T("指定名称"));
+
+		hEvalItem[3].emEvalType = EVAL_SPECIFYNUMINDEX;
+		strcpy(hEvalItem[3].szItemName, _T("数字索引"));
+
+		for (nIndex = 0; nIndex < sizeof(hEvalItem) / sizeof(EVAL_ITEMDATA); nIndex++)
+		{
+			m_hComboEval.InsertString(nIndex, hEvalItem[nIndex].szItemName);
+			m_hComboEval.SetItemData(nIndex, hEvalItem[nIndex].emEvalType);
+		}
+
+		m_hComboEval.SetCurSel(0);
+#endif
+		pFileInfo = new UPDATE_FILEINFO;
+		if (pFileInfo == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
+
+		pFileInfo->uiFileSize = 1;
+		pFileInfo->uiFileAttrib = 1;
+		pFileInfo->time_create = 12;
+		pFileInfo->time_access = 13;
+		pFileInfo->time_write = 14;
+		sprintf(pFileInfo->szFileName, _T("test1.txt"));
+		sprintf(pFileInfo->szParentPath, _T("C:\\"));
+		sprintf(pFileInfo->szFilePath, _T("C:\\test1.txt"));
+		sprintf(pFileInfo->szFileExt, _T(".txt"));
+		vecFileInfo.push_back(pFileInfo);
+
+		if (!filedata.SetUpdateFileData(vecFileInfo, test1))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!filenameFunc.CreateUpdateProc(filedata))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
 BOOL CDlgTest2Wnd::CreateChildWnd()
