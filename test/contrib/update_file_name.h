@@ -40,7 +40,7 @@ typedef struct {
 }UPDATE_FILEINFO;
 
 typedef struct {
-	int					iPos;					//文件名添加的位置, iPos=-1为从末尾开始添加;
+	int					iPos;					//文件名添加的位置, iPos<0为从末尾开始添加;
 	char				szFileName[MAX_PATH];	//文件名新添加的字符名;
 }UPDATE_ADDFILENAME;
 
@@ -51,7 +51,7 @@ typedef struct {
 }UPDATE_DATEFILENAME;
 
 typedef struct {
-	int					iPos;					//删除字符开始位置, iPos=-1为从末尾开始删除;
+	int					iPos;					//删除字符开始位置, iPos<0为从末尾开始删除;
 	int					iCount;					//删除字符的个数;
 	char				szFileName[MAX_PATH];	//文件名中待删除的字符名;
 }UPDATE_DELFILENAME;
@@ -97,12 +97,16 @@ public:
 	~update_file_data();
 
 public:
+	static update_file_data& Instance();
+
+public:
 	BOOL				SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData);
 	BOOL				GetUpdateFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
 
 	void				ClearFileData();
 
 private:
+	CRITICAL_SECTION	m_csLockData;
 	std::vector<UPDATE_FILEDATA*> m_vecFileData;
 };
 
@@ -131,7 +135,7 @@ public:
 	~update_file_name();
 	
 public:
-	BOOL				CreateUpdateProc(update_file_data fileData);
+	BOOL				CreateUpdateProc();
 	BOOL				CloseUpdateProc();
 	
 protected:
@@ -147,7 +151,6 @@ protected:
 	HANDLE				m_hStartEvent;
 	HANDLE				m_hEndEvent;
 
-	update_file_data	m_fileData;
 	update_file_func	m_fileFunc;
 
 private:

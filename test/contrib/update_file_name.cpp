@@ -11,11 +11,18 @@
 //update_file_data
 update_file_data::update_file_data()
 {
+	InitializeCriticalSection(&m_csLockData);
 }
 
 update_file_data::~update_file_data()
 {
+	DeleteCriticalSection(&m_csLockData);
+}
 
+update_file_data& update_file_data::Instance()
+{
+	static update_file_data inst;
+	return inst;
 }
 
 BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData)
@@ -28,6 +35,7 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 	UPDATE_FILEDATA stcUpdateFileData;
 	std::vector<UPDATE_FILEINFO*>::iterator iterFileData;
 
+	EnterCriticalSection(&m_csLockData);
 	do 
 	{
 		memset(&stcUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
@@ -69,6 +77,7 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 		bRet = TRUE;
 	} while (FALSE);
 
+	LeaveCriticalSection(&m_csLockData);
 	return bRet;
 }
 
@@ -76,6 +85,7 @@ BOOL update_file_data::GetUpdateFileData(std::vector<UPDATE_FILEDATA *> &vecFile
 {
 	BOOL bRet = FALSE;
 
+	EnterCriticalSection(&m_csLockData);
 	do 
 	{
 		if (m_vecFileData.size() == 0)
@@ -90,6 +100,7 @@ BOOL update_file_data::GetUpdateFileData(std::vector<UPDATE_FILEDATA *> &vecFile
 		bRet = TRUE;
 	} while (FALSE);
 
+	LeaveCriticalSection(&m_csLockData);
 	return bRet;
 }
 
@@ -99,6 +110,7 @@ void update_file_data::ClearFileData()
 	UPDATE_FILEDATA *pFileData = NULL;
 	std::vector<UPDATE_FILEDATA *>::iterator iterFileData;
 
+	EnterCriticalSection(&m_csLockData);
 	do 
 	{
 		for (iterFileData=m_vecFileData.begin(); iterFileData!=m_vecFileData.end();)
@@ -120,6 +132,8 @@ void update_file_data::ClearFileData()
 		m_vecFileData.clear();
 		bRet = TRUE;
 	} while (FALSE);
+
+	LeaveCriticalSection(&m_csLockData);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -233,6 +247,9 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 {
 	BOOL bRet = FALSE;
 
+	unsigned int uiPos = 0;
+
+	char *pFileName = NULL;
 	UPDATE_ADDFILENAME stcAddFileName = {0};
 
 	do 
@@ -249,20 +266,51 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 			break;
 		}
 
-		memcpy(&stcAddFileName, &pFileData->stcAddFileName, sizeof(UPDATE_ADDFILENAME));
-
-		if (strcmp(stcAddFileName.szFileName, _T("")) == 0)
+		if (strcmp(pFileData->stcAddFileName.szFileName, _T("")) == 0)
 		{
 			bRet = FALSE;
 			break;
 		}
 
+		memcpy(&stcAddFileName, &pFileData->stcAddFileName, sizeof(UPDATE_ADDFILENAME));
 		if (stcAddFileName.iPos != -1)
 		{
+			pFileName = pFileData->stcFileInfo.szFileName;
+
+			while (*pFileName != '\0')
+			{
+				if ((*pFileName&0x80) && (*pFileName&0x80))
+				{
+					pFileName += 2;
+					uiPos += 2;
+				}
+				else
+				{
+					pFileName++;
+					uiPos++;
+				}
+			}
 		}
 		else
 		{
+			uiPos = (strlen(pFileData->stcFileInfo.szFileName) - strlen(pFileData->stcFileInfo.szFileExt) - 1);
 
+			pFileName = pFileData->stcFileInfo.szFileName;
+			pFileName += uiPos;
+
+			while (*pFileName != '\0')
+			{
+				if ((*pFileName&0x80) && (*pFileName&0x80))
+				{
+					pFileName -= 2;
+					uiPos -= 2;
+				}
+				else
+				{
+					pFileName--;
+					uiPos--;
+				}
+			}
 		}
 
 		bRet = TRUE;
@@ -439,7 +487,7 @@ DWORD update_file_name::UpdateFileThreadProc(LPVOID lpParam)
 	{
 		pUpdateFileProc->UpdateFileInfo();
 	}
-	
+
 	return 0;
 }
 
@@ -469,7 +517,7 @@ BOOL update_file_name::UpdateFileName()
 
 	do 
 	{
-		if (!m_fileData.GetUpdateFileData(vecFileData))
+		if (!update_file_data::Instance().GetUpdateFileData(vecFileData))
 		{
 			bRet = FALSE;
 			break;
@@ -496,7 +544,7 @@ BOOL update_file_name::UpdateFileName()
 }
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
+BOOL update_file_name::CreateUpdateProc()
 {
 	BOOL bRet = FALSE;
 
@@ -511,8 +559,6 @@ BOOL update_file_name::CreateUpdateProc(update_file_data fileData)
 				bRet = FALSE;
 				break;
 			}
-
-			m_fileData = fileData;
 
 			SetEvent(m_hStartEvent);
 			ResetEvent(m_hEndEvent);

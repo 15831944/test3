@@ -275,6 +275,9 @@ BOOL test1(void *pUpdateData)
 	{
 		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
+
+		pFileData->stcAddFileName.iPos = -1;
+		strcpy(pFileData->stcAddFileName.szFileName, _T("≤‚ ‘1"));
 	}
 
 	return TRUE;
@@ -290,9 +293,7 @@ BOOL CDlgTest2Wnd::InitInfo()
 	UPDATE_FILEINFO *pFileInfo = NULL;
 	UPDATE_FILEDATA *pFileData = NULL;
 
-	update_file_data filedata;
 	update_file_name filenameFunc;
-
 	std::vector<UPDATE_FILEINFO*> vecFileInfo;
 	std::vector<UPDATE_FILEDATA*> vecFileData;
 
@@ -332,24 +333,24 @@ BOOL CDlgTest2Wnd::InitInfo()
 		}
 		memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
 
-		pFileInfo->uiFileSize = 1;
-		pFileInfo->uiFileAttrib = 1;
-		pFileInfo->time_create = 12;
-		pFileInfo->time_access = 13;
-		pFileInfo->time_write = 14;
-		sprintf(pFileInfo->szFileName, _T("test1.txt"));
+		pFileInfo->uiFileSize = 10;
+		pFileInfo->uiFileAttrib = 1000;
+		pFileInfo->time_create = 1537856468;
+		pFileInfo->time_access = 1537856468;
+		pFileInfo->time_write = 1537856468;
+		sprintf(pFileInfo->szFileName, _T("∞¢¿…¡µ«˙1.txt"));
 		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\test1.txt"));
+		sprintf(pFileInfo->szFilePath, _T("C:\\∞¢¿…¡µ«˙1.txt"));
 		sprintf(pFileInfo->szFileExt, _T(".txt"));
 		vecFileInfo.push_back(pFileInfo);
 
-		if (!filedata.SetUpdateFileData(vecFileInfo, test1))
+		if (!update_file_data::Instance().SetUpdateFileData(vecFileInfo, test1))
 		{
 			bRet = FALSE;
 			break;
 		}
 
-		if (!filenameFunc.CreateUpdateProc(filedata))
+		if (!filenameFunc.CreateUpdateProc())
 		{
 			bRet = FALSE;
 			break;
