@@ -140,12 +140,16 @@ void update_file_data::ClearFileData()
 //
 update_file_func::update_file_func()
 {
-
 }
 
 update_file_func::~update_file_func()
 {
+}
 
+update_file_func& update_file_func::Instance()
+{
+	static update_file_func inst;
+	return inst;
 }
 
 BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
@@ -246,10 +250,14 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
+	BOOL bAscii = FALSE;
 
 	unsigned int uiPos = 0;
+	unsigned int uiLen = 0;
+	unsigned int uiIndex = 0;
 
 	char *pFileName = NULL;
+	char szFileName[MAX_PATH] = {0};
 	UPDATE_ADDFILENAME stcAddFileName = {0};
 
 	do 
@@ -273,29 +281,48 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		}
 
 		memcpy(&stcAddFileName, &pFileData->stcAddFileName, sizeof(UPDATE_ADDFILENAME));
+
+		pFileName = pFileData->stcFileInfo.szFileName;
+		uiLen = strlen(pFileData->stcFileInfo.szFileName);
+
 		if (stcAddFileName.iPos != -1)
 		{
-			pFileName = pFileData->stcFileInfo.szFileName;
-
 			while (*pFileName != '\0')
 			{
 				if ((*pFileName&0x80) && (*pFileName&0x80))
 				{
-					pFileName += 2;
+					bAscii = FALSE;
+				}
+				else
+				{
+					bAscii = TRUE;
+				}
+
+				uiIndex++;
+				if (uiIndex == stcAddFileName.iPos)
+				{
+					sprintf(szFileName+uiPos, _T("%c"), *pFileName);
+				}
+				else
+				{
+					sprintf(szFileName+uiPos, _T("%c"), *pFileName);
+				}
+
+				if (!bAscii)
+				{
 					uiPos += 2;
 				}
 				else
 				{
-					pFileName++;
-					uiPos++;
+					uiPos += 1;
 				}
+
+				pFileName+=uiPos;
 			}
 		}
 		else
 		{
 			uiPos = (strlen(pFileData->stcFileInfo.szFileName) - strlen(pFileData->stcFileInfo.szFileExt) - 1);
-
-			pFileName = pFileData->stcFileInfo.szFileName;
 			pFileName += uiPos;
 
 			while (*pFileName != '\0')
@@ -531,7 +558,7 @@ BOOL update_file_name::UpdateFileName()
 				continue;
 			}
 
-			if (!m_fileFunc.SetUpdateFileFunc(pUpdateFileData->emConfigType, pUpdateFileData))
+			if (!update_file_func::Instance().SetUpdateFileFunc(pUpdateFileData->emConfigType, pUpdateFileData))
 			{
 				continue;
 			}
@@ -602,9 +629,12 @@ BOOL update_file_name::CloseUpdateProc()
 			m_mapEnumInfo.clear();
 		}
 */
-		CloseHandle(m_hThread);
-		m_hThread = NULL;
-
+		if (m_hThread != NULL)
+		{
+			CloseHandle(m_hThread);
+			m_hThread = NULL;
+		}
+		
 		ResetEvent(m_hStartEvent);
 		ResetEvent(m_hEndEvent);
 

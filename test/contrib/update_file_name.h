@@ -22,69 +22,69 @@ typedef enum {
 
 typedef enum {
 	DATE_EMPTYTYPE = 0,
-	DATE_CREATETIME_TYPE,						//创建时间
-	DATE_MODIFYTIME_TYPE,						//修改时间
-	DATE_ACCESSTIME_TYPE,						//访问时间
+	DATE_CREATETIME_TYPE,								//创建时间
+	DATE_MODIFYTIME_TYPE,								//修改时间
+	DATE_ACCESSTIME_TYPE,								//访问时间
 }UPDATE_DATETYPE;
 
 typedef struct {
-	unsigned int		uiFileSize;				//文件大小
-	unsigned int		uiFileAttrib;			//文件属性
-	__time64_t			time_create;			//文件创建时间
-	__time64_t			time_access;			//文件访问时间
-	__time64_t			time_write;				//文件写入时间
-	char				szFileName[MAX_PATH];	//文件名称
-	char				szParentPath[MAX_PATH];	//文件父路径
-	char				szFilePath[MAX_PATH];	//文件路径
-	char				szFileExt[MAX_PATH];	//文件扩展名
+	unsigned int				uiFileSize;				//文件大小
+	unsigned int				uiFileAttrib;			//文件属性
+	__time64_t					time_create;			//文件创建时间
+	__time64_t					time_access;			//文件访问时间
+	__time64_t					time_write;				//文件写入时间
+	char						szFileName[MAX_PATH];	//文件名称
+	char						szParentPath[MAX_PATH];	//文件父路径
+	char						szFilePath[MAX_PATH];	//文件路径
+	char						szFileExt[MAX_PATH];	//文件扩展名
 }UPDATE_FILEINFO;
 
 typedef struct {
-	int					iPos;					//文件名添加的位置, iPos<0为从末尾开始添加;
-	char				szFileName[MAX_PATH];	//文件名新添加的字符名;
+	int							iPos;					//文件名添加的位置, iPos<0为从末尾开始添加;
+	char						szFileName[MAX_PATH];	//文件名新添加的字符名;
 }UPDATE_ADDFILENAME;
 
 typedef struct {
-	BOOL				bIsReadPicExif;			//是否读取图片Exif信息;	
-	char				szDateFormat[MAX_PATH];	//日期格式;
-	UPDATE_DATETYPE		emDateType;				//日期类型;
+	BOOL						bIsReadPicExif;			//是否读取图片Exif信息;	
+	char						szDateFormat[MAX_PATH];	//日期格式;
+	UPDATE_DATETYPE				emDateType;				//日期类型;
 }UPDATE_DATEFILENAME;
 
 typedef struct {
-	int					iPos;					//删除字符开始位置, iPos<0为从末尾开始删除;
-	int					iCount;					//删除字符的个数;
-	char				szFileName[MAX_PATH];	//文件名中待删除的字符名;
+	int							iPos;					//删除字符开始位置, iPos<0为从末尾开始删除;
+	int							iCount;					//删除字符的个数;
+	char						szFileName[MAX_PATH];	//文件名中待删除的字符名;
 }UPDATE_DELFILENAME;
 
 typedef struct {
-	BOOL				bIsUppercase;			//是否大写;
-	char				szExtName[MAX_PATH];	//待替换的文件扩展名;
+	BOOL						bIsUppercase;			//是否大写;
+	char						szExtName[MAX_PATH];	//待替换的文件扩展名;
 }UPDATE_EXTFILENAME;
 
 typedef struct {
-	BOOL				bAutoAlign;				//自动对齐;
-	int					iBit;					//序号位数;
-	int					iStartIndex;			//开始序号;
-	int					iEndIndex;				//结束序号;
-	char				szIndexFormat[MAX_PATH]; //序号格式;
+	BOOL						bAutoAlign;				//自动对齐;
+	int							iBit;					//序号位数;
+	int							iStartIndex;			//开始序号;
+	int							iEndIndex;				//结束序号;
+	char						szIndexFormat[MAX_PATH]; //序号格式;
 }UPDATE_INDEXFILENAME;
 
 typedef struct {
-	char				szFileName[MAX_PATH];	//待替换的文件名字符;
+	char						szFileName[MAX_PATH];	//待替换的文件名字符;
 }UPDATE_REPLACEFILENAME;
 
 typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(void *pUpdateData);
 typedef struct {
-	UPDATE_CONFIGTYPE		emConfigType;
-	UPDATE_STATETYPE		emUpdateStatus;
-	UPDATE_FILEINFO			stcFileInfo;
+	UPDATE_CONFIGTYPE			emConfigType;
+	UPDATE_STATETYPE			emUpdateStatus;
+	UPDATE_FILEINFO				stcFileInfo;
 	union {
-		UPDATE_ADDFILENAME	stcAddFileName;
-		UPDATE_DATEFILENAME	stcDateFileName;
-		UPDATE_DELFILENAME	stcDelFileName;
-		UPDATE_EXTFILENAME	stcExtFileName;
-		UPDATE_INDEXFILENAME stcIndexFileName;
-		UPDATE_REPLACEFILENAME stcReplaceFileName;
+		UPDATE_ADDFILENAME		stcAddFileName;
+		UPDATE_DATEFILENAME		stcDateFileName;
+		UPDATE_DELFILENAME		stcDelFileName;
+		UPDATE_EXTFILENAME		stcExtFileName;
+		UPDATE_INDEXFILENAME	stcIndexFileName;
+		UPDATE_REPLACEFILENAME	stcReplaceFileName;
 	};
 	UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFunc;
 }UPDATE_FILEDATA;
@@ -115,6 +115,9 @@ class update_file_func
 public:
 	update_file_func();
 	~update_file_func();
+
+public:
+	static update_file_func& Instance();
 
 public:
 	BOOL				SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
@@ -150,8 +153,6 @@ protected:
 
 	HANDLE				m_hStartEvent;
 	HANDLE				m_hEndEvent;
-
-	update_file_func	m_fileFunc;
 
 private:
 	BOOL				m_bExit;

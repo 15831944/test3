@@ -276,7 +276,7 @@ BOOL test1(void *pUpdateData)
 		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
 
-		pFileData->stcAddFileName.iPos = -1;
+		pFileData->stcAddFileName.iPos = 2;
 		strcpy(pFileData->stcAddFileName.szFileName, _T("²âÊÔ1"));
 	}
 
@@ -338,9 +338,9 @@ BOOL CDlgTest2Wnd::InitInfo()
 		pFileInfo->time_create = 1537856468;
 		pFileInfo->time_access = 1537856468;
 		pFileInfo->time_write = 1537856468;
-		sprintf(pFileInfo->szFileName, _T("°¢ÀÉÁµÇú1.txt"));
+		sprintf(pFileInfo->szFileName, _T("1ÍõÀÚ2.txt"));
 		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\°¢ÀÉÁµÇú1.txt"));
+		sprintf(pFileInfo->szFilePath, _T("C:\\1ÍõÀÚ2.txt"));
 		sprintf(pFileInfo->szFileExt, _T(".txt"));
 		vecFileInfo.push_back(pFileInfo);
 
