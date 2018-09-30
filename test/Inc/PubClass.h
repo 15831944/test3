@@ -44,7 +44,6 @@
 
 #include "../Inc/GlobalInfo.h"
 //#include "../Inc/audio/waveplayer.h"
-#include "../WavePlayer.h"
 #include "../Inc/video/opengl_wnd_draw_video.h"
 #include "../Inc/video/gdi_wnd_draw_video.h"
 

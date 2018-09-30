@@ -530,10 +530,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\WavePlayer.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -549,10 +545,6 @@
 			</File>
 			<File
 				RelativePath="test.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WavePlayer.h"
 				>
 			</File>
 		</Filter>

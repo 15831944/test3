@@ -254,7 +254,9 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
+
 	unsigned int uiIndex = 0;
+	unsigned int uiOffset = 0;
 
 	char *pFileName = NULL;
 	char szFileName[MAX_PATH] = {0};
@@ -285,36 +287,33 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		pFileName = pFileData->stcFileInfo.szFileName;
 		uiLen = strlen(pFileData->stcFileInfo.szFileName);
 
-		if (stcAddFileName.iPos != -1)
+		if (stcAddFileName.iPos > -1)
 		{
 			while (*pFileName != '\0')
 			{
+				uiIndex ++;
 				if ((*pFileName&0x80) && (*pFileName&0x80))
 				{
 					bAscii = FALSE;
-				}
-				else
-				{
-					bAscii = TRUE;
-				}
-
-				uiIndex++;
-				if (uiIndex == stcAddFileName.iPos)
-				{
-					sprintf(szFileName+uiPos, _T("%c"), *pFileName);
-				}
-				else
-				{
-					sprintf(szFileName+uiPos, _T("%c"), *pFileName);
-				}
-
-				if (!bAscii)
-				{
 					uiPos += 2;
 				}
 				else
 				{
+					bAscii = TRUE;
 					uiPos += 1;
+				}
+
+				if (uiIndex == stcAddFileName.iPos)
+				{
+					memcpy(szFileName+uiOffset, pFileData->stcFileInfo.szFileName, uiPos);
+					uiOffset += uiPos;
+
+					memcpy(szFileName+uiOffset, stcAddFileName.szFileName, strlen(stcAddFileName.szFileName));
+					uiOffset += strlen(stcAddFileName.szFileName);
+					
+					memcpy(szFileName+uiOffset, pFileData->stcFileInfo.szFileName+uiPos, uiLen-uiPos);
+					uiOffset += (uiLen-uiPos);
+					break;
 				}
 
 				pFileName+=uiPos;
