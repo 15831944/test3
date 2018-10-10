@@ -276,7 +276,7 @@ BOOL test1(void *pUpdateData)
 		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
 
-		pFileData->stcAddFileName.iPos = 3;
+		pFileData->stcAddFileName.iIndex = 0;
 		strcpy(pFileData->stcAddFileName.szFileName, _T("≤‚ ‘1"));
 	}
 

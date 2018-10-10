@@ -250,7 +250,6 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
-	BOOL bAscii = FALSE;
 
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
@@ -258,88 +257,88 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 	unsigned int uiIndex = 0;
 	unsigned int uiOffset = 0;
 
+	char *p = NULL;
 	char *pFileName = NULL;
 	char szFileName[MAX_PATH] = {0};
-	UPDATE_ADDFILENAME stcAddFileName = {0};
 
 	do 
 	{
-		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		if (emConfigType != pFileData->emConfigType)
-		{
+		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
+		{//判断文件名称修改类型
 			bRet = FALSE;
 			break;
 		}
 
 		if (strcmp(pFileData->stcAddFileName.szFileName, _T("")) == 0)
-		{
+		{//判断规则名称是否为空
 			bRet = FALSE;
 			break;
 		}
 
-		memcpy(&stcAddFileName, &pFileData->stcAddFileName, sizeof(UPDATE_ADDFILENAME));
+		pFileName = strtok(pFileData->stcFileInfo.szFileName, pFileData->stcFileInfo.szFileExt);
+		if (pFileName == NULL)
+		{//文件名称
+			bRet = FALSE;
+			break;
+		}
 
-		pFileName = pFileData->stcFileInfo.szFileName;
-		uiLen = strlen(pFileData->stcFileInfo.szFileName);
-
-		if (stcAddFileName.iPos > -1)
-		{
-			while (*pFileName != '\0')
+		uiLen = strlen(pFileName);	//名称长度
+		if (pFileData->stcAddFileName.iIndex > 0)
+		{//名称字符正向添加
+			p = pFileName;
+			while (*p != '\0')
 			{
-				uiIndex ++;
-				if ((*pFileName&0x80) && (*pFileName&0x80))
+				uiIndex++;
+				if ((*p&0x80) && (*(p+1)&0x80))
 				{
-					bAscii = FALSE;
 					uiPos += 2;
+					p += 2;
 				}
 				else
 				{
-					bAscii = TRUE;
 					uiPos += 1;
+					p += 1;
 				}
-
-				if (uiIndex == stcAddFileName.iPos)
+				
+				if (uiIndex == pFileData->stcAddFileName.iIndex)
 				{
-					memcpy(szFileName+uiOffset, pFileData->stcFileInfo.szFileName, uiPos);
+					memcpy(szFileName+uiOffset, pFileName, uiPos);
 					uiOffset += uiPos;
-
-					memcpy(szFileName+uiOffset, stcAddFileName.szFileName, strlen(stcAddFileName.szFileName));
-					uiOffset += strlen(stcAddFileName.szFileName);
 					
-					memcpy(szFileName+uiOffset, pFileData->stcFileInfo.szFileName+uiPos, uiLen-uiPos);
+					memcpy(szFileName+uiOffset, pFileData->stcAddFileName.szFileName, strlen(pFileData->stcAddFileName.szFileName));
+					uiOffset += strlen(pFileData->stcAddFileName.szFileName);
+					
+					memcpy(szFileName+uiOffset, pFileName+uiPos, uiLen-uiPos);
 					uiOffset += (uiLen-uiPos);
+
+					memcpy(szFileName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+					uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+					bRet = TRUE;
 					break;
 				}
-
-				pFileName+=uiPos;
 			}
 		}
 		else
 		{
-			uiPos = (strlen(pFileData->stcFileInfo.szFileName) - strlen(pFileData->stcFileInfo.szFileExt) - 1);
-			pFileName += uiPos;
+			uiPos = uiLen;
+			p = pFileName + uiPos;
 
-			while (*pFileName != '\0')
+			while (*(p-1) != '\0')
 			{
-				if ((*pFileName&0x80) && (*pFileName&0x80))
+				uiIndex++;
+				if ((*p&0x80) && (*(p-1)&0x80))
 				{
-					pFileName -= 2;
 					uiPos -= 2;
+					p -= 2;
 				}
 				else
 				{
-					pFileName--;
-					uiPos--;
+					uiPos -= 1;
+					p -= 1;
 				}
 			}
 		}
-
-		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;

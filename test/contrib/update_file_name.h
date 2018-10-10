@@ -40,7 +40,7 @@ typedef struct {
 }UPDATE_FILEINFO;
 
 typedef struct {
-	int							iPos;					//文件名添加的位置, iPos<0为从末尾开始添加;
+	int							iIndex;					//文件名添加的索引, iIndex<0为从末尾开始添加;
 	char						szFileName[MAX_PATH];	//文件名新添加的字符名;
 }UPDATE_ADDFILENAME;
 
@@ -51,7 +51,7 @@ typedef struct {
 }UPDATE_DATEFILENAME;
 
 typedef struct {
-	int							iPos;					//删除字符开始位置, iPos<0为从末尾开始删除;
+	int							iIndex;					//删除字符开始位置, iPos<0为从末尾开始删除;
 	int							iCount;					//删除字符的个数;
 	char						szFileName[MAX_PATH];	//文件名中待删除的字符名;
 }UPDATE_DELFILENAME;
