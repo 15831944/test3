@@ -116,7 +116,9 @@ BOOL CTestDlg::OnInitDialog()
 
 	SetIcon(m_hIcon, TRUE);			
 	SetIcon(m_hIcon, FALSE);		
+	char p1[MAX_PATH] = {0};
 
+	int i = atoi(p1);
 	Init();
 	return TRUE;  
 }

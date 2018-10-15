@@ -250,6 +250,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
+	int iAddIndex = -1;
 
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
@@ -283,7 +284,9 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		}
 
 		uiLen = strlen(pFileName);	//名称长度
-		if (pFileData->stcAddFileName.iIndex > 0)
+		iAddIndex = pFileData->stcAddFileName.iIndex;	//待添加的位置
+
+		if (iAddIndex > 0)
 		{//名称字符正向添加
 			p = pFileName;
 			while (*p != '\0')
@@ -300,7 +303,7 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					p += 1;
 				}
 				
-				if (uiIndex == pFileData->stcAddFileName.iIndex)
+				if (uiIndex == iAddIndex)
 				{
 					memcpy(szFileName+uiOffset, pFileName, uiPos);
 					uiOffset += uiPos;
@@ -322,9 +325,14 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		else
 		{
 			uiPos = uiLen;
-			p = pFileName + uiPos;
+			p = pFileName + uiPos - 1;
 
-			while (*(p-1) != '\0')
+			if (iAddIndex == 0)
+			{
+				iAddIndex = ~(uiLen-1);	//正数转负数:~num+1;	负数转正数:~(num-1)
+			}
+
+			while (*p != '\0')
 			{
 				uiIndex++;
 				if ((*p&0x80) && (*(p-1)&0x80))
@@ -337,6 +345,24 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					uiPos -= 1;
 					p -= 1;
 				}
+
+				if ((~uiIndex+1) == iAddIndex)
+				{
+					memcpy(szFileName+uiOffset, pFileName, uiPos);
+					uiOffset += uiPos;
+
+					memcpy(szFileName+uiOffset, pFileData->stcAddFileName.szFileName, strlen(pFileData->stcAddFileName.szFileName));
+					uiOffset += strlen(pFileData->stcAddFileName.szFileName);
+
+					memcpy(szFileName+uiOffset, pFileName+uiPos, uiLen-uiPos);
+					uiOffset += (uiLen-uiPos);
+
+					memcpy(szFileName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+					uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+					bRet = TRUE;
+					break;
+				}
 			}
 		}
 	} while (FALSE);
@@ -347,19 +373,28 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
-	
-	UPDATE_DATEFILENAME stcDateFileName = {0};
+
+	unsigned int uiPos = 0;
+	unsigned int uiLen = 0;
+
+	unsigned int uiIndex = 0;
+	unsigned int uiOffset = 0;
+
+	char *p = NULL;
+	char *pFileName = NULL;
+	char szFileName[MAX_PATH] = {0};
 
 	do 
 	{
-		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
-		{
+		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
+		{//判断文件名称修改类型
 			bRet = FALSE;
 			break;
 		}
 
-		if (emConfigType != pFileData->emConfigType)
-		{
+		pFileName = strtok(pFileData->stcFileInfo.szFileName, pFileData->stcFileInfo.szFileExt);
+		if (pFileName == NULL)
+		{//文件名称
 			bRet = FALSE;
 			break;
 		}
@@ -373,21 +408,69 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
+	int iDelIndex = -1;
 
-	UPDATE_DELFILENAME stcDelFileName  = {0};
+	unsigned int uiPos = 0;
+	unsigned int uiLen = 0;
+
+	unsigned int uiIndex = 0;
+	unsigned int uiOffset = 0;
+
+	char *p = NULL;
+	char *pFileName = NULL;
+	char szFileName[MAX_PATH] = {0};
 
 	do 
 	{
-		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
-		{
+		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
+		{//判断文件名称修改类型
 			bRet = FALSE;
 			break;
 		}
 
-		if (emConfigType != pFileData->emConfigType)
-		{
+		if (strcmp(pFileData->stcDelFileName.szFileName, _T("")) == 0)
+		{//判断规则名称是否为空
 			bRet = FALSE;
 			break;
+		}
+
+		pFileName = strtok(pFileData->stcFileInfo.szFileName, pFileData->stcFileInfo.szFileExt);
+		if (pFileName == NULL)
+		{//文件名称
+			bRet = FALSE;
+			break;
+		}
+
+		uiLen = strlen(pFileName);	//名称长度
+		iDelIndex = pFileData->stcDelFileName.iIndex;	//待添加的位置
+
+		if (iDelIndex > 0)
+		{
+			p = pFileName;
+			while (*p != '\0')
+			{
+				uiIndex++;
+				if ((*p&0x80) && (*(p+1)&0x80))
+				{
+					uiPos += 2;
+					p += 2;
+				}
+				else
+				{
+					uiPos += 1;
+					p += 1;
+				}
+
+				if (uiIndex == iDelIndex)
+				{
+					bRet = TRUE;
+					break;
+				}
+			}
+		}
+		else
+		{
+
 		}
 
 		bRet = TRUE;

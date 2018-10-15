@@ -273,10 +273,11 @@ BOOL test1(void *pUpdateData)
 
 	if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
 	{
-		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
+		pFileData->emConfigType = CONFIG_DELFILENAME_TYPE;
 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
 
-		pFileData->stcAddFileName.iIndex = 0;
+		pFileData->stcDelFileName.iIndex = 0;
+		pFileData->stcDelFileName.iCount = 5;
 		strcpy(pFileData->stcAddFileName.szFileName, _T("测试1"));
 	}
 
@@ -340,7 +341,7 @@ BOOL CDlgTest2Wnd::InitInfo()
 		pFileInfo->time_write = 1537856468;
 		sprintf(pFileInfo->szFileName, _T("1王磊2.txt"));
 		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\1王磊2.txt"));
+		sprintf(pFileInfo->szFilePath, _T("C:\\1王磊2.txt"));//王磊2
 		sprintf(pFileInfo->szFileExt, _T(".txt"));
 		vecFileInfo.push_back(pFileInfo);
 
