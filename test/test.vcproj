@@ -772,6 +772,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="network"
+				>
+				<File
+					RelativePath=".\Inc\network\HttpClientTrans.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\network\HttpClientTrans.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Control"
