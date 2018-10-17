@@ -15,10 +15,15 @@ public:
 	
 public:
 	BOOL						OpenHttpClient(LPCTSTR lpszUrl, DWORD dwTimeout);
+	void						CloseHttpClient();
 
-	BOOL						HttpGetDataSize();
+	BOOL						HttpGetData(char *pszData, DWORD &dwSize);
 
-protected:
+private:
+	CStringW					m_strHostName;
+	CStringW					m_strUrlPath;
+	CStringW					m_strExtraInfo;
+
 	HINTERNET 					m_hSession;
 	HINTERNET					m_hConnect;
 	HINTERNET					m_hRequest;
