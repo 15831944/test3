@@ -161,7 +161,6 @@ void CDlgTest4Wnd::OnBnClickedButton3()
 #endif
 }
 
-#include "../../Inc/network/HttpClientTrans.h"
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
 #if 0

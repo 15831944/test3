@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "HttpClientTrans.h"
 
+#include <Winhttp.h>
 #pragma comment(lib,"Winhttp.lib")
 CHttpClientTrans::CHttpClientTrans()
 {

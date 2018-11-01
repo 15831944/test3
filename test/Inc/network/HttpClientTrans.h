@@ -1,7 +1,6 @@
 #ifndef __HTTP_CLIENT_TRANS_H__
 #define __HTTP_CLIENT_TRANS_H__
 
-#include <Winhttp.h>
 #define HttpAgent L""
 
 class CHttpClientTrans

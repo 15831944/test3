@@ -776,11 +776,11 @@
 				Name="network"
 				>
 				<File
-					RelativePath=".\Inc\network\HttpClientTrans.cpp"
+					RelativePath=".\Inc\network\HttpServer.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\network\HttpClientTrans.h"
+					RelativePath=".\Inc\network\HttpServer.h"
 					>
 				</File>
 			</Filter>
