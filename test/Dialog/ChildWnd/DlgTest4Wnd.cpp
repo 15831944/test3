@@ -163,9 +163,15 @@ void CDlgTest4Wnd::OnBnClickedButton3()
 
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
+	BOOL bRet = FALSE;
+
+	do 
+	{
 #if 0
-	m_CheckLinkProc.CloseCheckLinkProc();
+		m_CheckLinkProc.CloseCheckLinkProc();
 #endif
+		bRet = TRUE;
+	} while (FALSE);
 }
 
 BOOL test1(LINK_ADAPTER_INFO *pLinkAdapterInfo)

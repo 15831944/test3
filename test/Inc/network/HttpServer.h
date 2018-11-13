@@ -10,7 +10,8 @@ typedef struct tagHttpRequest{
 	HTTP_REQUEST stcHttpRequest;
 	char		szPath[MAX_PATH];
 	char		szQueryInfo[MAX_PATH];
-	char		szContext[MAX_PATH*16];
+	int			iSize;
+	char		*pContext;
 }HTTPREQUEST;
 
 //
@@ -37,7 +38,7 @@ public:
 	
 public:
 	BOOL					Initialize();
-	BOOL					AddUrlHandler(URLHANDLER *pUrlHandle);
+	BOOL					AddUrlHandler(LPCTSTR lpszUrlPath, int iPort, URLHANDLER *pUrlHandle);
 	BOOL					Start();
 
 protected:
@@ -49,11 +50,6 @@ protected:
 	BOOL					SetHeader(HTTP_RESPONSE *pHttpResponse, HTTP_HEADER_ID emHeaderId, LPCTSTR lpszValue);
 
 private:
-	int						m_iPort;
-
-	CString					m_strHost;
-	CString					m_strUrlPath;
-
 	HANDLE					m_hRequestHandle;
 	HTTP_REQUEST			m_hHttpRequest;
 

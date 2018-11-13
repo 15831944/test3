@@ -1,6 +1,7 @@
 #ifndef __HTTP_SERVERDATA_THREAD_H__
 #define __HTTP_SERVERDATA_THREAD_H__
 
+
 class CHttpServerDataThread
 {
 public:

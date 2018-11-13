@@ -6,10 +6,6 @@
 #pragma comment(lib, "httpapi.lib")
 CHttpServer::CHttpServer()
 {
-	m_iPort = 0;
-
-	m_strHost = _T("");
-	m_strUrlPath = _T("");
 }
 
 CHttpServer::~CHttpServer()
@@ -126,7 +122,7 @@ BOOL CHttpServer::ReadRequest(HTTPREQUEST *pHttpReq)
 				break;
 			}
 
-			sprintf(pHttpReq->szContext, _T("%s"), strContext);
+			strContext += szOutBuffer;
 		}
 
 		bRet = TRUE;
@@ -267,7 +263,7 @@ BOOL CHttpServer::Initialize()
 	return bRet;
 }
 
-BOOL CHttpServer::AddUrlHandler(URLHANDLER *pUrlHandle)
+BOOL CHttpServer::AddUrlHandler(LPCTSTR lpszUrlPath, int iPort, URLHANDLER *pUrlHandle)
 {
 	BOOL bRet = FALSE;
 
@@ -277,13 +273,13 @@ BOOL CHttpServer::AddUrlHandler(URLHANDLER *pUrlHandle)
 	USES_CONVERSION;
 	do 
 	{
-		if (pUrlHandle == NULL)
+		if (lpszUrlPath == NULL || *lpszUrlPath == '\0' || pUrlHandle == NULL)
 		{
 			bRet = FALSE;
 			break;
 		}
 
-		strFullUrlPath.Format(_T("%s/%s"), m_strUrlPath, pUrlHandle->szUrlPath);
+		strFullUrlPath.Format(_T("%s:%d%s/"), lpszUrlPath, iPort, pUrlHandle->szUrlPath);
 
 		//指定要监听的URI,为每个URI调用HttpAddUrl 
 		iRet = ::HttpAddUrl(m_hRequestHandle, A2CW(strFullUrlPath.GetBuffer(0)), NULL);
@@ -314,19 +310,8 @@ BOOL CHttpServer::Start()
 		while (TRUE)
 		{
 			memset(&stcHttpReq, 0x0, sizeof(HTTPREQUEST));
-			memset(&stcHttpResp, 0x0, sizeof(HTTPRESPONSE));
 
 			if (!ReadRequest(&stcHttpReq))
-			{
-				continue;
-			}
-
-			if (!GetHandler(&stcHttpReq, &pUrlHandler))
-			{
-				continue;
-			}
-
-			if (!SendResponse(&stcHttpResp))
 			{
 				continue;
 			}
