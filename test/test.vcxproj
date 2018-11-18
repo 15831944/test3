@@ -22,6 +22,7 @@
     <ProjectGuid>{3C0E867A-52BF-4C15-A318-E67221F03E0B}</ProjectGuid>
     <RootNamespace>test</RootNamespace>
     <Keyword>MFCProj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -120,7 +121,7 @@ del $(SolutionDir)bin\$(TargetFileName)
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
@@ -140,7 +141,7 @@ del $(SolutionDir)bin\$(TargetFileName)
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\json;$(SolutionDir)lib\zlog;$(SolutionDir)lib\zxing;$(SolutionDir)lib\feitian;$(SolutionDir)lib\skinUI;$(SolutionDir)lib\opengl;$(SolutionDir)lib\bignum;$(SolutionDir)lib\detours;$(SolutionDir)lib\opencv\lib;$(SolutionDir)lib\openssl\lib;$(SolutionDir)lib\feitian\pkcs#11;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences />
