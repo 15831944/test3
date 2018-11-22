@@ -178,6 +178,33 @@ BOOL CDlgTest1Wnd::InitCtrl()
 	return TRUE;
 }
 
+void CDlgTest1Wnd::CreateImageList()
+{
+	BOOL	bRetValue = FALSE;
+	HICON	hIcon = NULL;
+
+	bRetValue = m_ImageList.Create(16, 16, ILC_COLOR32 | ILC_MASK, 5, 1);
+	ASSERT(bRetValue == TRUE);
+
+	hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);
+	m_ImageList.Add(hIcon);
+
+	hIcon = AfxGetApp()->LoadIcon(IDI_ICON2);
+	m_ImageList.Add(hIcon);
+	// 	
+	// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_137);
+	// 	m_ImageList.Add(hIcon);
+	// 	
+	// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_005);
+	// 	m_ImageList.Add(hIcon);
+	// 	
+	// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_110);
+	// 	m_ImageList.Add(hIcon);
+	// 	
+	// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_131);
+	// 	m_ImageList.Add(hIcon);
+}
+
 BOOL CDlgTest1Wnd::InitInfo()
 {
 	BOOL bRet = FALSE;
@@ -188,31 +215,4 @@ BOOL CDlgTest1Wnd::InitInfo()
 	} while (FALSE);
 
 	return bRet;
-}
-
-void CDlgTest1Wnd::CreateImageList()
-{
-	BOOL	bRetValue = FALSE;
-	HICON	hIcon = NULL;
-
-	bRetValue = m_ImageList.Create(16, 16, ILC_COLOR32 | ILC_MASK, 5, 1);
-	ASSERT(bRetValue == TRUE);
-
- 	hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);
- 	m_ImageList.Add(hIcon);
-
-	hIcon = AfxGetApp()->LoadIcon(IDI_ICON2);
-	m_ImageList.Add(hIcon);
-// 	
-// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_137);
-// 	m_ImageList.Add(hIcon);
-// 	
-// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_005);
-// 	m_ImageList.Add(hIcon);
-// 	
-// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_110);
-// 	m_ImageList.Add(hIcon);
-// 	
-// 	hIcon = AfxGetApp()->LoadIcon(IDI_SHELL32_131);
-// 	m_ImageList.Add(hIcon);
 }

@@ -273,12 +273,20 @@ BOOL test1(void *pUpdateData)
 
 	if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
 	{
-		pFileData->emConfigType = CONFIG_DELFILENAME_TYPE;
+/*
+		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
 
-		pFileData->stcDelFileName.iIndex = 0;
+		pFileData->stcAddFileName.iIndex = 0;
+		strcpy(pFileData->stcAddFileName.szFileName, _T("王磊"));
+*/
+
+		pFileData->emConfigType = CONFIG_DELFILENAME_TYPE;
+		memset(&pFileData->stcDelFileName, 0x0, sizeof(UPDATE_DELFILENAME));
+
+		pFileData->stcDelFileName.iIndex = 1;
 		pFileData->stcDelFileName.iCount = 5;
-		strcpy(pFileData->stcAddFileName.szFileName, _T("测试1"));
+		strcpy(pFileData->stcDelFileName.szFileName, _T("王磊"));		
 	}
 
 	return TRUE;
@@ -339,9 +347,9 @@ BOOL CDlgTest2Wnd::InitInfo()
 		pFileInfo->time_create = 1537856468;
 		pFileInfo->time_access = 1537856468;
 		pFileInfo->time_write = 1537856468;
-		sprintf(pFileInfo->szFileName, _T("1王磊2.txt"));
+		sprintf(pFileInfo->szFileName, _T("this.txt"));
 		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\1王磊2.txt"));//王磊2
+		sprintf(pFileInfo->szFilePath, _T("C:\\this.txt"));	//王磊2
 		sprintf(pFileInfo->szFileExt, _T(".txt"));
 		vecFileInfo.push_back(pFileInfo);
 

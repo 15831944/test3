@@ -250,6 +250,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
+	BOOL bIsFindChar = FALSE;
 	int iAddIndex = -1;
 
 	unsigned int uiPos = 0;
@@ -276,7 +277,7 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 			break;
 		}
 
-		pFileName = strtok(pFileData->stcFileInfo.szFileName, pFileData->stcFileInfo.szFileExt);
+		pFileName = strtok(pFileData->stcFileInfo.szFileName, _T("."));	//pFileData->stcFileInfo.szFileExt
 		if (pFileName == NULL)
 		{//文件名称
 			bRet = FALSE;
@@ -434,7 +435,7 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 			break;
 		}
 
-		pFileName = strtok(pFileData->stcFileInfo.szFileName, pFileData->stcFileInfo.szFileExt);
+		pFileName = strtok(pFileData->stcFileInfo.szFileName, _T("."));
 		if (pFileName == NULL)
 		{//文件名称
 			bRet = FALSE;
@@ -442,7 +443,7 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		}
 
 		uiLen = strlen(pFileName);	//名称长度
-		iDelIndex = pFileData->stcDelFileName.iIndex;	//待添加的位置
+		iDelIndex = pFileData->stcDelFileName.iIndex;	//待删除的位置
 
 		if (iDelIndex > 0)
 		{
