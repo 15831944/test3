@@ -273,20 +273,20 @@ BOOL test1(void *pUpdateData)
 
 	if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
 	{
-/*
-		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
-		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
 
-		pFileData->stcAddFileName.iIndex = 0;
-		strcpy(pFileData->stcAddFileName.szFileName, _T("王磊"));
-*/
+// 		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
+// 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
+// 
+// 		pFileData->stcAddFileName.iIndex = -1;
+// 		strcpy(pFileData->stcAddFileName.szFileName, _T("王磊"));
+
 
 		pFileData->emConfigType = CONFIG_DELFILENAME_TYPE;
 		memset(&pFileData->stcDelFileName, 0x0, sizeof(UPDATE_DELFILENAME));
 
-		pFileData->stcDelFileName.iIndex = 1;
-		pFileData->stcDelFileName.iCount = 5;
-		strcpy(pFileData->stcDelFileName.szFileName, _T("王磊"));		
+		pFileData->stcDelFileName.iIndex = -1;
+		pFileData->stcDelFileName.iCount = 1;
+		strcpy(pFileData->stcDelFileName.szFileName, _T("王磊"));
 	}
 
 	return TRUE;
@@ -347,9 +347,9 @@ BOOL CDlgTest2Wnd::InitInfo()
 		pFileInfo->time_create = 1537856468;
 		pFileInfo->time_access = 1537856468;
 		pFileInfo->time_write = 1537856468;
-		sprintf(pFileInfo->szFileName, _T("this.txt"));
+		sprintf(pFileInfo->szFileName, _T("王磊22.txt"));
 		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\this.txt"));	//王磊2
+		sprintf(pFileInfo->szFilePath, _T("C:\\王磊22.txt"));	//王磊2
 		sprintf(pFileInfo->szFileExt, _T(".txt"));
 		vecFileInfo.push_back(pFileInfo);
 
@@ -422,7 +422,7 @@ BOOL CDlgTest2Wnd::SetWndCtrlInfo()
 	m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
 
 	m_hSysDirTree.SetSelectList(m_hSysDirList);
-//	m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
+	//m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
 
 #if 0
 	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
