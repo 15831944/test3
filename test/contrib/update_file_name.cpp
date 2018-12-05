@@ -641,21 +641,84 @@ BOOL update_file_func::SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 {
 	BOOL bRet = FALSE;
 
-	UPDATE_EXTFILENAME stcExtFileName = {0};
+	unsigned int uiPos = 0;
+	unsigned int uiLen = 0;
+	unsigned int uiOffset = 0;
+
+	char *p = NULL;
+	char *ptr = NULL;
+	char *pFileExt = NULL;
+	char *pFileName = NULL;
+
+	char szExtName[MAX_PATH] = {0};
+	char szFileOldName[MAX_PATH] = {0};
+	char szFileNewName[MAX_PATH] = {0};
 
 	do 
 	{
-		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
-		{
+		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
+		{//判断文件名称修改类型
 			bRet = FALSE;
 			break;
 		}
 
-		if (emConfigType != pFileData->emConfigType)
+		ptr = strrchr(pFileData->stcFileInfo.szFileName, '.');	//strtok
+		if (ptr == NULL)
 		{
-			bRet = FALSE;
-			break;
+			uiPos = strlen(pFileData->stcFileInfo.szFileName);
+			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
+			pFileName = pFileData->stcFileInfo.szFileName;
+			pFileExt = NULL;
 		}
+		else
+		{
+			uiPos = ptr - pFileData->stcFileInfo.szFileName;
+			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
+			pFileName = szFileOldName;
+			pFileExt = ptr;
+		}
+
+		uiLen = strlen(pFileName);	//名称长度
+		if (strcmp(pFileData->stcExtFileName.szExtName, _T("")) != 0)
+		{
+			ptr = strrchr(pFileData->stcExtFileName.szExtName, '.');
+			if (ptr == NULL)
+			{
+				sprintf(szExtName, _T(".%s"), pFileData->stcExtFileName.szExtName);
+			}
+			else
+			{
+				strcpy(szExtName, pFileData->stcExtFileName.szExtName);
+			}
+
+			if (pFileData->stcExtFileName.bIsUppercase)
+			{//转换大写
+				pFileExt = strupr(szExtName);
+			}
+			else
+			{//转换小写
+				pFileExt = strlwr(szExtName);
+			}
+		}
+		else
+		{
+			if (pFileData->stcExtFileName.bIsUppercase)
+			{
+				pFileExt = strupr(pFileExt);
+			}
+			else
+			{
+				pFileExt = strlwr(pFileExt);
+			}
+		}
+
+		memcpy(szFileNewName+uiOffset, pFileName, uiLen);
+		uiOffset += uiLen;
+
+		memcpy(szFileNewName+uiOffset, pFileExt, strlen(pFileExt));
+		uiOffset += strlen(pFileExt);
 
 		bRet = TRUE;
 	} while (FALSE);

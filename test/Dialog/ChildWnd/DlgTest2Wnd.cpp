@@ -274,19 +274,32 @@ BOOL test1(void *pUpdateData)
 	if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
 	{
 
-// 		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
-// 		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
-// 
-// 		pFileData->stcAddFileName.iIndex = -1;
-// 		strcpy(pFileData->stcAddFileName.szFileName, _T("ÍõÀÚ"));
+#if 0
+		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
+		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
 
+		pFileData->stcAddFileName.iIndex = -1;
+		strcpy(pFileData->stcAddFileName.szFileName, _T("ÍõÀÚ"));
+#endif
+		
 
+#if 0
 		pFileData->emConfigType = CONFIG_DELFILENAME_TYPE;
 		memset(&pFileData->stcDelFileName, 0x0, sizeof(UPDATE_DELFILENAME));
 
 		pFileData->stcDelFileName.iIndex = -1;
 		pFileData->stcDelFileName.iCount = 1;
 		strcpy(pFileData->stcDelFileName.szFileName, _T("ÍõÀÚ"));
+#endif
+
+#if 1
+		pFileData->emConfigType = CONFIG_EXTFILENAME_TYPE;
+		memset(&pFileData->stcExtFileName, 0x0, sizeof(UPDATE_EXTFILENAME));
+
+		pFileData->stcExtFileName.bIsUppercase = TRUE;
+		strcpy(pFileData->stcExtFileName.szExtName, _T("ext"));
+#endif
+		
 	}
 
 	return TRUE;
