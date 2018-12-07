@@ -70,6 +70,7 @@ typedef struct {
 }UPDATE_INDEXFILENAME;
 
 typedef struct {
+	char						szFindName[MAX_PATH];		//原文件名字符;
 	char						szFileName[MAX_PATH];		//待替换的文件名字符;
 }UPDATE_REPLACEFILENAME;
 

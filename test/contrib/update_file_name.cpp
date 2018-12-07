@@ -756,21 +756,68 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 {
 	BOOL bRet = FALSE;
 
-	UPDATE_REPLACEFILENAME stcReplaceFileName = {0};
+	unsigned int uiPos = 0;
+	unsigned int uiLen = 0;
+	unsigned int uiOffset = 0;
+
+	char *p = NULL;
+	char *ptr = NULL;
+	char *pFileName = NULL;
+
+	char szFileOldName[MAX_PATH] = {0};
+	char szFileNewName[MAX_PATH] = {0};
 
 	do 
 	{
-		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
+		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
+		{//判断文件名称修改类型
+			bRet = FALSE;
+			break;
+		}
+
+		if (strcmp(pFileData->stcReplaceFileName.szFindName, _T("")) == 0 || strcmp(pFileData->stcReplaceFileName.szFileName, _T("")) == 0)
 		{
 			bRet = FALSE;
 			break;
 		}
 
-		if (emConfigType != pFileData->emConfigType)
+		ptr = strrchr(pFileData->stcFileInfo.szFileName, '.');	//strtok
+		if (ptr == NULL)
+		{
+			uiPos = strlen(pFileData->stcFileInfo.szFileName);
+			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
+			pFileName = pFileData->stcFileInfo.szFileName;
+		}
+		else
+		{
+			uiPos = ptr - pFileData->stcFileInfo.szFileName;
+			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
+			pFileName = szFileOldName;
+		}
+
+		uiLen = strlen(pFileName);	//名称长度
+		ptr = strstr(pFileName, pFileData->stcReplaceFileName.szFindName);
+		if (ptr == NULL)
 		{
 			bRet = FALSE;
 			break;
 		}
+
+		uiPos = ptr - pFileName;
+
+		memcpy(szFileNewName+uiOffset, pFileName, uiPos);
+		uiOffset += uiPos;
+
+		memcpy(szFileNewName+uiOffset, pFileData->stcReplaceFileName.szFileName, strlen(pFileData->stcReplaceFileName.szFileName));
+		uiOffset += strlen(pFileData->stcReplaceFileName.szFileName);
+
+		memcpy(szFileNewName+uiOffset, pFileName+uiPos, uiLen-uiPos);
+		uiOffset += (uiLen-uiPos);
+
+		memcpy(szFileNewName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+		uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
 
 		bRet = TRUE;
 	} while (FALSE);

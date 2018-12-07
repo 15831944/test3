@@ -292,12 +292,20 @@ BOOL test1(void *pUpdateData)
 		strcpy(pFileData->stcDelFileName.szFileName, _T("王磊"));
 #endif
 
-#if 1
+#if 0
 		pFileData->emConfigType = CONFIG_EXTFILENAME_TYPE;
 		memset(&pFileData->stcExtFileName, 0x0, sizeof(UPDATE_EXTFILENAME));
 
 		pFileData->stcExtFileName.bIsUppercase = TRUE;
 		strcpy(pFileData->stcExtFileName.szExtName, _T("ext"));
+#endif
+
+#if 1
+		pFileData->emConfigType = CONFIG_REPLACEFILENAME_TYPE;
+		memset(&pFileData->stcReplaceFileName, 0x0, sizeof(UPDATE_REPLACEFILENAME));
+
+		strcpy(pFileData->stcReplaceFileName.szFindName, _T("王磊"));
+		strcpy(pFileData->stcReplaceFileName.szFileName, _T("wl"));
 #endif
 		
 	}
@@ -360,9 +368,9 @@ BOOL CDlgTest2Wnd::InitInfo()
 		pFileInfo->time_create = 1537856468;
 		pFileInfo->time_access = 1537856468;
 		pFileInfo->time_write = 1537856468;
-		sprintf(pFileInfo->szFileName, _T("王磊22.txt"));
+		sprintf(pFileInfo->szFileName, _T("11王磊22.txt"));
 		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\王磊22.txt"));	//王磊2
+		sprintf(pFileInfo->szFilePath, _T("C:\\11王磊22.txt"));	//王磊2
 		sprintf(pFileInfo->szFileExt, _T(".txt"));
 		vecFileInfo.push_back(pFileInfo);
 

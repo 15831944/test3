@@ -25,3 +25,21 @@ void CTextView::OnTimer(UINT_PTR nIDEvent)
 
     CView::OnTimer(nIDEvent);
 }
+
+
+std::set<CWnd*> g_setModalWindows;
+int DoModalHelper(CDialog* pDialog)
+{
+    g_setModalWindows.insert(pDialog);
+    int nResult = pDialog->DoModal();
+    g_setModalWindows.erase(pDialog);
+    return nResult;
+}
+
+int DoModalHelper(CPropertySheet* pSheet)
+{
+    g_setModalWindows.insert(pSheet);
+    int nResult = pSheet->DoModal();
+    g_setModalWindows.erase(pSheet);
+    return nResult;
+}
