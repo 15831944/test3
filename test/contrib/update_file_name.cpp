@@ -434,6 +434,8 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 			pFileName = szFileOldName;
 		}
 
+		uiLen = strlen(pFileName);	//名称长度 
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -730,21 +732,42 @@ BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_F
 {
 	BOOL bRet = FALSE;
 
-	UPDATE_INDEXFILENAME stcIndexFileName = {0};
+	unsigned int uiPos = 0;
+	unsigned int uiLen = 0;
+	unsigned int uiOffset = 0;
+
+	char *p = NULL;
+	char *ptr = NULL;
+	char *pFileName = NULL;
+
+	char szFileOldName[MAX_PATH] = {0};
+	char szFileNewName[MAX_PATH] = {0};
 
 	do 
 	{
-		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
-		{
+		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
+		{//判断文件名称修改类型
 			bRet = FALSE;
 			break;
 		}
 
-		if (emConfigType != pFileData->emConfigType)
+		ptr = strrchr(pFileData->stcFileInfo.szFileName, '.');	//strtok
+		if (ptr == NULL)
 		{
-			bRet = FALSE;
-			break;
+			uiPos = strlen(pFileData->stcFileInfo.szFileName);
+			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
+			pFileName = pFileData->stcFileInfo.szFileName;
 		}
+		else
+		{
+			uiPos = ptr - pFileData->stcFileInfo.szFileName;
+			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
+			pFileName = szFileOldName;
+		}
+
+		uiLen = strlen(pFileName);	//名称长度
 
 		bRet = TRUE;
 	} while (FALSE);

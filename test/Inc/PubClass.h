@@ -36,7 +36,7 @@
 #include <vector>
 
 #include <atlconv.h>
-#include "afxshelltreeCtrl.h"
+//#include "afxshelltreeCtrl.h"
 //#include <opencv2/opencv.hpp>
 
 #include "./common/MemDCEx.h"
