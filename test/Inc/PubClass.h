@@ -39,6 +39,8 @@
 //#include "afxshelltreeCtrl.h"
 //#include <opencv2/opencv.hpp>
 
+#include <detours.h>
+
 #include "./common/MemDCEx.h"
 #include "./common/Character.h"
 
@@ -61,7 +63,6 @@
 #include "../Contrib/VideoWndThread.h"
 #include "../Contrib/CheckLinkThread.h"
 
-typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);
 //////////////////////////////////////////////////////////////////////////
 //
 #define countof(arr)						(sizeof(arr)/sizeof(arr[0]))
@@ -79,6 +80,8 @@ typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAud
 #define min(a,b)							(((a) < (b)) ? (a) : (b))
 #endif
 #endif
+
+#pragma comment(lib, "detours.lib")
 //////////////////////////////////////////////////////////////////////////
 //
 typedef struct{
@@ -103,8 +106,11 @@ typedef struct{
 	USHORT			usAuthorityCount;
 	USHORT			usAdditionalCount;
 }HT_DNS_HEADER;
+
 //////////////////////////////////////////////////////////////////////////
 //
+typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);
+
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);
 int  CALLBACK	EnumFontProc(ENUMLOGFONTEX *lpelf,NEWTEXTMETRICEX *lpntm,DWORD nFontType,long lParam);
 

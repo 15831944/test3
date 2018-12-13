@@ -60,6 +60,9 @@ protected:
 	void				InitCtrl();
 	void				InitInfo();
 
+	void				Hook();
+	void				UnHook();
+
 protected:
 	CTabCtrl			m_hTabCtrl;
 

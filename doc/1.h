@@ -26,7 +26,8 @@ void CTextView::OnTimer(UINT_PTR nIDEvent)
     CView::OnTimer(nIDEvent);
 }
 
-
+/////////////////////////////////////////////////////////////////////////////
+//
 std::set<CWnd*> g_setModalWindows;
 int DoModalHelper(CDialog* pDialog)
 {
@@ -43,3 +44,66 @@ int DoModalHelper(CPropertySheet* pSheet)
     g_setModalWindows.erase(pSheet);
     return nResult;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//
+template<typename _T>
+class CExcludeCharacter
+{
+public:
+	typedef _T* Iter;
+	CExcludeCharacter(const _T* ptr,int num, _T sentinel)
+	{
+		m_iNum = num;
+		m_sentinel = sentinel;
+		m_pSpecialCharacters = ptr;
+	}
+
+	~CExcludeCharacter()
+	{
+		m_pSpecialCharacters = NULL;
+	}
+
+	BOOL operator()(_T ch)
+	{
+		 BOOL bExisted = FALSE;
+
+		const _T* pch = NULL;
+		pch = find(m_pSpecialCharacters,m_pSpecialCharacters + m_iNum -1,ch);
+		if (*pch != m_sentinel)
+		{
+			bExisted = TRUE;
+		}
+		return bExisted;
+	}
+
+private:
+	_T m_sentinel;
+	int m_iNum;
+	const _T* m_pSpecialCharacters;
+};
+
+
+#include <algorithm>
+#include <string>
+using   namespace   std;
+
+void test()
+{
+	char szSpecialCharacter[] = {'//','/',':','*','?','/"','<','>','|','0'};
+	char szSource[MAX_PATH];
+	memset(szSource,0x00,sizeof(szSource));
+	sprintf_s(szSource,MAX_PATH,"Thi<s i>s a sa//mple ab/out h>ow to delete a gro*up of spec:ial chara?cters fro|m a give/n stri<ng usin|g C++");
+	size_t size = strlen(szSource);
+	std::string vSource(szSource,szSource+size);
+
+	std::string::iterator iterCharacter = find_if(vSource.begin(),vSource.end(),CExcludeCharacter<char>(szSpecialCharacter, sizeof(szSpecialCharacter)/sizeof(char),szSpecialCharacter[9]));
+	while (iterCharacter != vSource.end())
+	{
+		vSource.erase(iterCharacter);
+		iterCharacter = find_if(vSource.begin(),vSource.end(),CExcludeCharacter<char>(szSpecialCharacter, sizeof(szSpecialCharacter)/sizeof(char),szSpecialCharacter[9]));
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//

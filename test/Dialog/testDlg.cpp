@@ -116,9 +116,7 @@ BOOL CTestDlg::OnInitDialog()
 
 	SetIcon(m_hIcon, TRUE);			
 	SetIcon(m_hIcon, FALSE);		
-	char p1[MAX_PATH] = {0};
 
-	int i = atoi(p1);
 	Init();
 	return TRUE;  
 }
@@ -155,8 +153,8 @@ void CTestDlg::OnPaint()
 	}
 	else
 	{
-//		GetClientRect(&rect);
-//		dc.Draw3dRect(rect, RGB(255,0,0), RGB(0,255,0));
+		GetClientRect(&rect);
+		dc.Draw3dRect(rect, RGB(255,0,0), RGB(0,255,0));
 		CDialog::OnPaint();
 	}
 }
@@ -228,4 +226,31 @@ void CTestDlg::InitCtrl()
 
 void CTestDlg::InitInfo()
 {
+}
+
+int (WINAPI *Real_Messagebox)(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)= MessageBoxA;
+extern "C" _declspec(dllexport) BOOL WINAPI MessageBox_Mine(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
+{
+	CString temp= lpText;
+	temp+="该MessageBox已被Detours截获！";
+	return Real_Messagebox(hWnd,temp,lpCaption,uType);
+}
+
+void CTestDlg::Hook()
+{
+	DetourRestoreAfterWith();	//恢复原来状态
+	DetourTransactionBegin();	//拦截开始
+	DetourUpdateThread(GetCurrentThread());	//刷新当前线程
+	DetourAttach(&(PVOID&)Real_Messagebox,MessageBox_Mine); //设置detour
+
+	DetourTransactionCommit();	//拦截生效
+}
+
+void CTestDlg::UnHook()
+{
+	DetourTransactionBegin();	//拦截开始
+	DetourUpdateThread(GetCurrentThread());	//刷新当前线程
+	DetourDetach(&(PVOID&)Real_Messagebox,MessageBox_Mine);//卸载detour
+
+	DetourTransactionCommit();	//拦截生效
 }
