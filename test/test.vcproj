@@ -93,7 +93,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\feitian&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;;&quot;$(SolutionDir)lib\feitian\pkcs#11&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\feitian&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;;&quot;$(SolutionDir)lib\feitian\pkcs#11&quot;;&quot;$(SolutionDir)lib\facedetect&quot;"
 				UACExecutionLevel="0"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -699,22 +699,6 @@
 			<Filter
 				Name="video"
 				>
-				<File
-					RelativePath=".\Inc\video\gdi_wnd_draw_video.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\video\gdi_wnd_draw_video.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\video\opengl_wnd_draw_video.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\video\opengl_wnd_draw_video.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="common"

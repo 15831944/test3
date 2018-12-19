@@ -618,6 +618,92 @@ bool CGlobalInfo::DNSLookupInfo(const char *pszDNSServerIp, const char *pszDomai
 	return true;
 }
 
+bool CGlobalInfo::OpenSysServer(const char *pszSvrName)
+{
+	bool bRet = false;
+	DWORD dwCount = 0;
+	const DWORD dwMaxRetryCount = 3;
+
+	SC_HANDLE scHandle;
+	SC_HANDLE svcHandle;
+
+	SERVICE_STATUS svcStatus;
+
+	do 
+	{
+		if (pszSvrName == NULL || *pszSvrName == '\0')
+		{
+			bRet = false;
+			break;
+		}
+
+		scHandle = ::OpenSCManager(NULL, NULL, GENERIC_EXECUTE);
+		if (scHandle == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		svcHandle = ::OpenService(scHandle, pszSvrName, SERVICE_START | SERVICE_QUERY_STATUS | SERVICE_STOP);
+		if (svcHandle == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (!::QueryServiceStatus(svcHandle, &svcStatus))
+		{
+			bRet = false;
+			break;
+		}
+
+		if (svcStatus.dwCurrentState == SERVICE_RUNNING)
+		{
+			bRet = true;
+		}
+		else
+		{
+			if (!::StartService(svcHandle, NULL, NULL))
+			{
+				bRet = false;
+				break;
+			}
+
+			while (::QueryServiceStatus(svcHandle, &svcStatus))
+			{
+				if (dwCount >= dwMaxRetryCount)
+				{
+					bRet = false;
+					break;
+				}
+
+				::Sleep( svcStatus.dwWaitHint);
+				if (svcStatus.dwCurrentState == SERVICE_RUNNING)
+				{
+					bRet = true;
+					break;
+				}
+
+				dwCount++;
+			}
+		}
+	} while (false);
+
+	if (svcHandle != NULL && svcHandle != INVALID_HANDLE_VALUE)
+	{
+		::CloseServiceHandle(svcHandle);
+		svcHandle = NULL;
+	}
+
+	if (scHandle != NULL && scHandle != INVALID_HANDLE_VALUE)
+	{
+		::CloseServiceHandle(scHandle);
+		scHandle = NULL;
+	}
+
+	return bRet;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 bool CGlobalInfo::DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned)

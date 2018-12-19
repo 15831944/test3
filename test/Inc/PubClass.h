@@ -40,6 +40,7 @@
 //#include <opencv2/opencv.hpp>
 
 #include <detours.h>
+#include <winsvc.h>
 
 #include "./common/MemDCEx.h"
 #include "./common/Character.h"

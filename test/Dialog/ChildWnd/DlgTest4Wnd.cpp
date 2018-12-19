@@ -77,101 +77,19 @@ void CDlgTest4Wnd::OnPaint()
 //
 void CDlgTest4Wnd::OnBnClickedButton1()
 {
-	static BOOL bFlag = FALSE;
-
-	CString strFileName;
-	CString strFilePath;
-
-	if (!bFlag)
-	{
-		bFlag = TRUE;
-		strFileName = _T("1.wav");
-	}
-	else
-	{
-		bFlag = FALSE;
-		strFileName = _T("2.wav");
-	}
-
-#if 0
-	strFilePath.Format(_T("%s\\%s"), CGlobalInfo::CreateInstance()->GetAppPath(), strFileName);
-	if (!CGlobalInfo::CreateInstance()->IsFileExists(strFilePath))
-	{
-		return;
-	}
-#endif
-
-#if 0
-	m_WavePlayer.SetPlayerProcEvent(FALSE);
-	if (!m_WavePlayer.SetPlayerProcData(strFilePath, 0))
-	{
-		return;
-	}
-
-	m_WavePlayer.SetPlayerProcEvent(TRUE);
-#endif
-
-#if 0
-	if (!m_WavePlayer.CreatePlayerProc(strFilePath, 0, PlayMode_Loop))
-	{
-		return;
-	}
-#endif
+	CGlobalInfo::CreateInstance()->OpenSysServer("W32Time");
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()
 {
-#if 0
-	static BOOL bFlag = FALSE;
-	if (!bFlag)
-	{
-		bFlag = TRUE;
-		m_WavePlayer.SetPlayerProcEvent(FALSE);
-	}
-	else
-	{
-		bFlag = FALSE;
-		m_WavePlayer.SetPlayerProcEvent(TRUE);
-	}
-#endif
-
-#if 0
-	m_WavePlayer.ClosePlayerProc();
-#endif
 }
 
 void CDlgTest4Wnd::OnBnClickedButton3()
 {
-#if 0
-	CDlgPTZControlWnd	dlgPTZControl;
-	dlgPTZControl.DoModal();
-#endif
-
-#if 0
-	int nSel = 50;
-	int nItem = m_list.GetTopIndex();
-
-    CRect rc;
-    m_list.GetItemRect(nItem, rc, LVIR_BOUNDS);
-    
-	CSize sz(0, (nSel - nItem)*rc.Height());
-    
-	m_list.Scroll(sz);
-    m_list.SetItemState(nSel, LVIS_SELECTED, LVIS_SELECTED);
-#endif
 }
 
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
-	BOOL bRet = FALSE;
-
-	do 
-	{
-#if 0
-		m_CheckLinkProc.CloseCheckLinkProc();
-#endif
-		bRet = TRUE;
-	} while (FALSE);
 }
 
 BOOL test1(LINK_ADAPTER_INFO *pLinkAdapterInfo)
@@ -226,16 +144,6 @@ BOOL CDlgTest4Wnd::InitCtrl()
 
 BOOL CDlgTest4Wnd::InitInfo()
 {
-#if 0
-	m_CheckLinkProc.CreateCheckLinkProc(test1);
-#endif
-	
-#if 0
-	if (!m_WavePlayer.CreatePlayerProc())
-	{
-		return FALSE;
-	}
-#endif
 	return TRUE;
 }
 
