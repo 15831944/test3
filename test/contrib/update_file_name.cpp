@@ -46,7 +46,7 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 		}
 
 		stcUpdateFileData.emUpdateStatus = STATE_UPDATEINPUTE_TYPE;
-		if (!pfUpdateFileData(&stcUpdateFileData))
+		if (!pfUpdateFileData(&stcUpdateFileData, NULL))
 		{
 			bRet = FALSE;
 			break;
@@ -420,21 +420,35 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 			break;
 		}
 
-		ptr = strrchr(pFileData->stcFileInfo.szFileName, '.');
+		if (strcmp(pFileData->stcDateFileName.szFileName, _T("")) == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		ptr = strrchr(pFileData->stcFileInfo.szFileName, '.');	//strtok
 		if (ptr == NULL)
-		{//文件名称
+		{
 			uiPos = strlen(pFileData->stcFileInfo.szFileName);
 			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
 			pFileName = pFileData->stcFileInfo.szFileName;
 		}
 		else
 		{
 			uiPos = ptr - pFileData->stcFileInfo.szFileName;
 			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
+
 			pFileName = szFileOldName;
 		}
 
 		uiLen = strlen(pFileName);	//名称长度 
+
+		memcpy(szFileNewName+uiOffset, pFileData->stcDateFileName.szFileName, strlen(pFileData->stcDateFileName.szFileName));
+		uiOffset += strlen(pFileData->stcDateFileName.szFileName);
+
+		memcpy(szFileNewName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+		uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
 
 		bRet = TRUE;
 	} while (FALSE);

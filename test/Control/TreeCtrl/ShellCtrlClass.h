@@ -88,7 +88,7 @@ protected:
 	GETSHELLTREE_PATH_CALLBACK_FUNC	m_pCallBackShellPath;
 
 private:	
-	int             giCtr;
+	int             m_giCtr;
 	LPMALLOC        m_pMalloc;
 };
 

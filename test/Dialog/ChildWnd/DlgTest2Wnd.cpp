@@ -10,7 +10,6 @@ CDlgTest2Wnd::CDlgTest2Wnd(CWnd* pParent /*=NULL*/)
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
 
-	m_nIndex = 0;
 	m_nPrePage = 0;
 	m_nDefaultSel = 0;
 
@@ -36,30 +35,97 @@ void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest2Wnd, CDialog)
+	ON_WM_CREATE()
+
+	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
+
 	ON_WM_SIZE()
 	ON_WM_SHOWWINDOW()
 
+	ON_BN_CLICKED(IDC_BTN2_RUNMODIFY,			OnBnClickedButtonRun)
 	ON_BN_CLICKED(IDC_BTN2_OPENFLODER,			OnBnClickedBtnOpenFloder)
 	ON_CBN_SELCHANGE(IDC_COMBO2_EVALNAME,		OnCbnSelchangeComboEvalname)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL CDlgTest2Wnd::OnInitDialog()
+int CDlgTest2Wnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	CDialog::OnInitDialog();
-
-	if (!Init())
+	if (__super::OnCreate(lpCreateStruct) == -1)
 	{
-		return FALSE;
+		return -1;
 	}
 
-	return TRUE;  
+	if (!CreateChildWnd())
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+BOOL CDlgTest2Wnd::OnInitDialog()
+{
+	BOOL bRet = FALSE;
+	CDialog::OnInitDialog();
+
+	do 
+	{
+		if (!Init())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
+	if (!bRet)
+	{
+		::PostMessage(AfxGetMainWnd()->m_hWnd,WM_CLOSE,0,0);
+	}
+
+	return bRet;  
+}
+
+BOOL CDlgTest2Wnd::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_ESCAPE || pMsg->wParam == VK_RETURN || pMsg->wParam == VK_SPACE))
+	{
+		return TRUE;
+	}
+
+	if (pMsg->message == WM_SYSKEYDOWN && pMsg->wParam == VK_F4)
+	{
+		return TRUE;
+	}
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CDlgTest2Wnd::OnPaint()
+{
+	CPaintDC dc(this);
+
+	if (!m_bInited)
+	{
+		return;
+	}
+
+	DrawWndImage(&dc);
+}
+
+BOOL CDlgTest2Wnd::OnEraseBkgnd(CDC* pDC)
+{
+	//return TRUE;
+	return CDialog::OnEraseBkgnd(pDC);
 }
 
 void CDlgTest2Wnd::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
+
 	if (!m_bInited)
 	{
 		return;
@@ -74,53 +140,49 @@ void CDlgTest2Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
 	CDialog::OnShowWindow(bShow, nStatus);
 }
 
+//////////////////////////////////////////////////////////////////////////
+//
 void CDlgTest2Wnd::OnBnClickedBtnOpenFloder()
 {
-
 }
 
-void CDlgTest2Wnd::OnBnClickedBtnRunModify()
+void CDlgTest2Wnd::OnBnClickedButtonRun()
 {
 	BOOL bRet = FALSE;
 
-	int nIndex = -1;
-	DWORD dwDataPtr = 0;
-
-	CString strFindName;
-	CString strSubName;
 	CString strPrompt;
+	update_file_name filenameFunc;
 
 	do 
 	{
 		if (m_strShellPath == _T(""))
 		{
 			bRet = FALSE;
-			strPrompt = _T("请选择正确的文件路径!");
+			strPrompt = _T("请选择正确的文件路径, 请检查!");
 			break;
 		}
 
-		if (strSubName == _T(""))
+		if (!update_file_data::Instance().SetUpdateFileData(m_vecFileInfo, NULL))
 		{
 			bRet = FALSE;
-			strPrompt = _T("新文件名称不能为空, 请检查!");
 			break;
 		}
 
-/*
-		if (!m_hUpdateFile.CreateUpdateProc(this->GetSafeHwnd(), m_strShellPath, strFindName, strSubName, m_emEvalType))
+		if (!filenameFunc.CreateUpdateProc())
 		{
 			bRet = FALSE;
-			strPrompt = _T("文件名称修改失败, 请检查!");
 			break;
 		}
-*/
 
 		bRet = TRUE;
 	} while (FALSE);
 
-	if (!bRet && strPrompt != _T(""))
+	if (!bRet)
 	{
-		::MessageBox(NULL, strPrompt, _T("警告!"), MB_ICONWARNING | MB_OK);
+		if (strPrompt != _T(""))
+		{
+			::MessageBox(NULL, strPrompt, _T("警告!"), MB_ICONWARNING|MB_OK);
+		}
 	}
 }
 
@@ -144,12 +206,13 @@ void CDlgTest2Wnd::OnCbnSelchangeComboEvalname()
 		m_nPrePage = nCurSel;
 	}
 }
+
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CDlgTest2Wnd::GetShellTreePath(char* pszShellPath, void* pParam)
 {
-	CDlgTest2Wnd* pTest1Wnd = (CDlgTest2Wnd*)pParam;
-	if (pTest1Wnd == NULL)
+	CDlgTest2Wnd* pWndInfo = (CDlgTest2Wnd*)pParam;
+	if (pWndInfo == NULL)
 	{
 		return FALSE;
 	}
@@ -159,7 +222,7 @@ BOOL CDlgTest2Wnd::GetShellTreePath(char* pszShellPath, void* pParam)
 		return FALSE;
 	}
 
-	pTest1Wnd->m_strShellPath = pszShellPath;
+	pWndInfo->m_strShellPath = pszShellPath;
 	return TRUE;
 }
 
@@ -175,7 +238,6 @@ LRESULT CDlgTest2Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 		{
 		case WM_CONTEXTMENU:
 			{
-				return 0;
 			}
 			break;
 
@@ -234,153 +296,41 @@ LRESULT CDlgTest2Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 //
 BOOL CDlgTest2Wnd::Init()
 {
-	if (!InitCtrl())
-	{
-		return FALSE;
-	}
+	BOOL bRet = FALSE;
 
-	if (!InitInfo())
+	do 
 	{
-		return FALSE;
-	}
+		if (!InitCtrl())
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	return TRUE;
+		if (!InitInfo())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
+	return bRet;
 }
 
 BOOL CDlgTest2Wnd::InitCtrl()
 {
-	if (!CreateChildWnd())
-	{
-		return FALSE;
-	}
-
-	if (!SetWndCtrlInfo())
-	{
-		return FALSE;
-	}
-	
-	return TRUE;
-}
-
-#include "../../Contrib/update_file_name.h"
-BOOL test1(void *pUpdateData)
-{
-	UPDATE_FILEDATA *pFileData = (UPDATE_FILEDATA*)pUpdateData;
-	if (pFileData == NULL)
-	{
-		return FALSE;
-	}
-
-	if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
-	{
-
-#if 0
-		pFileData->emConfigType = CONFIG_ADDFILENAME_TYPE;
-		memset(&pFileData->stcAddFileName, 0x0, sizeof(UPDATE_ADDFILENAME));
-
-		pFileData->stcAddFileName.iIndex = -1;
-		strcpy(pFileData->stcAddFileName.szFileName, _T("王磊"));
-#endif
-		
-
-#if 0
-		pFileData->emConfigType = CONFIG_DELFILENAME_TYPE;
-		memset(&pFileData->stcDelFileName, 0x0, sizeof(UPDATE_DELFILENAME));
-
-		pFileData->stcDelFileName.iIndex = -1;
-		pFileData->stcDelFileName.iCount = 1;
-		strcpy(pFileData->stcDelFileName.szFileName, _T("王磊"));
-#endif
-
-#if 0
-		pFileData->emConfigType = CONFIG_EXTFILENAME_TYPE;
-		memset(&pFileData->stcExtFileName, 0x0, sizeof(UPDATE_EXTFILENAME));
-
-		pFileData->stcExtFileName.bIsUppercase = TRUE;
-		strcpy(pFileData->stcExtFileName.szExtName, _T("ext"));
-#endif
-
-#if 1
-		pFileData->emConfigType = CONFIG_REPLACEFILENAME_TYPE;
-		memset(&pFileData->stcReplaceFileName, 0x0, sizeof(UPDATE_REPLACEFILENAME));
-
-		strcpy(pFileData->stcReplaceFileName.szFindName, _T("王磊"));
-		strcpy(pFileData->stcReplaceFileName.szFileName, _T("wl"));
-#endif
-		
-	}
-
-	return TRUE;
-}
-
-BOOL CDlgTest2Wnd::InitInfo()
-{
 	BOOL bRet = FALSE;
-
-	int nIndex = 0;
-	int nCount = 0;
-
-	UPDATE_FILEINFO *pFileInfo = NULL;
-	UPDATE_FILEDATA *pFileData = NULL;
-
-	update_file_name filenameFunc;
-	std::vector<UPDATE_FILEINFO*> vecFileInfo;
-	std::vector<UPDATE_FILEDATA*> vecFileData;
 
 	do 
 	{
-#if 0
-		CString strItemString;
-		EVAL_ITEMDATA hEvalItem[4];
-
-		memset(&hEvalItem, 0x0, sizeof(hEvalItem));
-
-		hEvalItem[0].emEvalType = EVAL_EMPTYTYPE;
-		strcpy(hEvalItem[0].szItemName, _T("请选择..."));
-
-		hEvalItem[1].emEvalType = EVAL_ALLFILENAME;
-		strcpy(hEvalItem[1].szItemName, _T("全部名称"));
-
-		hEvalItem[2].emEvalType = EVAL_SPECIFYNAME;
-		strcpy(hEvalItem[2].szItemName, _T("指定名称"));
-
-		hEvalItem[3].emEvalType = EVAL_SPECIFYNUMINDEX;
-		strcpy(hEvalItem[3].szItemName, _T("数字索引"));
-
-		for (nIndex = 0; nIndex < sizeof(hEvalItem) / sizeof(EVAL_ITEMDATA); nIndex++)
-		{
-			m_hComboEval.InsertString(nIndex, hEvalItem[nIndex].szItemName);
-			m_hComboEval.SetItemData(nIndex, hEvalItem[nIndex].emEvalType);
-		}
-
-		m_hComboEval.SetCurSel(0);
-#endif
-		pFileInfo = new UPDATE_FILEINFO;
-		if (pFileInfo == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-		memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
-
-		pFileInfo->uiFileSize = 10;
-		pFileInfo->uiFileAttrib = 1000;
-		pFileInfo->time_create = 1537856468;
-		pFileInfo->time_access = 1537856468;
-		pFileInfo->time_write = 1537856468;
-		sprintf(pFileInfo->szFileName, _T("11王磊22.txt"));
-		sprintf(pFileInfo->szParentPath, _T("C:\\"));
-		sprintf(pFileInfo->szFilePath, _T("C:\\11王磊22.txt"));	//王磊2
-		sprintf(pFileInfo->szFileExt, _T(".txt"));
-		vecFileInfo.push_back(pFileInfo);
-
-		if (!update_file_data::Instance().SetUpdateFileData(vecFileInfo, test1))
+		if (!InitWndSkin())
 		{
 			bRet = FALSE;
 			break;
 		}
 
-		if (!filenameFunc.CreateUpdateProc())
+		if (!InitWndInfo())
 		{
 			bRet = FALSE;
 			break;
@@ -392,89 +342,177 @@ BOOL CDlgTest2Wnd::InitInfo()
 	return bRet;
 }
 
+BOOL CDlgTest2Wnd::InitInfo()
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+#if 0
+		TCHAR lpszDesktopPath[_MAX_PATH] ={0};
+		if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
+		{
+			m_strDefaultPath = lpszDesktopPath;
+		}
+		else
+		{
+			m_strDefaultPath = _T("C:\\");
+		}
+
+		m_strAppPath = pGlobal->GetAppPath();
+
+		CEdit *pEdit = (CEdit*)GetDlgItem(IDC_EDIT_PATH);
+		if (pEdit)
+		{
+			pEdit->SetReadOnly(TRUE);
+			m_hEditWnd = pEdit->GetSafeHwnd();
+
+			SetWindowLong(m_hEditWnd, GWL_USERDATA, (DWORD)this);
+			m_OldEditProc = (WNDPROC)GetWindowLong(m_hEditWnd, GWL_WNDPROC);
+			SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
+		}
+#endif
+
+		//this->GetDlgItem(IDC_EDIT_FINDNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入查找的名称...");
+		//this->GetDlgItem(IDC_EDIT_SUBNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入替换的名称...");
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
 BOOL CDlgTest2Wnd::CreateChildWnd()
 {
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		m_dlgShowLogoWnd.Create(CDlgShowLogoWnd::IDD, this);
+		m_dlgFileNameAdd.Create(CDlgFileNameAdd::IDD, this);
+		m_dlgFileNameDate.Create(CDlgFileNameDate::IDD, this);
+		m_dlgFileNameDel.Create(CDlgFileNameDel::IDD, this);
+		m_dlgFileNameExt.Create(CDlgFileNameExt::IDD, this);
+		m_dlgFileNameIndex.Create(CDlgFileNameIndex::IDD, this);
+		m_dlgFileNameReplace.Create(CDlgFileNameReplace::IDD, this);
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgTest2Wnd::InitWndSkin()
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgTest2Wnd::InitWndInfo()
+{
+	BOOL bRet = FALSE;
+
 	int nIndex = 0;
 	CRect rcSubWnd;
 
-	m_dlgShowLogoWnd.Create(CDlgShowLogoWnd::IDD, this);
-	m_dlgFileNameAdd.Create(CDlgFileNameAdd::IDD, this);
-	m_dlgFileNameDate.Create(CDlgFileNameDate::IDD, this);
-	m_dlgFileNameDel.Create(CDlgFileNameDel::IDD, this);
-	m_dlgFileNameExt.Create(CDlgFileNameExt::IDD, this);
-	m_dlgFileNameIndex.Create(CDlgFileNameIndex::IDD, this);
-	m_dlgFileNameReplace.Create(CDlgFileNameReplace::IDD, this);
-
-	m_pArPage.Add(&m_dlgShowLogoWnd);
-	m_pArPage.Add(&m_dlgFileNameAdd);
-	m_pArPage.Add(&m_dlgFileNameDate);
-	m_pArPage.Add(&m_dlgFileNameDel);
-	m_pArPage.Add(&m_dlgFileNameExt);
-	m_pArPage.Add(&m_dlgFileNameIndex);
-	m_pArPage.Add(&m_dlgFileNameReplace);
-
-	m_hComboEval.AddString(_T("1"));
-	m_hComboEval.AddString(_T("2"));
-	m_hComboEval.AddString(_T("3"));
-	m_hComboEval.AddString(_T("4"));
-	m_hComboEval.AddString(_T("5"));
-	m_hComboEval.AddString(_T("6"));
-
-	GetDlgItem(IDC_STATIC2_RECT)->GetWindowRect(&rcSubWnd);
-	GetDlgItem(IDC_STATIC2_RECT)->ShowWindow(SW_HIDE);
-	ScreenToClient(&rcSubWnd);
-
-	for (nIndex=0; nIndex<m_pArPage.GetSize(); nIndex++)
+	do 
 	{
-		((CDialog*)m_pArPage[nIndex])->ShowWindow(SW_HIDE);
-		((CDialog*)m_pArPage[nIndex])->MoveWindow(&rcSubWnd);
-	}
+		//1:
+		m_pArPage.Add(&m_dlgShowLogoWnd);
+		m_pArPage.Add(&m_dlgFileNameAdd);
+		m_pArPage.Add(&m_dlgFileNameDel);
+		m_pArPage.Add(&m_dlgFileNameExt);
+		m_pArPage.Add(&m_dlgFileNameReplace);
+		m_pArPage.Add(&m_dlgFileNameDate);
+		m_pArPage.Add(&m_dlgFileNameIndex);
 
-	((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
-	((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
+		m_hComboEval.InsertString(nIndex++, _T("文件名添加..."));
+		m_hComboEval.InsertString(nIndex++, _T("文件名删除..."));
+		m_hComboEval.InsertString(nIndex++, _T("文件扩展名..."));
+		m_hComboEval.InsertString(nIndex++, _T("文件名替换..."));
+		m_hComboEval.InsertString(nIndex++, _T("文件名日期..."));
+		m_hComboEval.InsertString(nIndex++, _T("文件名序号..."));
 
-	m_nPrePage = m_nDefaultSel;
-	return TRUE;
+		GetDlgItem(IDC_STATIC2_RECT)->GetWindowRect(&rcSubWnd);
+		GetDlgItem(IDC_STATIC2_RECT)->ShowWindow(SW_HIDE);
+		ScreenToClient(&rcSubWnd);
+
+		for (nIndex=0; nIndex<m_pArPage.GetSize(); nIndex++)
+		{
+			((CDialog*)m_pArPage[nIndex])->ShowWindow(SW_HIDE);
+			((CDialog*)m_pArPage[nIndex])->MoveWindow(&rcSubWnd);
+		}
+
+		((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
+		((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
+
+		m_nPrePage = m_nDefaultSel;
+		m_hComboEval.SetCurSel(m_nDefaultSel);
+
+		//2:
+		m_hSysDirTree.InitializeCtrl();
+		m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
+		m_hSysDirTree.SetSelectList(m_hSysDirList);
+		
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
-BOOL CDlgTest2Wnd::SetWndCtrlInfo()
+BOOL CDlgTest2Wnd::UpdateWndCtrl()
 {
-	m_hSysDirTree.InitializeCtrl();
-	m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
+	BOOL bRet = FALSE;
 
-	m_hSysDirTree.SetSelectList(m_hSysDirList);
-	//m_hButton1.SubclassDlgItem(IDC_BUTTON1, this);
-
-#if 0
-	TCHAR lpszDesktopPath[_MAX_PATH] ={0};
-	if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
+	do 
 	{
-		m_strDefaultPath = lpszDesktopPath;
-	}
-	else
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgTest2Wnd::UpdateWndInfo()
+{
+	BOOL bRet = FALSE;
+
+	do 
 	{
-		m_strDefaultPath = _T("C:\\");
-	}
+		bRet = TRUE;
+	} while (FALSE);
 
-	m_strAppPath = pGlobal->GetAppPath();
-
-	CEdit *pEdit = (CEdit*)GetDlgItem(IDC_EDIT_PATH);
-	if (pEdit)
-	{
-		pEdit->SetReadOnly(TRUE);
-		m_hEditWnd = pEdit->GetSafeHwnd();
-
-		SetWindowLong(m_hEditWnd, GWL_USERDATA, (DWORD)this);
-		m_OldEditProc = (WNDPROC)GetWindowLong(m_hEditWnd, GWL_WNDPROC);
-		SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
-	}
-#endif
-	
-	//this->GetDlgItem(IDC_EDIT_FINDNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入查找的名称...");
-	//this->GetDlgItem(IDC_EDIT_SUBNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入替换的名称...");
-	return TRUE;
+	return bRet;
 }
 
 void CDlgTest2Wnd::SetWndControlLayout()
 {
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+}
+
+BOOL CDlgTest2Wnd::DrawWndImage(CDC *pDC)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (pDC == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }

@@ -237,5 +237,4 @@ void CDlgTest3Wnd::OnBnClickedBtnTest3()
 
 void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 {
-
 }

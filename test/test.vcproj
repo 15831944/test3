@@ -699,6 +699,14 @@
 			<Filter
 				Name="video"
 				>
+				<File
+					RelativePath=".\Inc\video\gdi_wnd_draw_video.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\video\gdi_wnd_draw_video.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="common"

@@ -45,9 +45,7 @@ typedef struct {
 }UPDATE_ADDFILENAME;
 
 typedef struct {
-	BOOL						bIsReadPicExif;				//是否读取图片Exif信息;	
-	char						szDateFormat[MAX_PATH];		//日期格式;
-	UPDATE_DATETYPE				emDateType;					//日期类型;
+	char						szFileName[MAX_PATH];		//待修改为指定日期格式的文件名;
 }UPDATE_DATEFILENAME;
 
 typedef struct {
@@ -74,7 +72,7 @@ typedef struct {
 	char						szFileName[MAX_PATH];		//待替换的文件名字符;
 }UPDATE_REPLACEFILENAME;
 
-typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(void *pUpdateData);
+typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(void *pUpdateData, void *pParentObject);
 typedef struct {
 	UPDATE_CONFIGTYPE			emConfigType;
 	UPDATE_STATETYPE			emUpdateStatus;

@@ -10,73 +10,86 @@
 #include "../FuncWnd/DlgFileNameIndex.h"
 #include "../FuncWnd/DlgFileNameReplace.h"
 
+#include "../../Contrib/update_file_name.h"
+
 using namespace std;
 class CDlgTest2Wnd : public CDialog
 {
 	DECLARE_DYNAMIC(CDlgTest2Wnd)
 public:
-	CDlgTest2Wnd(CWnd* pParent = NULL);					
+	CDlgTest2Wnd(CWnd* pParent = NULL);
 	virtual ~CDlgTest2Wnd();
 
 public:
 	enum { IDD = IDD_DIALOG2 };
 
 protected:
-	virtual void					DoDataExchange(CDataExchange* pDX);   
-	virtual BOOL					OnInitDialog();
+	virtual void			DoDataExchange(CDataExchange* pDX);
+	virtual BOOL			PreTranslateMessage(MSG* pMsg);
+	virtual BOOL			OnInitDialog();
 
-	afx_msg void					OnSize(UINT nType, int cx, int cy);
-	afx_msg void					OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg int				OnCreate(LPCREATESTRUCT lpCreateStruct);
 
-	afx_msg void					OnBnClickedBtnOpenFloder();
-	afx_msg void					OnBnClickedBtnRunModify();
-	afx_msg void					OnCbnSelchangeComboEvalname();
+	afx_msg void			OnPaint();
+	afx_msg BOOL			OnEraseBkgnd(CDC* pDC);
+
+	afx_msg void			OnSize(UINT nType, int cx, int cy);
+	afx_msg void			OnShowWindow(BOOL bShow, UINT nStatus);
+
+	afx_msg void			OnBnClickedButtonRun();
+	afx_msg void			OnBnClickedBtnOpenFloder();
+	afx_msg void			OnCbnSelchangeComboEvalname();
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static BOOL						GetShellTreePath(char* pszShellPath, void* pParam);
-	static LRESULT 					EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+	static BOOL				GetShellTreePath(char* pszShellPath, void* pParam);
+	static LRESULT 			EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 protected:
-	BOOL							Init();
+	BOOL					Init();
 
-	BOOL							InitCtrl();
-	BOOL							InitInfo();
+	BOOL					InitCtrl();
+	BOOL					InitInfo();
 
-	BOOL							CreateChildWnd();
-	BOOL							InitWndSkin();
+	BOOL					CreateChildWnd();
+	BOOL					InitWndSkin();
+	BOOL					InitWndInfo();
 
-	BOOL							SetWndCtrlInfo();
-	void							SetWndControlLayout();
+	BOOL					UpdateWndCtrl();
+	BOOL					UpdateWndInfo();
+
+	void					SetWndControlLayout();
+	BOOL					DrawWndImage(CDC *pDC);
 	
 protected:
-	CComboBox						m_hComboEval;
-	CShellTreeCtrl					m_hSysDirTree;
-	CShellListCtrl					m_hSysDirList;
+	CComboBox				m_hComboEval;
+	CShellTreeCtrl			m_hSysDirTree;
+	CShellListCtrl			m_hSysDirList;
 
-	CDlgShowLogoWnd					m_dlgShowLogoWnd;
-	CDlgFileNameAdd					m_dlgFileNameAdd;
-	CDlgFileNameDate				m_dlgFileNameDate;
-	CDlgFileNameDel					m_dlgFileNameDel;
-	CDlgFileNameExt					m_dlgFileNameExt;
-	CDlgFileNameIndex				m_dlgFileNameIndex;
-	CDlgFileNameReplace				m_dlgFileNameReplace;
+	CDlgShowLogoWnd			m_dlgShowLogoWnd;
+	CDlgFileNameAdd			m_dlgFileNameAdd;
+	CDlgFileNameDate		m_dlgFileNameDate;
+	CDlgFileNameDel			m_dlgFileNameDel;
+	CDlgFileNameExt			m_dlgFileNameExt;
+	CDlgFileNameIndex		m_dlgFileNameIndex;
+	CDlgFileNameReplace		m_dlgFileNameReplace;
 
 private:
-	BOOL							m_bInited;
-	BOOL							m_bShowing;
+	BOOL					m_bInited;
+	BOOL					m_bShowing;
 	
-	int								m_nIndex;
-	int								m_nPrePage;
-	int								m_nDefaultSel;
+	int						m_nPrePage;
+	int						m_nDefaultSel;
 
-	HWND							m_hEditWnd;
-	CPtrArray						m_pArPage;
+	HWND					m_hEditWnd;
+	CPtrArray				m_pArPage;
 
-	CString							m_strAppPath;
-	CString							m_strShellPath;
-	CString							m_strDefaultPath;
+	CString					m_strAppPath;
+	CString					m_strShellPath;
+	CString					m_strDefaultPath;
 
-	WNDPROC			 				m_OldEditProc;	//FARPROC,WNDPROC
-	CALLRING_CALLBACK_FUNC			m_pfCallRingFunc;
+	std::vector<UPDATE_FILEINFO*> m_vecFileInfo;
+
+	WNDPROC			 		m_OldEditProc;	//FARPROC,WNDPROC
+	CALLRING_CALLBACK_FUNC	m_pfCallRingFunc;
 };

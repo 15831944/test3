@@ -32,21 +32,37 @@
 #define IDC_SPIN1                       1039
 #define IDC_EDIT5                       1039
 #define IDC_EDIT2                       1040
+#define IDC_SPIN3                       1040
 #define IDC_EDIT3                       1041
 #define IDC_COMBO1                      1041
+#define IDC_COMBO_INDEXFORMAT           1041
 #define IDC_SPIN2                       1042
 #define IDC_EDIT4                       1042
+#define IDC_SPIN4                       1042
+#define IDC_COMBO_FILEPROPERTY          1042
+#define IDC_EDIT_NAMESRCCHAR            1042
+#define IDC_EDIT_NAMEDESCCHAR           1043
+#define IDC_CHECK_REVERSE               1044
+#define IDC_EDIT_ENDINDEX               1044
+#define IDC_EDIT_INDEXBIT               1045
+#define IDC_EDIT_NAMECHAR               1047
+#define IDC_EDIT_NAMEINDEX              1048
+#define IDC_SPIN_NAMEINDEX              1049
+#define IDC_CHECK_REGEX                 1050
+#define IDC_COMBO_DATEFORMAT            1051
+#define IDC_CHECK_READEXIF              1052
+#define IDC_EDIT_NAMECOUNT              1053
+#define IDC_CHECK_Uppercase             1055
+#define IDC_EDIT_STARTINDEX             1056
 #define IDC_TAB1                        0x1000
 #define IDC_STATIC_VERSION              0x1001
 #define IDC_LIST1_SHOWINFO              0x1100
-
 #define IDC_TREE2_SYSDIR                0x1200
 #define IDC_LIST2_SYSDIR                0x1201
 #define IDC_COMBO2_EVALNAME             0x1202
 #define IDC_BTN2_OPENFLODER             0x1203
 #define IDC_BTN2_RUNMODIFY              0x1204
 #define IDC_STATIC2_RECT                0x1205
-
 #define IDC_BTN3_TEST1                  0x1300
 #define IDC_BTN3_TEST2                  0x1301
 #define IDC_BTN3_TEST3                  0x1302
@@ -72,7 +88,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1058
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ShellCtrlClass.h"
 
+//////////////////////////////////////////////////////////////////////////
+//文件树结构
 CShellTreeCtrl::CShellTreeCtrl()
 {
 	m_pShellListCtrl = NULL;
@@ -36,54 +38,64 @@ void CShellTreeCtrl::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CShellTreeCtrl::OnSelchanging(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	BOOL bRet = FALSE;
 	HTREEITEM hItem = NULL;
 	LPTVITEMDATA* lptvid = NULL;
+	NM_TREEVIEW* pNMTreeView = NULL;
 
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
-	if (pNMTreeView == NULL)
+	do 
 	{
-		return;
-	}
-
-	if(!(pNMTreeView->action))
-	{
-		return;
-	}
-
-	hItem = pNMTreeView->itemNew.hItem;
-	m_pSelectedItem = hItem;
-
-	lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
-	if (! lptvid)
-	{
-		AfxMessageBox(IDS_MEMORY_ERROR);
-		return;
-	}
-
-	lptvid = (LPTVITEMDATA*)pNMTreeView->itemNew.lParam;
-	if(lptvid == NULL)
-	{
-		return;
-	}
-
-	if(pNMTreeView->action != 4096)
-	{
-		if(m_pShellListCtrl != NULL)
+		pNMTreeView = (NM_TREEVIEW*)pNMHDR;
+		if (pNMTreeView == NULL)
 		{
-			m_pShellListCtrl->LVPopulateFiles(lptvid);
+			bRet = FALSE;
+			break;
 		}
-		else
+
+		if(!(pNMTreeView->action))
 		{
-			ULONG uAttr = SFGAO_FOLDER;
-			lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *)&lptvid->lpi, &uAttr);
-			if(!(uAttr & SFGAO_FOLDER))
+			bRet = FALSE;
+			break;
+		}
+
+		hItem = pNMTreeView->itemNew.hItem;
+		m_pSelectedItem = hItem;
+
+		lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+		if (!lptvid)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		lptvid = (LPTVITEMDATA*)pNMTreeView->itemNew.lParam;
+		if(lptvid == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if(pNMTreeView->action != 4096)
+		{
+			if(m_pShellListCtrl != NULL)
 			{
-				CShellContextMenuClass cmc;
-				cmc.ShowMenu(lptvid, FALSE, m_hWnd);
+				m_pShellListCtrl->LVPopulateFiles(lptvid);
+			}
+			else
+			{
+				ULONG uAttr = SFGAO_FOLDER;
+				lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *)&lptvid->lpi, &uAttr);
+				if(!(uAttr & SFGAO_FOLDER))
+				{
+					CShellContextMenuClass cmc;
+					cmc.ShowMenu(lptvid, FALSE, m_hWnd);
+				}
 			}
 		}
-	}
 
+		bRet = TRUE;
+	} while (FALSE);
+	
 	*pResult = 0;
 }
 
@@ -223,11 +235,13 @@ void CShellTreeCtrl::SetTreeImages()
 UINT CShellTreeCtrl::DeleteChildren(HTREEITEM hItem)
 {
 	UINT nCount = 0;
-	HTREEITEM hChild = GetChildItem (hItem);
 
-	while (hChild != NULL) {
+	HTREEITEM hChild = GetChildItem (hItem);
+	while (hChild != NULL) 
+	{
 		HTREEITEM hNextItem = GetNextSiblingItem (hChild);
 		DeleteItem (hChild);
+	
 		hChild = hNextItem;
 		nCount++;
 	}
@@ -312,10 +326,10 @@ void CShellTreeCtrl::SetSelectList(CShellListCtrl& hListCtrl)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//
+//文件列表
 CShellListCtrl::CShellListCtrl()
 {
-	giCtr = 0;
+	m_giCtr = 0;
 
 	m_pTvid = NULL;
 
@@ -335,171 +349,179 @@ CShellListCtrl::~CShellListCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CShellListCtrl, CListCtrl)
-	//{{AFX_MSG_MAP(CShellListCtrl)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO,	OnGetdispinfo)
 	ON_NOTIFY_REFLECT(NM_DBLCLK,		OnDblclk)
 	ON_NOTIFY_REFLECT(NM_RCLICK,		OnRclick)
-	// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
-
 	ON_MESSAGE(WM_UPDATECTRLDIR_MSG,	OnUpdateCtrlItem)
 END_MESSAGE_MAP()
 
 void CShellListCtrl::OnGetdispinfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	BOOL bRet = FALSE;
 	char refTime[32] = {0};
 	char sNumBuff[32] = {0};
 	char szBuff[MAX_PATH] = {0};
-	
-	DWORD dwStyles = SHGFI_PIDL|SHGFI_TYPENAME;
-	ULONG uAttr = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
 
 	SHFILEINFO sfi;
 	SYSTEMTIME st;
 	SHFILEINFO fileInfo;
-	
+
 	WIN32_FIND_DATA fd;
 	LPTVITEMDATA* lptvid = NULL;
-
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
-	if (pDispInfo == NULL)
-	{
-		return;
-	}
-
-	lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
-	if (lptvid == NULL)
-	{
-		return;
-	}
-	else
-	{
-		lptvid = (LPTVITEMDATA*)pDispInfo->item.lParam;
-	}
 	
-	SHGetFileInfo ((LPCSTR)lptvid->lpi, 0, &sfi, sizeof(SHFILEINFO), dwStyles);
-	SHGetDataFromIDList(lptvid->lpsfParent, lptvid->lpi, SHGDFIL_FINDDATA, (WIN32_FIND_DATA*)&fd, sizeof(fd));
+	DWORD dwStyles = SHGFI_PIDL|SHGFI_TYPENAME;
+	ULONG uAttr = SFGAO_HASSUBFOLDER | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_GHOSTED | SFGAO_LINK | SFGAO_SHARE;
 
-	if (pDispInfo->item.mask & LVIF_IMAGE)
+	do 
 	{
-		pDispInfo->item.iImage = CShellClass::Instance().GetNormalIcon(lptvid->lpifq);
-
-		lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
-		if (uAttr & SFGAO_GHOSTED)
+		LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+		if (pDispInfo == NULL)
 		{
-			pDispInfo->item.mask |= LVIF_STATE;
-			pDispInfo->item.stateMask = LVIS_CUT;
-			pDispInfo->item.state = LVIS_CUT;
-		}
-
-		if (uAttr & SFGAO_LINK)
-		{
-			pDispInfo->item.mask |= LVIF_STATE;
-			pDispInfo->item.stateMask = LVIS_OVERLAYMASK;
-			pDispInfo->item.state = INDEXTOOVERLAYMASK(2);
-		}
-
-		if (uAttr & SFGAO_SHARE)
-		{
-			pDispInfo->item.mask |= LVIF_STATE;
-			pDispInfo->item.stateMask = LVIS_OVERLAYMASK;
-			pDispInfo->item.state = INDEXTOOVERLAYMASK(1);
-		}
-	}
-
-	if (pDispInfo->item.mask & LVIF_TEXT)
-	{
-		switch(pDispInfo->item.iSubItem)
-		{
-		case ID_COL_NAME:
-			{
-				CShellClass::Instance().GetName(lptvid->lpsfParent, lptvid->lpi, SHGDN_NORMAL, szBuff);
-				_tcscpy(pDispInfo->item.pszText, szBuff);
-			}
+			bRet = FALSE;
 			break;
-		case ID_COL_TYPE:
-			{
-				SHGetFileInfo((LPCTSTR)lptvid->lpi, NULL, &fileInfo, sizeof(fileInfo), SHGFI_PIDL|SHGFI_TYPENAME);
-				_tcscpy(pDispInfo->item.pszText,fileInfo.szTypeName);
-			}
+		}
+
+		lptvid = (LPTVITEMDATA*)m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+		if (lptvid == NULL)
+		{
+			bRet = FALSE;
 			break;
-		case ID_COL_SIZE:
+		}
+		lptvid = (LPTVITEMDATA*)pDispInfo->item.lParam;
+
+		SHGetFileInfo ((LPCSTR)lptvid->lpi, 0, &sfi, sizeof(SHFILEINFO), dwStyles);
+		SHGetDataFromIDList(lptvid->lpsfParent, lptvid->lpi, SHGDFIL_FINDDATA, (WIN32_FIND_DATA*)&fd, sizeof(fd));
+
+		if (pDispInfo->item.mask & LVIF_IMAGE)
+		{
+			pDispInfo->item.iImage = CShellClass::Instance().GetNormalIcon(lptvid->lpifq);
+
+			lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
+			if (uAttr & SFGAO_GHOSTED)
 			{
-				if(fd.dwFileAttributes != 3435973836)
+				pDispInfo->item.mask |= LVIF_STATE;
+				pDispInfo->item.stateMask = LVIS_CUT;
+				pDispInfo->item.state = LVIS_CUT;
+			}
+
+			if (uAttr & SFGAO_LINK)
+			{
+				pDispInfo->item.mask |= LVIF_STATE;
+				pDispInfo->item.stateMask = LVIS_OVERLAYMASK;
+				pDispInfo->item.state = INDEXTOOVERLAYMASK(2);
+			}
+
+			if (uAttr & SFGAO_SHARE)
+			{
+				pDispInfo->item.mask |= LVIF_STATE;
+				pDispInfo->item.stateMask = LVIS_OVERLAYMASK;
+				pDispInfo->item.state = INDEXTOOVERLAYMASK(1);
+			}
+		}
+
+		if (pDispInfo->item.mask & LVIF_TEXT)
+		{
+			switch(pDispInfo->item.iSubItem)
+			{
+			case ID_COL_NAME:
 				{
-					if(fd.nFileSizeLow)
+					CShellClass::Instance().GetName(lptvid->lpsfParent, lptvid->lpi, SHGDN_NORMAL, szBuff);
+					_tcscpy(pDispInfo->item.pszText, szBuff);
+				}
+				break;
+			case ID_COL_TYPE:
+				{
+					SHGetFileInfo((LPCTSTR)lptvid->lpi, NULL, &fileInfo, sizeof(fileInfo), SHGFI_PIDL|SHGFI_TYPENAME);
+					_tcscpy(pDispInfo->item.pszText,fileInfo.szTypeName);
+				}
+				break;
+			case ID_COL_SIZE:
+				{
+					if(fd.dwFileAttributes != 3435973836)
 					{
-						if(fd.nFileSizeLow > 1024)
+						if(fd.nFileSizeLow)
 						{
-							ltoa((long)fd.nFileSizeLow/1024,sNumBuff,10);
-							strcat(sNumBuff, " KB");
+							if(fd.nFileSizeLow > 1024)
+							{
+								ltoa((long)fd.nFileSizeLow/1024,sNumBuff,10);
+								strcat(sNumBuff, " KB");
+							}
+							else
+							{
+								ltoa((long)fd.nFileSizeLow,sNumBuff,10);
+							}
 						}
 						else
 						{
-							ltoa((long)fd.nFileSizeLow,sNumBuff,10);
+							strcpy(sNumBuff,"");
 						}
-					}
-					else
-					{
-						strcpy(sNumBuff,"");
-					}
 
-					_tcscpy(pDispInfo->item.pszText,sNumBuff);
+						_tcscpy(pDispInfo->item.pszText,sNumBuff);
+					}
 				}
-			}
-			break;
-		case ID_COL_DATE:
-			{
-				if(fd.dwFileAttributes != 3435973836)
+				break;
+			case ID_COL_DATE:
 				{
-					FileTimeToSystemTime(&fd.ftLastWriteTime, &st);
+					if(fd.dwFileAttributes != 3435973836)
+					{
+						FileTimeToSystemTime(&fd.ftLastWriteTime, &st);
 
-					wsprintf(refTime, _T("%02u-%02u-%04u"), st.wMonth, st.wDay, st.wYear); 
-					_tcscpy(pDispInfo->item.pszText, refTime);
+						wsprintf(refTime, _T("%02u-%02u-%04u"), st.wMonth, st.wDay, st.wYear); 
+						_tcscpy(pDispInfo->item.pszText, refTime);
+					}
 				}
+				break;
 			}
-			break;
 		}
-	}
+
+		bRet = TRUE;
+	} while (FALSE);
 
 	*pResult = 0;
 }
 
 void CShellListCtrl::OnDblclk(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	BOOL bRet = FALSE;
 	LVHITTESTINFO lvhInf = {0};
 
-	GetCursorPos(&lvhInf.pt);
-	ScreenToClient(&lvhInf.pt);
-
-	int item = ListView_HitTest(m_hWnd, &lvhInf);
-	if((LVHT_ONITEMLABEL & lvhInf.flags ) || (LVHT_ONITEMICON & lvhInf.flags))
+	do 
 	{
-		LPTVITEMDATA* lptvid = NULL;
-		lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
+		GetCursorPos(&lvhInf.pt);
+		ScreenToClient(&lvhInf.pt);
 
-		LVITEM lvi;
-		lvi.mask = LVIF_PARAM;
-		lvi.iItem = lvhInf.iItem;
-		ListView_GetItem(m_hWnd, &lvi);
-		lptvid = (LPTVITEMDATA*)lvi.lParam;
-
-		ULONG uAttr = SFGAO_FOLDER;
-		lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
-
-		if(uAttr & SFGAO_FOLDER)
+		int item = ListView_HitTest(m_hWnd, &lvhInf);
+		if((LVHT_ONITEMLABEL & lvhInf.flags ) || (LVHT_ONITEMICON & lvhInf.flags))
 		{
-			char szBuff[MAX_PATH];
-			CShellClass csc;
-			csc.GetName(lptvid->lpsfParent , lptvid->lpi , SHGDN_NORMAL, szBuff);
-//		    this->m_pShellTreeCtrl->SelectThisItem(szBuff);
-		}
-		else
-		{
-			ShowStdMenu(FALSE, lptvid);
-		}
-	}
+			LPTVITEMDATA* lptvid = NULL;
+			lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc (sizeof (LPTVITEMDATA));
 
+			LVITEM lvi;
+			lvi.mask = LVIF_PARAM;
+			lvi.iItem = lvhInf.iItem;
+			ListView_GetItem(m_hWnd, &lvi);
+			lptvid = (LPTVITEMDATA*)lvi.lParam;
+
+			ULONG uAttr = SFGAO_FOLDER;
+			lptvid->lpsfParent->GetAttributesOf(1, (LPCITEMIDLIST *) &lptvid->lpi, &uAttr);
+
+			if(uAttr & SFGAO_FOLDER)
+			{
+				char szBuff[MAX_PATH];
+				CShellClass csc;
+
+				csc.GetName(lptvid->lpsfParent , lptvid->lpi , SHGDN_NORMAL, szBuff);
+				//this->m_pShellTreeCtrl->SelectThisItem(szBuff);
+			}
+			else
+			{
+				ShowStdMenu(FALSE, lptvid);
+			}
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
 	*pResult = 0;
 }
 
@@ -522,79 +544,104 @@ BOOL CShellListCtrl::SubclassDlgItem(UINT nID, CWnd* pParent)
 
 BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LPITEMIDLIST lpifq)
 {
-	int iItem = 0;
+	BOOL bRet = FALSE;
 	UINT uFlags;
+	int iItem = 0;
 
 	LV_ITEM lvi;
 	char szBuff[MAX_PATH] = {0};
 	LPTVITEMDATA* lptvid = NULL;
 
-	lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
-	if(lptvid == NULL)
+	do 
 	{
-		return FALSE;
-	}
+		lptvid = (LPTVITEMDATA*) m_pMalloc->Alloc(sizeof(LPTVITEMDATA));
+		if(lptvid == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
+		uFlags = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
+		CShellClass::Instance().GetName(lpsf, lpi, SHGDN_NORMAL, szBuff);
+
+		lvi.iItem = m_giCtr++;
+		lvi.iSubItem = ID_COL_NAME;
+		lvi.pszText =  LPSTR_TEXTCALLBACK; 
+
+		lvi.iImage = I_IMAGECALLBACK; 
+		lptvid->lpsfParent = lpsf;
+		lptvid->lpi = CShellClass::Instance().CopyItemID(m_pMalloc, lpi);
+		lptvid->lpifq = CShellClass::Instance().Concatenate(m_pMalloc, lpifq,lpi); 
+		lvi.lParam = (LPARAM)lptvid;
+
+		iItem = InsertItem(&lvi);
+		bRet = TRUE;
+	} while (FALSE);
 	
-	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
-	uFlags = SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
-	CShellClass::Instance().GetName (lpsf, lpi, SHGDN_NORMAL, szBuff);
-
-	lvi.iItem = giCtr++;
-	lvi.iSubItem = ID_COL_NAME;
-	lvi.pszText =  LPSTR_TEXTCALLBACK; 
-
-	lvi.iImage = I_IMAGECALLBACK; 
-	lptvid->lpsfParent = lpsf;
-	lptvid->lpi = CShellClass::Instance().CopyItemID(m_pMalloc, lpi);
-	lptvid->lpifq = CShellClass::Instance().Concatenate(m_pMalloc, lpifq,lpi); 
-	lvi.lParam = (LPARAM)lptvid;
-
-	iItem = InsertItem (&lvi);
-	return TRUE;
+	return bRet;
 }
 
 int CShellListCtrl::InitilizeCtrl(void* pParam, GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath)
 {
-	CRect rect;
-	GetClientRect(&rect);
+	BOOL bRet = FALSE;
+	int iWidth = -1;
 
-	ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);	//
-	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-
-	if (pParam != NULL)
+	do 
 	{
-		m_pParam = pParam;
-	}
+		CRect rect;
+		GetClientRect(&rect);
 
-	if (pCallBackPath != NULL)
-	{
-		m_pCallBackShellPath = pCallBackPath;
-	}
+		ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);	//
+		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-	SetupImageLists();
+		if (pParam != NULL)
+		{
+			m_pParam = pParam;
+		}
 
-	InsertColumn(ID_COL_NAME, "Name", LVCFMT_LEFT  , rect.right/2, -1);
-	InsertColumn(ID_COL_TYPE, "Type", LVCFMT_LEFT  , rect.right/5, -1);
-	InsertColumn(ID_COL_SIZE, "Size", LVCFMT_RIGHT , rect.right/6, -1);
-	InsertColumn(ID_COL_DATE, "Date", LVCFMT_LEFT  , rect.right/6, -1);
+		if (pCallBackPath != NULL)
+		{
+			m_pCallBackShellPath = pCallBackPath;
+		}
 
-	return 0;
+		SetupImageLists();
+
+		iWidth = rect.Width()/3;
+		InsertColumn(ID_COL_NAME, "名字", LVCFMT_LEFT,  iWidth, -1);
+
+		iWidth = (rect.Width()-iWidth)/2;
+		InsertColumn(ID_COL_SIZE, "大小", LVCFMT_RIGHT, iWidth, -1);
+		InsertColumn(ID_COL_DATE, "日期", LVCFMT_LEFT,  iWidth, -1);
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet ? 0 : -1;
 }
 
 void CShellListCtrl::SetupImageLists()
 {
+	BOOL bRet = FALSE;
 	HIMAGELIST himlSmall, himlLarge;
 
-	himlSmall = CShellClass::Instance().GetImageList(TRUE);
-	himlLarge = CShellClass::Instance().GetImageList(FALSE);
+	do 
+	{
+		himlSmall = CShellClass::Instance().GetImageList(TRUE);
+		himlLarge = CShellClass::Instance().GetImageList(FALSE);
 
-	SetImageList(m_pImageListL.FromHandle(himlLarge), LVSIL_NORMAL); 
-	SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_SMALL); 
-	SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_STATE); 
+		SetImageList(m_pImageListL.FromHandle(himlLarge), LVSIL_NORMAL); 
+		SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_SMALL); 
+		SetImageList(m_pImageListS.FromHandle(himlSmall), LVSIL_STATE); 
+
+		bRet = TRUE;
+	} while (FALSE);
 }
 
 void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 {
+	BOOL bRet = FALSE;
+
 	HRESULT hr;
 	ULONG ulAttrs = 0;
 	ULONG celtFetched;
@@ -605,75 +652,92 @@ void CShellListCtrl::LVPopulateFiles(LPTVITEMDATA* lptvid)
 	LPENUMIDLIST ppenum = NULL;
 	IShellFolder *psfProgFiles = NULL;
 
-	m_pTvid = lptvid;
-
-	if(lptvid->bRoot)
+	do 
 	{
-		psfProgFiles = lptvid->lpsfParent;
-	}
-	else
-	{
-		hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *)&psfProgFiles);
-		if(FAILED(hr) || psfProgFiles == NULL)
+		m_pTvid = lptvid;
+		if(lptvid->bRoot)
 		{
-			return;
+			psfProgFiles = lptvid->lpsfParent;
 		}
-	}
-
-	ulAttrs = SFGAO_FILESYSTEM;
-	hr = psfProgFiles->GetAttributesOf(1, (const struct _ITEMIDLIST **)&pidlItems, &ulAttrs);
-	if (FAILED(hr) || ulAttrs == 0)
-	{
-		return;
-	}
-
-	MyDeleteAllItems();
-	SetRedraw(FALSE);
-
-	if (ulAttrs & SFGAO_FILESYSTEM)
-	{
-		if(SHGetPathFromIDList(lptvid->lpifq, szShellPath))
+		else
 		{
-			m_pCallBackShellPath(szShellPath, m_pParam);
+			hr = lptvid->lpsfParent->BindToObject(lptvid->lpi, NULL, IID_IShellFolder, (LPVOID *)&psfProgFiles);
+			if(FAILED(hr) || psfProgFiles == NULL)
+			{
+				bRet = FALSE;
+				break;
+			}
 		}
 
-		hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
-		if(FAILED(hr))
+		ulAttrs = SFGAO_FILESYSTEM;
+		hr = psfProgFiles->GetAttributesOf(1, (const struct _ITEMIDLIST **)&pidlItems, &ulAttrs);
+		if (FAILED(hr) || ulAttrs == 0)
 		{
-			return;
+			bRet = FALSE;
+			break;
 		}
 
-		while( hr = ppenum->Next(1,&pidlItems, &celtFetched) == S_OK && (celtFetched) == 1)
-		{
-			InsertListViewItem(psfProgFiles , pidlItems, lptvid->lpifq);
-		}
-	}
+		MyDeleteAllItems();
+		SetRedraw(FALSE);
 
-	SetRedraw(TRUE);
-	return;
+		if (ulAttrs&SFGAO_FILESYSTEM)
+		{
+			if(SHGetPathFromIDList(lptvid->lpifq, szShellPath))
+			{
+				m_pCallBackShellPath(szShellPath, m_pParam);
+			}
+
+			hr = psfProgFiles->EnumObjects(NULL, SHCONTF_FOLDERS|SHCONTF_NONFOLDERS|SHCONTF_INCLUDEHIDDEN, &ppenum);
+			if(FAILED(hr))
+			{
+				return;
+			}
+
+			while(hr=ppenum->Next(1, &pidlItems, &celtFetched) == S_OK && (celtFetched) == 1)
+			{
+				InsertListViewItem(psfProgFiles, pidlItems, lptvid->lpifq);
+			}
+		}
+
+		SetRedraw(TRUE);
+		bRet = TRUE;
+	} while (FALSE);
 }
 
 void CShellListCtrl::MyDeleteAllItems()
 {
-	DeleteAllItems();
-	giCtr = 0;
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		m_giCtr = 0;
+		DeleteAllItems();
+
+		bRet = TRUE;
+	} while (FALSE);
 }
 
 void CShellListCtrl::ShowStdMenu(BOOL bShowMenu ,  LPTVITEMDATA* lptvid)
 {
 	CShellContextMenuClass cmc;
 	cmc.ShowMenu(lptvid, bShowMenu, m_hWnd);
-	return;
 }
 
 LRESULT CShellListCtrl::OnUpdateCtrlItem(WPARAM wParam, LPARAM lParam)
 {
-	if (m_pTvid != NULL)
-	{
-		LVPopulateFiles(m_pTvid);
-	}
+	BOOL bRet = FALSE;
 
-	return 0;
+	do 
+	{
+		if (m_pTvid != NULL)
+		{
+			LVPopulateFiles(m_pTvid);
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
+	return bRet ? 0 : -1;
 }
 
 /////////////////////////////////////////////////////////////////////////////
