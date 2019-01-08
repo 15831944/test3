@@ -582,7 +582,7 @@ BOOL CShellListCtrl::InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LP
 	return bRet;
 }
 
-int CShellListCtrl::InitilizeCtrl(void* pParam, GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath)
+int CShellListCtrl::InitilizeCtrl(void *pParentObject, GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath)
 {
 	BOOL bRet = FALSE;
 	int iWidth = -1;
@@ -595,9 +595,9 @@ int CShellListCtrl::InitilizeCtrl(void* pParam, GETSHELLTREE_PATH_CALLBACK_FUNC 
 		ModifyStyle(NULL, LVS_REPORT | LVS_SHAREIMAGELISTS, 0);	//
 		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
-		if (pParam != NULL)
+		if (pParentObject != NULL)
 		{
-			m_pParam = pParam;
+			m_pParam = pParentObject;
 		}
 
 		if (pCallBackPath != NULL)

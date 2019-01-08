@@ -25,7 +25,7 @@ update_file_data& update_file_data::Instance()
 	return inst;
 }
 
-BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData)
+BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData, void *pParentObject)
 {
 	BOOL bRet = FALSE;
 	
@@ -46,7 +46,7 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 		}
 
 		stcUpdateFileData.emUpdateStatus = STATE_UPDATEINPUTE_TYPE;
-		if (!pfUpdateFileData(&stcUpdateFileData, NULL))
+		if (!pfUpdateFileData(&stcUpdateFileData, pParentObject))
 		{
 			bRet = FALSE;
 			break;

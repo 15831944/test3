@@ -99,7 +99,7 @@ public:
 	static update_file_data& Instance();
 
 public:
-	BOOL				SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData);
+	BOOL				SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData, void *pParentObject);
 	BOOL				GetUpdateFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
 
 	void				ClearFileData();

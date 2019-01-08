@@ -42,7 +42,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static BOOL				GetShellTreePath(char* pszShellPath, void* pParam);
+	static BOOL				GetShellTreePath(char* pszShellPath, void *pParentObject);
+	static BOOL				GetUpdateFileData(void *pUpdateData, void *pParentObject);
 	static LRESULT 			EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 protected:

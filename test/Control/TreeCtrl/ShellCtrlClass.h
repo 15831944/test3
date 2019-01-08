@@ -11,7 +11,7 @@
 #define ID_COL_SIZE   2
 #define ID_COL_DATE   3
 
-typedef BOOL (*GETSHELLTREE_PATH_CALLBACK_FUNC)(char* pszShellPath, void* pParam);
+typedef BOOL (*GETSHELLTREE_PATH_CALLBACK_FUNC)(char* pszShellPath, void *pParentObject);
 
 class CShellListCtrl;
 class CShellTreeCtrl;
@@ -70,7 +70,7 @@ public:
 	BOOL 			SubclassDlgItem(UINT nID, CWnd* pParent);
 	BOOL 			InsertListViewItem(LPSHELLFOLDER lpsf, LPITEMIDLIST lpi, LPITEMIDLIST lpifq);
 	
-	int 			InitilizeCtrl(void* pParam, GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath = NULL);
+	int 			InitilizeCtrl(void *pParentObject, GETSHELLTREE_PATH_CALLBACK_FUNC pCallBackPath = NULL);
 	
 	void 			SetupImageLists();
 	void 			LVPopulateFiles(LPTVITEMDATA* lptvid);

@@ -211,6 +211,7 @@ BOOL CDlgTest1Wnd::InitInfo()
 
 	do 
 	{
+
 		bRet = TRUE;
 	} while (FALSE);
 

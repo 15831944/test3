@@ -155,14 +155,14 @@ void CDlgTest2Wnd::OnBnClickedButtonRun()
 
 	do 
 	{
-		if (m_strShellPath == _T(""))
-		{
-			bRet = FALSE;
-			strPrompt = _T("请选择正确的文件路径, 请检查!");
-			break;
-		}
+// 		if (m_strShellPath == _T(""))
+// 		{
+// 			bRet = FALSE;
+// 			strPrompt = _T("请选择正确的文件路径, 请检查!");
+// 			break;
+// 		}
 
-		if (!update_file_data::Instance().SetUpdateFileData(m_vecFileInfo, NULL))
+		if (!update_file_data::Instance().SetUpdateFileData(m_vecFileInfo, GetUpdateFileData, this))
 		{
 			bRet = FALSE;
 			break;
@@ -209,21 +209,58 @@ void CDlgTest2Wnd::OnCbnSelchangeComboEvalname()
 
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL CDlgTest2Wnd::GetShellTreePath(char* pszShellPath, void* pParam)
+BOOL CDlgTest2Wnd::GetShellTreePath(char* pszShellPath, void *pParentObject)
 {
-	CDlgTest2Wnd* pWndInfo = (CDlgTest2Wnd*)pParam;
-	if (pWndInfo == NULL)
-	{
-		return FALSE;
-	}
+	BOOL bRet = FALSE;
+	CDlgTest2Wnd* pWndInfo = NULL;
 
-	if (pszShellPath == NULL || strcmp(pszShellPath, _T("")) == 0)
+	do 
 	{
-		return FALSE;
-	}
+		pWndInfo = (CDlgTest2Wnd*)pParentObject;
+		if (pWndInfo == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
 
-	pWndInfo->m_strShellPath = pszShellPath;
-	return TRUE;
+		if (pszShellPath == NULL || strcmp(pszShellPath, _T("")) == 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		pWndInfo->m_strShellPath = pszShellPath;
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgTest2Wnd::GetUpdateFileData(void *pUpdateData, void *pParentObject)
+{
+	BOOL bRet = FALSE;
+	CDlgTest2Wnd* pWndInfo = NULL;
+
+	do 
+	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		pWndInfo = (CDlgTest2Wnd*)pParentObject;
+		if (pWndInfo == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
 
 LRESULT CDlgTest2Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -456,7 +493,7 @@ BOOL CDlgTest2Wnd::InitWndInfo()
 
 		//2:
 		m_hSysDirTree.InitializeCtrl();
-		m_hSysDirList.InitilizeCtrl(this, (GETSHELLTREE_PATH_CALLBACK_FUNC)GetShellTreePath);
+		m_hSysDirList.InitilizeCtrl(this, GetShellTreePath);
 		m_hSysDirTree.SetSelectList(m_hSysDirList);
 		
 		bRet = TRUE;

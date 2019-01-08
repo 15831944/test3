@@ -28,19 +28,11 @@
 #define IDB_BITMAP3                     0x0213
 #define IDB_BITMAP4                     0x0214
 #define IDB_BITMAP5                     0x0215
-#define IDC_EDIT1                       1038
-#define IDC_SPIN1                       1039
-#define IDC_EDIT5                       1039
-#define IDC_EDIT2                       1040
-#define IDC_SPIN3                       1040
-#define IDC_EDIT3                       1041
-#define IDC_COMBO1                      1041
+#define IDC_SPIN_ENDINDEX               1040
 #define IDC_COMBO_INDEXFORMAT           1041
-#define IDC_SPIN2                       1042
-#define IDC_EDIT4                       1042
-#define IDC_SPIN4                       1042
 #define IDC_COMBO_FILEPROPERTY          1042
 #define IDC_EDIT_NAMESRCCHAR            1042
+#define IDC_SPIN_BITINDEX               1042
 #define IDC_EDIT_NAMEDESCCHAR           1043
 #define IDC_CHECK_REVERSE               1044
 #define IDC_EDIT_ENDINDEX               1044
@@ -54,6 +46,8 @@
 #define IDC_EDIT_NAMECOUNT              1053
 #define IDC_CHECK_Uppercase             1055
 #define IDC_EDIT_STARTINDEX             1056
+#define IDC_SPIN_REMOVEINDEX            1058
+#define IDC_SPIN_STARTINDEX             1059
 #define IDC_TAB1                        0x1000
 #define IDC_STATIC_VERSION              0x1001
 #define IDC_LIST1_SHOWINFO              0x1100
@@ -88,7 +82,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1058
+#define _APS_NEXT_CONTROL_VALUE         1060
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
