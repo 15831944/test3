@@ -39,11 +39,11 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 	do 
 	{
 		memset(&stcUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
-// 		if (vecFileData.size() == 0 || pfUpdateFileData == NULL)
-// 		{
-// 			bRet = FALSE;
-// 			break;
-// 		}
+		if (vecFileData.size() == 0 || pfUpdateFileData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
 
 		stcUpdateFileData.emUpdateStatus = STATE_UPDATEINPUTE_TYPE;
 		if (!pfUpdateFileData(&stcUpdateFileData, pParentObject))
@@ -134,6 +134,90 @@ void update_file_data::ClearFileData()
 	} while (FALSE);
 
 	LeaveCriticalSection(&m_csLockData);
+}
+
+BOOL update_file_data::EnumFileInfo(const char *pszShellPath, std::vector<UPDATE_FILEINFO*> &vecFileData)
+{
+	BOOL bRet = FALSE;
+
+	char *p = NULL;
+	char *ptr = NULL;
+
+	HANDLE hFind = NULL;
+	unsigned int uiPos = 0;
+	UPDATE_FILEINFO *pFileInfo = NULL;
+
+	std::string strFindPath;
+	WIN32_FIND_DATA fd;
+
+	do 
+	{
+		if (pszShellPath == NULL || *pszShellPath == '\0')
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		strFindPath  = pszShellPath;
+		strFindPath += _T("\\");
+		strFindPath += _T("*");
+
+		hFind = FindFirstFile(strFindPath.c_str(), &fd);
+		if (hFind == INVALID_HANDLE_VALUE)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		do 
+		{
+			if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				continue;
+			}
+			else
+			{
+				pFileInfo = new UPDATE_FILEINFO;
+				if (pFileInfo == NULL)
+				{
+					continue;
+				}
+				memset(pFileInfo, 0x0, sizeof(UPDATE_FILEINFO));
+
+				pFileInfo->uiFileSize = (fd.nFileSizeHigh*(MAXDWORD+1)) + fd.nFileSizeLow;
+				pFileInfo->uiFileAttrib = fd.dwFileAttributes;
+				pFileInfo->time_create = static_cast<__int64>(fd.ftCreationTime.dwHighDateTime)<<32 | fd.ftCreationTime.dwLowDateTime;
+				pFileInfo->time_access = static_cast<__int64>(fd.ftLastAccessTime.dwHighDateTime)<<32 | fd.ftLastAccessTime.dwLowDateTime;
+				pFileInfo->time_write  = static_cast<__int64>(fd.ftLastWriteTime.dwHighDateTime)<<32 | fd.ftLastWriteTime.dwLowDateTime;
+
+				sprintf(pFileInfo->szFileName, _T("%s"), fd.cFileName);
+				sprintf(pFileInfo->szParentPath, _T("%s"), pszShellPath);
+				sprintf(pFileInfo->szFilePath, _T("%s\\%s"), pszShellPath, fd.cFileName);
+
+				ptr = strrchr(fd.cFileName, '.');
+				if (ptr == NULL)
+				{
+				}
+				else
+				{
+					uiPos = ptr - fd.cFileName;
+					memcpy(pFileInfo->szFileExt, fd.cFileName+uiPos, strlen(fd.cFileName)-uiPos);
+				}
+
+				vecFileData.push_back(pFileInfo);
+			}
+		} while (FindNextFile(hFind, &fd));
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	if (hFind != NULL)
+	{
+		FindClose(hFind);
+		hFind = NULL;
+	}
+
+	return bRet;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -265,6 +349,9 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 	char szFileOldName[MAX_PATH] = {0};
 	char szFileNewName[MAX_PATH] = {0};
 
+	char szOldFilePath[MAX_PATH] = {0};
+	char szNewFilePath[MAX_PATH] = {0};
+
 	do 
 	{
 		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
@@ -388,6 +475,14 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 
 				iIndex--;
 			} while (*p != '\0');
+		}
+
+		if (bRet)
+		{
+			sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
+			sprintf(szNewFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileNewName, pFileData->stcFileInfo.szFileExt);
+
+			rename(szOldFilePath, szNewFilePath);
 		}
 
 	} while (FALSE);

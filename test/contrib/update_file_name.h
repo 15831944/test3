@@ -103,6 +103,7 @@ public:
 	BOOL				GetUpdateFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
 
 	void				ClearFileData();
+	BOOL				EnumFileInfo(const char *pszShellPath, std::vector<UPDATE_FILEINFO*> &vecFileData);
 
 private:
 	CRITICAL_SECTION	m_csLockData;

@@ -163,6 +163,12 @@ void CDlgTest2Wnd::OnBnClickedButtonRun()
 			break;
 		}
 
+		if (!update_file_data::Instance().EnumFileInfo(m_strShellPath, m_vecFileInfo))
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		if (!update_file_data::Instance().SetUpdateFileData(m_vecFileInfo, GetUpdateFileData, this))
 		{
 			bRet = FALSE;
