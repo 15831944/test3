@@ -8,6 +8,8 @@ public:
 	CDlgFileNameDel(CWnd* pParent = NULL);
 	virtual ~CDlgFileNameDel();
 	
+	BOOL					GetWndAddData(UPDATE_FILEDATA *pUpdateData);
+
 public:
 	enum { IDD = IDD_FILENAMEDEL_DIALOG };
 	
@@ -36,9 +38,13 @@ protected:
 	void					SetWndControlLayout();
 	BOOL					DrawWndImage(CDC *pDC);
 
+	BOOL					SetConfigData();
+
 private:
 	BOOL					m_bInited;
 	BOOL					m_bShowing;	
+
+	UPDATE_FILEDATA			m_stConfigData;
 };
 
 #endif

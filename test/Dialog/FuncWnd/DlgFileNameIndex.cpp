@@ -7,6 +7,8 @@ CDlgFileNameIndex::CDlgFileNameIndex(CWnd* pParent /*=NULL*/)
 {
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
+
+	memset(&m_stConfigData, 0x0, sizeof(UPDATE_FILEDATA));
 }
 
 CDlgFileNameIndex::~CDlgFileNameIndex()
@@ -41,7 +43,7 @@ BOOL CDlgFileNameIndex::OnInitDialog()
 			break;
 		}
 
-		if (!InitWndInfo())
+		if (!InitInfo())
 		{
 			bRet = FALSE;
 			break;
@@ -168,8 +170,55 @@ BOOL CDlgFileNameIndex::InitWndInfo()
 {
 	BOOL bRet = FALSE;
 
+	DWORD dwStyle = 0;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
 	do 
 	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_STARTINDEX));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_STARTINDEX));
+		if (pEditChar != NULL && pSpinCtrl != NULL)
+		{
+			dwStyle = pEditChar->GetStyle();
+			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
+
+			pSpinCtrl->SetBuddy(pEditChar);
+			pSpinCtrl->SetRange(0, 255);
+
+			pSpinCtrl->SetBase(1);
+			pSpinCtrl->SetPos(0);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_ENDINDEX));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_ENDINDEX));
+		if (pEditChar != NULL && pSpinCtrl != NULL)
+		{
+			dwStyle = pEditChar->GetStyle();
+			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
+
+			pSpinCtrl->SetBuddy(pEditChar);
+			pSpinCtrl->SetRange(0, 255);
+
+			pSpinCtrl->SetBase(1);
+			pSpinCtrl->SetPos(0);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_INDEXBIT));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_BITINDEX));
+		if (pEditChar != NULL && pSpinCtrl != NULL)
+		{
+			dwStyle = pEditChar->GetStyle();
+			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
+
+			pSpinCtrl->SetBuddy(pEditChar);
+			pSpinCtrl->SetRange(0, 255);
+
+			pSpinCtrl->SetBase(1);
+			pSpinCtrl->SetPos(0);
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -222,6 +271,20 @@ BOOL CDlgFileNameIndex::DrawWndImage(CDC *pDC)
 			break;
 		}
 
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgFileNameIndex::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
 		bRet = TRUE;
 	} while (FALSE);
 

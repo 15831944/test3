@@ -10,7 +10,10 @@
 #include "../FuncWnd/DlgFileNameIndex.h"
 #include "../FuncWnd/DlgFileNameReplace.h"
 
-#include "../../Contrib/update_file_name.h"
+typedef struct{
+	UPDATE_CONFIGTYPE	emConfigType;
+	CWnd*				pWndInfo;
+}CONFIG_ITEMDATA;
 
 using namespace std;
 class CDlgTest2Wnd : public CDialog
@@ -19,6 +22,8 @@ class CDlgTest2Wnd : public CDialog
 public:
 	CDlgTest2Wnd(CWnd* pParent = NULL);
 	virtual ~CDlgTest2Wnd();
+
+	BOOL					GetCurConfigData(UPDATE_FILEDATA *pUpdateData);
 
 public:
 	enum { IDD = IDD_DIALOG2 };
@@ -42,8 +47,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static BOOL				GetShellTreePath(char* pszShellPath, void *pParentObject);
 	static BOOL				GetUpdateFileData(void *pUpdateData, void *pParentObject);
+	static BOOL				GetShellTreePath(char* pszShellPath, void *pParentObject);
+	
 	static LRESULT 			EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 protected:
@@ -81,6 +87,7 @@ private:
 	
 	int						m_nPrePage;
 	int						m_nDefaultSel;
+	int						m_nCurSelIndex;
 
 	HWND					m_hEditWnd;
 	CPtrArray				m_pArPage;

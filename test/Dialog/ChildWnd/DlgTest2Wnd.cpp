@@ -10,8 +10,9 @@ CDlgTest2Wnd::CDlgTest2Wnd(CWnd* pParent /*=NULL*/)
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
 
-	m_nPrePage = 0;
-	m_nDefaultSel = 0;
+	m_nPrePage = -1;
+	m_nDefaultSel = -1;
+	m_nCurSelIndex = -1;
 
 	m_strAppPath = _T("");
 	m_strShellPath = _T("");
@@ -155,12 +156,12 @@ void CDlgTest2Wnd::OnBnClickedButtonRun()
 
 	do 
 	{
-// 		if (m_strShellPath == _T(""))
-// 		{
-// 			bRet = FALSE;
-// 			strPrompt = _T("请选择正确的文件路径, 请检查!");
-// 			break;
-// 		}
+		if (m_strShellPath == _T(""))
+		{
+			bRet = FALSE;
+			strPrompt = _T("请选择正确的文件路径, 请检查!");
+			break;
+		}
 
 		if (!update_file_data::Instance().SetUpdateFileData(m_vecFileInfo, GetUpdateFileData, this))
 		{
@@ -199,6 +200,8 @@ void CDlgTest2Wnd::OnCbnSelchangeComboEvalname()
 	}
 
 	nCurSel = nIndex+1;
+	m_nCurSelIndex = nIndex;
+
 	if (nCurSel != m_nPrePage)
 	{
 		((CDialog*)m_pArPage[m_nPrePage])->ShowWindow(SW_HIDE);
@@ -209,6 +212,42 @@ void CDlgTest2Wnd::OnCbnSelchangeComboEvalname()
 
 //////////////////////////////////////////////////////////////////////////
 //
+BOOL CDlgTest2Wnd::GetUpdateFileData(void *pUpdateData, void *pParentObject)
+{
+	BOOL bRet = FALSE;
+
+	CDlgTest2Wnd* pWndInfo = NULL;
+	UPDATE_FILEDATA stUpdateFileData;
+	
+	do 
+	{
+		if (pUpdateData == NULL || pParentObject == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		pWndInfo = (CDlgTest2Wnd*)pParentObject;
+		if (pWndInfo == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memset(&stUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
+		if (!pWndInfo->GetCurConfigData(&stUpdateFileData))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &stUpdateFileData, sizeof(UPDATE_FILEDATA));
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
 BOOL CDlgTest2Wnd::GetShellTreePath(char* pszShellPath, void *pParentObject)
 {
 	BOOL bRet = FALSE;
@@ -230,33 +269,6 @@ BOOL CDlgTest2Wnd::GetShellTreePath(char* pszShellPath, void *pParentObject)
 		}
 
 		pWndInfo->m_strShellPath = pszShellPath;
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
-}
-
-BOOL CDlgTest2Wnd::GetUpdateFileData(void *pUpdateData, void *pParentObject)
-{
-	BOOL bRet = FALSE;
-	CDlgTest2Wnd* pWndInfo = NULL;
-
-	do 
-	{
-		if (pUpdateData == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		pWndInfo = (CDlgTest2Wnd*)pParentObject;
-		if (pWndInfo == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -453,8 +465,8 @@ BOOL CDlgTest2Wnd::InitWndSkin()
 BOOL CDlgTest2Wnd::InitWndInfo()
 {
 	BOOL bRet = FALSE;
-
 	int nIndex = 0;
+
 	CRect rcSubWnd;
 
 	do 
@@ -468,12 +480,23 @@ BOOL CDlgTest2Wnd::InitWndInfo()
 		m_pArPage.Add(&m_dlgFileNameDate);
 		m_pArPage.Add(&m_dlgFileNameIndex);
 
-		m_hComboEval.InsertString(nIndex++, _T("文件名添加..."));
-		m_hComboEval.InsertString(nIndex++, _T("文件名删除..."));
-		m_hComboEval.InsertString(nIndex++, _T("文件扩展名..."));
-		m_hComboEval.InsertString(nIndex++, _T("文件名替换..."));
-		m_hComboEval.InsertString(nIndex++, _T("文件名日期..."));
-		m_hComboEval.InsertString(nIndex++, _T("文件名序号..."));
+		m_hComboEval.InsertString(nIndex, _T("文件名添加..."));
+		m_hComboEval.SetItemData(nIndex++, CONFIG_ADDFILENAME_TYPE);
+
+		m_hComboEval.InsertString(nIndex, _T("文件名删除..."));
+		m_hComboEval.SetItemData(nIndex++, CONFIG_DELFILENAME_TYPE);
+
+		m_hComboEval.InsertString(nIndex, _T("文件扩展名..."));
+		m_hComboEval.SetItemData(nIndex++, CONFIG_EXTFILENAME_TYPE);
+
+		m_hComboEval.InsertString(nIndex, _T("文件名替换..."));
+		m_hComboEval.SetItemData(nIndex++, CONFIG_REPLACEFILENAME_TYPE);
+
+		m_hComboEval.InsertString(nIndex, _T("文件名日期..."));
+		m_hComboEval.SetItemData(nIndex++, CONFIG_DATEFILENAME_TYPE);
+
+		m_hComboEval.InsertString(nIndex, _T("文件名序号..."));
+		m_hComboEval.SetItemData(nIndex++, CONFIG_INDEXFILENAME_TYPE);
 
 		GetDlgItem(IDC_STATIC2_RECT)->GetWindowRect(&rcSubWnd);
 		GetDlgItem(IDC_STATIC2_RECT)->ShowWindow(SW_HIDE);
@@ -485,11 +508,10 @@ BOOL CDlgTest2Wnd::InitWndInfo()
 			((CDialog*)m_pArPage[nIndex])->MoveWindow(&rcSubWnd);
 		}
 
+		m_nDefaultSel = 0;
 		((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
 		((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
-
 		m_nPrePage = m_nDefaultSel;
-		m_hComboEval.SetCurSel(m_nDefaultSel);
 
 		//2:
 		m_hSysDirTree.InitializeCtrl();
@@ -551,5 +573,84 @@ BOOL CDlgTest2Wnd::DrawWndImage(CDC *pDC)
 		bRet = TRUE;
 	} while (FALSE);
 
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgTest2Wnd::GetCurConfigData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	UINT uiCurWndConfig = 0;
+	DWORD_PTR pdwWndConfig = NULL;
+
+	do 
+	{
+		if (pUpdateData == NULL || m_nCurSelIndex == -1)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		pdwWndConfig = m_hComboEval.GetItemData(m_nCurSelIndex);
+		if (pdwWndConfig == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (pdwWndConfig == CONFIG_ADDFILENAME_TYPE)
+		{
+			if (!m_dlgFileNameAdd.GetWndAddData(pUpdateData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (pdwWndConfig == CONFIG_DELFILENAME_TYPE)
+		{
+			if (!m_dlgFileNameDel.GetWndAddData(pUpdateData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (pdwWndConfig == CONFIG_EXTFILENAME_TYPE)
+		{
+			if (!m_dlgFileNameExt.GetWndAddData(pUpdateData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (pdwWndConfig == CONFIG_REPLACEFILENAME_TYPE)
+		{
+			if (!m_dlgFileNameReplace.GetWndAddData(pUpdateData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (pdwWndConfig == CONFIG_DATEFILENAME_TYPE)
+		{
+			if (!m_dlgFileNameAdd.GetWndAddData(pUpdateData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (pdwWndConfig == CONFIG_INDEXFILENAME_TYPE)
+		{
+			if (!m_dlgFileNameIndex.GetWndAddData(pUpdateData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
 	return bRet;
 }

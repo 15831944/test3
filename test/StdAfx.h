@@ -33,18 +33,19 @@
 #include "Inc/PubClass.h"
 
 #ifdef _DEBUG
-#	ifdef _UNICODE
-#		pragma comment (lib,"SkinUI_ud.lib")
-#	else
-#		pragma comment (lib,"SkinUI_d.lib")
-#	endif
+	#ifdef _UNICODE
+		#pragma comment (lib,"SkinUI_ud.lib")
+	#else
+		#pragma comment (lib,"SkinUI_d.lib")
+	#endif
 #else
-#	ifdef _UNICODE
-#		pragma comment (lib,"SkinUI_u.lib")
-#	else
-#		pragma comment (lib,"SkinUI.lib")
-#	endif
+	#ifdef _UNICODE
+		#pragma comment (lib,"SkinUI_u.lib")
+	#else
+		#pragma comment (lib,"SkinUI.lib")
+	#endif
 #endif
+
 #pragma comment(lib, "version.lib")
 //////////////////////////////////////////////////////////////////////////
 //

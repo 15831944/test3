@@ -39,11 +39,11 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 	do 
 	{
 		memset(&stcUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
-		if (vecFileData.size() == 0 || pfUpdateFileData == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
+// 		if (vecFileData.size() == 0 || pfUpdateFileData == NULL)
+// 		{
+// 			bRet = FALSE;
+// 			break;
+// 		}
 
 		stcUpdateFileData.emUpdateStatus = STATE_UPDATEINPUTE_TYPE;
 		if (!pfUpdateFileData(&stcUpdateFileData, pParentObject))

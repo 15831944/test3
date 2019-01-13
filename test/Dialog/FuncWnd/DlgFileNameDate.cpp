@@ -7,6 +7,8 @@ CDlgFileNameDate::CDlgFileNameDate(CWnd* pParent /*=NULL*/)
 {
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
+
+	memset(&m_stConfigData, 0x0, sizeof(UPDATE_FILEDATA));
 }
 
 CDlgFileNameDate::~CDlgFileNameDate()
@@ -41,7 +43,7 @@ BOOL CDlgFileNameDate::OnInitDialog()
 			break;
 		}
 
-		if (!InitWndInfo())
+		if (!InitInfo())
 		{
 			bRet = FALSE;
 			break;
@@ -222,6 +224,20 @@ BOOL CDlgFileNameDate::DrawWndImage(CDC *pDC)
 			break;
 		}
 
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgFileNameDate::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
 		bRet = TRUE;
 	} while (FALSE);
 

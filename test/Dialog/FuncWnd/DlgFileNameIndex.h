@@ -7,6 +7,8 @@ class CDlgFileNameIndex : public CDialog
 public:
 	CDlgFileNameIndex(CWnd* pParent = NULL);
 	virtual ~CDlgFileNameIndex();
+
+	BOOL					GetWndAddData(UPDATE_FILEDATA *pUpdateData);
 	
 public:
 	enum { IDD = IDD_FILENAMEINDEX_DIALOG };
@@ -39,6 +41,8 @@ protected:
 private:
 	BOOL					m_bInited;
 	BOOL					m_bShowing;
+
+	UPDATE_FILEDATA			m_stConfigData;
 };
 
 #endif

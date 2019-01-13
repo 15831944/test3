@@ -7,6 +7,8 @@ CDlgFileNameReplace::CDlgFileNameReplace(CWnd* pParent /*=NULL*/)
 {
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
+
+	memset(&m_stConfigData, 0x0, sizeof(UPDATE_FILEDATA));
 }
 
 CDlgFileNameReplace::~CDlgFileNameReplace()
@@ -41,7 +43,7 @@ BOOL CDlgFileNameReplace::OnInitDialog()
 			break;
 		}
 
-		if (!InitWndInfo())
+		if (!InitInfo())
 		{
 			bRet = FALSE;
 			break;
@@ -146,6 +148,9 @@ BOOL CDlgFileNameReplace::InitInfo()
 
 	do 
 	{
+		m_stConfigData.emConfigType = CONFIG_REPLACEFILENAME_TYPE;
+		m_stConfigData.emUpdateStatus = STATE_EMPTYTYPE;
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -167,9 +172,25 @@ BOOL CDlgFileNameReplace::InitWndSkin()
 BOOL CDlgFileNameReplace::InitWndInfo()
 {
 	BOOL bRet = FALSE;
+	DWORD dwStyle = 0;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
 
 	do 
 	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMESRCCHAR));
+		if (pEditChar != NULL)
+		{
+			pEditChar->SetLimitText(MAX_EDITCHAR_SIZE);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEDESCCHAR));
+		if (pEditChar != NULL)
+		{
+			pEditChar->SetLimitText(MAX_EDITCHAR_SIZE);
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -222,6 +243,86 @@ BOOL CDlgFileNameReplace::DrawWndImage(CDC *pDC)
 			break;
 		}
 
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgFileNameReplace::SetConfigData()
+{
+	BOOL bRet = FALSE;
+
+	CString strNameChar;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
+	do 
+	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMESRCCHAR));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameChar);
+			if (strNameChar == _T(""))
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			sprintf(m_stConfigData.stcReplaceFileName.szFindName, _T("%s"), strNameChar);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEDESCCHAR));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameChar);
+			if (strNameChar == _T(""))
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			sprintf(m_stConfigData.stcReplaceFileName.szFileName, _T("%s"), strNameChar);
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgFileNameReplace::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetConfigData())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
 		bRet = TRUE;
 	} while (FALSE);
 

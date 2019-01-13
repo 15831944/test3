@@ -8,6 +8,8 @@ public:
 	CDlgFileNameDate(CWnd* pParent = NULL);
 	virtual ~CDlgFileNameDate();
 	
+	BOOL					GetWndAddData(UPDATE_FILEDATA *pUpdateData);
+
 public:
 	enum { IDD = IDD_FILENAMEDATE_DIALOG };
 	
@@ -39,6 +41,8 @@ protected:
 private:
 	BOOL					m_bInited;
 	BOOL					m_bShowing;
+
+	UPDATE_FILEDATA			m_stConfigData;
 };
 
 #endif

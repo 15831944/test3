@@ -9,7 +9,7 @@ public:
 	virtual ~CDlgShowLogoWnd();
 	
 public:
-	enum { IDD = IDD_FILENAMEADD_DIALOG };
+	enum { IDD = IDD_SHOWLOGO_DIALOG };
 	
 protected:
 	virtual void			DoDataExchange(CDataExchange* pDX);   

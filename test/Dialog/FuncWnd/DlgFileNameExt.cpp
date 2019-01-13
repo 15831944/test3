@@ -7,6 +7,8 @@ CDlgFileNameExt::CDlgFileNameExt(CWnd* pParent /*=NULL*/)
 {
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
+
+	memset(&m_stConfigData, 0x0, sizeof(UPDATE_FILEDATA));
 }
 
 CDlgFileNameExt::~CDlgFileNameExt()
@@ -41,7 +43,7 @@ BOOL CDlgFileNameExt::OnInitDialog()
 			break;
 		}
 
-		if (!InitWndInfo())
+		if (!InitInfo())
 		{
 			bRet = FALSE;
 			break;
@@ -146,6 +148,9 @@ BOOL CDlgFileNameExt::InitInfo()
 
 	do 
 	{
+		m_stConfigData.emConfigType = CONFIG_EXTFILENAME_TYPE;
+		m_stConfigData.emUpdateStatus = STATE_EMPTYTYPE;
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -168,8 +173,19 @@ BOOL CDlgFileNameExt::InitWndInfo()
 {
 	BOOL bRet = FALSE;
 
+	DWORD dwStyle = 0;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
 	do 
 	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECHAR));
+		if (pEditChar != NULL)
+		{
+			pEditChar->SetLimitText(MAX_EDITCHAR_SIZE);
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -222,6 +238,77 @@ BOOL CDlgFileNameExt::DrawWndImage(CDC *pDC)
 			break;
 		}
 
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgFileNameExt::SetConfigData()
+{
+	BOOL bRet = FALSE;
+
+	CString strNameChar;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
+	do 
+	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECHAR));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameChar);
+			if (strNameChar == _T(""))
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			sprintf(m_stConfigData.stcExtFileName.szExtName, _T("%s"), strNameChar);
+		}
+
+		if (((CButton *)GetDlgItem(IDC_CHECK_Uppercase))->GetCheck() == 1)
+		{
+			m_stConfigData.stcExtFileName.bIsUppercase = TRUE;
+		}
+		else
+		{
+			m_stConfigData.stcExtFileName.bIsUppercase = FALSE;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgFileNameExt::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetConfigData())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
 		bRet = TRUE;
 	} while (FALSE);
 

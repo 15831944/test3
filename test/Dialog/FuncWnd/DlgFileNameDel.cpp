@@ -7,6 +7,8 @@ CDlgFileNameDel::CDlgFileNameDel(CWnd* pParent /*=NULL*/)
 {
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
+
+	memset(&m_stConfigData, 0x0, sizeof(UPDATE_FILEDATA)); 
 }
 
 CDlgFileNameDel::~CDlgFileNameDel()
@@ -41,7 +43,7 @@ BOOL CDlgFileNameDel::OnInitDialog()
 			break;
 		}
 
-		if (!InitWndInfo())
+		if (!InitInfo())
 		{
 			bRet = FALSE;
 			break;
@@ -146,6 +148,9 @@ BOOL CDlgFileNameDel::InitInfo()
 
 	do 
 	{
+		m_stConfigData.emConfigType = CONFIG_DELFILENAME_TYPE;
+		m_stConfigData.emUpdateStatus = STATE_EMPTYTYPE;
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -168,8 +173,47 @@ BOOL CDlgFileNameDel::InitWndInfo()
 {
 	BOOL bRet = FALSE;
 
+	DWORD dwStyle = 0;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
 	do 
 	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECHAR));
+		if (pEditChar != NULL)
+		{
+			pEditChar->SetLimitText(MAX_EDITCHAR_SIZE);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECOUNT));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_REMOVEINDEX));
+		if (pEditChar != NULL && pSpinCtrl != NULL)
+		{
+			dwStyle = pEditChar->GetStyle();
+			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
+
+			pSpinCtrl->SetBuddy(pEditChar);
+			pSpinCtrl->SetRange(0, 255);
+
+			pSpinCtrl->SetBase(1);
+			pSpinCtrl->SetPos(0);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_STARTINDEX));
+		if (pEditChar != NULL && pSpinCtrl != NULL)
+		{
+			dwStyle = pEditChar->GetStyle();
+			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
+
+			pSpinCtrl->SetBuddy(pEditChar);
+			pSpinCtrl->SetRange(0, 255);
+
+			pSpinCtrl->SetBase(1);
+			pSpinCtrl->SetPos(0);
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -222,6 +266,121 @@ BOOL CDlgFileNameDel::DrawWndImage(CDC *pDC)
 			break;
 		}
 
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgFileNameDel::SetConfigData()
+{
+	BOOL bRet = FALSE;
+	int nIndex = -1;
+	int nCount = -1;
+
+	CString strNameChar;
+	CString strNameIndex;
+	CString strNameCount;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
+	do 
+	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECHAR));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameChar);
+			if (strNameChar == _T(""))
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			sprintf(m_stConfigData.stcDelFileName.szFileName, _T("%s"), strNameChar);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECOUNT));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameCount);
+			if (strNameCount == _T(""))
+			{
+				nCount = 0;
+			}
+			else
+			{
+				nCount = atoi(strNameCount.GetBuffer(0));
+			}
+
+			m_stConfigData.stcDelFileName.iCount = nCount;
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameIndex);
+			if (strNameIndex == _T(""))
+			{
+				nIndex = 0;
+			}
+			else
+			{
+				nIndex = atoi(strNameIndex.GetBuffer(0));
+			}
+		}
+
+		if (((CButton *)GetDlgItem(IDC_CHECK_REVERSE))->GetCheck() == 1)
+		{
+			if (nIndex > 0)
+			{
+				nIndex = ~nIndex+1;
+			}
+		}
+
+		m_stConfigData.stcDelFileName.iIndex = nIndex;
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgFileNameDel::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetConfigData())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
 		bRet = TRUE;
 	} while (FALSE);
 

@@ -64,6 +64,8 @@
 #include "../Contrib/VideoWndThread.h"
 #include "../Contrib/CheckLinkThread.h"
 
+#include "../Contrib/update_file_name.h"
+
 //////////////////////////////////////////////////////////////////////////
 //
 #define countof(arr)						(sizeof(arr)/sizeof(arr[0]))
@@ -73,13 +75,13 @@
 #define ROUND_UP(x, d)						(DIV_ROUND_UP(x, d) * (d))
 
 #ifndef NOMINMAX
-#ifndef max
-#define max(a,b)							(((a) > (b)) ? (a) : (b))
-#endif
+	#ifndef max
+		#define max(a,b)					(((a) > (b)) ? (a) : (b))
+	#endif
 
-#ifndef min
-#define min(a,b)							(((a) < (b)) ? (a) : (b))
-#endif
+	#ifndef min
+		#define min(a,b)					(((a) < (b)) ? (a) : (b))
+	#endif
 #endif
 
 #define MAX_EDITCHAR_SIZE					16

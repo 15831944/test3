@@ -7,6 +7,8 @@ CDlgFileNameAdd::CDlgFileNameAdd(CWnd* pParent /*=NULL*/)
 {
 	m_bInited = FALSE;
 	m_bShowing = FALSE;
+
+	memset(&m_stConfigData, 0x0, sizeof(UPDATE_FILEDATA));
 }
 
 CDlgFileNameAdd::~CDlgFileNameAdd()
@@ -146,6 +148,9 @@ BOOL CDlgFileNameAdd::InitInfo()
 
 	do 
 	{
+		m_stConfigData.emConfigType = CONFIG_ADDFILENAME_TYPE;
+		m_stConfigData.emUpdateStatus = STATE_EMPTYTYPE;
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -177,7 +182,7 @@ BOOL CDlgFileNameAdd::InitWndInfo()
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECHAR));
 		if (pEditChar != NULL)
 		{
-			pEditChar->SetLimitText(2);	//MAX_EDITCHAR_SIZE
+			pEditChar->SetLimitText(MAX_EDITCHAR_SIZE);
 		}
 
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
@@ -188,10 +193,10 @@ BOOL CDlgFileNameAdd::InitWndInfo()
 			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
 
 			pSpinCtrl->SetBuddy(pEditChar);
-			pSpinCtrl->SetRange(1, 100);
+			pSpinCtrl->SetRange(0, 255);
 
 			pSpinCtrl->SetBase(1);
-			pSpinCtrl->SetPos(2);
+			pSpinCtrl->SetPos(0);
 		}
 
 		bRet = TRUE;
@@ -246,6 +251,98 @@ BOOL CDlgFileNameAdd::DrawWndImage(CDC *pDC)
 			break;
 		}
 
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgFileNameAdd::SetConfigData()
+{
+	BOOL bRet = FALSE;
+	int nIndex = -1;
+
+	CString strNameChar;
+	CString strNameIndex;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
+	do 
+	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECHAR));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameChar);
+			if (strNameChar == _T(""))
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			sprintf(m_stConfigData.stcAddFileName.szFileName, _T("%s"), strNameChar);
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameIndex);
+			if (strNameIndex == _T(""))
+			{
+				nIndex = 0;
+			}
+			else
+			{
+				nIndex = atoi(strNameIndex.GetBuffer(0));
+			}
+		}
+
+		if (((CButton *)GetDlgItem(IDC_CHECK_REVERSE))->GetCheck() == 1)
+		{
+			if (nIndex > 0)
+			{
+				nIndex = ~nIndex+1;
+			}
+		}
+
+		m_stConfigData.stcAddFileName.iIndex = nIndex;
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CDlgFileNameAdd::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetConfigData())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
 		bRet = TRUE;
 	} while (FALSE);
 
