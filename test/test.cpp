@@ -2,8 +2,8 @@
 #include "test.h"
 #include "./Dialog/testDlg.h"
 
-BEGIN_MESSAGE_MAP(CTestApp, CWinApp)
-	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
+BEGIN_MESSAGE_MAP(CTestApp, CWinAppEx)
+	ON_COMMAND(ID_HELP, CWinAppEx::OnHelp)
 END_MESSAGE_MAP()
 
 CTestApp::CTestApp()
@@ -14,10 +14,11 @@ CTestApp::CTestApp()
 CTestApp theApp;
 BOOL CTestApp::InitInstance()
 {
+	InitShellManager();
+	GdiplusStartup(&m_ulGdiPlusToken, &m_GdiPlusStartupInput, NULL);
+
 	CTestDlg dlg;
 	m_pMainWnd = &dlg;
-
-	GdiplusStartup(&m_ulGdiPlusToken, &m_GdiPlusStartupInput, NULL);
 
 	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
@@ -32,11 +33,11 @@ BOOL CTestApp::InitInstance()
 
 int CTestApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt) 
 {
-	return CWinApp::DoMessageBox(lpszPrompt, nType, nIDPrompt);
+	return CWinAppEx::DoMessageBox(lpszPrompt, nType, nIDPrompt);
 }
 
 int CTestApp::ExitInstance()
 {
 	GdiplusShutdown(m_ulGdiPlusToken);
-	return CWinApp::ExitInstance();
+	return CWinAppEx::ExitInstance();
 }

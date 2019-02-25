@@ -38,6 +38,8 @@ class CTestDlg : public CDialog
 public:
 	CTestDlg(CWnd* pParent = NULL);	
 	virtual ~CTestDlg();
+
+	BOOL				UpdateConfigInfo(BOOL bFlag);
 	
 public:
 	enum { IDD = IDD_TEST_DIALOG };
@@ -56,9 +58,11 @@ protected:
 	
 protected:	
 	void				Init();
-
 	void				InitCtrl();
 	void				InitInfo();
+
+	BOOL				UpdateWndCtrl();
+	BOOL				UpdateWndInfo();
 
 	void				Hook();
 	void				UnHook();

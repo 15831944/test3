@@ -843,22 +843,6 @@
 					RelativePath=".\Control\TreeCtrl\ShellCtrlClass.h"
 					>
 				</File>
-				<File
-					RelativePath=".\Control\TreeCtrl\StackedClass.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\TreeCtrl\StackedClass.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\TreeCtrl\StackedTreeCtrl.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\TreeCtrl\StackedTreeCtrl.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="WndCtrl"

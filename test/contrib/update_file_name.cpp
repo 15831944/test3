@@ -143,12 +143,13 @@ BOOL update_file_data::EnumFileInfo(const char *pszShellPath, std::vector<UPDATE
 	char *p = NULL;
 	char *ptr = NULL;
 
-	HANDLE hFind = NULL;
 	unsigned int uiPos = 0;
-	UPDATE_FILEINFO *pFileInfo = NULL;
-
 	std::string strFindPath;
+	std::string strFilePath;
+
 	WIN32_FIND_DATA fd;
+	HANDLE hFind = NULL;
+	UPDATE_FILEINFO *pFileInfo = NULL;
 
 	do 
 	{

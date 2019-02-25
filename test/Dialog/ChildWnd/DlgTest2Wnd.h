@@ -10,11 +10,6 @@
 #include "../FuncWnd/DlgFileNameIndex.h"
 #include "../FuncWnd/DlgFileNameReplace.h"
 
-typedef struct{
-	UPDATE_CONFIGTYPE	emConfigType;
-	CWnd*				pWndInfo;
-}CONFIG_ITEMDATA;
-
 using namespace std;
 class CDlgTest2Wnd : public CDialog
 {
@@ -23,6 +18,7 @@ public:
 	CDlgTest2Wnd(CWnd* pParent = NULL);
 	virtual ~CDlgTest2Wnd();
 
+	BOOL					UpdateConfigInfo(BOOL bFlag);
 	BOOL					GetCurConfigData(UPDATE_FILEDATA *pUpdateData);
 
 public:
@@ -43,7 +39,9 @@ protected:
 
 	afx_msg void			OnBnClickedButtonRun();
 	afx_msg void			OnBnClickedBtnOpenFloder();
+
 	afx_msg void			OnCbnSelchangeComboEvalname();
+	afx_msg void			OnTvnSelchangedTree(NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -54,7 +52,6 @@ protected:
 
 protected:
 	BOOL					Init();
-
 	BOOL					InitCtrl();
 	BOOL					InitInfo();
 
@@ -67,11 +64,15 @@ protected:
 
 	void					SetWndControlLayout();
 	BOOL					DrawWndImage(CDC *pDC);
+
+protected:
+	BOOL					SetChildWnd(BOOL bFlag);
+	BOOL					SetCtrlInfo(HTREEITEM hItem);
 	
 protected:
 	CComboBox				m_hComboEval;
-	CShellTreeCtrl			m_hSysDirTree;
-	CShellListCtrl			m_hSysDirList;
+	CMFCShellTreeCtrl 		m_hSysDirTree;		//CMFCShellTreeCtrl
+	CReportCtrl 			m_hSysDirList;		//CMFCShellListCtrl
 
 	CDlgShowLogoWnd			m_dlgShowLogoWnd;
 	CDlgFileNameAdd			m_dlgFileNameAdd;
@@ -96,8 +97,6 @@ private:
 	CString					m_strShellPath;
 	CString					m_strDefaultPath;
 
-	std::vector<UPDATE_FILEINFO*> m_vecFileInfo;
-
 	WNDPROC			 		m_OldEditProc;	//FARPROC,WNDPROC
-	CALLRING_CALLBACK_FUNC	m_pfCallRingFunc;
+	std::vector<UPDATE_FILEINFO*> m_vecFileInfo;
 };

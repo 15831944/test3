@@ -4,7 +4,7 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
-class CTestApp : public CWinApp
+class CTestApp : public CWinAppEx
 {
 public:
 	CTestApp();

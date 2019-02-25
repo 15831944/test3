@@ -228,6 +228,30 @@ void CTestDlg::InitInfo()
 {
 }
 
+BOOL CTestDlg::UpdateWndCtrl()
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CTestDlg::UpdateWndInfo()
+{
+	BOOL bRet = FALSE;
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
 int (WINAPI *Real_Messagebox)(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)= MessageBoxA;
 extern "C" _declspec(dllexport) BOOL WINAPI MessageBox_Mine(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
@@ -253,4 +277,36 @@ void CTestDlg::UnHook()
 	DetourDetach(&(PVOID&)Real_Messagebox,MessageBox_Mine);//–∂‘ÿdetour
 
 	DetourTransactionCommit();	//¿πΩÿ…˙–ß
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CTestDlg::UpdateConfigInfo(BOOL bFlag)
+{
+	BOOL bRet = FALSE;
+	CString strPrompt;
+
+	do 
+	{
+		if (bFlag)
+		{
+			if (!UpdateWndCtrl())
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			if (!UpdateWndInfo())
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+
+		m_hDlgTest2Wnd.UpdateConfigInfo(bFlag);
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
 }
