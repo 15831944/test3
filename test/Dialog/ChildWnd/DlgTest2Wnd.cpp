@@ -157,10 +157,9 @@ void CDlgTest2Wnd::OnBnClickedButtonRun()
 
 	do 
 	{
-		if (m_strShellPath == _T(""))
+		if (m_vecFileInfo.size() == 0)
 		{
 			bRet = FALSE;
-			strPrompt = _T("请选择正确的文件路径, 请检查!");
 			break;
 		}
 

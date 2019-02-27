@@ -481,7 +481,7 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		if (bRet)
 		{
 			sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
-			sprintf(szNewFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileNewName, pFileData->stcFileInfo.szFileExt);
+			sprintf(szNewFilePath, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, szFileNewName);
 
 			rename(szOldFilePath, szNewFilePath);
 		}
@@ -573,6 +573,9 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 	char szFileOldName[MAX_PATH] = {0};
 	char szFileNewName[MAX_PATH] = {0};
 
+	char szOldFilePath[MAX_PATH] = {0};
+	char szNewFilePath[MAX_PATH] = {0};
+
 	do 
 	{
 		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
@@ -614,6 +617,8 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 
 			memcpy(szFileNewName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
 			uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+			bRet = TRUE;
 		}
 		else
 		{
@@ -741,6 +746,14 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					iIndex--;
 				} while (*p != '\0');
 			}
+		}
+
+		if (bRet)
+		{
+			sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
+			sprintf(szNewFilePath, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, szFileNewName);
+
+			rename(szOldFilePath, szNewFilePath);
 		}
 
 		bRet = TRUE;

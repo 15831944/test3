@@ -296,13 +296,10 @@ BOOL CDlgFileNameDel::SetConfigData()
 		else
 		{
 			pEditChar->GetWindowText(strNameChar);
-			if (strNameChar == _T(""))
+			if (strNameChar != _T(""))
 			{
-				bRet = FALSE;
-				break;
+				sprintf(m_stConfigData.stcDelFileName.szFileName, _T("%s"), strNameChar);
 			}
-
-			sprintf(m_stConfigData.stcDelFileName.szFileName, _T("%s"), strNameChar);
 		}
 
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMECOUNT));

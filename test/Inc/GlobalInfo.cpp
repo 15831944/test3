@@ -704,6 +704,38 @@ bool CGlobalInfo::OpenSysServer(const char *pszSvrName)
 	return bRet;
 }
 
+bool CGlobalInfo::DeleteSelfFile()
+{
+	bool bRet = false;
+
+	CString strCmdLine;
+
+	do 
+	{
+		if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS))
+		{
+			bRet = false;
+			break;
+		}
+		
+		if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL))
+		{
+			bRet = false;
+			break;
+		}
+
+		SHChangeNotify(SHCNE_DELETE, SHCNF_PATH, _pgmptr, NULL);
+		strCmdLine.Format(_T("/c del /q %s"), _pgmptr);
+	
+		ShellExecute(NULL, "open", "cmd.exe", strCmdLine, NULL, SW_HIDE);
+		ExitProcess(0);
+
+		bRet = true;
+	} while (false);
+
+	return bRet;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 bool CGlobalInfo::DoIdentify(HANDLE hPhysicalDriveIOCTL, PSENDCMDINPARAMS pSCIP, PSENDCMDOUTPARAMS pSCOP, BYTE btIDCmd, BYTE btDriveNum, PDWORD pdwBytesReturned)
