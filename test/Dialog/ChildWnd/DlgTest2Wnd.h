@@ -68,6 +68,8 @@ protected:
 protected:
 	BOOL					SetChildWnd(BOOL bFlag);
 	BOOL					SetCtrlInfo(HTREEITEM hItem);
+
+	void					SetButtonCtrl(BOOL bFlag);
 	
 protected:
 	CComboBox				m_hComboEval;

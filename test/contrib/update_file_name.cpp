@@ -16,6 +16,7 @@ update_file_data::update_file_data()
 
 update_file_data::~update_file_data()
 {
+	ClearFileData();
 	DeleteCriticalSection(&m_csLockData);
 }
 
@@ -52,6 +53,7 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 			break;
 		}
 
+		ClearFileData();
 		for (iterFileData = vecFileData.begin(); iterFileData!=vecFileData.end(); ++iterFileData)
 		{
 			pFileInfo = (UPDATE_FILEINFO *)(*iterFileData);
@@ -556,14 +558,15 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 {
 	BOOL bRet = FALSE;
 
+	int iIndex = -1;
+	int iSpecIndex = -1;
+
 	int iDelIndex = -1;
 	int iDelCount = -1;
 
-	int iSpecIndex = -1;
-	int iIndex = -1;
-
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
+	unsigned int uiBit = 0;
 	unsigned int uiOffset = 0;
 
 	char *p = NULL;
@@ -640,22 +643,23 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 
 				while (*p != '\0')
 				{
+					if ((*p&0x80) && (*(p+1)&0x80))
+					{//ºº×Ö
+						uiBit = 2;
+					}
+					else
+					{//ASCIIÂë
+						uiBit = 1;
+					}
+
 					if (iIndex == 0)
 					{
 						uiPos = 0;
 					}
 					else
 					{
-						if ((*p&0x80) && (*(p+1)&0x80))
-						{
-							uiPos += 2;
-							p += 2;
-						}
-						else
-						{
-							uiPos += 1;
-							p += 1;
-						}
+						uiPos += uiBit;
+						p += uiBit;
 					}
 
 					if (iIndex == iDelIndex)
@@ -664,18 +668,12 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					}
 					else
 					{
-						if (iSpecIndex > 0)
-						{
-							if (iIndex == (iSpecIndex+iDelCount))
+						if (iSpecIndex >= 0)
+ 						{
+							if (iSpecIndex == 0 || (iIndex == iSpecIndex+iDelCount))
 							{
-								memcpy(szFileNewName+uiOffset, pFileName+uiPos, (uiLen - uiPos));
+								memcpy(szFileNewName+uiOffset, pFileName+uiPos, (uiLen-uiPos));
 								uiOffset += (uiLen-uiPos);
-
-								if (strcmp(szFileNewName, _T("")) == 0)
-								{
-									bRet = FALSE;
-									break;
-								}
 
 								memcpy(szFileNewName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
 								uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
@@ -683,6 +681,14 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 								bRet = TRUE;
 								break;
 							}
+							else
+							{
+							}
+ 						}
+						else
+						{
+							memcpy(szFileNewName+uiOffset, p, uiBit);
+							uiOffset += uiBit;
 						}
 					}
 
@@ -1017,22 +1023,6 @@ void update_file_name::UpdateFileInfo()
 {
 	BOOL bRet = FALSE;
 
-	do 
-	{
-		if (!UpdateFileName())
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-}
-
-BOOL update_file_name::UpdateFileName()
-{
-	BOOL bRet = FALSE;
-
 	UPDATE_FILEDATA *pUpdateFileData;
 	std::vector<UPDATE_FILEDATA*> vecFileData;
 	std::vector<UPDATE_FILEDATA*>::iterator iterFileData;
@@ -1058,12 +1048,11 @@ BOOL update_file_name::UpdateFileName()
 				continue;
 			}
 		}
-		
+
 		bRet = TRUE;
 	} while (FALSE);
-
-	return bRet;
 }
+
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL update_file_name::CreateUpdateProc()

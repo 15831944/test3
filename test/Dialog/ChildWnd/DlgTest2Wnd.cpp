@@ -29,6 +29,7 @@ CDlgTest2Wnd::~CDlgTest2Wnd()
 void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+
 	DDX_Control(pDX, IDC_TREE2_SYSDIR,			m_hSysDirTree);
 	DDX_Control(pDX, IDC_LIST2_SYSDIR,			m_hSysDirList);
 	DDX_Control(pDX, IDC_COMBO2_EVALNAME,		m_hComboEval);
@@ -701,6 +702,17 @@ BOOL CDlgTest2Wnd::SetCtrlInfo(HTREEITEM hItem)
 	} while (FALSE);
 
 	return bRet;
+}
+
+void CDlgTest2Wnd::SetButtonCtrl(BOOL bFlag)
+{
+	if (bFlag)
+	{
+	}
+	else
+	{
+
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
