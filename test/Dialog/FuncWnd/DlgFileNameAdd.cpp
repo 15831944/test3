@@ -313,6 +313,10 @@ BOOL CDlgFileNameAdd::SetConfigData()
 			{
 				nIndex = ~nIndex+1;
 			}
+			else
+			{
+				nIndex = 0;
+			}
 		}
 
 		m_stConfigData.stcAddFileName.iIndex = nIndex;

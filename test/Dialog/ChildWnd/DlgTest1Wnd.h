@@ -18,6 +18,9 @@ protected:
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 
 	afx_msg void			OnDestroy();
+
+	afx_msg void			OnBnClickedButton1();
+
 	afx_msg void			OnLbnSelchangeListTest();
 	afx_msg LRESULT			OnTest1WndMessage(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()

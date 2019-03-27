@@ -19,9 +19,12 @@ void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
-	ON_LBN_SELCHANGE(IDC_LIST1_SHOWINFO,			OnLbnSelchangeListTest)
-	ON_MESSAGE(WM_TEST1WND_CTRL,					OnTest1WndMessage)
 	ON_WM_DESTROY()
+
+	ON_BN_CLICKED(IDC_BTN2_OPENFLODER,						OnBnClickedButton1)
+
+	ON_MESSAGE(WM_TEST1WND_CTRL,					OnTest1WndMessage)
+	ON_LBN_SELCHANGE(IDC_LIST1_SHOWINFO,			OnLbnSelchangeListTest)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -216,4 +219,89 @@ BOOL CDlgTest1Wnd::InitInfo()
 	} while (FALSE);
 
 	return bRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
+{
+	BOOL bRet = FALSE;
+
+	UINT uiBit = 0;
+	UINT uiPos = 0;
+
+	UINT uiIndex = 0;
+	UINT uiOffset = 0;
+	UINT uiNameLen = 0;
+	UINT uiSpecIndex = 0;
+	
+	char *p = NULL;
+	CString strUserName;
+	char szNewUserName[256] = {0};
+
+	do 
+	{
+		if (lpszUserName == NULL || *lpszUserName == '\0')
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		p = (char*)lpszUserName;
+		uiNameLen = strlen(lpszUserName);
+		if (uiLimitLen > uiNameLen)
+		{
+			uiSpecIndex = uiNameLen;
+		}
+		else
+		{
+			uiSpecIndex = uiLimitLen;
+		}
+
+		while(*p != '\0')
+		{
+			if ((*p&0x80) && (*(p+1)&0x80))
+			{
+				uiBit = 2;
+			}
+			else
+			{
+				uiBit = 1;
+			}
+
+			if (uiIndex == 0)
+			{
+				uiPos = 0;
+			}
+			else
+			{
+				uiPos += uiBit;
+				p += uiBit;
+			}
+			
+			if ((uiIndex+1) == uiSpecIndex)
+			{
+				memcpy(szNewUserName+uiOffset, p, uiBit);
+				uiOffset += uiBit;
+
+				strUserName.Format(_T("%s..."), szNewUserName);
+			}
+			else
+			{
+				memcpy(szNewUserName+uiOffset, p, uiBit);
+				uiOffset += uiBit;
+			}
+
+			uiIndex++;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return strUserName;
+}
+
+void CDlgTest1Wnd::OnBnClickedButton1()
+{
+	InterceptSubText("123456", 3);
 }

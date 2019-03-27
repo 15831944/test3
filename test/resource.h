@@ -48,6 +48,7 @@
 #define IDC_EDIT_STARTINDEX             1056
 #define IDC_SPIN_REMOVEINDEX            1058
 #define IDC_SPIN_STARTINDEX             1059
+#define IDC_BUTTON1                     1060
 #define IDC_TAB1                        0x1000
 #define IDC_STATIC_VERSION              0x1001
 #define IDC_LIST1_SHOWINFO              0x1100
@@ -82,7 +83,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1060
+#define _APS_NEXT_CONTROL_VALUE         1061
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -348,6 +348,10 @@ BOOL CDlgFileNameDel::SetConfigData()
 			{
 				nIndex = ~nIndex+1;
 			}
+			else
+			{
+				nIndex = 0;
+			}
 		}
 
 		m_stConfigData.stcDelFileName.iIndex = nIndex;
