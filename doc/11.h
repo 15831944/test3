@@ -1,23 +1,20 @@
-CString CUtiliy::InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
+CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 {
 	BOOL bRet = FALSE;
 
 	UINT uiBit = 0;
 	UINT uiPos = 0;
+	UINT uiNameLen = 0;
 
 	UINT uiIndex = 0;
 	UINT uiOffset = 0;
 	UINT uiSpecIndex = 0;
 
-	UINT uitest = 0;
-	UINT uiNameLen = 0;
-	
-
 	char *p = NULL;
 	CString strUserName;
-	char szNewUserName[256] = {0};
+	char szNewUserName[256] = { 0 };
 
-	do 
+	do
 	{
 		if (lpszUserName == NULL || *lpszUserName == '\0')
 		{
@@ -36,9 +33,9 @@ CString CUtiliy::InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 			uiSpecIndex = uiLimitLen;
 		}
 
-		while(*p != '\0')
+		while (*p != '\0')
 		{
-			if ((*p&0x80) && (*(p+1)&0x80))
+			if ((*p & 0x80) && (*(p + 1) & 0x80))
 			{
 				uiBit = 2;
 			}
@@ -47,9 +44,9 @@ CString CUtiliy::InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 				uiBit = 1;
 			}
 
-			if (*(p+1) != '\0' && uiIndex != uiSpecIndex)
+			if (*(p + 1) != '\0' && uiIndex != uiSpecIndex)
 			{
-				memcpy(szNewUserName+uiOffset, p, uiBit);
+				memcpy(szNewUserName + uiOffset, p, uiBit);
 				uiOffset += uiBit;
 
 				p += uiBit;
@@ -57,7 +54,30 @@ CString CUtiliy::InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 			}
 			else
 			{
+				if (uiIndex == uiSpecIndex)
+				{
+					if (uiPos == uiNameLen)
+					{
+						strUserName.Format(_T("%s"), szNewUserName);
+					}
+					else
+					{
+						strUserName.Format(_T("%s..."), szNewUserName);
+					}
+				}
+				else
+				{
+					memcpy(szNewUserName + uiOffset, p, uiBit);
+					uiOffset += uiBit;
 
+					p += uiBit;
+					uiPos += uiBit;
+
+					strUserName.Format(_T("%s"), szNewUserName);
+				}
+				
+				bRet = TRUE;
+				break;
 			}
 
 			uiIndex++;
