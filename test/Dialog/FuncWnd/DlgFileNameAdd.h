@@ -23,6 +23,8 @@ protected:
 
 	afx_msg void			OnSize(UINT nType, int cx, int cy);
 	afx_msg void			OnShowWindow(BOOL bShow, UINT nStatus);
+
+	afx_msg void			OnBnClickedCheckReverse();
 	DECLARE_MESSAGE_MAP()
 	
 protected:
