@@ -229,17 +229,17 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 
 	UINT uiBit = 0;
 	UINT uiPos = 0;
+	UINT uiNameLen = 0;
 
 	UINT uiIndex = 0;
 	UINT uiOffset = 0;
-	UINT uiNameLen = 0;
 	UINT uiSpecIndex = 0;
-	
+
 	char *p = NULL;
 	CString strUserName;
-	char szNewUserName[256] = {0};
+	char szNewUserName[256] = { 0 };
 
-	do 
+	do
 	{
 		if (lpszUserName == NULL || *lpszUserName == '\0')
 		{
@@ -258,9 +258,9 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 			uiSpecIndex = uiLimitLen;
 		}
 
-		while(*p != '\0')
+		while (*p != '\0')
 		{
-			if ((*p&0x80) && (*(p+1)&0x80))
+			if ((*p & 0x80) && (*(p + 1) & 0x80))
 			{
 				uiBit = 2;
 			}
@@ -269,33 +269,44 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 				uiBit = 1;
 			}
 
-			if (uiIndex == 0)
+			if (*(p + uiBit) != '\0' && uiIndex != uiSpecIndex)
 			{
-				uiPos = 0;
-			}
-			else
-			{
-				uiPos += uiBit;
-				p += uiBit;
-			}
-			
-			if ((uiIndex+1) == uiSpecIndex)
-			{
-				memcpy(szNewUserName+uiOffset, p, uiBit);
+				memcpy(szNewUserName + uiOffset, p, uiBit);
 				uiOffset += uiBit;
 
-				strUserName.Format(_T("%s..."), szNewUserName);
+				p += uiBit;
+				uiPos += uiBit;
 			}
 			else
 			{
-				memcpy(szNewUserName+uiOffset, p, uiBit);
-				uiOffset += uiBit;
+				if (uiIndex == uiSpecIndex)
+				{
+					if (uiPos == uiNameLen)
+					{
+						strUserName.Format(_T("%s"), szNewUserName);
+					}
+					else
+					{
+						strUserName.Format(_T("%s..."), szNewUserName);
+					}
+				}
+				else
+				{
+					memcpy(szNewUserName + uiOffset, p, uiBit);
+					uiOffset += uiBit;
+
+					p += uiBit;
+					uiPos += uiBit;
+
+					strUserName.Format(_T("%s"), szNewUserName);
+				}
+
+				bRet = TRUE;
+				break;
 			}
 
 			uiIndex++;
 		}
-
-		bRet = TRUE;
 	} while (FALSE);
 
 	return strUserName;
@@ -303,5 +314,10 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-	InterceptSubText("123456", 3);
+	CString s1;
+
+	//s1 = _T("一二三四五六七八九十零一二三四五");
+	s1 = _T("一二三4");
+
+	InterceptSubText(s1, 3);
 }
