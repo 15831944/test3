@@ -126,6 +126,10 @@ void CDlgFileNameAdd::OnBnClickedCheckReverse()
 			((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX))->SetWindowText(_T("1"));
 		}		
 	}
+	else
+	{
+		((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX))->SetWindowText(_T("0"));
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

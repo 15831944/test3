@@ -86,3 +86,53 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 
 	return strUserName;
 }
+
+void test1()
+{
+	if (*(p+uiBit) != '\0' && iIndex != iDelIndex)
+	{
+		memcpy(szDataBuffer+uiOffset, p, uiBit);
+		uiOffset += uiBit;
+
+		p += uiBit;
+		uiPos += uiBit;
+	}
+	else
+	{
+		if (iDelIndex == iIndex)
+		{
+			p += uiBit;
+			uiPos += uiBit;
+
+			if (*(p+uiBit) == '\0')
+			{
+				memcpy(szDataBuffer+uiOffset, p, uiBit);
+				uiOffset += uiBit;
+
+				memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+				uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+				memcpy(szFileNewName, szDataBuffer, uiOffset);
+
+				bRet = TRUE;
+				break;
+			}
+		}
+		else
+		{
+			memcpy(szDataBuffer+uiOffset, p, uiBit);
+			uiOffset += uiBit;
+
+			p += uiBit;
+			uiPos += uiBit;
+
+			memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+			uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+			memcpy(szFileNewName, szDataBuffer, uiOffset);
+
+			bRet = TRUE;
+			break;
+		}
+	}
+}

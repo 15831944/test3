@@ -26,6 +26,8 @@ BEGIN_MESSAGE_MAP(CDlgFileNameDel, CDialog)
 
 	ON_WM_SIZE()
 	ON_WM_SHOWWINDOW()
+
+	ON_BN_CLICKED(IDC_CHECK_REVERSE,	OnBnClickedCheckReverse)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -113,8 +115,22 @@ void CDlgFileNameDel::OnShowWindow(BOOL bShow, UINT nStatus)
 
 //////////////////////////////////////////////////////////////////////////
 //
-
-
+void CDlgFileNameDel::OnBnClickedCheckReverse()
+{
+	CString strText;
+	if (((CButton *)GetDlgItem(IDC_CHECK_REVERSE))->GetCheck() == 1)
+	{
+		((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX))->GetWindowText(strText);
+		if (strText == _T("") || strText == _T("0"))
+		{
+			((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX))->SetWindowText(_T("1"));
+		}		
+	}
+	else
+	{
+		((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX))->SetWindowText(_T("0"));
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 //

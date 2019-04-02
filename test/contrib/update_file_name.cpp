@@ -583,6 +583,8 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 	int iDelCount = -1;
 
 	unsigned int uiPos = 0;
+	unsigned int uiSpecPos = 0;
+
 	unsigned int uiLen = 0;
 	unsigned int uiBit = 0;
 	unsigned int uiOffset = 0;
@@ -649,20 +651,20 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		{
 			uiLen = strlen(pFileName);
 			iDelIndex = pFileData->stcDelFileName.iIndex;	//待删除的位置
-			if (pFileData->stcDelFileName.iCount > uiLen)
+
+			iDelCount = pFileData->stcDelFileName.iCount;	//
+			if (pFileData->stcDelFileName.iCount <= 0)
 			{
-				iDelCount = uiLen;
-			}
-			else
-			{
-				iDelCount = pFileData->stcDelFileName.iCount;
+				bRet = FALSE;
+				break;
 			}
 
 			if (iDelIndex >= 0)
 			{//字符正向处理
+				uiPos = 0;
 				iIndex = 0;
-				p = pFileName;
 
+				p = pFileName;
 				while (*p != '\0')
 				{
 					if ((*p&0x80) && (*(p+1)&0x80))
@@ -674,120 +676,96 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 						uiBit = 1;
 					}
 
-					if (iIndex == 0)
-					{
-						uiPos = 0;
-					}
-					else
-					{
-						uiPos += uiBit;
-						p += uiBit;
-					}
-
-					if (iIndex == iDelIndex)
+					if (iSpecIndex < 0 && iDelIndex == iIndex)
 					{
 						iSpecIndex = iIndex;
+						uiSpecPos = uiPos;
 					}
 					else
 					{
-						if (iSpecIndex >= 0)
+						if (iSpecIndex >= 0 && (iIndex == (iSpecIndex+iDelCount) || *(p+uiBit) == '\0'))
 						{
-							if (iSpecIndex == 0 || (iIndex == iSpecIndex+iDelCount))
+							if (uiSpecPos != 0)
 							{
-								memcpy(szDataBuffer+uiOffset, pFileName+uiPos, (uiLen-uiPos));
-								uiOffset += (uiLen-uiPos);
-
-								memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
-								uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
-
-								memcpy(szFileNewName, szDataBuffer, uiOffset);
-								bRet = TRUE;
-								break;
+								memcpy(szDataBuffer+uiOffset, pFileName, uiSpecPos);
+								uiOffset += uiSpecPos;
 							}
-							else
-							{
-								if (iIndex >= uiLen)
-								{
-									bRet = FALSE;
-									break;
-								}
-							}
-						}
-						else
-						{
-							memcpy(szDataBuffer+uiOffset, p, uiBit);
-							uiOffset += uiBit;
+							
+							memcpy(szDataBuffer+uiOffset, pFileName+uiPos, uiLen-uiPos);
+							uiOffset += (uiLen-uiPos);
+
+							memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+							uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+							memcpy(szFileNewName, szDataBuffer, uiOffset);
+
+							bRet = TRUE;
+							break;
 						}
 					}
 
+					p += uiBit;
+					uiPos += uiBit;
+				
 					iIndex++;
 				}
 			}
 			else
 			{//字符反向处理
+				uiPos = uiLen;
 				iIndex = uiLen;
-				p = pFileName + uiLen;
 
-				do 
+				p = pFileName + uiLen;
+				while (iIndex > 0)
 				{
-					if ((*p&0x80) && (*(p-1)&0x80))
-					{//汉字
-						uiBit = 2;
+					if (iIndex >= 2)
+					{
+						if ((*(p-1)&0x80) && (*(p-2)&0x80))
+						{//汉字
+							uiBit = 2;
+						}
+						else
+						{//ASCII码
+							uiBit = 1;
+						}
 					}
 					else
 					{//ASCII码
 						uiBit = 1;
 					}
 
-					if (iIndex == uiLen)
-					{
-						uiPos = uiLen;
-						p -= uiBit;
-					}
-					else
-					{
-						uiPos -= uiBit;
-						p -= uiBit;
-					}
-
-					if ((iIndex-uiLen) == iDelIndex)	
-					{//正数转负数:~num+1;	负数转正数:~(num-1)
-						iSpecIndex = iIndex;
-					}
-					else
-					{
-						if (iSpecIndex >= 0)
-						{
-							if (iIndex == (iSpecIndex+iDelCount))
-							{
-								memcpy(szDataBuffer+uiOffset, pFileName+uiPos, (uiLen-uiPos));
-								uiOffset += (uiLen-uiPos);
-
-								memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
-								uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
-
-								memcpy(szFileNewName, szDataBuffer, uiOffset);
-								bRet = TRUE;
-								break;
-							}
-							else
-							{
-								if (iIndex >= uiLen)
-								{
-									bRet = FALSE;
-									break;
-								}
-							}
-						}
-						else
-						{
-							memcpy(szDataBuffer+uiOffset, p, uiBit);
-							uiOffset += uiBit;
-						}
-					}
+					p -= uiBit;
+					uiPos -= uiBit;
 
 					iIndex--;
-				} while (*p != '\0');
+					if (iSpecIndex < 0 && iDelIndex == (iIndex-uiLen))
+					{
+						iSpecIndex = iIndex;
+						uiSpecPos = uiPos;
+					}
+					else
+					{
+						if (iSpecIndex >= 0 && iIndex == (iSpecIndex-iDelCount))
+						{
+							if (uiPos != 0)
+							{
+								memcpy(szDataBuffer+uiOffset, pFileName, uiPos);
+								uiOffset += uiPos;
+							}
+							
+							memcpy(szDataBuffer+uiOffset, pFileName+uiSpecPos, uiLen-uiSpecPos);
+							uiOffset += (uiLen-uiSpecPos);
+
+							memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+							uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+
+							memcpy(szFileNewName, szDataBuffer, uiOffset);
+
+							bRet = TRUE;
+							break;
+						}
+					}
+				}
 			}
 		}
 
