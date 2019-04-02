@@ -129,12 +129,6 @@
     <ClCompile Include="Control\TreeCtrl\ShellCtrlClass.cpp">
       <Filter>Control\TreeCtrl</Filter>
     </ClCompile>
-    <ClCompile Include="Control\TreeCtrl\StackedClass.cpp">
-      <Filter>Control\TreeCtrl</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\TreeCtrl\StackedTreeCtrl.cpp">
-      <Filter>Control\TreeCtrl</Filter>
-    </ClCompile>
     <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp">
       <Filter>Control\WndCtrl</Filter>
     </ClCompile>
@@ -264,12 +258,6 @@
       <Filter>Control\ListBox</Filter>
     </ClInclude>
     <ClInclude Include="Control\TreeCtrl\ShellCtrlClass.h">
-      <Filter>Control\TreeCtrl</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\TreeCtrl\StackedClass.h">
-      <Filter>Control\TreeCtrl</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\TreeCtrl\StackedTreeCtrl.h">
       <Filter>Control\TreeCtrl</Filter>
     </ClInclude>
     <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h">

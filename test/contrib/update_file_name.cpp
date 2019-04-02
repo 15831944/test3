@@ -681,18 +681,22 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 						iSpecIndex = iIndex;
 						uiSpecPos = uiPos;
 					}
-					else
+					
+					if (iSpecIndex >= 0)
 					{
-						if (iSpecIndex >= 0 && (iIndex == (iSpecIndex+iDelCount) || *(p+uiBit) == '\0'))
+						if (*(p+uiBit) == '\0' || iIndex == (iSpecIndex+iDelCount))
 						{
 							if (uiSpecPos != 0)
 							{
 								memcpy(szDataBuffer+uiOffset, pFileName, uiSpecPos);
 								uiOffset += uiSpecPos;
 							}
-							
-							memcpy(szDataBuffer+uiOffset, pFileName+uiPos, uiLen-uiPos);
-							uiOffset += (uiLen-uiPos);
+
+							if (iIndex == (iSpecIndex+iDelCount))
+							{
+								memcpy(szDataBuffer+uiOffset, pFileName+uiPos, uiLen-uiPos);
+								uiOffset += (uiLen-uiPos);
+							}
 
 							memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
 							uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
@@ -743,16 +747,17 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 						iSpecIndex = iIndex;
 						uiSpecPos = uiPos;
 					}
-					else
+					
+					if (iSpecIndex >= 0)
 					{
-						if (iSpecIndex >= 0 && iIndex == (iSpecIndex-iDelCount))
+						if (iIndex == 0 || (iIndex == (iSpecIndex-iDelCount)))
 						{
 							if (uiPos != 0)
 							{
 								memcpy(szDataBuffer+uiOffset, pFileName, uiPos);
 								uiOffset += uiPos;
 							}
-							
+
 							memcpy(szDataBuffer+uiOffset, pFileName+uiSpecPos, uiLen-uiSpecPos);
 							uiOffset += (uiLen-uiSpecPos);
 
@@ -796,9 +801,12 @@ BOOL update_file_func::SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 	char *pFileExt = NULL;
 	char *pFileName = NULL;
 
-	char szExtName[MAX_PATH] = {0};
+	char szDataBuffer[MAX_PATH] = {0};
 	char szFileOldName[MAX_PATH] = {0};
 	char szFileNewName[MAX_PATH] = {0};
+
+	char szOldFilePath[MAX_PATH] = {0};
+	char szNewFilePath[MAX_PATH] = {0};
 
 	do 
 	{
@@ -832,20 +840,20 @@ BOOL update_file_func::SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 			ptr = strrchr(pFileData->stcExtFileName.szExtName, '.');
 			if (ptr == NULL)
 			{
-				sprintf(szExtName, _T(".%s"), pFileData->stcExtFileName.szExtName);
+				sprintf(szDataBuffer, _T(".%s"), pFileData->stcExtFileName.szExtName);
 			}
 			else
 			{
-				strcpy(szExtName, pFileData->stcExtFileName.szExtName);
+				strcpy(szDataBuffer, pFileData->stcExtFileName.szExtName);
 			}
 
 			if (pFileData->stcExtFileName.bIsUppercase)
 			{//转换大写
-				pFileExt = strupr(szExtName);
+				pFileExt = strupr(szDataBuffer);
 			}
 			else
 			{//转换小写
-				pFileExt = strlwr(szExtName);
+				pFileExt = strlwr(szDataBuffer);
 			}
 		}
 		else
@@ -865,6 +873,10 @@ BOOL update_file_func::SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 
 		memcpy(szFileNewName+uiOffset, pFileExt, strlen(pFileExt));
 		uiOffset += strlen(pFileExt);
+
+		sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
+		sprintf(szNewFilePath, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, szFileNewName);
+		rename(szOldFilePath, szNewFilePath);
 
 		bRet = TRUE;
 	} while (FALSE);
@@ -924,6 +936,8 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 	BOOL bRet = FALSE;
 
 	unsigned int uiPos = 0;
+	unsigned int uiSpecPos = 0;
+
 	unsigned int uiLen = 0;
 	unsigned int uiOffset = 0;
 
@@ -931,8 +945,12 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 	char *ptr = NULL;
 	char *pFileName = NULL;
 
+	char szDataBuffer[MAX_PATH] = {0};
 	char szFileOldName[MAX_PATH] = {0};
 	char szFileNewName[MAX_PATH] = {0};
+
+	char szOldFilePath[MAX_PATH] = {0};
+	char szNewFilePath[MAX_PATH] = {0};
 
 	do 
 	{
@@ -965,26 +983,48 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 		}
 
 		uiLen = strlen(pFileName);	//名称长度
+		p = pFileData->stcReplaceFileName.szFindName;
+		if (p == NULL || *p == '\0')
+		{
+			bRet = FALSE;
+			break;
+		}
+
 		ptr = strstr(pFileName, pFileData->stcReplaceFileName.szFindName);
 		if (ptr == NULL)
 		{
 			bRet = FALSE;
 			break;
 		}
+		else
+		{
+			uiPos = ptr - pFileName;
+			if (uiPos != 0)
+			{
+				memcpy(szDataBuffer+uiOffset, pFileName, uiPos);
+				uiOffset += uiPos;
+			}
 
-		uiPos = ptr - pFileName;
+			memcpy(szDataBuffer+uiOffset, pFileData->stcReplaceFileName.szFileName, strlen(pFileData->stcReplaceFileName.szFileName));
+			uiOffset += strlen(pFileData->stcReplaceFileName.szFileName);
 
-		memcpy(szFileNewName+uiOffset, pFileName, uiPos);
-		uiOffset += uiPos;
+			uiPos += strlen(p);
+			if (uiLen-uiPos != 0)
+			{
+				memcpy(szDataBuffer+uiOffset, pFileName+uiPos, uiLen-uiPos);
+				uiOffset += (uiLen-uiPos);
+			}
 
-		memcpy(szFileNewName+uiOffset, pFileData->stcReplaceFileName.szFileName, strlen(pFileData->stcReplaceFileName.szFileName));
-		uiOffset += strlen(pFileData->stcReplaceFileName.szFileName);
+			memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
+			uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
 
-		memcpy(szFileNewName+uiOffset, pFileName+uiPos, uiLen-uiPos);
-		uiOffset += (uiLen-uiPos);
+			memcpy(szFileNewName, szDataBuffer, uiOffset);
+		}
+		
+		sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
+		sprintf(szNewFilePath, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, szFileNewName);
 
-		memcpy(szFileNewName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
-		uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
+		rename(szOldFilePath, szNewFilePath);
 
 		bRet = TRUE;
 	} while (FALSE);

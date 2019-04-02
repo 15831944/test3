@@ -126,7 +126,7 @@ del $(SolutionDir)bin\$(TargetFileName)
       <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <ResourceCompile>
@@ -354,8 +354,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Control\ListBox\UserListBox.cpp" />
     <ClCompile Include="Control\ListCtrl\ReportCtrl.cpp" />
     <ClCompile Include="Control\TreeCtrl\ShellCtrlClass.cpp" />
-    <ClCompile Include="Control\TreeCtrl\StackedClass.cpp" />
-    <ClCompile Include="Control\TreeCtrl\StackedTreeCtrl.cpp" />
     <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp" />
     <ClCompile Include="Dialog\ChildWnd\DlgTest1Wnd.cpp" />
     <ClCompile Include="Dialog\ChildWnd\DlgTest2Wnd.cpp" />
@@ -403,8 +401,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Control\ListBox\UserListBox.h" />
     <ClInclude Include="Control\ListCtrl\ReportCtrl.h" />
     <ClInclude Include="Control\TreeCtrl\ShellCtrlClass.h" />
-    <ClInclude Include="Control\TreeCtrl\StackedClass.h" />
-    <ClInclude Include="Control\TreeCtrl\StackedTreeCtrl.h" />
     <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h" />
     <ClInclude Include="Dialog\ChildWnd\DlgTest1Wnd.h" />
     <ClInclude Include="Dialog\ChildWnd\DlgTest2Wnd.h" />
