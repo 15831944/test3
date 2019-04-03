@@ -73,6 +73,7 @@ typedef struct {
 }UPDATE_REPLACEFILENAME;
 
 typedef BOOL(*UPDATE_FILEDATA_CALLBACK_FUNC)(void *pUpdateData, void *pParentObject);
+
 typedef struct {
 	UPDATE_CONFIGTYPE			emConfigType;
 	UPDATE_STATETYPE			emUpdateStatus;
@@ -85,6 +86,8 @@ typedef struct {
 		UPDATE_INDEXFILENAME	stcIndexFileName;
 		UPDATE_REPLACEFILENAME	stcReplaceFileName;
 	};
+
+	void*						pParentObject;
 	UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFunc;
 }UPDATE_FILEDATA;
 
@@ -102,8 +105,10 @@ public:
 	BOOL				SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileData, UPDATE_FILEDATA_CALLBACK_FUNC pfUpdateFileData, void *pParentObject);
 	BOOL				GetUpdateFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
 
-	void				ClearFileData();
 	BOOL				EnumFileInfo(const char *pszShellPath, std::vector<UPDATE_FILEINFO*> &vecFileData);
+
+	void				ClearFileData(std::vector<UPDATE_FILEDATA*> &vecFileData);
+	void				ClearFileInfo(std::vector<UPDATE_FILEINFO*> &vecFileInfo);
 
 private:
 	CRITICAL_SECTION	m_csLockData;

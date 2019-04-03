@@ -207,6 +207,7 @@ void CDlgTest2Wnd::OnCbnSelchangeComboEvalname()
 	{
 		((CDialog*)m_pArPage[m_nPrePage])->ShowWindow(SW_HIDE);
 		((CDialog*)m_pArPage[nCurSel])->ShowWindow(SW_SHOW);
+
 		m_nPrePage = nCurSel;
 	}
 }
@@ -214,15 +215,19 @@ void CDlgTest2Wnd::OnCbnSelchangeComboEvalname()
 void CDlgTest2Wnd::OnTvnSelchangedTree(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	BOOL bRet = FALSE;
+
+	CString strShellPath;
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 
 	do 
 	{
-		if (!SetCtrlInfo(pNMTreeView->itemNew.hItem))
+		if (!m_hSysDirTree.GetItemPath(strShellPath, pNMTreeView->itemNew.hItem))
 		{
 			bRet = FALSE;
 			break;
 		}
+
+		ShowShellPathFile(strShellPath);
 
 		bRet = TRUE;
 	} while (FALSE);
@@ -236,17 +241,13 @@ BOOL CDlgTest2Wnd::GetUpdateFileData(void *pUpdateData, void *pParentObject)
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_FILEDATA stcFileData;
+
 	CDlgTest2Wnd* pWndInfo = NULL;
-	UPDATE_FILEDATA stUpdateFileData;
+	UPDATE_FILEDATA* pFileData = NULL;
 	
 	do 
 	{
-		if (pUpdateData == NULL || pParentObject == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
 		pWndInfo = (CDlgTest2Wnd*)pParentObject;
 		if (pWndInfo == NULL)
 		{
@@ -254,14 +255,30 @@ BOOL CDlgTest2Wnd::GetUpdateFileData(void *pUpdateData, void *pParentObject)
 			break;
 		}
 
-		memset(&stUpdateFileData, 0x0, sizeof(UPDATE_FILEDATA));
-		if (!pWndInfo->GetCurConfigData(&stUpdateFileData))
+		pFileData = (UPDATE_FILEDATA*)pUpdateData;
+		if (pFileData == NULL)
 		{
 			bRet = FALSE;
 			break;
 		}
 
-		memcpy(pUpdateData, &stUpdateFileData, sizeof(UPDATE_FILEDATA));
+		memset(&stcFileData, 0x0, sizeof(UPDATE_FILEDATA));
+		if (pFileData->emUpdateStatus == STATE_UPDATEINPUTE_TYPE)
+		{
+			if (!pWndInfo->GetCurConfigData(&stcFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			memcpy(pUpdateData, &stcFileData, sizeof(UPDATE_FILEDATA));
+		}
+		else if (pFileData->emUpdateStatus == STATE_UPDATESUCCED_TYPE
+				 || pFileData->emUpdateStatus == STATE_UPDATEFAILED_TYPE)
+		{
+			pWndInfo->ShowShellPathFile(pWndInfo->m_strShellPath);
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -508,23 +525,22 @@ BOOL CDlgTest2Wnd::InitWndInfo()
 			break;
 		}
 
-		//2:
+		//TreeCtrl:
 		//m_hSysDirTree.SetFlags(SHCONTF_FOLDERS |SHCONTF_STORAGE);
 		m_hSysDirTree.ModifyStyle(NULL, TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT);
 		m_hSysDirTree.Expand(m_hSysDirTree.GetRootItem(), TVE_EXPAND);
 
-		//3:
+		//ListCtrl:
 		m_hSysDirList.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
 		m_hSysDirList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-
-		strListHeader.Format(_T("名称名, 100; 扩展名, 80; 状态, 80"));
-		m_hSysDirList.SetColumnHeader(strListHeader);
-
-		m_hSysDirList.SetGridLines(TRUE);
 		//m_hSysDirList.SetCheckboxeStyle(RC_CHKBOX_NORMAL);
 
-		m_hSysDirList.SetItemTextColor(-1, 2, RGB(0, 0, 0));
-		m_hSysDirList.SetItemBkColor(-1, 2, RGB(255, 255, 0));
+		m_hSysDirList.InsertColumn(1, _T("名称"), LVCFMT_LEFT, 100);
+		m_hSysDirList.InsertColumn(2, _T("扩展名"), LVCFMT_CENTER, 80);
+		m_hSysDirList.InsertColumn(3, _T("状态"), LVCFMT_CENTER, 80);
+
+		//m_hSysDirList.SetItemTextColor(-1, 2, RGB(0, 0, 0));
+		//m_hSysDirList.SetItemBkColor(-1, 2, RGB(255, 255, 0));
 		 
 		bRet = TRUE;
 	} while (FALSE);
@@ -638,13 +654,13 @@ BOOL CDlgTest2Wnd::SetChildWnd(BOOL bFlag)
 	return bRet;
 }
 
-BOOL CDlgTest2Wnd::SetCtrlInfo(HTREEITEM hItem)
+void CDlgTest2Wnd::ShowShellPathFile(LPCTSTR lpszShellPath)
 {
 	BOOL bRet = FALSE;
 
 	int nPos = -1;
 	int nCount = -1;
-	
+
 	CString strFileExt;
 	CString strFileName;
 	CString strFilePath;
@@ -654,21 +670,20 @@ BOOL CDlgTest2Wnd::SetCtrlInfo(HTREEITEM hItem)
 
 	do 
 	{
-		m_vecFileInfo.clear();
-		m_hSysDirList.DeleteAllItems();
+		if (lpszShellPath == NULL || *lpszShellPath == '\0')
+		{
+			bRet = FALSE;
+			break;
+		}
 
-		if (!m_hSysDirTree.GetItemPath(m_strShellPath, hItem))
+		update_file_data::Instance().ClearFileInfo(m_vecFileInfo);
+		if (!update_file_data::Instance().EnumFileInfo(lpszShellPath, m_vecFileInfo))
 		{
 			bRet = FALSE;
 			break;
 		}
-		
-		if (!update_file_data::Instance().EnumFileInfo(m_strShellPath, m_vecFileInfo))
-		{
-			bRet = FALSE;
-			break;
-		}
-		
+
+		m_hSysDirList.DeleteAllItems();
 		for (iterFileInfo=m_vecFileInfo.begin(); iterFileInfo!=m_vecFileInfo.end(); ++iterFileInfo)
 		{
 			memset(&shFileInfo, 0x0, sizeof(SHFILEINFO));
@@ -698,10 +713,10 @@ BOOL CDlgTest2Wnd::SetCtrlInfo(HTREEITEM hItem)
 			m_hSysDirList.SetItemText(nCount, 1, strFileExt);
 		}
 
+		m_strShellPath = lpszShellPath;
+
 		bRet = TRUE;
 	} while (FALSE);
-
-	return bRet;
 }
 
 void CDlgTest2Wnd::SetButtonCtrl(BOOL bFlag)

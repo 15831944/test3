@@ -16,7 +16,7 @@ update_file_data::update_file_data()
 
 update_file_data::~update_file_data()
 {
-	ClearFileData();
+	ClearFileData(m_vecFileData);
 	DeleteCriticalSection(&m_csLockData);
 }
 
@@ -53,7 +53,7 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 			break;
 		}
 
-		ClearFileData();
+		ClearFileData(m_vecFileData);
 		for (iterFileData = vecFileData.begin(); iterFileData!=vecFileData.end(); ++iterFileData)
 		{
 			pFileInfo = (UPDATE_FILEINFO *)(*iterFileData);
@@ -71,6 +71,8 @@ BOOL update_file_data::SetUpdateFileData(std::vector<UPDATE_FILEINFO*> &vecFileD
 
 			memcpy(pFileData, &stcUpdateFileData, sizeof(UPDATE_FILEDATA));
 			memcpy(&pFileData->stcFileInfo, pFileInfo, sizeof(UPDATE_FILEINFO));
+
+			pFileData->pParentObject = pParentObject;
 			pFileData->pfUpdateFunc = pfUpdateFileData;
 
 			m_vecFileData.push_back(pFileData);
@@ -104,38 +106,6 @@ BOOL update_file_data::GetUpdateFileData(std::vector<UPDATE_FILEDATA *> &vecFile
 
 	LeaveCriticalSection(&m_csLockData);
 	return bRet;
-}
-
-void update_file_data::ClearFileData()
-{
-	BOOL bRet = FALSE;
-	UPDATE_FILEDATA *pFileData = NULL;
-	std::vector<UPDATE_FILEDATA *>::iterator iterFileData;
-
-	EnterCriticalSection(&m_csLockData);
-	do 
-	{
-		for (iterFileData=m_vecFileData.begin(); iterFileData!=m_vecFileData.end();)
-		{
-			pFileData = (UPDATE_FILEDATA *)(*iterFileData);
-			if (pFileData != NULL)
-			{
-				delete pFileData;
-				pFileData = NULL;
-
-				iterFileData = m_vecFileData.erase(iterFileData);
-			}
-			else
-			{
-				++iterFileData;
-			}
-		}
-
-		m_vecFileData.clear();
-		bRet = TRUE;
-	} while (FALSE);
-
-	LeaveCriticalSection(&m_csLockData);
 }
 
 BOOL update_file_data::EnumFileInfo(const char *pszShellPath, std::vector<UPDATE_FILEINFO*> &vecFileData)
@@ -223,6 +193,71 @@ BOOL update_file_data::EnumFileInfo(const char *pszShellPath, std::vector<UPDATE
 	return bRet;
 }
 
+void update_file_data::ClearFileData(std::vector<UPDATE_FILEDATA*> &vecFileData)
+{
+	BOOL bRet = FALSE;
+
+	UPDATE_FILEDATA *pFileData = NULL;
+	std::vector<UPDATE_FILEDATA *>::iterator iterFileData;
+
+	EnterCriticalSection(&m_csLockData);
+	do 
+	{
+		for (iterFileData=vecFileData.begin(); iterFileData!=vecFileData.end();)
+		{
+			pFileData = (UPDATE_FILEDATA *)(*iterFileData);
+			if (pFileData != NULL)
+			{
+				delete pFileData;
+				pFileData = NULL;
+
+				iterFileData = vecFileData.erase(iterFileData);
+			}
+			else
+			{
+				++iterFileData;
+			}
+		}
+
+		vecFileData.clear();
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	LeaveCriticalSection(&m_csLockData);
+}
+
+void update_file_data::ClearFileInfo(std::vector<UPDATE_FILEINFO *> &vecFileInfo)
+{
+	BOOL bRet = FALSE;
+
+	UPDATE_FILEINFO *pFileInfo = NULL;
+	std::vector<UPDATE_FILEINFO *>::iterator iterFileInfo;
+
+	do 
+	{
+		for (iterFileInfo=vecFileInfo.begin(); iterFileInfo!=vecFileInfo.end();)
+		{
+			pFileInfo = (UPDATE_FILEINFO *)(*iterFileInfo);
+			if (pFileInfo != NULL)
+			{
+				delete pFileInfo;
+				pFileInfo = NULL;
+
+				iterFileInfo = vecFileInfo.erase(iterFileInfo);
+			}
+			else
+			{
+				++iterFileInfo;
+			}
+		}
+
+		vecFileInfo.clear();
+
+		bRet = TRUE;
+	} while (FALSE);
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 update_file_func::update_file_func()
@@ -243,94 +278,76 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 {
 	BOOL bRet = FALSE;
 
+	UPDATE_STATETYPE emUpdateStatus = STATE_EMPTYTYPE;
+
 	do 
 	{
-		switch (emConfigType)
+		if (emConfigType == CONFIG_EMPTYTYPE || pFileData == NULL)
 		{
-		case CONFIG_ADDFILENAME_TYPE:
-			{
-				if (!SetAddFileName(emConfigType, pFileData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				bRet = TRUE;
-			}
-			break;
-
-		case CONFIG_DATEFILENAME_TYPE:
-			{
-				if (!SetDateFileName(emConfigType, pFileData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				bRet = TRUE;
-			}
-			break;
-
-		case CONFIG_DELFILENAME_TYPE:
-			{
-				if (!SetDelFileName(emConfigType, pFileData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				bRet = TRUE;
-			}
-			break;
-
-		case CONFIG_EXTFILENAME_TYPE:
-			{
-				if (!SetExtFileName(emConfigType, pFileData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				bRet = TRUE;
-			}
-			break;
-
-		case CONFIG_INDEXFILENAME_TYPE:
-			{
-				if (!SetIndexFileName(emConfigType, pFileData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				bRet = TRUE;
-			}
-			break;
-
-		case CONFIG_REPLACEFILENAME_TYPE:
-			{
-				if (!SetReplaceFileName(emConfigType, pFileData))
-				{
-					bRet = FALSE;
-					break;
-				}
-
-				bRet = TRUE;
-			}
-			break;
-
-		default:
+			bRet = FALSE;
 			break;
 		}
 
-		if (!bRet)
+		if (emConfigType == CONFIG_ADDFILENAME_TYPE)
 		{
-			break;
+			if (!SetAddFileName(emConfigType, pFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (emConfigType == CONFIG_DATEFILENAME_TYPE)
+		{
+			if (!SetDateFileName(emConfigType, pFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (emConfigType == CONFIG_DELFILENAME_TYPE)
+		{
+			if (!SetDelFileName(emConfigType, pFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (emConfigType == CONFIG_EXTFILENAME_TYPE)
+		{
+			if (!SetExtFileName(emConfigType, pFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (emConfigType == CONFIG_INDEXFILENAME_TYPE)
+		{
+			if (!SetIndexFileName(emConfigType, pFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
+		}
+		else if (emConfigType == CONFIG_REPLACEFILENAME_TYPE)
+		{
+			if (!SetReplaceFileName(emConfigType, pFileData))
+			{
+				bRet = FALSE;
+				break;
+			}
 		}
 
 		bRet = TRUE;
 	} while (FALSE);
 
+	if (pFileData != NULL)
+	{
+		bRet ? emUpdateStatus = STATE_UPDATESUCCED_TYPE : emUpdateStatus = STATE_UPDATEFAILED_TYPE;
+
+		pFileData->emUpdateStatus = emUpdateStatus;
+		pFileData->pfUpdateFunc(pFileData, pFileData->pParentObject);
+	}
+	
 	return bRet;
 }
 

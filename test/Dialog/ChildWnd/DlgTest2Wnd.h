@@ -67,14 +67,14 @@ protected:
 
 protected:
 	BOOL					SetChildWnd(BOOL bFlag);
-	BOOL					SetCtrlInfo(HTREEITEM hItem);
 
+	void					ShowShellPathFile(LPCTSTR lpszShellPath);
 	void					SetButtonCtrl(BOOL bFlag);
 	
 protected:
 	CComboBox				m_hComboEval;
 	CMFCShellTreeCtrl 		m_hSysDirTree;		//CMFCShellTreeCtrl
-	CReportCtrl 			m_hSysDirList;		//CMFCShellListCtrl
+	CListCtrl	 			m_hSysDirList;		//CMFCShellListCtrl
 
 	CDlgShowLogoWnd			m_dlgShowLogoWnd;
 	CDlgFileNameAdd			m_dlgFileNameAdd;
