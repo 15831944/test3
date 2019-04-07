@@ -969,7 +969,7 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 	char szOldFilePath[MAX_PATH] = {0};
 	char szNewFilePath[MAX_PATH] = {0};
 
-	do 
+	do
 	{
 		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
 		{//判断文件名称修改类型
@@ -982,7 +982,7 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 			bRet = FALSE;
 			break;
 		}
-
+		
 		ptr = strrchr(pFileData->stcFileInfo.szFileName, '.');	//strtok
 		if (ptr == NULL)
 		{
@@ -1007,7 +1007,7 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 			break;
 		}
 
-		ptr = strstr(pFileName, pFileData->stcReplaceFileName.szFindName);
+		ptr = strstr(pFileName, p);
 		if (ptr == NULL)
 		{
 			bRet = FALSE;
@@ -1015,21 +1015,23 @@ BOOL update_file_func::SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE
 		}
 		else
 		{
-			uiPos = ptr - pFileName;
-			if (uiPos != 0)
+			while (ptr != NULL)
 			{
+				uiPos = ptr - pFileName;
+
 				memcpy(szDataBuffer+uiOffset, pFileName, uiPos);
 				uiOffset += uiPos;
-			}
 
-			memcpy(szDataBuffer+uiOffset, pFileData->stcReplaceFileName.szFileName, strlen(pFileData->stcReplaceFileName.szFileName));
-			uiOffset += strlen(pFileData->stcReplaceFileName.szFileName);
+				memcpy(szDataBuffer+uiOffset, pFileData->stcReplaceFileName.szFileName, strlen(pFileData->stcReplaceFileName.szFileName));
+				uiOffset += strlen(pFileData->stcReplaceFileName.szFileName);
 
-			uiPos += strlen(p);
-			if (uiLen-uiPos != 0)
-			{
-				memcpy(szDataBuffer+uiOffset, pFileName+uiPos, uiLen-uiPos);
-				uiOffset += (uiLen-uiPos);
+				pFileName += (uiPos + strlen(p));
+				ptr = strstr(pFileName, p);
+				if (ptr == NULL)
+				{
+					memcpy(szDataBuffer+uiOffset, pFileName, strlen(pFileName));
+					uiOffset += strlen(pFileName);
+				}
 			}
 
 			memcpy(szDataBuffer+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));

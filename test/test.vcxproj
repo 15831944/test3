@@ -141,7 +141,7 @@ del $(SolutionDir)bin\$(TargetFileName)
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\json;$(SolutionDir)lib\zlog;$(SolutionDir)lib\zxing;$(SolutionDir)lib\feitian;$(SolutionDir)lib\skinUI;$(SolutionDir)lib\opengl;$(SolutionDir)lib\bignum;$(SolutionDir)lib\detours;$(SolutionDir)lib\opencv\lib;$(SolutionDir)lib\openssl\lib;$(SolutionDir)lib\feitian\pkcs#11;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences />
