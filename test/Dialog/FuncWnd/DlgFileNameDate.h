@@ -37,6 +37,8 @@ protected:
 
 	void					SetWndControlLayout();
 	BOOL					DrawWndImage(CDC *pDC);
+
+	BOOL					SetConfigData();
 	
 private:
 	BOOL					m_bInited;

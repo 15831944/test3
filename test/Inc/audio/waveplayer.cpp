@@ -40,7 +40,6 @@ WavePlayer::WavePlayer()
 WavePlayer::~WavePlayer()
 {
 	ClosePlayerProc();
-
 	if (m_hStartPlayEvent != NULL)
 	{
 		CloseHandle(m_hStartPlayEvent);
@@ -64,8 +63,6 @@ WavePlayer::~WavePlayer()
 		CloseHandle(m_hEndEvent);
 		m_hEndEvent = NULL;
 	}
-
-	
 }
 
 WavePlayer& WavePlayer::Instance()
@@ -748,9 +745,13 @@ BOOL WavePlayer::CreatePlayerProc(UINT nSpanTime)
 	return bRet;
 }
 
-BOOL WavePlayer::ClosePlayerProc()
+void WavePlayer::ClosePlayerProc()
 {
-	m_bExit = TRUE;
+	if (m_hThread == NULL)
+	{
+		return;
+	}
+	
 	if (m_hWaveOut != NULL && m_hWaveOut != INVALID_HANDLE_VALUE)
 	{
 		waveOutPause(m_hWaveOut);
@@ -761,6 +762,7 @@ BOOL WavePlayer::ClosePlayerProc()
 		SetEvent(m_hEndEvent);
 	}
 
+	m_bExit = TRUE;
 	WaitForSingleObject(m_hEndEvent, INFINITE);
 	ClosePlayDev(m_hWaveOut);
 	
@@ -769,12 +771,15 @@ BOOL WavePlayer::ClosePlayerProc()
 		GlobalFree(m_pWavData);
 		m_pWavData = NULL;
 	}
+	
+	if (m_hThread != NULL && m_hThread != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(m_hThread);
+		m_hThread = NULL;
+	}
 
 	m_bExit = FALSE;
-	ResetEvent(m_hEndPlayEvent);
 	ResetEvent(m_hStartEvent);
-	
-	return TRUE;
 }
 
 BOOL WavePlayer::SetPlayerProcData(const char* pszWavFilePath, UINT uiDevID)

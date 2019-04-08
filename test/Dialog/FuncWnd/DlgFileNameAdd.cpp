@@ -363,6 +363,7 @@ BOOL CDlgFileNameAdd::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
 		}
 
 		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
+
 		bRet = TRUE;
 	} while (FALSE);
 

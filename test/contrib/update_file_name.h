@@ -45,7 +45,9 @@ typedef struct {
 }UPDATE_ADDFILENAME;
 
 typedef struct {
-	char						szFileName[MAX_PATH];		//待修改为指定日期格式的文件名;
+	bool						bIsReadExif;
+	char						szDateFormat[MAX_PATH];		//日期格式;
+	char						szFileProperty[MAX_PATH];	//文件属性;
 }UPDATE_DATEFILENAME;
 
 typedef struct {

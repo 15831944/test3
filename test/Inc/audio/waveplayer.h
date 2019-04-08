@@ -11,14 +11,14 @@ public:
 	WavePlayer();
 	~WavePlayer();
 	
+	static 	WavePlayer&		Instance();
+	
 public:
 	BOOL					SetPlayerProcData(const char* pszWavFilePath, UINT uiDevID);
 	void					SetPlayerProcEvent(BOOL bFlag);
 
 	BOOL					CreatePlayerProc(UINT nSpanTime=500);
-	BOOL					ClosePlayerProc();
-
-	static 	WavePlayer&		Instance();
+	void					ClosePlayerProc();
 	
 protected:
 	static  DWORD WINAPI	WavePlayerThreadProc(LPVOID lpParam);

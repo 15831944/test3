@@ -148,6 +148,9 @@ BOOL CDlgFileNameDate::InitInfo()
 
 	do 
 	{
+		m_stConfigData.emConfigType = CONFIG_DATEFILENAME_TYPE;
+		m_stConfigData.emUpdateStatus = STATE_EMPTYTYPE;
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -158,8 +161,41 @@ BOOL CDlgFileNameDate::InitWndSkin()
 {
 	BOOL bRet = FALSE;
 
+	DWORD dwStyle = 0;
+	DWORD dwIndex = 0;
+
+	CComboBox *pComboBoxDateFormat = NULL;
+	CComboBox *pComboBoxFileProPerty = NULL;
+
 	do 
 	{
+		pComboBoxDateFormat = (CComboBox *)GetDlgItem(IDC_COMBO_DATEFORMAT);
+		if (pComboBoxDateFormat != NULL)
+		{
+			dwIndex = 0;
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyymmddhhmmss"));
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyy-mm-dd hhmmss"));
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyy-mm-dd"));
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyy年mm月dd日hh时mm分ss秒"));
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyymmddhhmmss"));
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("yy年m月d日h时m分s秒"));
+			pComboBoxDateFormat->InsertString(dwIndex++, _T("<SELF>-yyyymmddhhmmss"));
+ 
+			pComboBoxDateFormat->SetCurSel(0);
+		}
+
+		pComboBoxFileProPerty = (CComboBox*)GetDlgItem(IDC_COMBO_FILEPROPERTY);
+		if (pComboBoxFileProPerty != NULL)
+		{
+			dwIndex = 0;
+			pComboBoxFileProPerty->InsertString(dwIndex++, _T("忽略不处理"));
+			pComboBoxFileProPerty->InsertString(dwIndex++, _T("文件创建日期"));
+			pComboBoxFileProPerty->InsertString(dwIndex++, _T("文件访问日期"));
+			pComboBoxFileProPerty->InsertString(dwIndex++, _T("文件修改日期"));
+
+			pComboBoxFileProPerty->SetCurSel(0);
+		}
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -230,6 +266,57 @@ BOOL CDlgFileNameDate::DrawWndImage(CDC *pDC)
 	return bRet;
 }
 
+BOOL CDlgFileNameDate::SetConfigData()
+{
+	BOOL bRet = FALSE;
+
+	DWORD dwStyle = 0;
+	DWORD dwIndex = 0;
+
+	CString strDateFormat;
+	CString strFileProperty;
+
+	CComboBox *pComboBoxDateFormat = NULL;
+	CComboBox *pComboBoxFileProPerty = NULL;
+
+	do 
+	{
+		pComboBoxDateFormat = (CComboBox *)GetDlgItem(IDC_COMBO_DATEFORMAT);
+		if (pComboBoxDateFormat != NULL)
+		{
+			if (pComboBoxDateFormat->GetCurSel() < 0)
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			dwIndex = pComboBoxDateFormat->GetCurSel();
+			pComboBoxDateFormat->GetLBText(dwIndex, strDateFormat);
+
+			sprintf(m_stConfigData.stcDateFileName.szDateFormat, _T("%s"), strDateFormat);
+		}
+
+		pComboBoxFileProPerty = (CComboBox*)GetDlgItem(IDC_COMBO_FILEPROPERTY);
+		if (pComboBoxFileProPerty != NULL)
+		{
+			if (pComboBoxFileProPerty->GetCurSel() < 0)
+			{
+				bRet = FALSE;
+				break;
+			}
+
+			dwIndex = pComboBoxFileProPerty->GetCurSel();
+			pComboBoxFileProPerty->GetLBText(dwIndex, strFileProperty);
+
+			sprintf(m_stConfigData.stcDateFileName.szFileProperty, _T("%s"), strFileProperty);
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CDlgFileNameDate::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
@@ -238,6 +325,20 @@ BOOL CDlgFileNameDate::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
 
 	do 
 	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetConfigData())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
+
 		bRet = TRUE;
 	} while (FALSE);
 
