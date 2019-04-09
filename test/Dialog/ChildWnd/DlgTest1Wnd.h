@@ -17,24 +17,13 @@ protected:
 	virtual BOOL			OnInitDialog();
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 
-	afx_msg void			OnDestroy();
-
 	afx_msg void			OnBnClickedButton1();
-
-	afx_msg void			OnLbnSelchangeListTest();
-	afx_msg LRESULT			OnTest1WndMessage(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	BOOL					InitCtrl();
 	BOOL					InitInfo();
 
-	void					CreateImageList();
-
 protected:
-	CFont					m_font;
 	CListBox				m_ListBox;		//CDragListBox
-	CImageList				m_ImageList;
-
-	CScrollWndMsg			m_dlgScrollWnd;
 };

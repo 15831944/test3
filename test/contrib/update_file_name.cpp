@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "update_file_name.h"
 
+#include<regex>
+
 /************************************************************************/
 /* author : wl
  * email  : lysgwl@163.com
@@ -576,12 +578,6 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 		}
 
 		uiLen = strlen(pFileName);	//Ãû³Æ³¤¶È 
-
-// 		memcpy(szFileNewName+uiOffset, pFileData->stcDateFileName.szFileName, strlen(pFileData->stcDateFileName.szFileName));
-// 		uiOffset += strlen(pFileData->stcDateFileName.szFileName);
-// 
-// 		memcpy(szFileNewName+uiOffset, pFileData->stcFileInfo.szFileExt, strlen(pFileData->stcFileInfo.szFileExt));
-// 		uiOffset += strlen(pFileData->stcFileInfo.szFileExt);
 
 		bRet = TRUE;
 	} while (FALSE);
