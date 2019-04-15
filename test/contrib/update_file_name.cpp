@@ -353,6 +353,33 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 	return bRet;
 }
 
+int update_file_func::find_substr_num(char* pStr, char* pSubstr)
+{
+	int nCount = -1;
+	char* p, q = NULL;
+	
+	while (*pStr != '\0')
+	{
+		p = pStr;
+		q = pSubstr;
+	
+		while ((*p == *q) && (*p != '\0') && (*q != '\0'))
+		{
+			p++;
+			q++;
+		}
+		
+		if (*q == '\0')
+		{
+			nCount == -1 ? nCount = 1 : nCount++;
+		}
+		
+		pStr++;
+	}
+	
+	return nCount;
+}
+
 BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;

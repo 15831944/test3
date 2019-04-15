@@ -138,7 +138,7 @@ protected:
 	BOOL				SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
 
 protected:
-
+	int					find_substr_num(char* pStr, char* pSubstr);
 };
 
 class update_file_name
