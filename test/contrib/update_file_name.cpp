@@ -356,7 +356,7 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 int update_file_func::find_substr_num(char* pStr, char* pSubstr)
 {
 	int nCount = -1;
-	char* p, q = NULL;
+	char *p, *q = NULL;
 	
 	while (*pStr != '\0')
 	{
@@ -563,6 +563,7 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
+	unsigned int uiCount = 0;
 
 	unsigned int uiIndex = 0;
 	unsigned int uiOffset = 0;
@@ -578,12 +579,6 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 	{
 		if (emConfigType != pFileData->emConfigType || pFileData == NULL)
 		{//判断文件名称修改类型
-			bRet = FALSE;
-			break;
-		}
-
-		if (strcmp(pFileData->stcDateFileName.szDateFormat, _T("")) == 0)
-		{
 			bRet = FALSE;
 			break;
 		}

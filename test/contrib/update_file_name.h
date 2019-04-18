@@ -27,6 +27,16 @@ typedef enum {
 	DATE_ACCESSTIME_TYPE,									//访问时间
 }UPDATE_DATETYPE;
 
+typedef enum {
+	DATE_FORMATEMPTYTYPE = 0,
+	DATE_FORMAT1TYPE,										//yyyymmddhhmmss
+	DATE_FORMAT2TYPE,										//yyyy-mm-dd hhmmss
+	DATE_FORMAT3TYPE,										//yyyy-mm-dd
+	DATE_FORMAT4TYPE,										//yyyy年mm月dd日hh时mm分ss秒
+	DATE_FORMAT5TYPE,										//yy年m月d日h时m分s秒
+	DATE_FORMAT6TYPE,										//<SELF>-yyyymmddhhmmss
+}UPDATE_FORMATTYPE;
+
 typedef struct {
 	unsigned int				uiFileSize;					//文件大小
 	unsigned int				uiFileAttrib;				//文件属性
@@ -46,8 +56,8 @@ typedef struct {
 
 typedef struct {
 	bool						bIsReadExif;
-	char						szDateFormat[MAX_PATH];		//日期格式;
-	char						szFileProperty[MAX_PATH];	//文件属性;
+	UPDATE_DATETYPE				emDateType;
+	UPDATE_FORMATTYPE			emDateFormat;
 }UPDATE_DATEFILENAME;
 
 typedef struct {

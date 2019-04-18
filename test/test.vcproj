@@ -881,14 +881,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Contrib\HttpServerDataThread.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Contrib\HttpServerDataThread.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Contrib\update_file_name.cpp"
 				>
 			</File>

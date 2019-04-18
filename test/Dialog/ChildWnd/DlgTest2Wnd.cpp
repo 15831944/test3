@@ -816,7 +816,7 @@ BOOL CDlgTest2Wnd::GetCurConfigData(UPDATE_FILEDATA *pUpdateData)
 		}
 		else if (pdwWndConfig == CONFIG_DATEFILENAME_TYPE)
 		{
-			if (!m_dlgFileNameAdd.GetWndAddData(pUpdateData))
+			if (!m_dlgFileNameDate.GetWndAddData(pUpdateData))
 			{
 				bRet = FALSE;
 				break;

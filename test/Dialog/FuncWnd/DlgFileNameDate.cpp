@@ -172,14 +172,30 @@ BOOL CDlgFileNameDate::InitWndSkin()
 		pComboBoxDateFormat = (CComboBox *)GetDlgItem(IDC_COMBO_DATEFORMAT);
 		if (pComboBoxDateFormat != NULL)
 		{
+
 			dwIndex = 0;
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyymmddhhmmss"));
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyy-mm-dd hhmmss"));
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyy-mm-dd"));
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyy年mm月dd日hh时mm分ss秒"));
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("yyyymmddhhmmss"));
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("yy年m月d日h时m分s秒"));
-			pComboBoxDateFormat->InsertString(dwIndex++, _T("<SELF>-yyyymmddhhmmss"));
+			pComboBoxDateFormat->InsertString(dwIndex, _T("yyyymmddhhmmss"));
+			pComboBoxDateFormat->SetItemData(dwIndex, DATE_FORMAT1TYPE);
+
+			dwIndex++;
+			pComboBoxDateFormat->InsertString(dwIndex, _T("yyyy-mm-dd hhmmss"));
+			pComboBoxDateFormat->SetItemData(dwIndex, DATE_FORMAT2TYPE);
+
+			dwIndex++;
+			pComboBoxDateFormat->InsertString(dwIndex, _T("yyyy-mm-dd"));
+			pComboBoxDateFormat->SetItemData(dwIndex, DATE_FORMAT3TYPE);
+
+			dwIndex++;
+			pComboBoxDateFormat->InsertString(dwIndex, _T("yyyy年mm月dd日hh时mm分ss秒"));
+			pComboBoxDateFormat->SetItemData(dwIndex, DATE_FORMAT4TYPE);
+
+			dwIndex++;
+			pComboBoxDateFormat->InsertString(dwIndex, _T("yy年m月d日h时m分s秒"));
+			pComboBoxDateFormat->SetItemData(dwIndex, DATE_FORMAT5TYPE);
+			
+			dwIndex++;
+			pComboBoxDateFormat->InsertString(dwIndex, _T("<SELF>-yyyymmddhhmmss"));
+			pComboBoxDateFormat->SetItemData(dwIndex, DATE_FORMAT6TYPE);
  
 			pComboBoxDateFormat->SetCurSel(0);
 		}
@@ -188,11 +204,21 @@ BOOL CDlgFileNameDate::InitWndSkin()
 		if (pComboBoxFileProPerty != NULL)
 		{
 			dwIndex = 0;
-			pComboBoxFileProPerty->InsertString(dwIndex++, _T("忽略不处理"));
-			pComboBoxFileProPerty->InsertString(dwIndex++, _T("文件创建日期"));
-			pComboBoxFileProPerty->InsertString(dwIndex++, _T("文件访问日期"));
-			pComboBoxFileProPerty->InsertString(dwIndex++, _T("文件修改日期"));
+			pComboBoxFileProPerty->InsertString(dwIndex, _T("忽略不处理"));
+			pComboBoxFileProPerty->SetItemData(dwIndex, DATE_EMPTYTYPE);
 
+			dwIndex++;
+			pComboBoxFileProPerty->InsertString(dwIndex, _T("文件创建日期"));
+			pComboBoxFileProPerty->SetItemData(dwIndex, DATE_CREATETIME_TYPE);
+
+			dwIndex++;
+			pComboBoxFileProPerty->InsertString(dwIndex, _T("文件修改日期"));
+			pComboBoxFileProPerty->SetItemData(dwIndex, DATE_MODIFYTIME_TYPE);
+
+			dwIndex++;
+			pComboBoxFileProPerty->InsertString(dwIndex, _T("文件访问日期"));
+			pComboBoxFileProPerty->SetItemData(dwIndex, DATE_ACCESSTIME_TYPE);
+			
 			pComboBoxFileProPerty->SetCurSel(0);
 		}
 
@@ -272,6 +298,7 @@ BOOL CDlgFileNameDate::SetConfigData()
 
 	DWORD dwStyle = 0;
 	DWORD dwIndex = 0;
+	DWORD dwValue = 0;
 
 	CString strDateFormat;
 	CString strFileProperty;
@@ -293,7 +320,8 @@ BOOL CDlgFileNameDate::SetConfigData()
 			dwIndex = pComboBoxDateFormat->GetCurSel();
 			pComboBoxDateFormat->GetLBText(dwIndex, strDateFormat);
 
-			sprintf(m_stConfigData.stcDateFileName.szDateFormat, _T("%s"), strDateFormat);
+			dwValue = pComboBoxDateFormat->GetItemData(dwIndex);
+			m_stConfigData.stcDateFileName.emDateFormat = (UPDATE_FORMATTYPE)dwValue;
 		}
 
 		pComboBoxFileProPerty = (CComboBox*)GetDlgItem(IDC_COMBO_FILEPROPERTY);
@@ -308,7 +336,8 @@ BOOL CDlgFileNameDate::SetConfigData()
 			dwIndex = pComboBoxFileProPerty->GetCurSel();
 			pComboBoxFileProPerty->GetLBText(dwIndex, strFileProperty);
 
-			sprintf(m_stConfigData.stcDateFileName.szFileProperty, _T("%s"), strFileProperty);
+			dwValue = pComboBoxFileProPerty->GetItemData(dwIndex);
+			m_stConfigData.stcDateFileName.emDateType = (UPDATE_DATETYPE)dwValue;
 		}
 
 		bRet = TRUE;

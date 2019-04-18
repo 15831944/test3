@@ -175,7 +175,7 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 #include <array>
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-#if 1
+#if 0
 	std::tr1::array<int, 5> arry = {1, 2, 3, 4, 5};
 	string str("1994 is my birth year");
 
