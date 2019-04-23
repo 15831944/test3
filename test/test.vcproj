@@ -676,6 +676,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Inc\audio\waveaudio.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\waveaudio.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Inc\audio\wavebase.hpp"
 					>
 				</File>
