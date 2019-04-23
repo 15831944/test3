@@ -148,7 +148,8 @@ protected:
 	BOOL				SetReplaceFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData);
 
 protected:
-	int					find_substr_num(char* pStr, char* pSubstr);
+	int					FindSubNum(char* pStr, char* pSubstr);
+	std::string			GetDateName(UPDATE_FORMATTYPE emFormatType, __time64_t time, LPCTSTR lpszFileName);
 };
 
 class update_file_name
