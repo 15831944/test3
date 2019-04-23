@@ -370,6 +370,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Dialog\testDlg.cpp" />
     <ClCompile Include="Inc\audio\MixerDevice.cpp" />
     <ClCompile Include="Inc\audio\multimediastream.cpp" />
+    <ClCompile Include="Inc\audio\waveaudio.cpp" />
     <ClCompile Include="Inc\audio\waveindevice.cpp" />
     <ClCompile Include="Inc\audio\waveoutdevice.cpp" />
     <ClCompile Include="Inc\audio\waveplayer.cpp" />
@@ -418,6 +419,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Inc\algorithm\thread_queue.h" />
     <ClInclude Include="Inc\audio\MixerDevice.hpp" />
     <ClInclude Include="Inc\audio\multimediastream.hpp" />
+    <ClInclude Include="Inc\audio\waveaudio.h" />
     <ClInclude Include="Inc\audio\wavebase.hpp" />
     <ClInclude Include="Inc\audio\waveindevice.hpp" />
     <ClInclude Include="Inc\audio\waveoutdevice.hpp" />

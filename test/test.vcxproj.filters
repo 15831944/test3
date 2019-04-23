@@ -183,6 +183,9 @@
     <ClCompile Include="Dialog\FuncWnd\DlgShowLogoWnd.cpp">
       <Filter>Dialog\FuncWnd</Filter>
     </ClCompile>
+    <ClCompile Include="Inc\audio\waveaudio.cpp">
+      <Filter>Inc\audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -313,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="Dialog\FuncWnd\DlgShowLogoWnd.h">
       <Filter>Dialog\FuncWnd</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\waveaudio.h">
+      <Filter>Inc\audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
