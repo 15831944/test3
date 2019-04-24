@@ -171,35 +171,9 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 	return strUserName;
 }
 
-void test1(WAVEHDR pWaveInHdr)
-{
-	BOOL bRet = FALSE;
-
-	UINT uiIndex = 0;
-	DWORD dwDataSize = 0;
-
-	do 
-	{
-		for (uiIndex=0; uiIndex<10; ++uiIndex)
-		{
-// 			pWaveInHdr[uiIndex]->lpData = (LPSTR)new char[dwDataSize];
-// 			pWaveInHdr[uiIndex]->dwBufferLength = dwDataSize;
-// 			pWaveInHdr[uiIndex]->dwFlags = 0;
-// 			pWaveInHdr[uiIndex]->dwBytesRecorded = 0;
-// 			pWaveInHdr[uiIndex].dwUser = uiIndex;
-// 			pWaveInHdr[uiIndex]->dwLoops = 0;
-// 			pWaveInHdr[uiIndex]->lpNext = NULL;
-// 			pWaveInHdr[uiIndex]->reserved = NULL;
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-}
-
 #include<regex>
 #include <array>
 
-#include "../../Inc/audio/waveaudio.h"
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
 #if 0
@@ -223,7 +197,4 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 		iter = result[0].second; //更新搜索起始位置
 	}
 #endif
-
-	CWaveAudio waveAudio;
-	waveAudio.CreateAudioProc(0);
 }

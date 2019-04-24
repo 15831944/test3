@@ -1,7 +1,7 @@
 #ifndef  _AUDIO_CAPTURE_H_
 #define _AUDIO_CAPTURE_H_
 
-#define AUDIO_HDRCOUNT	  2
+#define AUDIO_HDRCOUNT	  10
 class CWaveAudio
 {
 public:
@@ -9,14 +9,13 @@ public:
 	~CWaveAudio();
 
 public:
-	BOOL					CreateAudioProc(UINT uiDevID, UINT nSpanTime=1000);
+	BOOL					CreateAudioProc(UINT uiDevID, UINT nSpanTime=10);
 	void					CloseAudioProc();
 
 	void					SetParentProc(void *pSpeechServer);
 
 protected:
 	static DWORD WINAPI		WaveAudioThreadProc(LPVOID lpParam);
-	static void CALLBACK	WaveAudioCallBackProc(HWAVEIN hwavein, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
 
 protected:
 	void					AudioWavInfo();
@@ -28,7 +27,7 @@ protected:
 	BOOL					SetAudioData(HWAVEIN hWaveIn, WAVEFORMATEX *pWaveformat);	//WAVEHDR *pWaveInHdr
 				
 protected:
-	BOOL					OpenAudioDev(UINT uiDevID, WAVEFORMATEX *pWaveformat, HWAVEIN &hWaveIn);
+	BOOL					OpenAudioDev(UINT uiDevID, UINT uiThreadId, WAVEFORMATEX *pWaveformat, HWAVEIN &hWaveIn);
 	void					CloseAudioDev(HWAVEIN hWaveIn);
 	
 	BOOL					SetAudioDev(BOOL bFlag, HWAVEIN hWaveIn);

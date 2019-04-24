@@ -11,16 +11,15 @@ CWaveAudio::CWaveAudio()
 
 	m_hThread = NULL;
 	m_hWaveIn = NULL;
+	m_pSpeechServer = NULL;
 
 	m_stWaveFormat.wFormatTag = WAVE_FORMAT_PCM;
 	m_stWaveFormat.nChannels = 1;					//采样声道数,对于单声道音频设置为1,立体声设置为2;
 	m_stWaveFormat.cbSize = 0;						//一般为0;
 	m_stWaveFormat.wBitsPerSample = 16;				//采样比特,16bits/次;
 	m_stWaveFormat.nSamplesPerSec = 16000;			//采样率,16000次/秒;
-	m_stWaveFormat.nBlockAlign = 2;					//一个块的大小,采样bit的字节数乘以声道数;	
-	m_stWaveFormat.nAvgBytesPerSec = 32000;			//每秒的数据率,就是每秒能采集多少字节的数据;
-
-	m_pSpeechServer = NULL;
+	m_stWaveFormat.nBlockAlign = (m_stWaveFormat.wBitsPerSample*m_stWaveFormat.nChannels)>>3;		//一个块的大小,采样bit的字节数乘以声道数;	
+	m_stWaveFormat.nAvgBytesPerSec = (m_stWaveFormat.nBlockAlign*m_stWaveFormat.nSamplesPerSec);	//每秒的数据率,就是每秒能采集多少字节的数据;
 
 	m_hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_hEndEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -55,83 +54,66 @@ DWORD CWaveAudio::WaveAudioThreadProc(LPVOID lpParam)
 	return 0;
 }
 
-void CWaveAudio::WaveAudioCallBackProc(HWAVEIN hwavein, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
-{
-	BOOL bRet = FALSE;
-
-	CWaveAudio *pWaveAudio = NULL;
-
-	do 
-	{
-		pWaveAudio = (CWaveAudio *)dwInstance;
-		if (pWaveAudio == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		switch (uMsg)
-		{
-		case WOM_DONE:
-			{
-				TRACE(_T("waveInStart msg : WOM_DONE"));
-			}
-			break;
-
-		case WOM_CLOSE:
-			{
-				TRACE(_T("waveInClose msg : WOM_CLOSE"));
-			}
-			break;
-
-		case WOM_OPEN:
-			{
-				TRACE(_T("waveInOpen msg : WOM_OPEN"));
-			}
-			break;
-
-		case WIM_DATA:
-			{
-				TRACE(_T("waveInData msg : WIM_DATA"));
-
-				//waveInAddBuffer(hwavein, (PWAVEHDR)dwParam1, sizeof(WAVEHDR));
-			}
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-}
-
 //////////////////////////////////////////////////////////////////////////
 //
 void CWaveAudio::AudioWavInfo()
 {
 	BOOL bRet = FALSE;
 
+	MSG msg;
+	HWAVEIN hWaveIn = NULL;
+	WAVEHDR* pWaveHdr = NULL;
+
 	do 
 	{
-// 		if (!SetAudioDev(TRUE, m_hWaveIn))
-// 		{
-// 			bRet = FALSE;
-// 			break;
-// 		}
-
 		while(WaitForSingleObject(m_hEndEvent, m_dwWaitTime) != WAIT_OBJECT_0)
 		{
 			if (!m_bExit)
 			{
-				TRACE("test1");
+				PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+				if (GetMessage(&msg, NULL, 0, 0))
+				{
+					if (msg.message == MM_WIM_OPEN)
+					{
+						TRACE("MM_WIM_OPEN");
+					}
+					else if (msg.message == MM_WIM_CLOSE)
+					{
+						TRACE("MM_WIM_CLOSE");
+						m_bExit = TRUE;
+					}
+					else if (msg.message == MM_WIM_DATA)
+					{
+						TRACE("MM_WIM_DATA");
+
+						hWaveIn = (HWAVEIN)msg.wParam;
+						pWaveHdr = (WAVEHDR*)msg.lParam;
+
+						if (hWaveIn == NULL || pWaveHdr == NULL)
+						{
+							continue;
+						}
+
+						if (pWaveHdr->lpData != NULL)
+						{
+							waveInUnprepareHeader(hWaveIn, pWaveHdr, sizeof(WAVEHDR));
+
+							waveInPrepareHeader(hWaveIn, pWaveHdr, sizeof(WAVEHDR));
+							waveInAddBuffer(hWaveIn, pWaveHdr, sizeof(WAVEHDR));
+						}
+					}
+				}
 			}
 			else
 			{
-				m_dwWaitTime = 0;
+				TRACE("ClearAudioData");
+				ClearAudioData(m_hWaveIn);
 
 				SetEvent(m_hEndEvent);
-				continue;
+				break;
 			}
 		}
 
-		TRACE("test2");
 		bRet = TRUE;
 	} while (FALSE);
 }
@@ -142,22 +124,27 @@ BOOL CWaveAudio::OpenAudioData(UINT uiDevID)
 
 	do 
 	{
-		//ClearAudioData(m_hWaveIn);
-
+		ClearAudioData(m_hWaveIn);
 		if (m_hWaveIn == NULL)
 		{
-			if (!OpenAudioDev(uiDevID, &m_stWaveFormat, m_hWaveIn))
+			if (!OpenAudioDev(uiDevID, m_dwThreadID, &m_stWaveFormat, m_hWaveIn))
 			{
 				bRet = FALSE;
 				break;
 			}
 		}
 
-// 		if (!SetAudioData(m_hWaveIn, &m_stWaveFormat))
-// 		{
-// 			bRet = FALSE;
-// 			break;
-// 		}
+		if (!SetAudioData(m_hWaveIn, &m_stWaveFormat))
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetAudioDev(TRUE, m_hWaveIn))
+		{
+			bRet = FALSE;
+			break;
+		}
 
 		bRet = TRUE;
 	} while (FALSE);
@@ -219,7 +206,13 @@ void CWaveAudio::ClearAudioData(HWAVEIN hWaveIn)
 		{
 			for (uiIndex=0; uiIndex<AUDIO_HDRCOUNT; ++uiIndex)
 			{
-				waveInUnprepareHeader(hWaveIn, &m_stWaveHdr[uiIndex], sizeof(WAVEHDR));
+				if (m_stWaveHdr[uiIndex].lpData != NULL)	//WHDR_PREPARED & header->dwFlags
+				{
+					waveInUnprepareHeader(hWaveIn, &m_stWaveHdr[uiIndex], sizeof(WAVEHDR));
+					delete[] m_stWaveHdr[uiIndex].lpData;
+					m_stWaveHdr[uiIndex].lpData = NULL;
+				}
+				
 			}
 		}
 
@@ -242,15 +235,15 @@ BOOL CWaveAudio::SetAudioData(HWAVEIN hWaveIn, WAVEFORMATEX *pWaveformat)
 			break;
 		}
 
-		for (uiIndex=0; uiIndex<AUDIO_HDRCOUNT; ++uiIndex)
-		{
-			dwDataSize = pWaveformat->nBlockAlign*pWaveformat->nSamplesPerSec;
+		dwDataSize = pWaveformat->nBlockAlign*pWaveformat->nSamplesPerSec;
 
+		for (uiIndex=0; uiIndex<AUDIO_HDRCOUNT; ++uiIndex)
+		{			
 			m_stWaveHdr[uiIndex].lpData = (LPSTR)new char[dwDataSize];
 			m_stWaveHdr[uiIndex].dwBufferLength = dwDataSize;
 			m_stWaveHdr[uiIndex].dwFlags = 0;
 			m_stWaveHdr[uiIndex].dwBytesRecorded = 0;
-			m_stWaveHdr[uiIndex].dwUser = uiIndex;
+			m_stWaveHdr[uiIndex].dwUser = 0;
 			m_stWaveHdr[uiIndex].dwLoops = 0;
 			m_stWaveHdr[uiIndex].lpNext = NULL;
 			m_stWaveHdr[uiIndex].reserved = NULL;
@@ -274,7 +267,7 @@ BOOL CWaveAudio::SetAudioData(HWAVEIN hWaveIn, WAVEFORMATEX *pWaveformat)
 
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL CWaveAudio::OpenAudioDev(UINT uiDevID, WAVEFORMATEX *pWaveformat, HWAVEIN &hWaveIn)
+BOOL CWaveAudio::OpenAudioDev(UINT uiDevID, UINT uiThreadId, WAVEFORMATEX *pWaveformat, HWAVEIN &hWaveIn)
 {
 	BOOL bRet = FALSE;
 
@@ -305,7 +298,7 @@ BOOL CWaveAudio::OpenAudioDev(UINT uiDevID, WAVEFORMATEX *pWaveformat, HWAVEIN &
 			break;
 		}
 
-		hResult = waveInOpen(&hWaveIn, uiDevID, pWaveformat, (DWORD_PTR)WaveAudioCallBackProc, (DWORD)this, CALLBACK_FUNCTION);
+		hResult = waveInOpen(&hWaveIn, uiDevID, pWaveformat, (DWORD_PTR)uiThreadId, (DWORD)this, CALLBACK_THREAD);	//CALLBACK_FUNCTION
 		if (hResult != 0)
 		{
 			bRet = FALSE;
@@ -377,7 +370,6 @@ BOOL CWaveAudio::CreateAudioProc(UINT uiDevID, UINT nSpanTime)
 
 	do 
 	{
-		CloseAudioProc();
 		if(WaitForSingleObject(m_hStartEvent, 0) != WAIT_OBJECT_0)
 		{
 			m_hThread = CreateThread(NULL, 0, WaveAudioThreadProc, (LPVOID)this, 0, &m_dwThreadID);
@@ -418,11 +410,7 @@ void CWaveAudio::CloseAudioProc()
 			break;
 		}
 
-		if (m_hWaveIn != NULL && m_hWaveIn != INVALID_HANDLE_VALUE)
-		{
-			SetAudioEvent(FALSE, m_hWaveIn);
-		}
-		else
+		if (m_hWaveIn == NULL || m_hWaveIn == INVALID_HANDLE_VALUE)
 		{
 			SetEvent(m_hEndEvent);
 		}
