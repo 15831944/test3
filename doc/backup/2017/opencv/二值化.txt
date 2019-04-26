@@ -1,0 +1,21 @@
+常用的二值化的方法包括：
+    1. 双峰直方图阈值分割法和平均灰度法【Hu 94】【Xia 99】
+    2. 微分直方图【Hu 94】
+    3. Ostu 方法【XZhang 01】【Xia 99】
+    4. Abutaleb 方法【Abutaleb 98】
+    5. Kapur 等人的方法【Kapur et al. 85】
+    6. Kittler 和 Illingworth 方法【Kittler and Illingworth 86】
+    7. Otsu 方法【Otsu 79】
+    8. Bernsen 方法【Bernsen 86】
+    9. Chow 和 Kaneko 方法【Chow and Kaneko 72】【Nakagawa and Rosenfeld 79】
+  10. Eikvil 等人的方法【Eikvil et al. 91】
+  11. Markia 和 Hainsworth 方法【Mardia and Hainsworth 88】
+  12. Niblack 方法【Niblack 86】
+  13. Taxt 等人的方法【Taxt et al. 89】
+  14. Yanowitz 和 Bruckstein 方法【Yanowitz and Bruckstein 89】
+  15. White 和 Rohrer 的动态阈值算法【White and Rohrer 89】
+  16. Parker 方法【Parker 91】
+  17. White 和 Rohrer 的集成函数算法【White and Rohrer 89】
+  18. Trier 和 Taxt 方法【Trier and Taxt 95】
+  
+  

@@ -14,8 +14,6 @@ CDlgTest4Wnd::~CDlgTest4Wnd()
 void CDlgTest4Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BTN4_TEST3,			m_btnTest3);
-	DDX_Control(pDX, IDC_LIST4_SHOWINFO,		m_ListTest);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
@@ -33,26 +31,6 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 {
 	USES_CONVERSION;
 	CDialog::OnInitDialog();
-
-#if 0
-	DWORD dwStyle;
-	CRect rcClient;
-	CRect rcTreeWnd;
-
-	GetClientRect(&rcClient);
-	dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE;
-
-	rcTreeWnd.left   = rcClient.left;
-	rcTreeWnd.top    = rcClient.top;
-	rcTreeWnd.right  = rcClient.right/3;
-	rcTreeWnd.bottom = rcClient.bottom;
-
-	m_hTreeCtrl.Create(dwStyle, rcTreeWnd, this, 0+1);
-#endif
-
-#if 0
-	m_btnTest3.SetImage(_T("C:\\s1.png"), NULL, _T("C:\\s2.png"), NULL);
-#endif
 
 	if (!InitCtrl())
 	{
@@ -77,7 +55,6 @@ void CDlgTest4Wnd::OnPaint()
 //
 void CDlgTest4Wnd::OnBnClickedButton1()
 {
-	CGlobalInfo::CreateInstance()->OpenSysServer("W32Time");
 }
 
 void CDlgTest4Wnd::OnBnClickedButton2()
@@ -91,122 +68,14 @@ void CDlgTest4Wnd::OnBnClickedButton3()
 void CDlgTest4Wnd::OnBnClickedButton4()
 {
 }
-
-BOOL test1(LINK_ADAPTER_INFO *pLinkAdapterInfo)
-{
-	BOOL bRet = FALSE;
-
-	do 
-	{
-		if (pLinkAdapterInfo == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		if (pLinkAdapterInfo->emLinkStateType == LINK_STATEINPUTTYPE)
-		{
-			strcpy(pLinkAdapterInfo->szIpAddress, _T("192.168.2.113"));
-		}
-		else if (pLinkAdapterInfo->emLinkStateType == LINK_STATEOUTPUTTYPE)
-		{
-			if (pLinkAdapterInfo->bIsConnected)
-			{
-				TRACE(_T("%s-ÍøÂçÁ¬½Ó!"), pLinkAdapterInfo->szIpAddress);
-			}
-			else
-			{
-				TRACE(_T("%s-ÍøÂç¶Ï¿ª!"), pLinkAdapterInfo->szIpAddress);
-			}
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
-}
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CDlgTest4Wnd::InitCtrl()
 {
-	if (!InitList())
-	{
-		return FALSE;
-	}
-
-	if (!InitWndRect())
-	{
-		return FALSE;
-	}
-
 	return TRUE;
 }
 
 BOOL CDlgTest4Wnd::InitInfo()
-{
-	return TRUE;
-}
-
-COleDateTime GenRandDate()
-{
-	COleDateTime now = COleDateTime::GetCurrentTime();
-	COleDateTimeSpan span(rand() % 3650, rand() % 24, rand() % 60, rand() % 60);
-	now -= span;
-	return now;
-}
-
-BOOL CDlgTest4Wnd::InitList()
-{
-	m_ListTest.SetColumnHeader(_T("Student ID, 100; Enroll Date, 150; Score, 80, 2"));
-
-	//::InitializeFlatSB(m_ListTest.m_hWnd);
-	//::FlatSB_EnableScrollBar(m_ListTest.m_hWnd, SB_BOTH, ESB_DISABLE_BOTH); 
-
-	m_ListTest.ModifyStyle(0, LVS_REPORT);
-	m_ListTest.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-
-	for (int i = 0; i < 50; i++)
-	{
-		const int IDX = m_ListTest.InsertItem(0, _T(""));
-		m_ListTest.SetItemText(IDX, 0, rand() % 3000);
-		m_ListTest.SetItemText(IDX, 1, GenRandDate());
-		m_ListTest.SetItemText(IDX, 2, (rand() % 51) + 50);
-	}
-
-	m_ListTest.SetGridLines(TRUE); 
-	m_ListTest.SetCheckboxeStyle(RC_CHKBOX_NONE); 
-	m_ListTest.SetEditable(TRUE); 
-	m_ListTest.SortItems(0, TRUE); 
-
-	m_ListTest.SetItemTextColor(-1, 2, RGB(0, 0, 0));
-	m_ListTest.SetItemBkColor(-1, 2, RGB(255, 255, 0));
-
-	for (int n = 0; n < m_ListTest.GetItemCount(); n++)
-	{
-		const int SCORE = _ttoi(m_ListTest.GetItemText(n, 2));
-
-		if (SCORE < 60)
-		{
-			m_ListTest.SetItemBkColor(n, -1, ::GetSysColor(COLOR_INFOBK));
-			m_ListTest.SetItemTextColor(n, -1, RGB(255, 0, 0));
-
-			m_ListTest.SetItemBkColor(n, 2, RGB(255, 0, 0));
-			m_ListTest.SetItemTextColor(n, 2, RGB(255, 255, 255));
-		}
-		else if (SCORE > 90)
-		{
-			m_ListTest.SetItemBkColor(n, -1, RGB(160, 255, 192));
-			m_ListTest.SetItemTextColor(n, -1, RGB(0, 0, 255));
-
-			m_ListTest.SetItemTextColor(n, 2, RGB(255, 255, 255));
-			m_ListTest.SetItemBkColor(n, 2, RGB(0, 160, 0));
-		}
-	}
-
-	return TRUE;
-}
-
-BOOL CDlgTest4Wnd::InitWndRect()
 {
 	return TRUE;
 }

@@ -728,14 +728,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\common\ETSLayout.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ETSLayout.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Inc\common\FileFunc.cpp"
 					>
 				</File>
@@ -745,30 +737,6 @@
 				</File>
 				<File
 					RelativePath=".\Inc\common\MemDCEx.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ResizableDialog.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ResizableDialog.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ResizeCtrl.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ResizeCtrl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ShellClass.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\ShellClass.h"
 					>
 				</File>
 			</Filter>
@@ -843,14 +811,6 @@
 			<Filter
 				Name="TreeCtrl"
 				>
-				<File
-					RelativePath=".\Control\TreeCtrl\ShellCtrlClass.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\TreeCtrl\ShellCtrlClass.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="WndCtrl"

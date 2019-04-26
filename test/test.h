@@ -4,6 +4,7 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
+using namespace Gdiplus;
 class CTestApp : public CWinAppEx
 {
 public:

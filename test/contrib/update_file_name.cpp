@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "update_file_name.h"
 
-#include<regex>
+#include <regex>
+#include <sstream>
 
 /************************************************************************/
 /* author : wl
@@ -380,10 +381,14 @@ int update_file_func::FindSubNum(char* pStr, char* pSubstr)
 	return nCount;
 }
 
-std::string update_file_func::GetDateName(UPDATE_FORMATTYPE emFormatType, __time64_t time, LPCTSTR lpszFileName)
+std::string update_file_func::GetDateName(UPDATE_DATETYPE emDateType, UPDATE_FORMATTYPE emFormatType, LPCTSTR lpszFileName, time_t time)
 {
 	BOOL bRet = FALSE;
+
 	std::string strDateName;
+	std::stringstream stream;
+
+	char szFormat[MAX_PATH] = {0};	//MAXDWORD	//Int64ShrlMod32
 
 	do 
 	{
@@ -393,49 +398,27 @@ std::string update_file_func::GetDateName(UPDATE_FORMATTYPE emFormatType, __time
 			break;
 		}
 
-		switch (emFormatType)
+		if (emFormatType == DATE_FORMAT1TYPE)
 		{
-		case DATE_FORMAT1TYPE:
-			{
-
-			}
-			break;
-
-		case DATE_FORMAT2TYPE:
-			{
-
-			}
-			break;
-
-		case DATE_FORMAT3TYPE:
-			{
-
-			}
-			break;
-
-		case DATE_FORMAT4TYPE:
-			{
-
-			}
-			break;
-
-		case DATE_FORMAT5TYPE:
-			{
-
-			}
-			break;
-
-		case DATE_FORMAT6TYPE:
-			{
-
-			}
-			break;
-
-		case DATE_FORMATEMPTYTYPE:
-			{
-
-			}
-			break;
+			strftime(szFormat, sizeof(szFormat), _T("%Y%m%d%H%M%S"), localtime(&time));
+		}
+		else if (emFormatType == DATE_FORMAT2TYPE)
+		{
+			strftime(szFormat, sizeof(szFormat), _T("%Y-%m-%d %H%M%S"), localtime(&time));
+		}
+		else if (emFormatType == DATE_FORMAT3TYPE)
+		{
+			strftime(szFormat, sizeof(szFormat), _T("%Y-%m-%d"), localtime(&time));
+		}
+		else if (emFormatType == DATE_FORMAT4TYPE)
+		{
+			strftime(szFormat, sizeof(szFormat), _T("%Y年%m月%d日%H时%M分%S秒"), localtime(&time));
+		}
+		else if (emFormatType == DATE_FORMAT5TYPE)
+		{
+		}
+		else if (emFormatType == DATE_FORMAT6TYPE)
+		{
 		}
 
 		bRet = TRUE;
@@ -629,8 +612,8 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 	unsigned int uiLen = 0;
 	unsigned int uiOffset = 0;
 
-	__time64_t curTime = 0;
-	UPDATE_FORMATTYPE emFormatType;
+	time_t curTime = 0;
+	std::string strDateName;
 
 	char *p = NULL;
 	char *ptr = NULL;
@@ -668,8 +651,6 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 		}
 
 		uiLen = strlen(pFileName);	//名称长度
-		emFormatType = pFileData->stcDateFileName.emDateFormat;
-
 		switch (pFileData->stcDateFileName.emDateType)
 		{
 		case DATE_EMPTYTYPE:
@@ -697,7 +678,12 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 			break;
 		}
 
-		GetDateName(emFormatType, curTime, pFileName);
+		strDateName = GetDateName(pFileData->stcDateFileName.emDateType, pFileData->stcDateFileName.emDateFormat, pFileName, curTime);
+		if (strDateName == _T(""))
+		{
+			bRet = FALSE;
+			break;
+		}
 
 		bRet = TRUE;
 	} while (FALSE);

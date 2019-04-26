@@ -149,7 +149,7 @@ protected:
 
 protected:
 	int					FindSubNum(char* pStr, char* pSubstr);
-	std::string			GetDateName(UPDATE_FORMATTYPE emFormatType, __time64_t time, LPCTSTR lpszFileName);
+	std::string			GetDateName(UPDATE_DATETYPE emDateType, UPDATE_FORMATTYPE emFormatType, LPCTSTR lpszFileName, time_t time);
 };
 
 class update_file_name

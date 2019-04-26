@@ -25,5 +25,4 @@ protected:
 	BOOL							InitInfo();
 
 protected:
-	CUserListBox					m_UserListbox;
 };

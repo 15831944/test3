@@ -1,0 +1,73 @@
+IplImage* paintx=cvCreateImage( cvGetSize(pBinaryImage),IPL_DEPTH_8U, 1 );
+		IplImage* painty=cvCreateImage( cvGetSize(pBinaryImage),IPL_DEPTH_8U, 1 );
+
+		cvZero(paintx);  
+		cvZero(painty); 
+
+		int* v=new int[pBinaryImage->width];  
+		int* h=new int[pBinaryImage->height];
+
+
+		memset(v,0,pBinaryImage->width*4);  
+		memset(h,0,pBinaryImage->height*4);
+
+		int x, y;
+		CvScalar s,t;
+
+		for (x=0; x<pBinaryImage->width; x++)
+		{
+			for(y=0; y<pBinaryImage->height; y++)
+			{
+				s = cvGet2D(pBinaryImage, y, x);	//a(x,y);
+				if (s.val[0]==0)
+				{
+					v[x]++;
+				}
+			}
+		}
+
+		for (x=0; x<pBinaryImage->width; x++)
+		{
+			for (y=0; y<v[x]; y++)
+			{
+				t.val[0] = 255;
+				cvSet2D(paintx, y, x, t);
+			}
+		}
+
+		for (y=0; y<pBinaryImage->height; y++)
+		{
+			for (x=0; x<pBinaryImage->width; x++)
+			{
+				s = cvGet2D(pBinaryImage, y, x);
+				if (s.val[0]==0)
+				{
+					h[y]++;
+				}
+			}
+		}
+
+		for (y=0; y<pBinaryImage->height; y++)
+		{
+			for (x=0; x<h[y]; x++)
+			{
+				t.val[0]=255;
+				cvSet2D(painty, y, x, t);
+			}
+		}
+
+		cvNamedWindow("二值化");
+		cvNamedWindow("垂直积分投影");
+		cvNamedWindow("水平积分投影");
+
+		cvShowImage("二值化", pBinaryImage);
+		cvShowImage("垂直积分投影", paintx);
+		cvShowImage("水平积分投影", painty);
+		
+		
+		
+		
+		
+		
+		IplConvKernel* myModel=cvCreateStructuringElementEx(5,5,2,2,CV_SHAPE_ELLIPSE);
+	cvMorphologyEx(lpDst1, lpDst1, NULL,myModel, CV_MOP_OPEN, 4);

@@ -28,6 +28,7 @@
 #include <vector>
 
 #include <atlconv.h>
+#include <gdiplus.h>
 //#include "afxshelltreeCtrl.h"
 //#include <opencv2/opencv.hpp>
 

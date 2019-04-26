@@ -14,7 +14,6 @@ CDlgTest5Wnd::~CDlgTest5Wnd()
 void CDlgTest5Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST5_SHOWINFO,		m_UserListbox);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest5Wnd, CDialog)
@@ -50,9 +49,6 @@ void CDlgTest5Wnd::OnPaint()
 //
 BOOL CDlgTest5Wnd::InitCtrl()
 {
-	m_UserListbox.AddString("test1");
-	m_UserListbox.AddString("test2");
-	m_UserListbox.AddString("test3");
 	return TRUE;
 }
 

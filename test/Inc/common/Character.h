@@ -16,6 +16,11 @@ public:
 	static int		IsStringUtf8(const char* pszString);
 	static int		IsStringGBK(const char* pszString);
 	static int		IsStringUnicode(const char* pszString);
+
+public:
+	std::vector<char*>		 SplitString1(const char pszSource[], const char* pszSeparator);
+	std::vector<std::string> SplitString2(const char* pszSource, const char* pszSeparator);	
+	std::vector<CString>	 SplitString3(const char* pszSource, const char* pszSeparator);
 };
 
 class CConvert  
@@ -36,7 +41,9 @@ public:
 			
 	static int		StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag=0);
 	static int      HexStringToBytes(unsigned char*	 szDesc, const char* szSrc,int nLen);			
-	static int		BytesHexToString(char*  szDesc, const unsigned char* szSrc,int nLen);	
+	static int		BytesHexToString(char*  szDesc, const unsigned char* szSrc,int nLen);
+
+	bool			ConvertToInt(const double &val,int& i);
 };
 
 #endif

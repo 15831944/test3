@@ -8,10 +8,13 @@ public:
 	~CFileFunc();
 	
 public:
-	static 	CFileFunc&		Instance();
+	static 	CFileFunc& Instance();
 	
 public:
-	
+	CString		GetAppPath();
+
+	bool		IsFileExists(LPCTSTR lpszFilePath);
+	bool		DeleteSelfFile();
 };
 
 #endif

@@ -1,0 +1,268 @@
+	m_hcapWndVideo.CaptureImages("D:\\2015.bmp");
+	CImageProc proc;
+
+
+#if 0
+	IplImage *p1 = cvLoadImage("D:\\predict.bmp",1);
+
+
+	CvSVM svm = CvSVM();
+	svm.load("D:\\HOG_SVM_DATA.xml");
+	IplImage *p2 = cvCreateImage(cvSize(28,28), IPL_DEPTH_8U,3);
+	cvZero(p2); 
+	cvResize(p1, p2);
+
+	vector<float>descriptors;
+	HOGDescriptor *pHog = new HOGDescriptor(cvSize(28,28),cvSize(14,14),cvSize(7,7),cvSize(7,7),9);
+	if (pHog != NULL)
+	{
+		//
+		pHog->compute(p2, descriptors, Size(1,1), Size(0,0));
+
+		//
+		CvMat* SVMtrainMat = cvCreateMat(1, descriptors.size(), CV_32FC1);
+		if (SVMtrainMat != NULL)
+		{
+			int n = 0;
+			for(vector<float>::iterator iter=descriptors.begin();iter!=descriptors.end();iter++) 
+			{
+				cvmSet(SVMtrainMat,0,n,*iter);
+				n++;
+			}
+			int m = svm.predict(SVMtrainMat);
+
+			CString str;
+			str.Format("%d", m);
+			AfxMessageBox(str);
+		}
+	}
+
+
+	cvReleaseImage(&p1);
+	cvReleaseImage(&p2);
+#endif
+	
+
+#if 0
+	IplImage *p2 = cvLoadImage("tessdata\\images\\2.jpg");
+
+	IplImage *GrayP1 = NULL, *GrayP2 =NULL;
+	proc.GreyProc(p1,&GrayP1);
+	proc.GreyProc(p2,&GrayP2);
+
+	IplImage *BinP1 = NULL, *BinP2 = NULL;
+	proc.BinarizeProc(GrayP1, 90, &BinP1);
+	proc.BinarizeProc(GrayP2, 90, &BinP2);
+
+	cvNamedWindow("1");
+	cvShowImage("1", BinP1);
+
+	cvNamedWindow("2");
+	cvShowImage("2", BinP2);
+	GrayHist *p = proc.CompareImage(BinP1,BinP2);
+	if (p != NULL)
+	{
+		double s1 = p->HisVal1;
+		double s2 = p->HisVal2;
+		double s3 = p->HisVal3;
+		double s4 = p->HisVal4;
+	}
+#endif
+	
+#if 0
+	CvRect ImageRC;
+	IplImage *pImage = cvLoadImage("predict.bmp", CV_LOAD_IMAGE_GRAYSCALE);
+	if (pImage != NULL)
+	{
+		ImageRC = findBB(pImage);
+
+		IplImage *lpDst = cvCreateImage(cvSize(ImageRC.width,ImageRC.height),pImage->depth,pImage->nChannels);
+		cvSetImageROI(pImage, ImageRC);
+		cvCopy(pImage,lpDst);
+		cvResetImageROI(pImage);
+
+		cvNamedWindow("1");
+		cvShowImage("1", lpDst);
+	}
+#endif
+	
+/*
+	IplImage *p = cvLoadImage("004.bmp", CV_LOAD_IMAGE_GRAYSCALE); //tessdata\\images\\9\\089.bmp
+
+
+	CImageOCR ImageOCR;
+	ImageOCR.InitImageOCR();
+	float result = ImageOCR.GetOCRResult(p);
+
+	CString str;
+	str.Format("%f", result);
+	AfxMessageBox(str);
+*/
+
+
+
+
+/*采用cvFindContours提取轮廓，并过滤掉小面积轮廓，最后将轮廓保存*/
+
+static int getContoursByC(char* Imgname, double minarea, double whRatio)
+{
+	IplImage* src = cvLoadImage(Imgname, CV_LOAD_IMAGE_GRAYSCALE);
+	if (!src)
+	{
+		printf("read data error!\n");
+		return -1;
+	}
+	IplImage* dst = cvCreateImage(cvGetSize(src), 8, 3);
+
+	//the parm. for cvFindContours
+	CvMemStorage* storage = cvCreateMemStorage(0);
+	CvSeq* contour = 0;
+	double maxarea = 0;
+
+	//for display
+	cvNamedWindow("Source", CV_WINDOW_NORMAL);
+	cvShowImage("Source", src);
+
+	//二值化
+	cvThreshold(src, src, 120, 255, CV_THRESH_BINARY);
+
+	//提取轮廓
+	cvFindContours(src, storage, &contour, sizeof(CvContour), CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+	cvZero(dst);//清空数组
+
+	//CvSeq* _contour为了保存轮廓的首指针位置，因为随后contour将用来迭代
+	CvSeq* _contour = contour;
+
+
+	int maxAreaIdx = -1, iteratorIdx = 0;//n为面积最大轮廓索引，m为迭代索引
+	for (int iteratorIdx = 0; contour != 0; contour = contour->h_next, iteratorIdx++/*更新迭代索引*/)
+	{
+
+		double tmparea = fabs(cvContourArea(contour));
+		if (tmparea > maxarea)
+		{
+			maxarea = tmparea;
+			maxAreaIdx = iteratorIdx;
+			continue;
+		}
+		if (tmparea < minarea)
+		{
+			//删除面积小于设定值的轮廓
+			cvSeqRemove(contour, 0); 
+			continue;
+		}
+		CvRect aRect = cvBoundingRect(contour, 0);
+		if ((aRect.width / aRect.height)<whRatio)
+		{
+			//删除宽高比例小于设定值的轮廓
+			cvSeqRemove(contour, 0); 
+			continue;
+		}
+		//CvScalar color = CV_RGB( rand()&255, rand()&255, rand()&255 );//创建一个色彩值
+		//CvScalar color = CV_RGB(0, 255, 255);
+
+		//max_level 绘制轮廓的最大等级。如果等级为0，绘制单独的轮廓。如果为1，绘制轮廓及在其后的相同的级别下轮廓。
+		//如果值为2，所有的轮廓。如果等级为2，绘制所有同级轮廓及所有低一级轮廓，诸此种种。
+		//如果值为负数，函数不绘制同级轮廓，但会升序绘制直到级别为abs(max_level)-1的子轮廓。 
+		//cvDrawContours(dst, contour, color, color, -1, 1, 8);//绘制外部和内部的轮廓
+	}
+	contour = _contour; /*int k=0;*/
+	//统计剩余轮廓，并画出最大面积的轮廓
+	int count = 0;
+	for (; contour != 0; contour = contour->h_next)
+	{
+		count++;
+		double tmparea = fabs(cvContourArea(contour));
+		if (tmparea == maxarea /*k==n*/)
+		{
+			CvScalar color = CV_RGB(255, 0, 0);
+			cvDrawContours(dst, contour, color, color, -1, 1, 8);
+		}
+		/*k++;*/
+	}
+	printf("The total number of contours is:%d", count);
+	cvNamedWindow("Components", CV_WINDOW_NORMAL);
+	cvShowImage("Components", dst);
+	cvSaveImage("dst.jpg", dst);
+	//roateProcess(dst);
+	cvWaitKey(0);
+	//销毁窗口和图像存储
+	cvDestroyWindow("Source");
+	cvReleaseImage(&src);
+	cvDestroyWindow("Components");
+	cvReleaseImage(&dst);
+	return 0;
+}
+/*
+static int getContoursByCplus(char* Imgname, double minarea, double whRatio)
+{
+	cv::Mat src, dst, canny_output;
+	/// Load source image and convert it to gray
+	src = imread(Imgname, 0);
+
+	if (!src.data)
+	{
+		std::cout << "read data error!" << std::endl;
+		return -1;
+	}
+	blur(src, src, Size(3, 3));
+
+
+	//the pram. for findContours,
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+
+	/// Detect edges using canny
+	Canny(src, canny_output, 80, 255, 3);
+	/// Find contours
+	findContours(canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+	//CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE
+
+	double maxarea = 0;
+	int maxAreaIdx = 0;
+
+	for (int i = 0; i<contours.size(); i++)
+	{
+
+		double tmparea = fabs(contourArea(contours[i]));
+		if (tmparea>maxarea)
+		{
+			maxarea = tmparea;
+			maxAreaIdx = i;
+			continue;
+		}
+
+		if (tmparea < minarea)
+		{
+			//删除面积小于设定值的轮廓
+			contours.erase(contours.begin() + i); 
+			std::wcout << "delete a small area" << std::endl;
+			continue;
+		}
+		//计算轮廓的直径宽高
+		Rect aRect =boundingRect(contours[i]);
+		if ((aRect.width / aRect.height)<whRatio)
+		{
+			//删除宽高比例小于设定值的轮廓
+			contours.erase(contours.begin() + i); 
+			std::wcout << "delete a unnomalRatio area" << std::endl;
+			continue;
+		}
+	}
+	/// Draw contours,彩色轮廓
+	dst= Mat::zeros(canny_output.size(), CV_8UC3);
+	for (int i = 0; i< contours.size(); i++)
+	{
+		//随机颜色
+		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		drawContours(dst, contours, i, color, 2, 8, hierarchy, 0, Point());
+	}
+	// Create Window
+	char* source_window = "countors";
+	namedWindow(source_window, CV_WINDOW_NORMAL);
+	imshow(source_window, dst);
+cv:; waitKey(0);
+
+	return 0;
+}
+*/

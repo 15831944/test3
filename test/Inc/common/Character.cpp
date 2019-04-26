@@ -180,6 +180,232 @@ int CControl::IsStringUnicode(const char* pszString)
 {
 	return 0;
 }
+
+/*
+ * CÓïÑÔº¯Êý×Ö·û´®·Ö¸î
+ * char×ª»»CString, strtokº¯Êý·Ö¸î×Ö·û´®;
+*/
+std::vector<char*> CControl::SplitString1(const char pszSource[], const char* pszSeparator)
+{
+	BOOL bRet = FALSE;
+	int npos = 0;
+	unsigned long ulStrLen = 0;
+
+	char* pString = NULL;
+	char* pSrcString = NULL;
+	char* pSubString = NULL;
+
+	std::vector<char*> vecString;
+
+	if (pszSource == NULL || pszSeparator == NULL)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+
+	pString = (char*)pszSource;
+
+#define MACRO_STRTOK_TAG 1
+#define MACRO_STRSTR_TAG 0
+
+#if (MACRO_STRTOK_TAG == 1)	
+	pSubString = strtok(pString, pszSeparator);
+	if (pSubString == NULL)
+	{
+		bRet = FALSE;
+		goto part1;
+	}
+	else
+	{
+		vecString.push_back(pSubString);
+	}
+
+	while(1)
+	{
+		pSubString = strtok(NULL, pszSeparator);
+		if (pSubString == NULL)
+		{
+			break;
+		}
+		else
+		{
+			vecString.push_back(pSubString);
+		}
+	}
+#endif
+
+#if (MACRO_STRSTR_TAG == 1)
+	while(1)
+	{
+		pSubString = strstr(pString, pszSeparator);
+		if (pSubString != NULL)
+		{
+			memset(pSubString, '\0', strlen(pszSeparator));
+			vecString.push_back(pString);
+			
+			pSubString = pSubString + strlen(pszSeparator);
+			pString = pSubString;
+		}
+		else
+		{
+			vecString.push_back(pString);
+			break;
+		}
+	}
+#endif
+
+part1:
+	return vecString;
+}
+
+/*
+ * C++º¯Êý×Ö·û´®·Ö¸î
+ * char×ª»»string, substrº¯Êý·Ö¸î×Ö·û´®;
+*/
+std::vector<std::string> CControl::SplitString2(const char* pszSource, const char* pszSeparator)
+{
+	std::string::size_type start = 0;
+	std::string::size_type index = 0;
+
+	std::string strString(pszSource);
+	std::string strSepString(pszSeparator);
+
+	std::vector<std::string> vecString;
+
+#define MACRO_STRING1_TAG 0
+#define MACRO_STRING2_TAG 1
+
+#if (MACRO_STRING1_TAG == 1)
+	std::string strSubString;
+	do 
+	{
+		index = strString.find_first_of(pszSeparator, start);
+		if (index != std::string::npos)
+		{
+			strSubString = strString.substr(start, index-start);
+			if (strSubString != _T(""))
+			{
+				vecString.push_back(strSubString);
+			}
+
+			start = strString.find_first_not_of(pszSeparator, index);
+
+			if (start == std::string::npos)
+			{
+				return vecString;
+			}
+		}
+	} while (index != std::string::npos);
+
+	strSubString = strString.substr(start);
+	vecString.push_back(strSubString);
+#endif
+	
+#if (MACRO_STRING2_TAG == 1)
+	string::const_iterator substart = strString.begin();
+	
+	string::const_iterator delimstart = strSepString.begin();
+	string::const_iterator delimend   = strSepString.end();
+	
+	while(1)
+	{
+		string::const_iterator subend = strString.end();
+
+		subend = search(substart, subend, delimstart, delimend);
+		if (subend == strString.end())
+		{
+			std::string strSubString(substart, subend);
+			if (!strSubString.empty())
+			{
+				vecString.push_back(strSubString);
+			}
+			break;
+		}
+		else
+		{
+			std::string strSubString(substart, subend);
+			if (!strSubString.empty())
+			{
+				vecString.push_back(strSubString);
+			}
+
+			substart = subend + strSepString.size();
+		}
+	}
+#endif
+
+	return vecString;
+}
+
+/*
+ * MFCº¯Êý×Ö·û´®·Ö¸î
+ * char×ª»»CString, MFCº¯Êý·Ö¸î×Ö·û´®;
+*/
+std::vector<CString> CControl::SplitString3(const char* pszSource, const char* pszSeparator)
+{
+	int nPos    = 0;
+	int nPrePos = 0;
+
+	CString strSubString;
+	CString strString = pszSource;
+
+	std::vector<CString> vecString;
+
+#define MACRO_CSTRING1_TAG 1
+#define MACRO_CSTRING2_TAG 0
+#define MACRO_CSTRING3_TAG 0
+#define MACRO_CSTRING4_TAG 0
+
+#if (MACRO_CSTRING1_TAG == 1)
+	while(nPos != -1)
+	{
+		nPrePos = nPos;
+
+		nPos = strString.Find(pszSeparator, (nPos+1));
+		vecString.push_back(strString.Mid(nPrePos, (nPos-nPrePos)));
+	}
+#endif
+
+#if (MACRO_CSTRING2_TAG == 1)
+	nPos = strString.Find(pszSeparator);
+
+	while(nPos != -1)
+	{
+		strSubString = strString.Left(nPos);
+		if (!strSubString.IsEmpty())
+		{
+			vecString.push_back(strSubString);
+		}
+
+		strString = strString.Right(strString.GetLength()-nPos-1);
+		nPos = strString.Find(pszSeparator);
+	}
+
+	if (!strString.IsEmpty())
+	{
+		vecString.push_back(strString);
+	}
+#endif
+
+#if (MACRO_CSTRING3_TAG == 1)
+	strSubString = strString.Tokenize(pszSeparator, nPos);
+	while(strSubString.Trim() != _T(""))
+	{
+		vecString.push_back(strSubString);
+		strSubString = strString.Tokenize(pszSeparator, nPos);
+	}
+#endif
+
+#if (MACRO_CSTRING4_TAG == 1)
+	while(AfxExtractSubString(strSubString, pszSource, nPos, *pszSeparator))
+	{
+		nPos++;
+		vecString.push_back(strSubString);
+	}
+#endif
+
+	return vecString;
+}
 //////////////////////////////////////////////////////////////////////////
 //
 CConvert::CConvert()
@@ -421,4 +647,27 @@ int CConvert::BytesHexToString(char*  szDesc, const unsigned char* szSrc,int nLe
 	}
 	*szDesc = '\0';
 	return nLen*2;
+}
+
+bool CConvert::ConvertToInt(const double &val,int& i)
+{
+	int num[2] ={0};  
+	memcpy(num,&val,8);  
+	int high =num[1];  
+	int nExp =((high>>20)&0x7ff) - 1023;  
+	if(nExp<= 20)  
+	{  
+		i = ( high&0xfffff |0x100000)>>(20 - nExp);  
+	}  
+	else if(nExp > 20 && nExp <= 30)  
+	{  
+		int low= num[0];  
+		i = ( ( high&0xfffff |0x100000)<<(nExp - 20) )+ ( low >>(52 - nExp));  
+	}  
+	else  
+		return false;  
+
+	if(high&0x80000000)  
+		i = ~i + 1;  
+	return true; 
 }

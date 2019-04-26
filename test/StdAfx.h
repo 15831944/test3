@@ -31,16 +31,6 @@
 //
 #include "Inc/PubClass.h"
 
-#include "./Control/Button/ImageButton.h"
-#include "./Control/ListCtrl/ReportCtrl.h"
-
-#include "./Control/Button/DrawButton.h"
-#include "./Control/TreeCtrl/ShellCtrlClass.h"
-
-#include "./Control/ListBox//DrawListBox.h"
-#include "./Control/WndCtrl/ScrollWndMsg.h"
-#include "./Control/ListBox/UserListBox.h"
-
 #pragma comment(lib, "detours.lib")
 #pragma comment(lib, "version.lib")
 //////////////////////////////////////////////////////////////////////////

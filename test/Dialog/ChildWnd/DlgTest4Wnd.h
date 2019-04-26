@@ -29,15 +29,8 @@ protected:
 	BOOL							InitCtrl();
 	BOOL							InitInfo();
 
-	BOOL							InitList();
-	BOOL							InitWndRect();
-
 	BOOL							DrawRectFrameLine(CDC *pDC);
 	
 protected:
-	CButton							m_btnTest3;
-	CReportCtrl						m_ListTest;
-
 	//WavePlayer					m_WavePlayer;
-	CCheckLinkThread				m_CheckLinkProc;
 };
