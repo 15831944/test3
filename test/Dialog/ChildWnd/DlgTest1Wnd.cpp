@@ -173,28 +173,61 @@ CString InterceptSubText(LPCTSTR lpszUserName, UINT uiLimitLen)
 
 #include<regex>
 #include <array>
+#include <algorithm>
+#include <functional> 
+#include <cctype>
+#include <locale>
+
+static inline std::string &ltrim(std::string &s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	return s;
+}
+
+static inline std::string &rtrim(std::string &s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+static inline std::string &trim(std::string &s) {
+	return ltrim(rtrim(s));
+}
 
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
+	std::string str;
+	std::string s1;
+
 #if 0
 	std::tr1::array<int, 5> arry = {1, 2, 3, 4, 5};
-	string str("1994 is my birth year");
+	string str1("1994 is my birth year");
 
-	string regex_str("\\d{4}");
-	std::tr1::regex pattern(regex_str, std::tr1::regex::icase);
+	string regex_str1("\\d{4}");
+	std::tr1::regex pattern1(regex_str1, std::tr1::regex::icase);
 
-	string temp;
+	string s1;
 	std::tr1::match_results<string::const_iterator> result;
 
-	string::const_iterator iter = str.begin();
-	string::const_iterator iterEnd= str.end();
+	string::const_iterator iter = str1.begin();
+	string::const_iterator iterEnd= str1.end();
 
 	while (std::tr1::regex_search(iter, iterEnd, result, pattern))
 	{
-		temp=result[0];
+		s1=result[0];
 
-		cout<<temp<<endl;
+		cout<<s1<<endl;
 		iter = result[0].second; //更新搜索起始位置
 	}
+#endif
+
+#if 1
+	std::string str2 = _T("this is?#( a #@#test!");
+	std::string regex_str2 = _T("((?=[\x21-\x7e]+)[^A-Za-z0-9])");	//(( )+|(\n)+)	//((?=[\x21-\x7e]+)[^A-Za-z0-9])
+	std::tr1::regex pattern2(regex_str2, std::tr1::regex::icase);
+	
+	//ltrim(str2);
+	//rtrim(str2);
+
+	s1 = _T("");
+	str = std::tr1::regex_replace(str2, pattern2, s1);
 #endif
 }
