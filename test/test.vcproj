@@ -841,14 +841,6 @@
 			Name="Contrib"
 			>
 			<File
-				RelativePath=".\Contrib\CheckLinkThread.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Contrib\CheckLinkThread.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Contrib\update_file_name.cpp"
 				>
 			</File>

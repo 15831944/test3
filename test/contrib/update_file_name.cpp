@@ -354,73 +354,69 @@ BOOL update_file_func::SetUpdateFileFunc(UPDATE_CONFIGTYPE emConfigType, UPDATE_
 	return bRet;
 }
 
-int update_file_func::FindSubNum(char* pStr, char* pSubstr)
-{
-	int nCount = -1;
-	char *p, *q = NULL;
-	
-	while (*pStr != '\0')
-	{
-		p = pStr;
-		q = pSubstr;
-	
-		while ((*p == *q) && (*p != '\0') && (*q != '\0'))
-		{
-			p++;
-			q++;
-		}
-		
-		if (*q == '\0')
-		{
-			nCount == -1 ? nCount = 1 : nCount++;
-		}
-		
-		pStr++;
-	}
-	
-	return nCount;
-}
-
-std::string update_file_func::GetDateName(UPDATE_DATETYPE emDateType, UPDATE_FORMATTYPE emFormatType, LPCTSTR lpszFileName, time_t time)
+std::string update_file_func::GetDateName(LPCTSTR lpszFileName, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
 
 	std::string strDateName;
 	std::stringstream stream;
 
+	time_t time;
 	char szFormat[MAX_PATH] = {0};	//MAXDWORD	//Int64ShrlMod32
 
 	do 
 	{
-		if (lpszFileName == NULL || *lpszFileName == '\0')
+		if (pFileData == NULL
+			|| (lpszFileName == NULL || *lpszFileName == '\0'))
 		{
 			bRet = FALSE;
 			break;
 		}
 
-		if (emFormatType == DATE_FORMAT1TYPE)
+		if (pFileData->stcDateFileName.emDateType == DATE_EMPTYTYPE)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (pFileData->stcDateFileName.emDateType == DATE_CREATETIME_TYPE)
+		{
+			time = pFileData->stcFileInfo.time_create;
+		}
+		else if (pFileData->stcDateFileName.emDateType == DATE_MODIFYTIME_TYPE)
+		{
+			time = pFileData->stcFileInfo.time_write;
+		}
+		else if (pFileData->stcDateFileName.emDateType == DATE_ACCESSTIME_TYPE)
+		{
+			time = pFileData->stcFileInfo.time_access;
+		}
+
+		if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT1TYPE)
 		{
 			strftime(szFormat, sizeof(szFormat), _T("%Y%m%d%H%M%S"), localtime(&time));
+			stream<<szFormat<<endl;
 		}
-		else if (emFormatType == DATE_FORMAT2TYPE)
+		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT2TYPE)
 		{
 			strftime(szFormat, sizeof(szFormat), _T("%Y-%m-%d %H%M%S"), localtime(&time));
 		}
-		else if (emFormatType == DATE_FORMAT3TYPE)
+		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT3TYPE)
 		{
 			strftime(szFormat, sizeof(szFormat), _T("%Y-%m-%d"), localtime(&time));
 		}
-		else if (emFormatType == DATE_FORMAT4TYPE)
+		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT4TYPE)
 		{
 			strftime(szFormat, sizeof(szFormat), _T("%Y年%m月%d日%H时%M分%S秒"), localtime(&time));
 		}
-		else if (emFormatType == DATE_FORMAT5TYPE)
+		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT5TYPE)
+		{
+			strftime(szFormat, sizeof(szFormat), _T("%y年%m月%d日%H时%M分%S秒"), localtime(&time));
+		}
+		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT6TYPE)
 		{
 		}
-		else if (emFormatType == DATE_FORMAT6TYPE)
-		{
-		}
-
+		
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -650,35 +646,7 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 			pFileName = szFileOldName;
 		}
 
-		uiLen = strlen(pFileName);	//名称长度
-		switch (pFileData->stcDateFileName.emDateType)
-		{
-		case DATE_EMPTYTYPE:
-			{
-				curTime = ::time(NULL);
-			}
-			break;
-
-		case DATE_CREATETIME_TYPE:
-			{
-				curTime = pFileData->stcFileInfo.time_create;
-			}
-			break;
-
-		case DATE_MODIFYTIME_TYPE:
-			{
-				curTime = pFileData->stcFileInfo.time_write;
-			}
-			break;
-
-		case DATE_ACCESSTIME_TYPE:
-			{
-				curTime = pFileData->stcFileInfo.time_access;
-			}
-			break;
-		}
-
-		strDateName = GetDateName(pFileData->stcDateFileName.emDateType, pFileData->stcDateFileName.emDateFormat, pFileName, curTime);
+		strDateName = GetDateName(pFileName, pFileData);
 		if (strDateName == _T(""))
 		{
 			bRet = FALSE;

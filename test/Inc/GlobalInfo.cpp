@@ -866,3 +866,30 @@ bool CGlobalInfo::DNSDecodeString(const char *pszDNSEncodeName, char *pszDomainN
 	*puDNSEncodeNameLen = uDNSEncodeLen +1;
 	return true;
 }
+
+int CGlobalInfo::FindSubNum(char* pStr, char* pSubstr)
+{
+	int nCount = -1;
+	char *p, *q = NULL;
+
+	while (*pStr != '\0')
+	{
+		p = pStr;
+		q = pSubstr;
+
+		while ((*p == *q) && (*p != '\0') && (*q != '\0'))
+		{
+			p++;
+			q++;
+		}
+
+		if (*q == '\0')
+		{
+			nCount == -1 ? nCount = 1 : nCount++;
+		}
+
+		pStr++;
+	}
+
+	return nCount;
+}
