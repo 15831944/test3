@@ -18,6 +18,9 @@ public:
 	time_t				SystemTimeToTime(SYSTEMTIME st);
 	time_t				SystemTimeToTimeEx(const SYSTEMTIME& st);
 
+	time_t				FileTimeToTime(FILETIME fileTime);
+	SYSTEMTIME			FileTimeToSystemTime(FILETIME fileTime);
+
 	SYSTEMTIME			TimeToSystemTime(time_t t);
 	SYSTEMTIME			TimeToSystemTimeEx(time_t t);
 	

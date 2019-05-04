@@ -162,9 +162,9 @@ BOOL update_file_data::EnumFileInfo(const char *pszShellPath, std::vector<UPDATE
 
 				pFileInfo->uiFileSize = (fd.nFileSizeHigh*(MAXDWORD+1)) + fd.nFileSizeLow;
 				pFileInfo->uiFileAttrib = fd.dwFileAttributes;
-				pFileInfo->time_create = static_cast<__int64>(fd.ftCreationTime.dwHighDateTime)<<32 | fd.ftCreationTime.dwLowDateTime;
-				pFileInfo->time_access = static_cast<__int64>(fd.ftLastAccessTime.dwHighDateTime)<<32 | fd.ftLastAccessTime.dwLowDateTime;
-				pFileInfo->time_write  = static_cast<__int64>(fd.ftLastWriteTime.dwHighDateTime)<<32 | fd.ftLastWriteTime.dwLowDateTime;
+				pFileInfo->time_create = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftCreationTime);
+				pFileInfo->time_access = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftLastAccessTime);
+				pFileInfo->time_write = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftLastWriteTime);
 
 				sprintf(pFileInfo->szFileName, _T("%s"), fd.cFileName);
 				sprintf(pFileInfo->szParentPath, _T("%s"), pszShellPath);
@@ -358,12 +358,16 @@ std::string update_file_func::GetDateName(LPCTSTR lpszFileName, UPDATE_FILEDATA 
 {
 	BOOL bRet = FALSE;
 
-	std::string strDateName;
-	std::stringstream stream;
-
 	time_t time;
-	char szFormat[MAX_PATH] = {0};	//MAXDWORD	//Int64ShrlMod32
-
+	int nIndex = 0;
+	
+	std::string strDateName;
+	std::string strFileName;
+	std::string strFilePath;
+	
+	char szFormat[MAX_PATH] = {0};
+	char szDateBuffer[MAX_PATH] = {0};	//MAXDWORD	//Int64ShrlMod32
+	
 	do 
 	{
 		if (pFileData == NULL
@@ -394,29 +398,64 @@ std::string update_file_func::GetDateName(LPCTSTR lpszFileName, UPDATE_FILEDATA 
 
 		if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT1TYPE)
 		{
-			strftime(szFormat, sizeof(szFormat), _T("%Y%m%d%H%M%S"), localtime(&time));
-			stream<<szFormat<<endl;
+			strftime(szDateBuffer, sizeof(szDateBuffer), _T("%Y%m%d%H%M%S"), localtime(&time));
+			sprintf(szFormat, _T("%s"), szDateBuffer);
 		}
 		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT2TYPE)
 		{
-			strftime(szFormat, sizeof(szFormat), _T("%Y-%m-%d %H%M%S"), localtime(&time));
+			strftime(szDateBuffer, sizeof(szDateBuffer), _T("%Y-%m-%d %H%M%S"), localtime(&time));
+			sprintf(szFormat, _T("%s"), szDateBuffer);
 		}
 		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT3TYPE)
 		{
-			strftime(szFormat, sizeof(szFormat), _T("%Y-%m-%d"), localtime(&time));
+			strftime(szDateBuffer, sizeof(szDateBuffer), _T("%Y-%m-%d"), localtime(&time));
+			sprintf(szFormat, _T("%s"), szDateBuffer);
 		}
 		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT4TYPE)
 		{
-			strftime(szFormat, sizeof(szFormat), _T("%Y年%m月%d日%H时%M分%S秒"), localtime(&time));
+			strftime(szDateBuffer, sizeof(szDateBuffer), _T("%Y年%m月%d日%H时%M分%S秒"), localtime(&time));
+			sprintf(szFormat, _T("%s"), szDateBuffer);
 		}
 		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT5TYPE)
 		{
-			strftime(szFormat, sizeof(szFormat), _T("%y年%m月%d日%H时%M分%S秒"), localtime(&time));
+			strftime(szDateBuffer, sizeof(szDateBuffer), _T("%y年%m月%d日%H时%M分%S秒"), localtime(&time));
+			sprintf(szFormat, _T("%s"), szDateBuffer);
 		}
 		else if (pFileData->stcDateFileName.emDateFormat == DATE_FORMAT6TYPE)
 		{
+			strftime(szDateBuffer, sizeof(szDateBuffer), _T("%Y%m%d%H%M%S"), localtime(&time));
+			sprintf(szFormat, _T("<%s>%s"), lpszFileName, szDateBuffer);
+		} 
+
+		strDateName = szFormat;
+
+		sprintf(szFormat, _T("%s%s"), strDateName.c_str(), pFileData->stcFileInfo.szFileExt);
+		strFileName = szFormat;
+
+		sprintf(szFormat, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, strFileName.c_str());
+		strFilePath = szFormat;
+
+		if ((_access(strFilePath.c_str(), 0)) != -1)
+		{
+			while (++nIndex)
+			{
+				sprintf(szFormat, _T("%s_%02d%s"), strDateName.c_str(), nIndex, pFileData->stcFileInfo.szFileExt);
+				strFileName = szFormat;
+
+				sprintf(szFormat, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, strFileName.c_str());
+				strFilePath = szFormat;
+
+				if ((_access(strFilePath.c_str(), 0)) != -1)
+				{
+					continue;
+				}
+
+				sprintf(szFormat, _T("%s_%02d"), strDateName.c_str(), nIndex);
+				strDateName = szFormat;
+				break;
+			};
 		}
-		
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -652,6 +691,13 @@ BOOL update_file_func::SetDateFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FI
 			bRet = FALSE;
 			break;
 		}
+
+		sprintf(szFileNewName, _T("%s"), strDateName.c_str());
+		
+		sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
+		sprintf(szNewFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileNewName, pFileData->stcFileInfo.szFileExt);
+
+		rename(szOldFilePath, szNewFilePath);
 
 		bRet = TRUE;
 	} while (FALSE);

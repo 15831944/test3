@@ -345,7 +345,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Contrib\CheckLinkThread.cpp" />
     <ClCompile Include="Contrib\update_file_name.cpp" />
     <ClCompile Include="contrib\variable_test.cpp" />
     <ClCompile Include="Control\Button\DrawButton.cpp" />
@@ -353,7 +352,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Control\ListBox\DrawListBox.cpp" />
     <ClCompile Include="Control\ListBox\UserListBox.cpp" />
     <ClCompile Include="Control\ListCtrl\ReportCtrl.cpp" />
-    <ClCompile Include="Control\TreeCtrl\ShellCtrlClass.cpp" />
     <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp" />
     <ClCompile Include="Dialog\ChildWnd\DlgTest1Wnd.cpp" />
     <ClCompile Include="Dialog\ChildWnd\DlgTest2Wnd.cpp" />
@@ -375,11 +373,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Inc\audio\waveoutdevice.cpp" />
     <ClCompile Include="Inc\audio\waveplayer.cpp" />
     <ClCompile Include="Inc\common\Character.cpp" />
-    <ClCompile Include="Inc\common\ETSLayout.cpp" />
     <ClCompile Include="Inc\common\FileFunc.cpp" />
-    <ClCompile Include="Inc\common\ResizableDialog.cpp" />
-    <ClCompile Include="Inc\common\ResizeCtrl.cpp" />
-    <ClCompile Include="Inc\common\ShellClass.cpp" />
     <ClCompile Include="Inc\GlobalInfo.cpp" />
     <ClCompile Include="Inc\PubClass.cpp" />
     <ClCompile Include="Inc\video\gdi_wnd_draw_video.cpp" />
@@ -393,7 +387,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Contrib\CheckLinkThread.h" />
     <ClInclude Include="Contrib\update_file_name.h" />
     <ClInclude Include="contrib\variable_test.h" />
     <ClInclude Include="Control\Button\DrawButton.h" />
@@ -401,7 +394,6 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Control\ListBox\DrawListBox.h" />
     <ClInclude Include="Control\ListBox\UserListBox.h" />
     <ClInclude Include="Control\ListCtrl\ReportCtrl.h" />
-    <ClInclude Include="Control\TreeCtrl\ShellCtrlClass.h" />
     <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h" />
     <ClInclude Include="Dialog\ChildWnd\DlgTest1Wnd.h" />
     <ClInclude Include="Dialog\ChildWnd\DlgTest2Wnd.h" />
@@ -425,11 +417,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Inc\audio\waveoutdevice.hpp" />
     <ClInclude Include="Inc\audio\waveplayer.h" />
     <ClInclude Include="Inc\common\Character.h" />
-    <ClInclude Include="Inc\common\ETSLayout.h" />
     <ClInclude Include="Inc\common\FileFunc.h" />
-    <ClInclude Include="Inc\common\ResizableDialog.h" />
-    <ClInclude Include="Inc\common\ResizeCtrl.h" />
-    <ClInclude Include="Inc\common\ShellClass.h" />
     <ClInclude Include="Inc\GlobalInfo.h" />
     <ClInclude Include="Inc\PubClass.h" />
     <ClInclude Include="Inc\video\gdi_wnd_draw_video.h" />

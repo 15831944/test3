@@ -99,19 +99,7 @@
     <ClCompile Include="Inc\common\Character.cpp">
       <Filter>Inc\common</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\common\ETSLayout.cpp">
-      <Filter>Inc\common</Filter>
-    </ClCompile>
     <ClCompile Include="Inc\common\FileFunc.cpp">
-      <Filter>Inc\common</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\ResizableDialog.cpp">
-      <Filter>Inc\common</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\ResizeCtrl.cpp">
-      <Filter>Inc\common</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\ShellClass.cpp">
       <Filter>Inc\common</Filter>
     </ClCompile>
     <ClCompile Include="Control\ComboBox\CustomCombox.cpp">
@@ -126,17 +114,11 @@
     <ClCompile Include="Control\ListBox\UserListBox.cpp">
       <Filter>Control\ListBox</Filter>
     </ClCompile>
-    <ClCompile Include="Control\TreeCtrl\ShellCtrlClass.cpp">
-      <Filter>Control\TreeCtrl</Filter>
-    </ClCompile>
     <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp">
       <Filter>Control\WndCtrl</Filter>
     </ClCompile>
     <ClCompile Include="Control\ListCtrl\ReportCtrl.cpp">
       <Filter>Control\ListCtrl</Filter>
-    </ClCompile>
-    <ClCompile Include="Contrib\CheckLinkThread.cpp">
-      <Filter>Contrib</Filter>
     </ClCompile>
     <ClCompile Include="Contrib\update_file_name.cpp">
       <Filter>Contrib</Filter>
@@ -233,19 +215,7 @@
     <ClInclude Include="Inc\common\Character.h">
       <Filter>Inc\common</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\common\ETSLayout.h">
-      <Filter>Inc\common</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\common\FileFunc.h">
-      <Filter>Inc\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\ResizableDialog.h">
-      <Filter>Inc\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\ResizeCtrl.h">
-      <Filter>Inc\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\ShellClass.h">
       <Filter>Inc\common</Filter>
     </ClInclude>
     <ClInclude Include="Control\ComboBox\CustomCombox.h">
@@ -260,17 +230,11 @@
     <ClInclude Include="Control\ListBox\UserListBox.h">
       <Filter>Control\ListBox</Filter>
     </ClInclude>
-    <ClInclude Include="Control\TreeCtrl\ShellCtrlClass.h">
-      <Filter>Control\TreeCtrl</Filter>
-    </ClInclude>
     <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h">
       <Filter>Control\WndCtrl</Filter>
     </ClInclude>
     <ClInclude Include="Control\ListCtrl\ReportCtrl.h">
       <Filter>Control\ListCtrl</Filter>
-    </ClInclude>
-    <ClInclude Include="Contrib\CheckLinkThread.h">
-      <Filter>Contrib</Filter>
     </ClInclude>
     <ClInclude Include="Contrib\update_file_name.h">
       <Filter>Contrib</Filter>

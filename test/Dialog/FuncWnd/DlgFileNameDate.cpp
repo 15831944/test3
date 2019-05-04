@@ -321,7 +321,7 @@ BOOL CDlgFileNameDate::SetConfigData()
 			pComboBoxDateFormat->GetLBText(dwIndex, strDateFormat);
 
 			dwValue = pComboBoxDateFormat->GetItemData(dwIndex);
-			m_stConfigData.stcDateFileName.emDateFormat = (UPDATE_FORMATTYPE)dwValue;
+			m_stConfigData.stcDateFileName.emDateFormat = (UPDATE_DATEFORMATTYPE)dwValue;
 		}
 
 		pComboBoxFileProPerty = (CComboBox*)GetDlgItem(IDC_COMBO_FILEPROPERTY);

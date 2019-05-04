@@ -65,6 +65,27 @@ time_t CGlobalInfo::SystemTimeToTimeEx(const SYSTEMTIME& st)
 	return mktime(&temptm);
 }
 
+time_t CGlobalInfo::FileTimeToTime(FILETIME fileTime)
+{
+	ULARGE_INTEGER ui;
+	ui.LowPart = fileTime.dwLowDateTime;
+	ui.HighPart = fileTime.dwHighDateTime;
+
+	LONGLONG nLL;
+	nLL = (fileTime.dwHighDateTime << 32) + fileTime.dwLowDateTime;
+
+	time_t pt = (long)((LONGLONG)(ui.QuadPart - 116444736000000000) / 10000000);
+	return pt;
+}
+
+SYSTEMTIME CGlobalInfo::FileTimeToSystemTime(FILETIME fileTime)
+{
+	SYSTEMTIME pst;
+	::FileTimeToSystemTime(&fileTime, &pst);
+
+	return pst;
+}
+
 SYSTEMTIME CGlobalInfo::TimeToSystemTime(time_t t)
 {
 	LONGLONG nLL = Int32x32To64(t, 10000000) + 116444736000000000;
@@ -74,7 +95,7 @@ SYSTEMTIME CGlobalInfo::TimeToSystemTime(time_t t)
 	ft.dwHighDateTime = (DWORD)(nLL >> 32);
 
 	SYSTEMTIME pst;
-	FileTimeToSystemTime(&ft, &pst);
+	::FileTimeToSystemTime(&ft, &pst);
 
 	return pst;
 }

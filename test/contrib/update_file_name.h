@@ -35,7 +35,17 @@ typedef enum {
 	DATE_FORMAT4TYPE,										//yyyy年mm月dd日hh时mm分ss秒
 	DATE_FORMAT5TYPE,										//yy年m月d日h时m分s秒
 	DATE_FORMAT6TYPE,										//<SELF>-yyyymmddhhmmss
-}UPDATE_FORMATTYPE;
+}UPDATE_DATEFORMATTYPE;
+
+typedef enum
+{
+	INDEX_FORMATEMPTYTYPE = 0,
+	INDEX_FORMAT1TYPE,
+	INDEX_FORMAT2TYPE,
+	INDEX_FORMAT3TYPE,
+	INDEX_FORMAT4TYPE,
+	INDEX_FORMAT5TYPE,
+}UPDATE_INDEXFORMATTYPE;
 
 typedef struct {
 	unsigned int				uiFileSize;					//文件大小
@@ -57,7 +67,7 @@ typedef struct {
 typedef struct {
 	bool						bIsReadExif;
 	UPDATE_DATETYPE				emDateType;
-	UPDATE_FORMATTYPE			emDateFormat;
+	UPDATE_DATEFORMATTYPE		emDateFormat;
 }UPDATE_DATEFILENAME;
 
 typedef struct {
@@ -76,7 +86,7 @@ typedef struct {
 	int							iBit;						//序号位数;
 	int							iStartIndex;				//开始序号;
 	int							iEndIndex;					//结束序号;
-	char						szIndexFormat[MAX_PATH];	//序号格式;
+	UPDATE_INDEXFORMATTYPE		emIndexFormat;				//序号格式;	
 }UPDATE_INDEXFILENAME;
 
 typedef struct {
