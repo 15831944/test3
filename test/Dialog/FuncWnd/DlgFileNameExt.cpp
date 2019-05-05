@@ -273,7 +273,7 @@ BOOL CDlgFileNameExt::SetConfigData()
 			sprintf(m_stConfigData.stcExtFileName.szExtName, _T("%s"), strNameChar);
 		}
 
-		if (((CButton *)GetDlgItem(IDC_CHECK_Uppercase))->GetCheck() == 1)
+		if (((CButton *)GetDlgItem(IDC_CHECK_UPPERCASE))->GetCheck() == 1)
 		{
 			m_stConfigData.stcExtFileName.bIsUppercase = TRUE;
 		}

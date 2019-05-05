@@ -19,6 +19,7 @@
 #define IDD_FILENAMEDATE_DIALOG         0x0123
 #define IDD_FILENAMEINDEX_DIALOG        0x0124
 #define IDD_FILENAMEREPLACE_DIALOG      0x0125
+
 #define IDR_MAINFRAME                   0x0200
 #define IDI_ICON1                       0x0201
 #define IDI_ICON2                       0x0202
@@ -28,49 +29,32 @@
 #define IDB_BITMAP3                     0x0213
 #define IDB_BITMAP4                     0x0214
 #define IDB_BITMAP5                     0x0215
-#define IDC_SPIN_ENDINDEX               1040
-#define IDC_SPIN_SPANINDEX              1040
-#define IDC_COMBO_INDEXFORMAT           1041
-#define IDC_COMBO_FILEPROPERTY          1042
-#define IDC_EDIT_NAMESRCCHAR            1042
-#define IDC_SPIN_BITINDEX               1042
-#define IDC_EDIT_NAMEDESCCHAR           1043
-#define IDC_CHECK_REVERSE               1044
-#define IDC_EDIT_SPANINDEX              1044
-#define IDC_EDIT_INDEXBIT               1045
-#define IDC_EDIT_NAMECHAR               1047
-#define IDC_EDIT_NAMEINDEX              1048
-#define IDC_SPIN_NAMEINDEX              1049
-#define IDC_CHECK_REGEX                 1050
-#define IDC_COMBO_DATEFORMAT            1051
-#define IDC_CHECK_READEXIF              1052
-#define IDC_EDIT_NAMECOUNT              1053
-#define IDC_CHECK_Uppercase             1055
-#define IDC_EDIT_NEWINDEX               1056
-#define IDC_SPIN_REMOVEINDEX            1058
-#define IDC_SPIN_STARTINDEX             1059
-#define IDC_BUTTON1                     1060
-#define IDC_SPIN_NEWINDEX               1061
-#define IDC_TAB1                        0x1000
+
+//Dialog
+#define IDC_TABCTRL                     0x1000
 #define IDC_STATIC_VERSION              0x1001
-#define IDC_LIST1_SHOWINFO              0x1100
-#define IDC_TREE2_SYSDIR                0x1200
-#define IDC_LIST2_SYSDIR                0x1201
-#define IDC_COMBO2_EVALNAME             0x1202
-#define IDC_BTN2_OPENFLODER             0x1203
-#define IDC_BTN2_RUNMODIFY              0x1204
-#define IDC_STATIC2_RECT                0x1205
-#define IDC_BTN3_TEST1                  0x1300
-#define IDC_BTN3_TEST2                  0x1301
-#define IDC_BTN3_TEST3                  0x1302
-#define IDC_COMBO3_ENUMDEVICE           0x1303
-#define IDC_STATIC3_VIDEO               0x1304
-#define IDC_BTN4_TEST1                  0x1400
-#define IDC_BTN4_TEST2                  0x1401
-#define IDC_BTN4_TEST3                  0x1402
-#define IDC_BTN4_TEST4                  0x1403
-#define IDC_LIST4_SHOWINFO              0x1404
-#define IDC_LIST5_SHOWINFO              0x1500
+#define IDC_BTN_TEST1					0x1002
+#define IDC_BTN_TEST2					0x1003
+#define IDC_BTN_TEST3					0x1004
+#define IDC_BTN_TEST4					0x1005
+#define IDC_LIST_SHOWINFO				0x1010
+
+//Dialog test2
+#define IDC_STATIC_RECT					0x1200
+#define IDC_TREE_SYSDIR					0x1201
+#define IDC_LIST_SYSDIR					0x1202
+#define IDC_COMBO_EVALNAME				0x1203
+#define IDC_BTN_OPENFLODER				0x1204
+#define IDC_BTN_RUNMODIFY				0x1205
+
+//Dialog test3
+#define IDC_STATIC_VIDEO				0x1304
+#define IDC_COMBO_ENUMDEVICE			0x1303
+
+//Dialog test4
+//Dialog test5
+
+//Menu
 #define ID_MENU_GLOBALTHRESHOLD         0x2100
 #define ID_MENU_LOCALTHRESHOLD          0x2101
 #define ID_MENU_GRABCUT_TEST            0x2102
@@ -79,13 +63,39 @@
 #define ID_MENU_TESSERACT_OCR           0x2105
 #define ID_MENU_BARCODE_DEMO            0x2106
 
+//
+#define IDC_CHECK_REVERSE               0x2140
+#define IDC_CHECK_REGEX                 0x2141
+#define IDC_CHECK_UPPERCASE             0x2142
+#define IDC_CHECK_READEXIF              0x2143
+#define IDC_CHECK_RECOUNTER				0x2144
+
+#define IDC_SPIN_NAMEINDEX              0x2150
+#define IDC_SPIN_REMOVEINDEX            0x2151
+#define IDC_SPIN_STARTINDEX             0x2152
+#define IDC_SPIN_NEWINDEX               0x2153
+#define IDC_SPIN_SPANINDEX              0x2154
+#define IDC_SPIN_BITINDEX               0x2155
+
+#define IDC_EDIT_NAMECHAR               0x2160
+#define IDC_EDIT_NAMEINDEX              0x2161
+#define IDC_EDIT_NAMECOUNT              0x2162
+#define IDC_EDIT_NEWINDEX               0x2163
+#define IDC_EDIT_SPANINDEX              0x2164
+#define IDC_EDIT_INDEXBIT               0x2165
+#define IDC_EDIT_NAMESRCCHAR            0x2166
+#define IDC_EDIT_NAMEDESCCHAR           0x2167
+
+#define IDC_COMBO_DATEFORMAT            0x2180
+#define IDC_COMBO_FILEPROPERTY          0x2181
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        159
 #define _APS_NEXT_COMMAND_VALUE         32807
-#define _APS_NEXT_CONTROL_VALUE         1062
+#define _APS_NEXT_CONTROL_VALUE         0x2182
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

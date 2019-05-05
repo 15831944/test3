@@ -14,11 +14,10 @@ CDlgTest1Wnd::~CDlgTest1Wnd()
 void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST1_SHOWINFO,	m_ListBox);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
-	ON_BN_CLICKED(IDC_BTN2_OPENFLODER,		OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BTN_OPENFLODER,		OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////

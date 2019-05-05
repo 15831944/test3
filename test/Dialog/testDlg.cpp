@@ -82,7 +82,7 @@ CTestDlg::~CTestDlg()
 void CTestDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_TAB1, m_hTabCtrl);
+	DDX_Control(pDX, IDC_TABCTRL, m_hTabCtrl);
 }
 
 BEGIN_MESSAGE_MAP(CTestDlg, CDialog)
@@ -90,7 +90,7 @@ BEGIN_MESSAGE_MAP(CTestDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1,OnTcnSelchangeTabWndctrl)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL,OnTcnSelchangeTabWndctrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -186,11 +186,11 @@ void CTestDlg::Init()
 
 void CTestDlg::InitCtrl()
 {
-	m_hDlgTest1Wnd.Create(IDD_DIALOG1, GetDlgItem(IDC_TAB1));
-	m_hDlgTest2Wnd.Create(IDD_DIALOG2, GetDlgItem(IDC_TAB1));
-	m_hDlgTest3Wnd.Create(IDD_DIALOG3, GetDlgItem(IDC_TAB1));
-	m_hDlgTest4Wnd.Create(IDD_DIALOG4, GetDlgItem(IDC_TAB1));
-	m_hDlgTest5Wnd.Create(IDD_DIALOG5, GetDlgItem(IDC_TAB1));
+	m_hDlgTest1Wnd.Create(IDD_DIALOG1, GetDlgItem(IDC_TABCTRL));
+	m_hDlgTest2Wnd.Create(IDD_DIALOG2, GetDlgItem(IDC_TABCTRL));
+	m_hDlgTest3Wnd.Create(IDD_DIALOG3, GetDlgItem(IDC_TABCTRL));
+	m_hDlgTest4Wnd.Create(IDD_DIALOG4, GetDlgItem(IDC_TABCTRL));
+	m_hDlgTest5Wnd.Create(IDD_DIALOG5, GetDlgItem(IDC_TABCTRL));
 
 	m_pArPage.Add(&m_hDlgTest1Wnd);
 	m_pArPage.Add(&m_hDlgTest2Wnd);

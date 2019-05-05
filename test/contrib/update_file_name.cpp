@@ -1021,16 +1021,24 @@ BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_F
 {
 	BOOL bRet = FALSE;
 
+	int nIndex = -1;
+	int nAddIndex = -1;
+
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
+	unsigned int uiBit = 0;
 	unsigned int uiOffset = 0;
 
 	char *p = NULL;
 	char *ptr = NULL;
 	char *pFileName = NULL;
 
+	char szDataBuffer[MAX_PATH] = {0};
 	char szFileOldName[MAX_PATH] = {0};
 	char szFileNewName[MAX_PATH] = {0};
+
+	char szOldFilePath[MAX_PATH] = {0};
+	char szNewFilePath[MAX_PATH] = {0};
 
 	do 
 	{
@@ -1045,20 +1053,76 @@ BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_F
 		{
 			uiPos = strlen(pFileData->stcFileInfo.szFileName);
 			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
-
 			pFileName = pFileData->stcFileInfo.szFileName;
 		}
 		else
 		{
 			uiPos = ptr - pFileData->stcFileInfo.szFileName;
 			memcpy(szFileOldName, pFileData->stcFileInfo.szFileName, uiPos);
-
 			pFileName = szFileOldName;
 		}
 
 		uiLen = strlen(pFileName);	//名称长度
+		nAddIndex = pFileData->stcIndexFileName.nIndex;	//待添加的位置
 
-		bRet = TRUE;
+		if (nAddIndex >= 0)
+		{//字符正向处理
+			uiPos = 0;
+			nIndex = 0;
+
+			p = pFileName;
+			while (*p != '\0')
+			{
+				if ((*p&0x80) && (*(p+1)&0x80))
+				{//汉字
+					uiBit = 2;
+				}
+				else
+				{//ASCII码
+					uiBit = 1;
+				}
+
+
+			}
+		}
+		else
+		{//字符反向处理
+			uiPos = 0;
+			nIndex = uiLen;
+
+			p = pFileName + uiLen;
+			while (nIndex > 0)
+			{
+				if (nIndex >= 2)
+				{
+					if ((*(p-1)&0x80) && (*(p-2)&0x80))
+					{//汉字
+						uiBit = 2;
+					}
+					else
+					{//ASCII码
+						uiBit = 1;
+					}
+				}
+				else
+				{//ASCII码
+					uiBit = 1;
+				}
+
+				p -= uiBit;
+				uiPos += uiBit;
+
+
+			}
+		}
+
+		if (bRet)
+		{
+			sprintf(szOldFilePath, _T("%s\\%s%s"), pFileData->stcFileInfo.szParentPath, szFileOldName, pFileData->stcFileInfo.szFileExt);
+			sprintf(szNewFilePath, _T("%s\\%s"), pFileData->stcFileInfo.szParentPath, szFileNewName);
+
+			rename(szOldFilePath, szNewFilePath);
+		}
 	} while (FALSE);
 
 	return bRet;

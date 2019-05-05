@@ -19,11 +19,11 @@ void CDlgTest3Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest3Wnd, CDialog)
-	ON_BN_CLICKED(IDC_BTN3_TEST1,			OnBnClickedBtnTest1)
-	ON_BN_CLICKED(IDC_BTN3_TEST2,			OnBnClickedBtnTest2)
-	ON_BN_CLICKED(IDC_BTN3_TEST3,			OnBnClickedBtnTest3)
+	ON_BN_CLICKED(IDC_BTN_TEST1,			OnBnClickedBtnTest1)
+	ON_BN_CLICKED(IDC_BTN_TEST2,			OnBnClickedBtnTest2)
+	ON_BN_CLICKED(IDC_BTN_TEST3,			OnBnClickedBtnTest3)
 
-	ON_CBN_SELCHANGE(IDC_COMBO3_ENUMDEVICE,	OnCbnSelchangeComboEnumdevice)
+	ON_CBN_SELCHANGE(IDC_COMBO_ENUMDEVICE,	OnCbnSelchangeComboEnumdevice)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -38,14 +38,14 @@ BOOL CDlgTest3Wnd::OnInitDialog()
 void CDlgTest3Wnd::OnBnClickedBtnTest1()
 {
 	CRect rect1;
-	GetDlgItem(IDC_STATIC3_VIDEO)->GetClientRect(&rect1);
+	GetDlgItem(IDC_STATIC_VIDEO)->GetClientRect(&rect1);
 
 #if (OPENGL_DRAW_WND_VIDEO == 1)
 	m_openglDrawVideo.SetProcTimeOver(50);
-	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PTORGB24_TYPE, rect1, GetDlgItem(IDC_STATIC3_VIDEO)->GetSafeHwnd());
+	m_openglDrawVideo.CreateGLContext(FRAME_YUV420PTORGB24_TYPE, rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());
 #else
 	m_gdiDrawVideo.SetProcTimeOver(50);
-	m_gdiDrawVideo.CreateVideoProc(&rect1, GetDlgItem(IDC_STATIC3_VIDEO)->GetSafeHwnd());m_gdiDrawVideo.SetProcState();
+	m_gdiDrawVideo.CreateVideoProc(&rect1, GetDlgItem(IDC_STATIC_VIDEO)->GetSafeHwnd());m_gdiDrawVideo.SetProcState();
 #endif
 }
 
@@ -57,7 +57,7 @@ void CDlgTest3Wnd::OnBnClickedBtnTest2()
 	m_gdiDrawVideo.CloseVideoProc();
 #endif
 
-	GetDlgItem(IDC_STATIC3_VIDEO)->Invalidate(TRUE);
+	GetDlgItem(IDC_STATIC_VIDEO)->Invalidate(TRUE);
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnTest3()

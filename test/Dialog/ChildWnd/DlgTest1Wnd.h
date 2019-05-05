@@ -23,7 +23,4 @@ protected:
 protected:
 	BOOL					InitCtrl();
 	BOOL					InitInfo();
-
-protected:
-	CListBox				m_ListBox;		//CDragListBox
 };

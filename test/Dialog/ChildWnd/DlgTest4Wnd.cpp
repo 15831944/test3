@@ -19,10 +19,10 @@ void CDlgTest4Wnd::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgTest4Wnd, CDialog)
 	ON_WM_PAINT()
 
-	ON_BN_CLICKED(IDC_BTN4_TEST1,				OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BTN4_TEST2,				OnBnClickedButton2)
-	ON_BN_CLICKED(IDC_BTN4_TEST3,				OnBnClickedButton3)
-	ON_BN_CLICKED(IDC_BTN4_TEST4,				OnBnClickedButton4)
+	ON_BN_CLICKED(IDC_BTN_TEST1,				OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BTN_TEST2,				OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BTN_TEST3,				OnBnClickedButton3)
+	ON_BN_CLICKED(IDC_BTN_TEST4,				OnBnClickedButton4)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////

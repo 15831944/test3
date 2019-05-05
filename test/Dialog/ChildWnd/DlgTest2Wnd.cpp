@@ -30,9 +30,9 @@ void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_TREE2_SYSDIR,			m_hSysDirTree);
-	DDX_Control(pDX, IDC_LIST2_SYSDIR,			m_hSysDirList);
-	DDX_Control(pDX, IDC_COMBO2_EVALNAME,		m_hComboEval);
+	DDX_Control(pDX, IDC_TREE_SYSDIR,			m_hSysDirTree);
+	DDX_Control(pDX, IDC_LIST_SYSDIR,			m_hSysDirList);
+	DDX_Control(pDX, IDC_COMBO_EVALNAME,		m_hComboEval);
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest2Wnd, CDialog)
@@ -44,11 +44,11 @@ BEGIN_MESSAGE_MAP(CDlgTest2Wnd, CDialog)
 	ON_WM_SIZE()
 	ON_WM_SHOWWINDOW()
 
-	ON_BN_CLICKED(IDC_BTN2_RUNMODIFY,			OnBnClickedButtonRun)
-	ON_BN_CLICKED(IDC_BTN2_OPENFLODER,			OnBnClickedBtnOpenFloder)
+	ON_BN_CLICKED(IDC_BTN_RUNMODIFY,			OnBnClickedButtonRun)
+	ON_BN_CLICKED(IDC_BTN_OPENFLODER,			OnBnClickedBtnOpenFloder)
 
-	ON_CBN_SELCHANGE(IDC_COMBO2_EVALNAME,		OnCbnSelchangeComboEvalname)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE2_SYSDIR,	OnTvnSelchangedTree)
+	ON_CBN_SELCHANGE(IDC_COMBO_EVALNAME,		OnCbnSelchangeComboEvalname)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_SYSDIR,	OnTvnSelchangedTree)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -632,8 +632,8 @@ BOOL CDlgTest2Wnd::SetChildWnd(BOOL bFlag)
 			m_hComboEval.InsertString(nIndex, _T("ÎÄ¼þÃûÐòºÅ..."));
 			m_hComboEval.SetItemData(nIndex++, CONFIG_INDEXFILENAME_TYPE);
 
-			GetDlgItem(IDC_STATIC2_RECT)->GetWindowRect(&rcSubWnd);
-			GetDlgItem(IDC_STATIC2_RECT)->ShowWindow(SW_HIDE);
+			GetDlgItem(IDC_STATIC_RECT)->GetWindowRect(&rcSubWnd);
+			GetDlgItem(IDC_STATIC_RECT)->ShowWindow(SW_HIDE);
 			ScreenToClient(&rcSubWnd);
 
 			for (nIndex=0; nIndex<m_pArPage.GetSize(); nIndex++)

@@ -148,6 +148,9 @@ BOOL CDlgFileNameIndex::InitInfo()
 
 	do 
 	{
+		m_stConfigData.emConfigType = CONFIG_INDEXFILENAME_TYPE;
+		m_stConfigData.emUpdateStatus = STATE_EMPTYTYPE;
+
 		bRet = TRUE;
 	} while (FALSE);
 
@@ -177,6 +180,22 @@ BOOL CDlgFileNameIndex::InitWndInfo()
 
 	do 
 	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_NAMEINDEX));
+		if (pEditChar != NULL && pSpinCtrl != NULL)
+		{
+			dwStyle = pEditChar->GetStyle();
+			::SetWindowLong(pEditChar->GetSafeHwnd(), GWL_STYLE, dwStyle|ES_NUMBER);
+
+			pSpinCtrl->SetBuddy(pEditChar);
+			pSpinCtrl->SetRange(0, 255);
+
+			pSpinCtrl->SetBase(1);
+			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
+		}
+
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NEWINDEX));
 		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_NEWINDEX));
 		if (pEditChar != NULL && pSpinCtrl != NULL)
@@ -283,6 +302,136 @@ BOOL CDlgFileNameIndex::DrawWndImage(CDC *pDC)
 	return bRet;
 }
 
+BOOL CDlgFileNameIndex::SetConfigData()
+{
+	BOOL bRet = FALSE;
+
+	int nIndex = -1;
+	int nNewIndex = -1;
+
+	int nSpan = -1;
+	int nBit = -1;
+
+	CString strNameIndex;
+	CString strSpan;
+	CString strBit;
+
+	CEdit *pEditChar = NULL;
+	CSpinButtonCtrl *pSpinCtrl = NULL;
+
+	do 
+	{
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NEWINDEX));	//ÐÂ±àºÅ
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameIndex);
+			if (strNameIndex == _T(""))
+			{
+				nNewIndex = 0;
+			}
+			else
+			{
+				nNewIndex = atoi(strNameIndex.GetBuffer(0));
+			}
+
+			m_stConfigData.stcIndexFileName.nNewIndex = nNewIndex;
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_SPANINDEX));	//¼ä¸ô
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strSpan);
+			if (strSpan == _T(""))
+			{
+				nSpan = 0;
+			}
+			else
+			{
+				nSpan = atoi(strSpan.GetBuffer(0));
+			}
+
+			m_stConfigData.stcIndexFileName.nSpan = nSpan;
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_INDEXBIT));	//±àºÅÎ»Êý
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strBit);
+			if (strBit == _T(""))
+			{
+				nBit = 0;
+			}
+			else
+			{
+				nBit = atoi(strBit.GetBuffer(0));
+			}
+
+			m_stConfigData.stcIndexFileName.nBit = nBit;
+		}
+
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));	//ÐòºÅÎ»ÖÃ
+		if (pEditChar == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		else
+		{
+			pEditChar->GetWindowText(strNameIndex);
+			if (strNameIndex == _T(""))
+			{
+				nIndex = 0;
+			}
+			else
+			{
+				nIndex = atoi(strNameIndex.GetBuffer(0));
+			}
+		}
+
+		if (((CButton *)GetDlgItem(IDC_CHECK_REVERSE))->GetCheck() == 1)
+		{
+			if (nIndex > 0)
+			{
+				nIndex = ~nIndex+1;
+			}
+			else
+			{
+				nIndex = 0;
+			}
+		}
+
+		m_stConfigData.stcIndexFileName.nIndex = nIndex;
+
+		if (((CButton *)GetDlgItem(IDC_CHECK_RECOUNTER))->GetCheck() == 1)
+		{
+			m_stConfigData.stcIndexFileName.bIsReCounter = TRUE;
+		}
+		else
+		{
+			m_stConfigData.stcIndexFileName.bIsReCounter = FALSE;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 BOOL CDlgFileNameIndex::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
@@ -291,6 +440,20 @@ BOOL CDlgFileNameIndex::GetWndAddData(UPDATE_FILEDATA *pUpdateData)
 
 	do 
 	{
+		if (pUpdateData == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!SetConfigData())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		memcpy(pUpdateData, &m_stConfigData, sizeof(UPDATE_FILEDATA));
+
 		bRet = TRUE;
 	} while (FALSE);
 

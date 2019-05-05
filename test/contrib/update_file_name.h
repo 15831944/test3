@@ -60,7 +60,7 @@ typedef struct {
 }UPDATE_FILEINFO;
 
 typedef struct {
-	int							nIndex;						//文件名添加的索引, iIndex<0为从末尾开始添加;
+	int							nIndex;						//文件名添加的索引, nIndex<0为从末尾开始添加;
 	char						szFileName[MAX_PATH];		//文件名新添加的字符名;
 }UPDATE_ADDFILENAME;
 
@@ -71,7 +71,7 @@ typedef struct {
 }UPDATE_DATEFILENAME;
 
 typedef struct {
-	int							nIndex;						//删除字符开始位置, iIndex<0为从末尾开始删除;
+	int							nIndex;						//删除字符开始位置, nIndex<0为从末尾开始删除;
 	int							nCount;						//删除字符的个数;
 	char						szFileName[MAX_PATH];		//文件名中待删除的字符名;
 }UPDATE_DELFILENAME;
@@ -82,11 +82,11 @@ typedef struct {
 }UPDATE_EXTFILENAME;
 
 typedef struct {
-	BOOL						bAutoAlign;					//自动对齐;
+	int							nIndex;						//序号索引, nIndex<0为从末尾计数
+	int							nNewIndex;					//开始序号;
 	int							nBit;						//序号位数;
 	int							nSpan;						//序号间隔
-	int							nStartIndex;				//开始序号;
-	int							nEndIndex;					//结束序号;
+	BOOL						bIsReCounter;				//是否重新计数
 	UPDATE_INDEXFORMATTYPE		emIndexFormat;				//序号格式;	
 }UPDATE_INDEXFILENAME;
 
