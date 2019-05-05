@@ -213,6 +213,8 @@ BOOL CDlgFileNameAdd::InitWndInfo()
 
 			pSpinCtrl->SetBase(1);
 			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
 		}
 
 		bRet = TRUE;
@@ -335,7 +337,7 @@ BOOL CDlgFileNameAdd::SetConfigData()
 			}
 		}
 
-		m_stConfigData.stcAddFileName.iIndex = nIndex;
+		m_stConfigData.stcAddFileName.nIndex = nIndex;
 		bRet = TRUE;
 	} while (FALSE);
 

@@ -177,8 +177,8 @@ BOOL CDlgFileNameIndex::InitWndInfo()
 
 	do 
 	{
-		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_STARTINDEX));
-		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_STARTINDEX));
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NEWINDEX));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_NEWINDEX));
 		if (pEditChar != NULL && pSpinCtrl != NULL)
 		{
 			dwStyle = pEditChar->GetStyle();
@@ -189,10 +189,12 @@ BOOL CDlgFileNameIndex::InitWndInfo()
 
 			pSpinCtrl->SetBase(1);
 			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
 		}
 
-		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_ENDINDEX));
-		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_ENDINDEX));
+		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_SPANINDEX));
+		pSpinCtrl = ((CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_SPANINDEX));
 		if (pEditChar != NULL && pSpinCtrl != NULL)
 		{
 			dwStyle = pEditChar->GetStyle();
@@ -203,6 +205,8 @@ BOOL CDlgFileNameIndex::InitWndInfo()
 
 			pSpinCtrl->SetBase(1);
 			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
 		}
 
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_INDEXBIT));
@@ -217,6 +221,8 @@ BOOL CDlgFileNameIndex::InitWndInfo()
 
 			pSpinCtrl->SetBase(1);
 			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
 		}
 
 		bRet = TRUE;

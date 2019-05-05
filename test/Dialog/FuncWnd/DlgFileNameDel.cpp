@@ -214,6 +214,8 @@ BOOL CDlgFileNameDel::InitWndInfo()
 
 			pSpinCtrl->SetBase(1);
 			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
 		}
 
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
@@ -228,6 +230,8 @@ BOOL CDlgFileNameDel::InitWndInfo()
 
 			pSpinCtrl->SetBase(1);
 			pSpinCtrl->SetPos(0);
+
+			pEditChar->SetWindowText(_T("1"));
 		}
 
 		bRet = TRUE;
@@ -336,7 +340,7 @@ BOOL CDlgFileNameDel::SetConfigData()
 				nCount = atoi(strNameCount.GetBuffer(0));
 			}
 
-			m_stConfigData.stcDelFileName.iCount = nCount;
+			m_stConfigData.stcDelFileName.nCount = nCount;
 		}
 
 		pEditChar = ((CEdit*)GetDlgItem(IDC_EDIT_NAMEINDEX));
@@ -370,7 +374,7 @@ BOOL CDlgFileNameDel::SetConfigData()
 			}
 		}
 
-		m_stConfigData.stcDelFileName.iIndex = nIndex;
+		m_stConfigData.stcDelFileName.nIndex = nIndex;
 		bRet = TRUE;
 	} while (FALSE);
 

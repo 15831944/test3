@@ -466,8 +466,8 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 {
 	BOOL bRet = FALSE;
 
-	int iAddIndex = -1;
-	int iIndex = -1;
+	int nAddIndex = -1;
+	int nIndex = -1;
 
 	unsigned int uiPos = 0;
 	unsigned int uiLen = 0;
@@ -514,12 +514,12 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		}
 
 		uiLen = strlen(pFileName);	//名称长度
-		iAddIndex = pFileData->stcAddFileName.iIndex;	//待添加的位置
+		nAddIndex = pFileData->stcAddFileName.nIndex;	//待添加的位置
 		
-		if (iAddIndex >= 0)
+		if (nAddIndex >= 0)
 		{//字符正向处理
 			uiPos = 0;
-			iIndex = 0;
+			nIndex = 0;
 			
 			p = pFileName;
 			while (*p != '\0')
@@ -533,7 +533,7 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					uiBit = 1;
 				}
 
-				if (iAddIndex != iIndex && *(p+uiBit) != '\0')
+				if (nAddIndex != nIndex && *(p+uiBit) != '\0')
 				{
 					memcpy(szDataBuffer+uiOffset, p, uiBit);
 					uiOffset += uiBit;
@@ -546,7 +546,7 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					memcpy(szDataBuffer+uiOffset, pFileData->stcAddFileName.szFileName, strlen(pFileData->stcAddFileName.szFileName));
 					uiOffset += strlen(pFileData->stcAddFileName.szFileName);
 
-					if (iAddIndex == iIndex)
+					if (nAddIndex == nIndex)
 					{
 						memcpy(szDataBuffer+uiOffset, p, uiLen-uiPos);
 						uiOffset += (uiLen-uiPos);
@@ -571,18 +571,18 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					break;
 				}
 
-				iIndex++;
+				nIndex++;
 			}
 		}
 		else
 		{//字符反向处理
 			uiPos = 0;
-			iIndex = uiLen;
+			nIndex = uiLen;
 
 			p = pFileName + uiLen;
-			while (iIndex > 0)
+			while (nIndex > 0)
 			{
-				if (iIndex >= 2)
+				if (nIndex >= 2)
 				{
 					if ((*(p-1)&0x80) && (*(p-2)&0x80))
 					{//汉字
@@ -601,8 +601,8 @@ BOOL update_file_func::SetAddFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 				p -= uiBit;
 				uiPos += uiBit;
 
-				iIndex--;
-				if (iAddIndex == iIndex-uiLen)	//正数转负数:~num+1;	负数转正数:~(num-1)
+				nIndex--;
+				if (nAddIndex == nIndex-uiLen)	//正数转负数:~num+1;	负数转正数:~(num-1)
 				{
 					memcpy(szDataBuffer+uiOffset, pFileName, uiLen-uiPos);
 					uiOffset += uiLen-uiPos;
@@ -709,11 +709,11 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 {
 	BOOL bRet = FALSE;
 
-	int iIndex = -1;
-	int iSpecIndex = -1;
+	int nIndex = -1;
+	int nSpecIndex = -1;
 
-	int iDelIndex = -1;
-	int iDelCount = -1;
+	int nDelIndex = -1;
+	int nDelCount = -1;
 
 	unsigned int uiPos = 0;
 	unsigned int uiSpecPos = 0;
@@ -783,19 +783,19 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 		else
 		{
 			uiLen = strlen(pFileName);
-			iDelIndex = pFileData->stcDelFileName.iIndex;	//待删除的位置
+			nDelIndex = pFileData->stcDelFileName.nIndex;	//待删除的位置
 
-			iDelCount = pFileData->stcDelFileName.iCount;	//
-			if (pFileData->stcDelFileName.iCount <= 0)
+			nDelCount = pFileData->stcDelFileName.nCount;	//
+			if (pFileData->stcDelFileName.nCount <= 0)
 			{
 				bRet = FALSE;
 				break;
 			}
 
-			if (iDelIndex >= 0)
+			if (nDelIndex >= 0)
 			{//字符正向处理
 				uiPos = 0;
-				iIndex = 0;
+				nIndex = 0;
 
 				p = pFileName;
 				while (*p != '\0')
@@ -809,15 +809,15 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 						uiBit = 1;
 					}
 
-					if (iSpecIndex < 0 && iDelIndex == iIndex)
+					if (nSpecIndex < 0 && nDelIndex == nIndex)
 					{
-						iSpecIndex = iIndex;
+						nSpecIndex = nIndex;
 						uiSpecPos = uiPos;
 					}
 					
-					if (iSpecIndex >= 0)
+					if (nSpecIndex >= 0)
 					{
-						if (*(p+uiBit) == '\0' || iIndex == (iSpecIndex+iDelCount))
+						if (*(p+uiBit) == '\0' || nIndex == (nSpecIndex+nDelCount))
 						{
 							if (uiSpecPos != 0)
 							{
@@ -825,7 +825,7 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 								uiOffset += uiSpecPos;
 							}
 
-							if (iIndex == (iSpecIndex+iDelCount))
+							if (nIndex == (nSpecIndex+nDelCount))
 							{
 								memcpy(szDataBuffer+uiOffset, pFileName+uiPos, uiLen-uiPos);
 								uiOffset += (uiLen-uiPos);
@@ -844,18 +844,18 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					p += uiBit;
 					uiPos += uiBit;
 				
-					iIndex++;
+					nIndex++;
 				}
 			}
 			else
 			{//字符反向处理
 				uiPos = uiLen;
-				iIndex = uiLen;
+				nIndex = uiLen;
 
 				p = pFileName + uiLen;
-				while (iIndex > 0)
+				while (nIndex > 0)
 				{
-					if (iIndex >= 2)
+					if (nIndex >= 2)
 					{
 						if ((*(p-1)&0x80) && (*(p-2)&0x80))
 						{//汉字
@@ -874,16 +874,16 @@ BOOL update_file_func::SetDelFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 					p -= uiBit;
 					uiPos -= uiBit;
 
-					iIndex--;
-					if (iSpecIndex < 0 && iDelIndex == (iIndex-uiLen))
+					nIndex--;
+					if (nSpecIndex < 0 && nDelIndex == (nIndex-uiLen))
 					{
-						iSpecIndex = iIndex;
+						nSpecIndex = nIndex;
 						uiSpecPos = uiPos;
 					}
 					
-					if (iSpecIndex >= 0)
+					if (nSpecIndex >= 0)
 					{
-						if (iIndex == 0 || (iIndex == (iSpecIndex-iDelCount)))
+						if (nIndex == 0 || (nIndex == (nSpecIndex-nDelCount)))
 						{
 							if (uiPos != 0)
 							{
