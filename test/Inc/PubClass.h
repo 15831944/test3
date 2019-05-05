@@ -44,7 +44,6 @@
 #include "../Inc/video/opengl_wnd_draw_video.h"
 #include "../Inc/video/gdi_wnd_draw_video.h"
 
-#include "../Contrib/VideoWndThread.h"
 #include "../Contrib/CheckLinkThread.h"
 #include "../Contrib/update_file_name.h"
 

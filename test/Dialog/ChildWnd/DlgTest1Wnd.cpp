@@ -17,7 +17,7 @@ void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
-	ON_BN_CLICKED(IDC_BTN_OPENFLODER,		OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BTN_TEST1,		OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -191,6 +191,8 @@ static inline std::string &trim(std::string &s) {
 	return ltrim(rtrim(s));
 }
 
+#include "../../Inc/common/LeafFile.h"
+
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
 	std::string str;
@@ -218,7 +220,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	}
 #endif
 
-#if 1
+#if 0
 	std::string str2 = _T("this is?#( a #@#test!");
 	std::string regex_str2 = _T("((?=[\x21-\x7e]+)[^A-Za-z0-9])");	//(( )+|(\n)+)	//((?=[\x21-\x7e]+)[^A-Za-z0-9])
 	std::tr1::regex pattern2(regex_str2, std::tr1::regex::icase);

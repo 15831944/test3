@@ -720,19 +720,19 @@
 				Name="common"
 				>
 				<File
-					RelativePath=".\Inc\common\Character.cpp"
+					RelativePath=".\Inc\common\LeafChar.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\common\Character.h"
+					RelativePath=".\Inc\common\LeafChar.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\common\FileFunc.cpp"
+					RelativePath=".\Inc\common\LeafFile.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\common\FileFunc.h"
+					RelativePath=".\Inc\common\LeafFile.h"
 					>
 				</File>
 				<File
@@ -759,14 +759,6 @@
 			<Filter
 				Name="Combox"
 				>
-				<File
-					RelativePath=".\Control\ComboBox\CustomCombox.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\ComboBox\CustomCombox.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Button"
@@ -791,22 +783,6 @@
 			<Filter
 				Name="ListBox"
 				>
-				<File
-					RelativePath=".\Control\ListBox\DrawListBox.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\ListBox\DrawListBox.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\ListBox\UserListBox.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\ListBox\UserListBox.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="TreeCtrl"

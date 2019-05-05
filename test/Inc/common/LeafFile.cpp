@@ -1,23 +1,8 @@
 #include "stdafx.h"
-#include "FileFunc.h"
+#include "LeafFile.h"
 
-CFileFunc::CFileFunc()
-{
-}
-
-CFileFunc::~CFileFunc()
-{
-}
-
-CFileFunc& CFileFunc::Instance()
-{
-	static CFileFunc inst;
-	return inst;
-}
-
-//////////////////////////////////////////////////////////////////////////
-//
-CString CFileFunc::GetAppPath()
+using namespace Leaf::IO;
+CString File::GetAppPath()
 {
 	CString  strAppPath;
 	TCHAR    szModuleFileName[MAX_PATH +1];
@@ -32,7 +17,7 @@ CString CFileFunc::GetAppPath()
 	return strAppPath;
 }
 
-bool CFileFunc::IsFileExists(LPCTSTR lpszFilePath)
+bool File::IsFileExists(LPCTSTR lpszFilePath)
 {
 	if (lpszFilePath == NULL  || *lpszFilePath == '\0')
 	{
@@ -47,7 +32,7 @@ bool CFileFunc::IsFileExists(LPCTSTR lpszFilePath)
 	return true;
 }
 
-bool CFileFunc::DeleteSelfFile()
+bool File::DeleteSelfFile()
 {
 	bool bRet = false;
 
