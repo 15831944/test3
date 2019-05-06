@@ -18,6 +18,7 @@ void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
 	ON_BN_CLICKED(IDC_BTN_TEST1,		OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BTN_TEST2, &CDlgTest1Wnd::OnBnClickedBtnTest2)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -229,4 +230,108 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	s1 = _T("");
 	str = std::tr1::regex_replace(str2, pattern2, s1);
 #endif
+}
+
+#include <pthread.h>
+#pragma comment(lib, "pthreadVC2.lib")
+
+typedef struct{
+	pthread_condattr_t	stCattr;
+	pthread_mutex_t		stMutex;
+	pthread_cond_t		stCond;
+	void*				pParam;
+}MUTEX_COND_T;
+
+void* ptThreadFunc1(void *pParam);
+void* ptThreadFunc2(void *pParam);
+
+void CDlgTest1Wnd::OnBnClickedBtnTest2()
+{
+	BOOL bRet = FALSE;
+
+	pthread_t ptThreadId1;
+	pthread_t ptThreadId2;
+
+	MUTEX_COND_T stMutex_t = {0};
+
+	do 
+	{
+		if (pthread_condattr_init(&stMutex_t.stCattr) != 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		stMutex_t.pParam = this;
+		pthread_mutex_init(&stMutex_t.stMutex, NULL);
+		pthread_cond_init(&stMutex_t.stCond, &stMutex_t.stCattr);
+
+		pthread_create(&ptThreadId1, NULL, ptThreadFunc1, &stMutex_t);
+		pthread_create(&ptThreadId2, NULL, ptThreadFunc2, &stMutex_t);
+
+		pthread_join(ptThreadId1, NULL);
+		pthread_join(ptThreadId2, NULL);
+
+		//pthread_detach(ptThreadId1);
+		//pthread_detach(ptThreadId2);
+
+		bRet = TRUE;
+	} while (FALSE);
+}
+
+void* ptThreadFunc1(void *pParam)
+{
+	BOOL bRet = FALSE;
+
+	int nRet = 0;
+	struct timespec tv;
+	MUTEX_COND_T *pMutex_t = NULL;
+
+	do 
+	{
+		pMutex_t = (MUTEX_COND_T *)pParam;
+		if (pMutex_t == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		while(TRUE)
+		{
+
+			tv.tv_sec = time(NULL);
+			tv.tv_sec += 3;
+
+			pthread_mutex_lock(&pMutex_t->stMutex);
+			nRet = pthread_cond_timedwait(&pMutex_t->stCond, &pMutex_t->stMutex, &tv);
+			pthread_mutex_unlock(&pMutex_t->stMutex);
+
+			TRACE("wait:%d", nRet);
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
+	return NULL;
+}
+
+void* ptThreadFunc2(void *pParam)
+{
+	BOOL bRet = FALSE;
+
+	MUTEX_COND_T *pMutex_t = NULL;
+
+	do 
+	{
+		pMutex_t = (MUTEX_COND_T *)pParam;
+		if (pMutex_t == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return NULL;
 }
