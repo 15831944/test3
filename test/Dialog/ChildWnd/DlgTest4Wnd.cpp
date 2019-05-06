@@ -48,7 +48,6 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 void CDlgTest4Wnd::OnPaint()
 {
 	CPaintDC dc(this);
-	DrawRectFrameLine(&dc);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -80,6 +79,7 @@ BOOL CDlgTest4Wnd::InitInfo()
 	return TRUE;
 }
 
+/*
 BOOL CDlgTest4Wnd::DrawRectFrameLine(CDC *pDC)
 {
 	CRect rcClient;
@@ -108,3 +108,4 @@ BOOL CDlgTest4Wnd::DrawRectFrameLine(CDC *pDC)
 	graphics.DrawLine(&pen, ptRightTop,   ptRightBottom);
 	return TRUE;
 }
+*/

@@ -8,22 +8,17 @@ if exist "ipch" 				(rmdir /Q /S "ipch")
 
 cd %s1%\test
 if exist "*.aps"				(del /a /q /f "*.aps")
-if exist "*.user"				(del /a /q /f "*.user")
-
-cd %s1%\UKeyVerify
-if exist "*.aps"				(del /a /q /f "*.aps")
-if exist "*.user"				(del /a /q /f "*.user")			
+if exist "*.user"				(del /a /q /f "*.user")		
 
 cd %s1%\bin
 if exist "test.exe"				(del /a /q /f "test.exe")
-if exist "opencv*.dll"			(del /a /q /f "opencv*.dll")
-if exist "lib*.dll"				(del /a /q /f "lib*.dll")
-if exist "tbb*.dll"				(del /a /q /f "tbb*.dll")
+if exist "*.dll"				(del /a /q /f "*.dll")
 
 cd %s1%\temp\Compile
 if exist "test" 				(rmdir /Q /S "test")
-if exist "UKeyVerify" 			(rmdir /Q /S "UKeyVerify")
 
 cd %s1%\temp\Link
 if exist "test" 				(rmdir /Q /S "test")
-if exist "UKeyVerify" 			(rmdir /Q /S "UKeyVerify")
+
+cd %s1%\.vs
+if exist "Test Project14"		(rmdir /Q /S "Test Project14")

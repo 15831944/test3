@@ -9,8 +9,12 @@ namespace Leaf
 {
 	namespace Text
 	{
-		class Encoding
+		class CEncoding
 		{
+		public:
+			CEncoding();
+			~CEncoding();
+
 		public:
 			static int  	UnicodeToANSI(char*    szDesc,  const wchar_t* szSrc);       	//wchar_t --> char
 			static int   	ANSIToUnicode(wchar_t* szDesc,  const char*    szSrc);        	//char    --> wchar_t 
@@ -28,8 +32,12 @@ namespace Leaf
 			static bool		ConvertToInt(const double &val,int& i);
 		};
 
-		class EncodingInfo
+		class CEncodingInfo
 		{
+		public:
+			CEncodingInfo();
+			~CEncodingInfo();
+
 		public:
 			static int		IsStringANSI(const char* pszString);
 			static int		IsStringUtf8(const char* pszString);

@@ -28,8 +28,6 @@ protected:
 protected:
 	BOOL							InitCtrl();
 	BOOL							InitInfo();
-
-	BOOL							DrawRectFrameLine(CDC *pDC);
 	
 protected:
 	//WavePlayer					m_WavePlayer;

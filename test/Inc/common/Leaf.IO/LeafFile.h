@@ -5,13 +5,11 @@ namespace Leaf
 {
 	namespace IO
 	{
-		class File
+		class CFile
 		{
 		public:
-			CString		GetAppPath();
-
-			bool		IsFileExists(LPCTSTR lpszFilePath);
-			bool		DeleteSelfFile();
+			CFile();
+			~CFile();
 		};
 	}
 }

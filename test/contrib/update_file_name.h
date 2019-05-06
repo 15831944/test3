@@ -160,6 +160,7 @@ protected:
 
 protected:
 	std::string			GetDateName(LPCTSTR lpszFileName, UPDATE_FILEDATA *pFileData);
+	std::string			GetIndexName(BOOL bIsReCounter);
 };
 
 class update_file_name

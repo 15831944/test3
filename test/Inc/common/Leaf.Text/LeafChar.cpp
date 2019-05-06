@@ -4,8 +4,18 @@
 #include <assert.h>
 
 using namespace Leaf::Text;
+Leaf::Text::CEncoding::CEncoding()
+{
+
+}
+
+Leaf::Text::CEncoding::~CEncoding()
+{
+
+}
+
 ////将wchar_t* 转成char*的实现函数(wcstombs,mbstowcs)
-int Encoding::UnicodeToANSI(char* szDesc, const wchar_t* szSrc)
+int Leaf::Text::CEncoding::UnicodeToANSI(char* szDesc, const wchar_t* szSrc)
 {
 #ifdef WIN32
 	int nLength = wcslen(szSrc);
@@ -34,7 +44,7 @@ int Encoding::UnicodeToANSI(char* szDesc, const wchar_t* szSrc)
 }
 
 ////将char* 转成wchar_t*的实现函数
-int Encoding::ANSIToUnicode(wchar_t* szDesc, const char* szSrc)
+int Leaf::Text::CEncoding::ANSIToUnicode(wchar_t* szDesc, const char* szSrc)
 {
 #ifdef WIN32
 	int nLength = strlen(szSrc);
@@ -56,7 +66,7 @@ int Encoding::ANSIToUnicode(wchar_t* szDesc, const char* szSrc)
 #endif
 }
 
-int Encoding::UTF8ToUnicode(wchar_t* szDesc, const char* szSrc)
+int Leaf::Text::CEncoding::UTF8ToUnicode(wchar_t* szDesc, const char* szSrc)
 {
 #ifdef WIN32
 	int nLength= strlen(szSrc);
@@ -79,7 +89,7 @@ int Encoding::UTF8ToUnicode(wchar_t* szDesc, const char* szSrc)
 #endif
 }
 
-int Encoding::UnicodeToUTF8(char* szDesc, const wchar_t* szSrc)
+int Leaf::Text::CEncoding::UnicodeToUTF8(char* szDesc, const wchar_t* szSrc)
 {
 #ifdef WIN32
 	int nLength = wcslen(szSrc);
@@ -106,7 +116,7 @@ int Encoding::UnicodeToUTF8(char* szDesc, const wchar_t* szSrc)
 #endif
 }
 
-int Encoding::StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag)
+int Leaf::Text::CEncoding::StringToHexString(char* szDesc, const char* szSrc, int nLen, char chTag)
 {
 	unsigned char* pSrc = (unsigned char*)szSrc;
 	assert(szDesc != NULL && pSrc != NULL);
@@ -156,7 +166,7 @@ int Encoding::StringToHexString(char* szDesc, const char* szSrc, int nLen, char 
 	return nRet;
 }
 
-int Encoding::HexStringToBytes(unsigned char* szDesc, const char* szSrc,int nLen)
+int Leaf::Text::CEncoding::HexStringToBytes(unsigned char* szDesc, const char* szSrc,int nLen)
 {
 	unsigned char* pSrc = (unsigned char*)szSrc;
 	assert(pSrc != NULL && szDesc != NULL);
@@ -211,7 +221,7 @@ int Encoding::HexStringToBytes(unsigned char* szDesc, const char* szSrc,int nLen
 	return nRet;
 }
 
-int Encoding::BytesHexToString(char*  szDesc, const unsigned char* szSrc,int nLen)
+int Leaf::Text::CEncoding::BytesHexToString(char*  szDesc, const unsigned char* szSrc,int nLen)
 {
 	unsigned char* pSrc = (unsigned char*)szSrc;
 	assert(pSrc != NULL && szDesc != NULL);
@@ -232,7 +242,7 @@ int Encoding::BytesHexToString(char*  szDesc, const unsigned char* szSrc,int nLe
 	return nLen*2;
 }
 
-bool Encoding::ConvertToInt(const double &val,int& i)
+bool Leaf::Text::CEncoding::ConvertToInt(const double &val,int& i)
 {
 	int num[2] ={0};  
 	memcpy(num,&val,8);  
@@ -257,12 +267,22 @@ bool Encoding::ConvertToInt(const double &val,int& i)
 
 //////////////////////////////////////////////////////////////////////////
 //
-int EncodingInfo::IsStringANSI(const char* pszString)
+Leaf::Text::CEncodingInfo::CEncodingInfo()
+{
+
+}
+
+Leaf::Text::CEncodingInfo::~CEncodingInfo()
+{
+
+}
+
+int Leaf::Text::CEncodingInfo::IsStringANSI(const char* pszString)
 {
 	return 0;
 }
 
-int EncodingInfo::IsStringUtf8(const char* pszString)
+int Leaf::Text::CEncodingInfo::IsStringUtf8(const char* pszString)
 {
 	bool bRet = false;
 	bool bIsAllAscii = false;
@@ -348,7 +368,7 @@ int EncodingInfo::IsStringUtf8(const char* pszString)
 	return bRet ? 1 : 0;
 }
 
-int EncodingInfo::IsStringGBK(const char* pszString)
+int Leaf::Text::CEncodingInfo::IsStringGBK(const char* pszString)
 {
 	bool bRet = false;
 	bool bIsAllAscii = false;
@@ -418,7 +438,7 @@ int EncodingInfo::IsStringGBK(const char* pszString)
 	return bRet ? 1 : 0;
 }
 
-int EncodingInfo::IsStringUnicode(const char* pszString)
+int Leaf::Text::CEncodingInfo::IsStringUnicode(const char* pszString)
 {
 	return 0;
 }
@@ -427,7 +447,7 @@ int EncodingInfo::IsStringUnicode(const char* pszString)
  * C语言函数字符串分割
  * char转换CString, strtok函数分割字符串;
 */
-std::vector<char*> EncodingInfo::SplitString1(const char pszSource[], const char* pszSeparator)
+std::vector<char*> Leaf::Text::CEncodingInfo::SplitString1(const char pszSource[], const char* pszSeparator)
 {
 	BOOL bRet = FALSE;
 	int npos = 0;
@@ -504,7 +524,7 @@ part1:
  * C++函数字符串分割
  * char转换string, substr函数分割字符串;
 */
-std::vector<std::string> EncodingInfo::SplitString2(const char* pszSource, const char* pszSeparator)
+std::vector<std::string> Leaf::Text::CEncodingInfo::SplitString2(const char* pszSource, const char* pszSeparator)
 {
 	std::string::size_type start = 0;
 	std::string::size_type index = 0;
@@ -583,7 +603,7 @@ std::vector<std::string> EncodingInfo::SplitString2(const char* pszSource, const
  * MFC函数字符串分割
  * char转换CString, MFC函数分割字符串;
 */
-std::vector<CString> EncodingInfo::SplitString3(const char* pszSource, const char* pszSeparator)
+std::vector<CString> Leaf::Text::CEncodingInfo::SplitString3(const char* pszSource, const char* pszSeparator)
 {
 	int nPos    = 0;
 	int nPrePos = 0;

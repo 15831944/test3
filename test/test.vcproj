@@ -31,7 +31,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if  not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end&#x0D;&#x0A;"
+				CommandLine="if exist $(SolutionDir)\bin\opencv_core249.dll		del $(SolutionDir)bin\opencv_core249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_highgui249.dll 	del $(SolutionDir)bin\opencv_highgui249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_imgproc249.dll 	del $(SolutionDir)bin\opencv_imgproc249.dll /f /q"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\feitian&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\libexfat&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\feitian\pkcs#11&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\zxing&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\detours&quot;;&quot;$(SolutionDir)Include\openssl&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				GeneratePreprocessedFile="0"
 				KeepComments="false"
@@ -89,11 +89,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib user32.lib libeay32.lib"
+				AdditionalDependencies="ws2_32.lib user32.lib "
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\feitian&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\opencv\lib&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;;&quot;$(SolutionDir)lib\feitian\pkcs#11&quot;;&quot;$(SolutionDir)lib\facedetect&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\zxing&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opencv&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\detours&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;"
 				UACExecutionLevel="0"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy  $(TargetPath) $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;"
+				CommandLine="xcopy $(SolutionDir)lib\opencv\*.dll	$(SolutionDir)bin /d /y"
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
@@ -246,7 +246,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if  not exist $(SolutionDir)\bin\$(TargetFileName) GOTO end&#x0D;&#x0A;del $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;:end&#x0D;&#x0A;"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -302,7 +302,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib user32.lib libjsoncpp165.lib"
+				AdditionalDependencies="ws2_32.lib user32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -342,7 +342,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetPath) $(SolutionDir)bin\$(TargetFileName)&#x0D;&#x0A;"
+				CommandLine="&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -708,37 +708,89 @@
 				Name="video"
 				>
 				<File
-					RelativePath=".\Inc\video\gdi_wnd_draw_video.cpp"
+					RelativePath=".\Inc\video\videoServerControl.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\video\gdi_wnd_draw_video.h"
+					RelativePath=".\Inc\video\videoServerControl.h"
 					>
 				</File>
+				<Filter
+					Name="interface"
+					>
+					<File
+						RelativePath=".\Inc\video\interface\opencvVideoInterface.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\video\interface\opencvVideoInterface.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\video\interface\videoInterface.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="common"
 				>
-				<File
-					RelativePath=".\Inc\common\LeafChar.cpp"
+				<Filter
+					Name="Leaf.System"
 					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\LeafChar.h"
+					<File
+						RelativePath=".\Inc\common\Leaf.System\LeafSystem.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.System\LeafSystem.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Leaf.Text"
 					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\LeafFile.cpp"
+					<File
+						RelativePath=".\Inc\common\Leaf.Text\LeafChar.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.Text\LeafChar.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Leaf.IO"
 					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\LeafFile.h"
+					<File
+						RelativePath=".\Inc\common\Leaf.IO\LeafDirectory.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.IO\LeafDirectory.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.IO\LeafFile.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.IO\LeafFile.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Leaf.Drawing"
 					>
-				</File>
-				<File
-					RelativePath=".\Inc\common\MemDCEx.h"
-					>
-				</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.Drawing\LeafMemDC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.Drawing\LeafMemDC.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="network"
@@ -763,22 +815,6 @@
 			<Filter
 				Name="Button"
 				>
-				<File
-					RelativePath=".\Control\Button\DrawButton.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\Button\DrawButton.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\Button\ImageButton.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\Button\ImageButton.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="ListBox"

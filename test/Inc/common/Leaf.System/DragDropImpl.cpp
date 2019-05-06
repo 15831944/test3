@@ -3,18 +3,19 @@
 #include <atlbase.h>
 #include "DragDropImpl.h"
 
+using namespace Leaf::System;
 //////////////////////////////////////////////////////////////////////////
 //CDragSourceNotify
-CDragSourceNotify::CDragSourceNotify()
+Leaf::System::CDragSourceNotify::CDragSourceNotify()
 				  :m_cRefCount(0), 
 {
 }
 
-CDragSourceNotify::~CDragSourceNotify()
+Leaf::System::CDragSourceNotify::~CDragSourceNotify()
 {
 }
 
-HRESULT STDMETHODCALLTYPE CDragSourceNotify::QueryInterface(REFIID riid, void** ppvObject)
+HRESULT STDMETHODCALLTYPE Leaf::System::CDragSourceNotify::QueryInterface(REFIID riid, void** ppvObject)
 {
 	if(!ppvObject)
 	{
@@ -39,12 +40,12 @@ HRESULT STDMETHODCALLTYPE CDragSourceNotify::QueryInterface(REFIID riid, void** 
 	return S_OK;
 }
 
-ULONG STDMETHODCALLTYPE CDragSourceNotify::AddRef()
+ULONG STDMETHODCALLTYPE Leaf::System::CDragSourceNotify::AddRef()
 {
 	return InterlockedIncrement(&m_cRefCount);
 }
 
-ULONG STDMETHODCALLTYPE CDragSourceNotify::Release()
+ULONG STDMETHODCALLTYPE Leaf::System::CDragSourceNotify::Release()
 {
 	ULONG uRet = InterlockedDecrement(&m_cRefCount);
 	if(!uRet)
@@ -54,18 +55,18 @@ ULONG STDMETHODCALLTYPE CDragSourceNotify::Release()
 	return uRet;
 }
 
-HRESULT STDMETHODCALLTYPE CDragSourceNotify::DragEnterTarget(HWND hwndTarget)
+HRESULT STDMETHODCALLTYPE Leaf::System::CDragSourceNotify::DragEnterTarget(HWND hwndTarget)
 {
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CDragSourceNotify::DragLeaveTarget()
+HRESULT STDMETHODCALLTYPE Leaf::System::CDragSourceNotify::DragLeaveTarget()
 {
 	return S_OK;
 }
 //////////////////////////////////////////////////////////////////////////
 //CEnumFormatEtc
-CEnumFormatEtc::CEnumFormatEtc(const CSimpleArray<FORMATETC>&  ArrFE)
+Leaf::System::CEnumFormatEtc::CEnumFormatEtc(const CSimpleArray<FORMATETC>&  ArrFE)
 {
 	ATLTRACE("CEnumFormatEtc::CEnumFormatEtc()\n");
 	for(int i=0; i < ArrFE.GetSize(); ++i)
@@ -74,7 +75,7 @@ CEnumFormatEtc::CEnumFormatEtc(const CSimpleArray<FORMATETC>&  ArrFE)
 	}	
 }
 
-CEnumFormatEtc::CEnumFormatEtc(const CSimpleArray<FORMATETC*>& ArrFE)
+Leaf::System::CEnumFormatEtc::CEnumFormatEtc(const CSimpleArray<FORMATETC*>& ArrFE)
 {
 	ATLTRACE("CEnumFormatEtc::CEnumFormatEtc()\n");
 	for(int i=0; i < ArrFE.GetSize(); ++)
@@ -83,7 +84,7 @@ CEnumFormatEtc::CEnumFormatEtc(const CSimpleArray<FORMATETC*>& ArrFE)
 	}	
 }
 
-STDMETHODIMP  CEnumFormatEtc::QueryInterface(REFIID refiid, void FAR* FAR* ppv)
+STDMETHODIMP  Leaf::System::CEnumFormatEtc::QueryInterface(REFIID refiid, void FAR* FAR* ppv)
 {
 	ATLTRACE("CEnumFormatEtc::QueryInterface()\n");
 	if(ppv == NULL)
@@ -105,13 +106,13 @@ STDMETHODIMP  CEnumFormatEtc::QueryInterface(REFIID refiid, void FAR* FAR* ppv)
 	return S_OK;
 }
 
-STDMETHODIMP_(ULONG) CEnumFormatEtc::AddRef(void)
+STDMETHODIMP_(ULONG) Leaf::System::CEnumFormatEtc::AddRef(void)
 {
 	ATLTRACE("CEnumFormatEtc::AddRef()\n");
 	return ++m_cRefCount;
 }
 
-STDMETHODIMP_(ULONG) CEnumFormatEtc::Release(void)
+STDMETHODIMP_(ULONG) Leaf::System::CEnumFormatEtc::Release(void)
 {
 	ATLTRACE("CEnumFormatEtc::Release()\n");
 	ULONG ulCount = --m_cRefCount;
@@ -125,7 +126,7 @@ STDMETHODIMP_(ULONG) CEnumFormatEtc::Release(void)
 	return ulCount;
 }
 
-STDMETHODIMP CEnumFormatEtc::Next( ULONG celt,LPFORMATETC lpFormatEtc, ULONG FAR *pceltFetched)
+STDMETHODIMP Leaf::System::CEnumFormatEtc::Next( ULONG celt,LPFORMATETC lpFormatEtc, ULONG FAR *pceltFetched)
 {
 	ATLTRACE("CEnumFormatEtc::Next()\n");
 	if(celt <= 0)
@@ -159,7 +160,7 @@ STDMETHODIMP CEnumFormatEtc::Next( ULONG celt,LPFORMATETC lpFormatEtc, ULONG FAR
 	return (ulRet == 0) ? S_OK : S_FALSE;
 }
 
-STDMETHODIMP CEnumFormatEtc::Skip(ULONG celt)
+STDMETHODIMP Leaf::System::CEnumFormatEtc::Skip(ULONG celt)
 {
 	ATLTRACE("CEnumFormatEtc::Skip()\n");
 	if((m_iCur + int(celt)) >= m_pFmtEtc.GetSize())
@@ -171,7 +172,7 @@ STDMETHODIMP CEnumFormatEtc::Skip(ULONG celt)
 	return S_OK;
 }
 
-STDMETHODIMP CEnumFormatEtc::Reset(void)
+STDMETHODIMP Leaf::System::CEnumFormatEtc::Reset(void)
 {
 	ATLTRACE("CEnumFormatEtc::Reset()\n");
 	m_iCur = 0;
@@ -179,7 +180,7 @@ STDMETHODIMP CEnumFormatEtc::Reset(void)
 	return S_OK;
 }
 
-STDMETHODIMP CEnumFormatEtc::Clone(IEnumFORMATETC FAR * FAR*ppCloneEnumFormatEtc)
+STDMETHODIMP Leaf::System::CEnumFormatEtc::Clone(IEnumFORMATETC FAR * FAR*ppCloneEnumFormatEtc)
 {
 	ATLTRACE("CEnumFormatEtc::Clone()\n");
 	
@@ -203,16 +204,16 @@ STDMETHODIMP CEnumFormatEtc::Clone(IEnumFORMATETC FAR * FAR*ppCloneEnumFormatEtc
 
 //////////////////////////////////////////////////////////////////////////
 //CIDropSource
-CIDropSource::CIDropSource()
+Leaf::System::CIDropSource::CIDropSource()
 			 :m_cRefCount(0), m_bDropped(false)
 {
 }
 
-CIDropSource::~CIDropSource()
+Leaf::System::CIDropSource::~CIDropSource()
 {
 }
 
-STDMETHODIMP CIDropSource::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
+STDMETHODIMP Leaf::System::CIDropSource::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
 {
 	if(!ppvObject)
 	{
@@ -233,13 +234,13 @@ STDMETHODIMP CIDropSource::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR
 	return S_OK;
 }
 
-STDMETHODIMP_(ULONG) CIDropSource::AddRef(void)
+STDMETHODIMP_(ULONG) Leaf::System::CIDropSource::AddRef(void)
 {
 	ATLTRACE("CIDropSource::AddRef\n");
 	return ++m_cRefCount;
 }
 
-STDMETHODIMP_(ULONG) CIDropSource::Release(void)
+STDMETHODIMP_(ULONG) Leaf::System::CIDropSource::Release(void)
 {
 	ATLTRACE("CIDropSource::Release\n");
 	ULONG ulRet = --m_cRefCount;
@@ -254,7 +255,7 @@ STDMETHODIMP_(ULONG) CIDropSource::Release(void)
 	return uRet;
 }
 
-STDMETHODIMP CIDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState)
+STDMETHODIMP Leaf::System::CIDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState)
 {
 	ATLTRACE("CIDropSource::QueryContinueDrag\n");
 	
@@ -272,19 +273,19 @@ STDMETHODIMP CIDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeySt
 	return S_OK;
 }
 
-STDMETHODIMP CIDropSource::GiveFeedback(DWORD dwEffect)
+STDMETHODIMP Leaf::System::CIDropSource::GiveFeedback(DWORD dwEffect)
 {
 	ATLTRACE("CIDropSource::GiveFeedback\n");
 	return DRAGDROP_S_USEDEFAULTCURSORS;
 }
 //////////////////////////////////////////////////////////////////////////
 //CIDataObject
-CIDataObject::CIDataObject(CIDropSource* pDropSource)
+Leaf::System::CIDataObject::CIDataObject(CIDropSource* pDropSource)
 			 :m_cRefCount(0), m_pDropSource(pDropSource)
 {
 }		
 
-CIDataObject::~CIDataObject()
+Leaf::System::CIDataObject::~CIDataObject()
 {
 	for(int i = 0; i < m_StgMedium.GetSize(); ++i)
 	{
@@ -295,7 +296,7 @@ CIDataObject::~CIDataObject()
 		delete m_ArrFormatEtc[j];
 }	
 
-STDMETHODIMP CIDataObject::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
+STDMETHODIMP Leaf::System::CIDataObject::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
 {
 	ATLTRACE("CIDataObject::QueryInterface()\n");
 	if(!ppvObject)
@@ -317,13 +318,13 @@ STDMETHODIMP CIDataObject::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR
     return S_OK;
 } 
 
-STDMETHODIMP_(ULONG) CIDataObject::AddRef( void)
+STDMETHODIMP_(ULONG) Leaf::System::CIDataObject::AddRef( void)
 {
 	ATLTRACE("CIDataObject::AddRef()\n");
 	return ++m_cRefCount;
 }
 
-STDMETHODIMP_(ULONG) CIDataObject::Release( void)
+STDMETHODIMP_(ULONG) Leaf::System::CIDataObject::Release( void)
 {
 	ATLTRACE("CIDataObject::Release()\n");	
 	
@@ -338,7 +339,7 @@ STDMETHODIMP_(ULONG) CIDataObject::Release( void)
 	return ulRet;
 }
 
-STDMETHODIMP CIDataObject::GetData(FORMATETC __RPC_FAR *pformatetcIn, STGMEDIUM __RPC_FAR *pmedium)
+STDMETHODIMP Leaf::System::CIDataObject::GetData(FORMATETC __RPC_FAR *pformatetcIn, STGMEDIUM __RPC_FAR *pmedium)
 {
 	ATLTRACE("CIDataObject::GetData\n");
 	if(pformatetcIn == NULL || pmedium == NULL)
@@ -363,14 +364,14 @@ STDMETHODIMP CIDataObject::GetData(FORMATETC __RPC_FAR *pformatetcIn, STGMEDIUM 
 	return DV_E_FORMATETC;
 }
 
-STDMETHODIMP CIDataObject::GetDataHere(FORMATETC __RPC_FAR *pformatetc, STGMEDIUM __RPC_FAR *pmedium)
+STDMETHODIMP Leaf::System::CIDataObject::GetDataHere(FORMATETC __RPC_FAR *pformatetc, STGMEDIUM __RPC_FAR *pmedium)
 {
 	ATLTRACE("CIDataObject::GetDataHere\n");
 	
 	return E_NOTIMPL;
 }
 
-STDMETHODIMP CIDataObject::QueryGetData(FORMATETC __RPC_FAR *pformatetc)
+STDMETHODIMP Leaf::System::CIDataObject::QueryGetData(FORMATETC __RPC_FAR *pformatetc)
 {
 	ATLTRACE("CIDataObject::QueryGetData\n");
 	if(pformatetc == NULL)
@@ -406,7 +407,7 @@ STDMETHODIMP CIDataObject::QueryGetData(FORMATETC __RPC_FAR *pformatetc)
 	return hr;
 } 
 
-STDMETHODIMP CIDataObject::GetCanonicalFormatEtc(FORMATETC __RPC_FAR *pformatectIn, FORMATETC __RPC_FAR *pformatetcOut)
+STDMETHODIMP Leaf::System::CIDataObject::GetCanonicalFormatEtc(FORMATETC __RPC_FAR *pformatectIn, FORMATETC __RPC_FAR *pformatetcOut)
 {
 	ATLTRACE("CIDataObject::GetCanonicalFormatEtc\n");
 	if(pformatetcOut == NULL)
@@ -417,7 +418,7 @@ STDMETHODIMP CIDataObject::GetCanonicalFormatEtc(FORMATETC __RPC_FAR *pformatect
 	return DATA_S_SAMEFORMATETC;
 }
 
-STDMETHODIMP CIDataObject::SetData(FORMATETC __RPC_FAR *pformatetc, STGMEDIUM __RPC_FAR *pmedium, BOOL fRelease)
+STDMETHODIMP Leaf::System::CIDataObject::SetData(FORMATETC __RPC_FAR *pformatetc, STGMEDIUM __RPC_FAR *pmedium, BOOL fRelease)
 {
 	ATLTRACE("CIDataObject::SetData\n");
 	if(pformatetc == NULL || pmedium == NULL)
@@ -453,7 +454,7 @@ STDMETHODIMP CIDataObject::SetData(FORMATETC __RPC_FAR *pformatetc, STGMEDIUM __
 	return S_OK;
 }
 
-STDMETHODIMP CIDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC __RPC_FAR *__RPC_FAR *ppenumFormatEtc)
+STDMETHODIMP Leaf::System::CIDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC __RPC_FAR *__RPC_FAR *ppenumFormatEtc)
 {
 	ATLTRACE("CIDataObject::EnumFormatEtc\n");
 	if(ppenumFormatEtc == NULL)
@@ -490,25 +491,25 @@ STDMETHODIMP CIDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC __RPC
 	return S_OK;
 }
 
-STDMETHODIMP CIDataObject::DAdvise(FORMATETC __RPC_FAR *pformatetc, DWORD advf, IAdviseSink __RPC_FAR *pAdvSink, DWORD __RPC_FAR *pdwConnection)
+STDMETHODIMP Leaf::System::CIDataObject::DAdvise(FORMATETC __RPC_FAR *pformatetc, DWORD advf, IAdviseSink __RPC_FAR *pAdvSink, DWORD __RPC_FAR *pdwConnection)
 {
 	ATLTRACE("CIDataObject::DAdvise\n");
 	return OLE_E_ADVISENOTSUPPORTED;
 }
 
-STDMETHODIMP CIDataObject::DUnadvise(DWORD dwConnection)
+STDMETHODIMP Leaf::System::CIDataObject::DUnadvise(DWORD dwConnection)
 {
 	ATLTRACE("CIDataObject::DUnadvise\n");
 	return E_NOTIMPL;
 }
 
-HRESULT STDMETHODCALLTYPE CIDataObject::EnumDAdvise(IEnumSTATDATA __RPC_FAR *__RPC_FAR *ppenumAdvise) 
+HRESULT STDMETHODCALLTYPE Leaf::System::CIDataObject::EnumDAdvise(IEnumSTATDATA __RPC_FAR *__RPC_FAR *ppenumAdvise) 
 {
 	ATLTRACE("CIDataObject::EnumDAdvise\n");
 	return OLE_E_ADVISENOTSUPPORTED;
 }
 
-void CIDataObject::CopyMedium(STGMEDIUM* pMedDest, STGMEDIUM* pMedSrc, FORMATETC* pFmtSrc)
+void Leaf::System::CIDataObject::CopyMedium(STGMEDIUM* pMedDest, STGMEDIUM* pMedSrc, FORMATETC* pFmtSrc)
 {
 	switch(pMedSrc->tymed)
 	{
@@ -575,7 +576,7 @@ void CIDataObject::CopyMedium(STGMEDIUM* pMedDest, STGMEDIUM* pMedSrc, FORMATETC
 }
 //////////////////////////////////////////////////////////////////////////
 //
-CIDropTarget::CIDropTarget(HWND hTargetWnd)
+Leaf::System::CIDropTarget::CIDropTarget(HWND hTargetWnd)
 			 :m_hTargetWnd(hTargetWnd),
 			  m_cRefCount(0),
 			  m_bAllowDrop(false),
@@ -591,7 +592,7 @@ CIDropTarget::CIDropTarget(HWND hTargetWnd)
 	}	
 }
 
-CIDropTarget::~CIDropTarget()
+Leaf::System::CIDropTarget::~CIDropTarget()
 {
 	if(m_pDropTargetHelper != NULL)
 	{
@@ -600,7 +601,7 @@ CIDropTarget::~CIDropTarget()
 	}
 }
 
-HRESULT STDMETHODCALLTYPE CIDropTarget::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
+HRESULT Leaf::System::STDMETHODCALLTYPE CIDropTarget::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
 {
 	if(ppvObject == NULL)
 	{
@@ -622,13 +623,13 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::QueryInterface(REFIID riid, void __RPC_F
     return S_OK;
 }
 
-ULONG STDMETHODCALLTYPE CIDropTarget::AddRef(void)
+ULONG Leaf::System::STDMETHODCALLTYPE CIDropTarget::AddRef(void)
 {
 	ATLTRACE("CIDropTarget::AddRef()\n");
 	return ++m_cRefCount; 
 }
 
-ULONG STDMETHODCALLTYPE CIDropTarget::Release(void)
+ULONG STDMETHODCALLTYPE Leaf::System::CIDropTarget::Release(void)
 {
 	ATLTRACE("CIDropTarget::Release()\n");
 	ULONG ulRet = --m_cRefCount;
@@ -641,7 +642,7 @@ ULONG STDMETHODCALLTYPE CIDropTarget::Release(void)
 	return ulRet;
 }
 
-HRESULT STDMETHODCALLTYPE CIDropTarget::DragEnter(
+HRESULT Leaf::System::STDMETHODCALLTYPE CIDropTarget::DragEnter(
 						IDataObject __RPC_FAR *pDataObj,
 						DWORD grfKeyState,
 						POINTL pt,
@@ -674,7 +675,7 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::DragEnter(
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CIDropTarget::DragOver(
+HRESULT Leaf::System::STDMETHODCALLTYPE CIDropTarget::DragOver(
 						DWORD grfKeyState,
 						POINTL pt,
 						DWORD __RPC_FAR *pdwEffect)
@@ -694,7 +695,7 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::DragOver(
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CIDropTarget::DragLeave()
+HRESULT STDMETHODCALLTYPE Leaf::System::CIDropTarget::DragLeave()
 {
 	ATLTRACE("CIDropTarget::DragLeave\n");
 	if(m_pDropTargetHelper)
@@ -707,7 +708,7 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::DragLeave()
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CIDropTarget::Drop(
+HRESULT STDMETHODCALLTYPE Leaf::System::CIDropTarget::Drop(
 						IDataObject __RPC_FAR *pDataObj,
 						DWORD grfKeyState,
 						POINTL pt, 
@@ -745,7 +746,7 @@ HRESULT STDMETHODCALLTYPE CIDropTarget::Drop(
 	return S_OK;
 }
 
-bool CIDropTarget::QueryDrop(DWORD grfKeyState, LPDWORD pdwEffect)
+bool Leaf::System::CIDropTarget::QueryDrop(DWORD grfKeyState, LPDWORD pdwEffect)
 {
 	ATLTRACE("CIDropTarget::QueryDrop\n");
 	DWORD dwOKEffects = *pdwEffect; 

@@ -1020,6 +1020,7 @@ BOOL update_file_func::SetExtFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FIL
 BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_FILEDATA *pFileData)
 {
 	BOOL bRet = FALSE;
+	BOOL bIsReCounter = FALSE;
 
 	int nIndex = -1;
 	int nAddIndex = -1;
@@ -1064,6 +1065,7 @@ BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_F
 
 		uiLen = strlen(pFileName);	//名称长度
 		nAddIndex = pFileData->stcIndexFileName.nIndex;	//待添加的位置
+		bIsReCounter = pFileData->stcIndexFileName.bIsReCounter;
 
 		if (nAddIndex >= 0)
 		{//字符正向处理
@@ -1082,7 +1084,32 @@ BOOL update_file_func::SetIndexFileName(UPDATE_CONFIGTYPE emConfigType, UPDATE_F
 					uiBit = 1;
 				}
 
+				if (bIsReCounter)
+				{
+				}
+				else
+				{
+					if (nAddIndex != nIndex && *(p+uiBit) != '\0')
+					{
+						memcpy(szDataBuffer+uiOffset, p, uiBit);
+						uiOffset += uiBit;
 
+						p += uiBit;
+						uiPos += uiBit;
+					}
+					else
+					{
+						//memcpy(szDataBuffer+uiOffset, pFileData->stcAddFileName.szFileName, strlen(pFileData->stcAddFileName.szFileName));
+						//uiOffset += strlen(pFileData->stcAddFileName.szFileName);
+
+						if (nAddIndex == nIndex)
+						{
+
+						}
+					}
+
+					nIndex++;
+				}
 			}
 		}
 		else

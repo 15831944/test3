@@ -35,19 +35,14 @@
 #include <detours.h>
 #include <winsvc.h>
 
-#include "./common/MemDCEx.h"
-#include "./common/Character.h"
-
 #include "./internal.h"
 #include "../Inc/GlobalInfo.h"
 #include "../Inc/audio/waveplayer.h"
-#include "../Inc/video/opengl_wnd_draw_video.h"
-#include "../Inc/video/gdi_wnd_draw_video.h"
 
 #include "../Contrib/CheckLinkThread.h"
 #include "../Contrib/update_file_name.h"
 
-
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);
 int  CALLBACK	EnumFontProc(ENUMLOGFONTEX *lpelf,NEWTEXTMETRICEX *lpntm,DWORD nFontType,long lParam);
+
 #endif
