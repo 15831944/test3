@@ -18,7 +18,6 @@ public:
 	CDlgTest2Wnd(CWnd* pParent = NULL);
 	virtual ~CDlgTest2Wnd();
 
-	BOOL					UpdateConfigInfo(BOOL bFlag);
 	BOOL					GetCurConfigData(UPDATE_FILEDATA *pUpdateData);
 
 public:
@@ -30,6 +29,7 @@ protected:
 	virtual BOOL			OnInitDialog();
 
 	afx_msg int				OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void			OnDestroy();
 
 	afx_msg void			OnPaint();
 	afx_msg BOOL			OnEraseBkgnd(CDC* pDC);
@@ -51,25 +51,20 @@ protected:
 	static LRESULT 			EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 protected:
-	BOOL					Init();
 	BOOL					InitCtrl();
 	BOOL					InitInfo();
 
-	BOOL					CreateChildWnd();
-	BOOL					InitWndSkin();
+	BOOL					InitWndCtrl();
 	BOOL					InitWndInfo();
 
-	BOOL					UpdateWndCtrl();
-	BOOL					UpdateWndInfo();
+	BOOL					CreateChildWnd();
+	void					DestroyChildWnd();
 
 	void					SetWndControlLayout();
 	BOOL					DrawWndImage(CDC *pDC);
 
 protected:
-	BOOL					SetChildWnd(BOOL bFlag);
-
 	void					ShowShellPathFile(LPCTSTR lpszShellPath);
-	void					SetButtonCtrl(BOOL bFlag);
 	
 protected:
 	CComboBox				m_hComboEval;

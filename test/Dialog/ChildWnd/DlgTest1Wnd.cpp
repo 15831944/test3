@@ -18,7 +18,7 @@ void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
 	ON_BN_CLICKED(IDC_BTN_TEST1,		OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BTN_TEST2, &CDlgTest1Wnd::OnBnClickedBtnTest2)
+	ON_BN_CLICKED(IDC_BTN_TEST2,		OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -235,45 +235,65 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 #include <pthread.h>
 #pragma comment(lib, "pthreadVC2.lib")
 
-typedef struct{
-	pthread_condattr_t	stCattr;
-	pthread_mutex_t		stMutex;
-	pthread_cond_t		stCond;
+typedef struct {
+	pthread_attr_t		ptAttr;
+	pthread_cond_t		ptCond;
+	pthread_mutex_t		ptMutex;
+	pthread_condattr_t	ptCattr;
 	void*				pParam;
-}MUTEX_COND_T;
+}THREAD_MUTEX_T;
+
+typedef enum {
+	PRIORITY_IDLE = -1,
+	PRIORITY_NORMAL = 0,
+	PRIORITY_ABOVE_NORMAL = 1,
+	PRIORITY_HIGH = 2,
+}THREAD_PRIORITY_T;
 
 void* ptThreadFunc1(void *pParam);
-void* ptThreadFunc2(void *pParam);
-
-void CDlgTest1Wnd::OnBnClickedBtnTest2()
+void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	BOOL bRet = FALSE;
 
 	pthread_t ptThreadId1;
-	pthread_t ptThreadId2;
+	THREAD_PRIORITY_T priority = PRIORITY_NORMAL;
 
-	MUTEX_COND_T stMutex_t = {0};
+	struct sched_param param = {0};
+	THREAD_MUTEX_T stMutex_t = {0};
 
 	do 
 	{
-		if (pthread_condattr_init(&stMutex_t.stCattr) != 0)
+		pthread_attr_init(&stMutex_t.ptAttr);
+		if (priority != PRIORITY_NORMAL)
 		{
-			bRet = FALSE;
-			break;
+			if (priority != PRIORITY_IDLE)
+			{
+				pthread_attr_setschedpolicy(&stMutex_t.ptAttr, SCHED_RR);			//实时,轮转法
+				if (pthread_attr_getschedparam(&stMutex_t.ptAttr, &param) == 0)		//查询优先级
+				{
+					if (priority == PRIORITY_HIGH)
+					{
+						param.sched_priority = 6;									//6:HIGH
+					}
+					else
+					{
+						param.sched_priority = 4;									//4:ABOVE_NORMAL
+					}
+
+					pthread_attr_setschedparam(&stMutex_t.ptAttr, &param);			//设置优先级
+				}
+			}
 		}
 
 		stMutex_t.pParam = this;
-		pthread_mutex_init(&stMutex_t.stMutex, NULL);
-		pthread_cond_init(&stMutex_t.stCond, &stMutex_t.stCattr);
+		pthread_mutex_init(&stMutex_t.ptMutex, NULL);
+		pthread_condattr_init(&stMutex_t.ptCattr);
+		pthread_cond_init(&stMutex_t.ptCond, &stMutex_t.ptCattr);
 
-		pthread_create(&ptThreadId1, NULL, ptThreadFunc1, &stMutex_t);
-		pthread_create(&ptThreadId2, NULL, ptThreadFunc2, &stMutex_t);
+		pthread_create(&ptThreadId1, &stMutex_t.ptAttr, ptThreadFunc1, &stMutex_t);
 
-		pthread_join(ptThreadId1, NULL);
-		pthread_join(ptThreadId2, NULL);
-
+		//pthread_join(ptThreadId1, NULL);
 		//pthread_detach(ptThreadId1);
-		//pthread_detach(ptThreadId2);
 
 		bRet = TRUE;
 	} while (FALSE);
@@ -285,11 +305,11 @@ void* ptThreadFunc1(void *pParam)
 
 	int nRet = 0;
 	struct timespec tv;
-	MUTEX_COND_T *pMutex_t = NULL;
+	THREAD_MUTEX_T *pMutex_t = NULL;
 
 	do 
 	{
-		pMutex_t = (MUTEX_COND_T *)pParam;
+		pMutex_t = (THREAD_MUTEX_T *)pParam;
 		if (pMutex_t == NULL)
 		{
 			bRet = FALSE;
@@ -298,13 +318,12 @@ void* ptThreadFunc1(void *pParam)
 
 		while(TRUE)
 		{
-
 			tv.tv_sec = time(NULL);
 			tv.tv_sec += 3;
 
-			pthread_mutex_lock(&pMutex_t->stMutex);
-			nRet = pthread_cond_timedwait(&pMutex_t->stCond, &pMutex_t->stMutex, &tv);
-			pthread_mutex_unlock(&pMutex_t->stMutex);
+			pthread_mutex_lock(&pMutex_t->ptMutex);
+			nRet = pthread_cond_timedwait(&pMutex_t->ptCond, &pMutex_t->ptMutex, &tv);
+			pthread_mutex_unlock(&pMutex_t->ptMutex);
 
 			TRACE("wait:%d", nRet);
 		}
@@ -312,26 +331,5 @@ void* ptThreadFunc1(void *pParam)
 		bRet = TRUE;
 	} while (FALSE);
 	
-	return NULL;
-}
-
-void* ptThreadFunc2(void *pParam)
-{
-	BOOL bRet = FALSE;
-
-	MUTEX_COND_T *pMutex_t = NULL;
-
-	do 
-	{
-		pMutex_t = (MUTEX_COND_T *)pParam;
-		if (pMutex_t == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-
 	return NULL;
 }

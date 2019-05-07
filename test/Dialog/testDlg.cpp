@@ -77,6 +77,7 @@ CTestDlg::CTestDlg(CWnd* pParent /*=NULL*/)
 
 CTestDlg::~CTestDlg()
 {
+	m_pArPage.RemoveAll();
 }
 
 void CTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -86,39 +87,78 @@ void CTestDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTestDlg, CDialog)
-	ON_WM_SYSCOMMAND()
+	ON_WM_CREATE()
+	ON_WM_DESTROY()
+
 	ON_WM_PAINT()
+	ON_WM_SYSCOMMAND()
 	ON_WM_QUERYDRAGICON()
 	
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL,OnTcnSelchangeTabWndctrl)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL, OnTcnSelchangeTabWndCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 //
 BOOL CTestDlg::OnInitDialog()
 {
+	BOOL bRet = FALSE;
 	CDialog::OnInitDialog();
 
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
-
-	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
+	do 
 	{
-		CString strAboutMenu;
-		strAboutMenu.LoadString(IDS_ABOUTBOX);
-		if (!strAboutMenu.IsEmpty())
+		CMenu* pSysMenu = GetSystemMenu(FALSE);
+		if (pSysMenu != NULL)
 		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+			CString strAboutMenu;
+			strAboutMenu.LoadString(IDS_ABOUTBOX);
+			if (!strAboutMenu.IsEmpty())
+			{
+				pSysMenu->AppendMenu(MF_SEPARATOR);
+				pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+			}
 		}
+
+		SetIcon(m_hIcon, TRUE);			
+		SetIcon(m_hIcon, FALSE);
+
+		if (!InitCtrl())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!InitInfo())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	if (!bRet)
+	{
+		::PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);
 	}
 
-	SetIcon(m_hIcon, TRUE);			
-	SetIcon(m_hIcon, FALSE);		
+	return bRet;  
+}
 
-	Init();
-	return TRUE;  
+int CTestDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (__super::OnCreate(lpCreateStruct) == -1)
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+void CTestDlg::OnDestroy()
+{
+	__super::OnDestroy();
+
+	DestroyChildWnd();
 }
 
 void CTestDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -164,94 +204,136 @@ HCURSOR CTestDlg::OnQueryDragIcon()
 	return (HCURSOR) m_hIcon;
 }
 
-void CTestDlg::OnTcnSelchangeTabWndctrl(NMHDR *pNMHDR, LRESULT *pResult)
+void CTestDlg::OnTcnSelchangeTabWndCtrl(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	int nCurSel = m_hTabCtrl.GetCurSel();
-	
 	if (nCurSel != m_nPrePage)
 	{
 		((CDialog*)m_pArPage[m_nPrePage])->ShowWindow(SW_HIDE);
 		((CDialog*)m_pArPage[nCurSel])->ShowWindow(SW_SHOW);
+
 		m_nPrePage = nCurSel;
 	}
 
 	*pResult = 0;
 }
 
-void CTestDlg::Init()
+//////////////////////////////////////////////////////////////////////////
+//
+BOOL CTestDlg::InitCtrl()
 {
-	InitCtrl();
-	InitInfo();
-}
-
-void CTestDlg::InitCtrl()
-{
-	m_hDlgTest1Wnd.Create(IDD_DIALOG1, GetDlgItem(IDC_TABCTRL));
-	m_hDlgTest2Wnd.Create(IDD_DIALOG2, GetDlgItem(IDC_TABCTRL));
-	m_hDlgTest3Wnd.Create(IDD_DIALOG3, GetDlgItem(IDC_TABCTRL));
-	m_hDlgTest4Wnd.Create(IDD_DIALOG4, GetDlgItem(IDC_TABCTRL));
-	m_hDlgTest5Wnd.Create(IDD_DIALOG5, GetDlgItem(IDC_TABCTRL));
-
-	m_pArPage.Add(&m_hDlgTest1Wnd);
-	m_pArPage.Add(&m_hDlgTest2Wnd);
-	m_pArPage.Add(&m_hDlgTest3Wnd);
-	m_pArPage.Add(&m_hDlgTest4Wnd);
-	m_pArPage.Add(&m_hDlgTest5Wnd);
-
-	m_hTabCtrl.InsertItem(0, _T("test1"));
-	m_hTabCtrl.InsertItem(1, _T("test2"));
-	m_hTabCtrl.InsertItem(2, _T("test3"));
-	m_hTabCtrl.InsertItem(3, _T("test4"));
-	m_hTabCtrl.InsertItem(4, _T("test5"));
-
-	CRect rcClient;
-	m_hTabCtrl.GetClientRect(&rcClient);
-
-	rcClient.top +=20;
-	rcClient.left +=2;
-	rcClient.right -=2;
-	rcClient.bottom -=4;
-
-	for(int i=0; i<m_pArPage.GetSize(); i++)
+	if (!CreateChildWnd())
 	{
-		((CDialog*)m_pArPage[i])->MoveWindow(&rcClient);
+		return FALSE;
 	}
 
+	if (!InitWndCtrl())
+	{
+		return FALSE;
+	}
+
+	if (!InitWndInfo())
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CTestDlg::InitInfo()
+{
+	return TRUE;
+}
+
+BOOL CTestDlg::InitWndCtrl()
+{
+	BOOL bRet = FALSE;
+
+	DWORD dwIndex = 0;
+	CRect rcClient;
+	CRect rcDialog;
+
+	do 
+	{
+		m_hTabCtrl.GetClientRect(&rcClient);
+
+		m_hTabCtrl.InsertItem(dwIndex++, _T("test1"));
+		m_hTabCtrl.InsertItem(dwIndex++, _T("test2"));
+		m_hTabCtrl.InsertItem(dwIndex++, _T("test3"));
+		m_hTabCtrl.InsertItem(dwIndex++, _T("test4"));
+		m_hTabCtrl.InsertItem(dwIndex++, _T("test5"));
+
+		rcDialog.left = rcClient.left + 2;
+		rcDialog.top  = rcClient.top + 20;
+		rcDialog.right  = rcClient.right - 2;
+		rcDialog.bottom = rcClient.bottom - 2;
+
+		for (dwIndex=0; dwIndex<m_pArPage.GetSize(); ++dwIndex)
+		{
+			((CDialog*)m_pArPage[dwIndex])->MoveWindow(&rcDialog);
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CTestDlg::InitWndInfo()
+{
 	((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
 	((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
 
 	m_hTabCtrl.SetCurSel(m_nDefaultSel);
 	m_nPrePage = m_nDefaultSel;
+
+	return TRUE;
 }
 
-void CTestDlg::InitInfo()
-{
-}
-
-BOOL CTestDlg::UpdateWndCtrl()
+BOOL CTestDlg::CreateChildWnd()
 {
 	BOOL bRet = FALSE;
 
 	do 
 	{
+		m_hDlgTest1Wnd.Create(IDD_DIALOG1, GetDlgItem(IDC_TABCTRL));
+		m_hDlgTest2Wnd.Create(IDD_DIALOG2, GetDlgItem(IDC_TABCTRL));
+		m_hDlgTest3Wnd.Create(IDD_DIALOG3, GetDlgItem(IDC_TABCTRL));
+		m_hDlgTest4Wnd.Create(IDD_DIALOG4, GetDlgItem(IDC_TABCTRL));
+		m_hDlgTest5Wnd.Create(IDD_DIALOG5, GetDlgItem(IDC_TABCTRL));
+
+		m_pArPage.Add(&m_hDlgTest1Wnd);
+		m_pArPage.Add(&m_hDlgTest2Wnd);
+		m_pArPage.Add(&m_hDlgTest3Wnd);
+		m_pArPage.Add(&m_hDlgTest4Wnd);
+		m_pArPage.Add(&m_hDlgTest5Wnd);
+
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOL CTestDlg::UpdateWndInfo()
+void CTestDlg::DestroyChildWnd()
 {
-	BOOL bRet = FALSE;
+	DWORD dwIndex = 0;
+	CDialog *pDialog = NULL;
 
-	do 
+	for (dwIndex; dwIndex<m_pArPage.GetSize(); ++dwIndex)
 	{
-		bRet = TRUE;
-	} while (FALSE);
+		pDialog = (CDialog *)m_pArPage.GetAt(dwIndex);
+		if (pDialog == NULL)
+		{
+			continue;
+		}
 
-	return bRet;
+		pDialog->DestroyWindow();
+		pDialog = NULL;
+	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+//
 int (WINAPI *Real_Messagebox)(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)= MessageBoxA;
 extern "C" _declspec(dllexport) BOOL WINAPI MessageBox_Mine(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
 {
@@ -277,36 +359,4 @@ void CTestDlg::UnHook()
 	DetourDetach(&(PVOID&)Real_Messagebox,MessageBox_Mine);//–∂‘ÿdetour
 
 	DetourTransactionCommit();	//¿πΩÿ…˙–ß
-}
-
-//////////////////////////////////////////////////////////////////////////
-//
-BOOL CTestDlg::UpdateConfigInfo(BOOL bFlag)
-{
-	BOOL bRet = FALSE;
-	CString strPrompt;
-
-	do 
-	{
-		if (bFlag)
-		{
-			if (!UpdateWndCtrl())
-			{
-				bRet = FALSE;
-				break;
-			}
-
-			if (!UpdateWndInfo())
-			{
-				bRet = FALSE;
-				break;
-			}
-		}
-
-		m_hDlgTest2Wnd.UpdateConfigInfo(bFlag);
-
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
 }

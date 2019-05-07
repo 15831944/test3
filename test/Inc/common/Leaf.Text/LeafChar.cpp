@@ -238,6 +238,7 @@ int Leaf::Text::CEncoding::BytesHexToString(char*  szDesc, const unsigned char* 
 		*szDesc++ = tab[*pSrc & 0x0f];
 		pSrc++;
 	}
+	
 	*szDesc = '\0';
 	return nLen*2;
 }
@@ -245,9 +246,11 @@ int Leaf::Text::CEncoding::BytesHexToString(char*  szDesc, const unsigned char* 
 bool Leaf::Text::CEncoding::ConvertToInt(const double &val,int& i)
 {
 	int num[2] ={0};  
-	memcpy(num,&val,8);  
+	memcpy(num,&val,8); 
+	
 	int high =num[1];  
 	int nExp =((high>>20)&0x7ff) - 1023;  
+	
 	if(nExp<= 20)  
 	{  
 		i = ( high&0xfffff |0x100000)>>(20 - nExp);  
@@ -257,11 +260,16 @@ bool Leaf::Text::CEncoding::ConvertToInt(const double &val,int& i)
 		int low= num[0];  
 		i = ( ( high&0xfffff |0x100000)<<(nExp - 20) )+ ( low >>(52 - nExp));  
 	}  
-	else  
+	else 
+	{
 		return false;  
-
+	}
+	
 	if(high&0x80000000)  
-		i = ~i + 1;  
+	{
+		i = ~i + 1;
+	}
+	
 	return true; 
 }
 

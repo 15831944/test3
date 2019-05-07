@@ -18,7 +18,7 @@ protected:
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 
 	afx_msg void			OnBnClickedButton1();
-	afx_msg void			OnBnClickedBtnTest2();
+	afx_msg void			OnBnClickedButton2();
 	DECLARE_MESSAGE_MAP()
 
 protected:

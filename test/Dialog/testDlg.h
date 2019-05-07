@@ -39,8 +39,6 @@ public:
 	CTestDlg(CWnd* pParent = NULL);	
 	virtual ~CTestDlg();
 
-	BOOL				UpdateConfigInfo(BOOL bFlag);
-	
 public:
 	enum { IDD = IDD_TEST_DIALOG };
 	
@@ -48,21 +46,26 @@ protected:
 	HICON m_hIcon;
 	virtual void		DoDataExchange(CDataExchange* pDX);	
 	virtual BOOL		OnInitDialog();
+
+	afx_msg int			OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void		OnDestroy();
 	
 	afx_msg void		OnPaint();
 	afx_msg HCURSOR		OnQueryDragIcon();
 	afx_msg void		OnSysCommand(UINT nID, LPARAM lParam);
 	
-	afx_msg void		OnTcnSelchangeTabWndctrl(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void		OnTcnSelchangeTabWndCtrl(NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 	
 protected:	
-	void				Init();
-	void				InitCtrl();
-	void				InitInfo();
+	BOOL				InitCtrl();
+	BOOL				InitInfo();
 
-	BOOL				UpdateWndCtrl();
-	BOOL				UpdateWndInfo();
+	BOOL				InitWndCtrl();
+	BOOL				InitWndInfo();
+
+	BOOL				CreateChildWnd();
+	void				DestroyChildWnd();
 
 	void				Hook();
 	void				UnHook();
@@ -70,8 +73,8 @@ protected:
 protected:
 	CTabCtrl			m_hTabCtrl;
 
-	CDlgTest1Wnd		m_hDlgTest1Wnd;
-	CDlgTest2Wnd		m_hDlgTest2Wnd;
+ 	CDlgTest1Wnd		m_hDlgTest1Wnd;
+ 	CDlgTest2Wnd		m_hDlgTest2Wnd;
 	CDlgTest3Wnd		m_hDlgTest3Wnd;
 	CDlgTest4Wnd		m_hDlgTest4Wnd;
 	CDlgTest5Wnd		m_hDlgTest5Wnd;

@@ -24,6 +24,8 @@ CDlgTest2Wnd::CDlgTest2Wnd(CWnd* pParent /*=NULL*/)
 
 CDlgTest2Wnd::~CDlgTest2Wnd()
 {
+	update_file_data::Instance().ClearFileInfo(m_vecFileInfo);
+	m_pArPage.RemoveAll();
 }
 
 void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
@@ -37,6 +39,7 @@ void CDlgTest2Wnd::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlgTest2Wnd, CDialog)
 	ON_WM_CREATE()
+	ON_WM_DESTROY()
 
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
@@ -53,6 +56,36 @@ END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
 //
+BOOL CDlgTest2Wnd::OnInitDialog()
+{
+	BOOL bRet = FALSE;
+	CDialog::OnInitDialog();
+
+	do 
+	{
+		if (!InitCtrl())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		if (!InitInfo())
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+	
+	if (!bRet)
+	{
+		::PostMessage(AfxGetMainWnd()->m_hWnd,WM_CLOSE,0,0);
+	}
+
+	return bRet;  
+}
+
 int CDlgTest2Wnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (__super::OnCreate(lpCreateStruct) == -1)
@@ -68,28 +101,11 @@ int CDlgTest2Wnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-BOOL CDlgTest2Wnd::OnInitDialog()
+void CDlgTest2Wnd::OnDestroy()
 {
-	BOOL bRet = FALSE;
-	CDialog::OnInitDialog();
+	__super::OnDestroy();
 
-	do 
-	{
-		if (!Init())
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-	
-	if (!bRet)
-	{
-		::PostMessage(AfxGetMainWnd()->m_hWnd,WM_CLOSE,0,0);
-	}
-
-	return bRet;  
+	DestroyChildWnd();
 }
 
 BOOL CDlgTest2Wnd::PreTranslateMessage(MSG* pMsg)
@@ -380,37 +396,13 @@ LRESULT CDlgTest2Wnd::EditWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lPara
 }
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL CDlgTest2Wnd::Init()
-{
-	BOOL bRet = FALSE;
-
-	do 
-	{
-		if (!InitCtrl())
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		if (!InitInfo())
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-	
-	return bRet;
-}
-
 BOOL CDlgTest2Wnd::InitCtrl()
 {
 	BOOL bRet = FALSE;
 
 	do 
 	{
-		if (!InitWndSkin())
+		if (!InitWndCtrl())
 		{
 			bRet = FALSE;
 			break;
@@ -434,7 +426,7 @@ BOOL CDlgTest2Wnd::InitInfo()
 
 	do 
 	{
-/*
+#if 0
 		TCHAR lpszDesktopPath[_MAX_PATH] ={0};
 		if (::SHGetSpecialFolderPath(this->GetSafeHwnd(), lpszDesktopPath, CSIDL_DESKTOP, NULL))
 		{
@@ -457,12 +449,92 @@ BOOL CDlgTest2Wnd::InitInfo()
 			m_OldEditProc = (WNDPROC)GetWindowLong(m_hEditWnd, GWL_WNDPROC);
 			SetWindowLong(m_hEditWnd, GWL_WNDPROC, (DWORD)EditWndProc);
 		}
-*/
+#endif
 
 #if 0
 		//this->GetDlgItem(IDC_EDIT_FINDNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入查找的名称...");
 		//this->GetDlgItem(IDC_EDIT_SUBNAME)->SendMessage(EM_SETCUEBANNER, 0, (LPARAM)(LPCWSTR)L"输入替换的名称...");
 #endif
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgTest2Wnd::InitWndCtrl()
+{
+	BOOL bRet = FALSE;
+
+	DWORD dwIndex = 0;
+	CRect rcWndCtrl;
+
+	do 
+	{
+		GetDlgItem(IDC_STATIC_RECT)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC_RECT)->GetWindowRect(&rcWndCtrl);
+		ScreenToClient(&rcWndCtrl);
+
+		m_hComboEval.InsertString(dwIndex, _T("文件名添加..."));
+		m_hComboEval.SetItemData(dwIndex++, CONFIG_ADDFILENAME_TYPE);
+
+		m_hComboEval.InsertString(dwIndex, _T("文件名删除..."));
+		m_hComboEval.SetItemData(dwIndex++, CONFIG_DELFILENAME_TYPE);
+
+		m_hComboEval.InsertString(dwIndex, _T("文件扩展名..."));
+		m_hComboEval.SetItemData(dwIndex++, CONFIG_EXTFILENAME_TYPE);
+
+		m_hComboEval.InsertString(dwIndex, _T("文件名替换..."));
+		m_hComboEval.SetItemData(dwIndex++, CONFIG_REPLACEFILENAME_TYPE);
+
+		m_hComboEval.InsertString(dwIndex, _T("文件名日期..."));
+		m_hComboEval.SetItemData(dwIndex++, CONFIG_DATEFILENAME_TYPE);
+
+		m_hComboEval.InsertString(dwIndex, _T("文件名序号..."));
+		m_hComboEval.SetItemData(dwIndex++, CONFIG_INDEXFILENAME_TYPE);
+
+		for (dwIndex=0; dwIndex<m_pArPage.GetSize(); dwIndex++)
+		{
+			((CDialog*)m_pArPage[dwIndex])->ShowWindow(SW_HIDE);
+			((CDialog*)m_pArPage[dwIndex])->MoveWindow(&rcWndCtrl);
+		}
+
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOL CDlgTest2Wnd::InitWndInfo()
+{
+	BOOL bRet = FALSE;
+
+	CString strPrompt;
+	CString strListHeader;
+
+	do 
+	{
+		//TreeCtrl:
+		//m_hSysDirTree.SetFlags(SHCONTF_FOLDERS |SHCONTF_STORAGE);
+		m_hSysDirTree.ModifyStyle(NULL, TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT);
+		m_hSysDirTree.Expand(m_hSysDirTree.GetRootItem(), TVE_EXPAND);
+
+		//ListCtrl:
+		m_hSysDirList.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
+		m_hSysDirList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+		//m_hSysDirList.SetCheckboxeStyle(RC_CHKBOX_NORMAL);
+
+		m_hSysDirList.InsertColumn(1, _T("名称"), LVCFMT_LEFT, 100);
+		m_hSysDirList.InsertColumn(2, _T("扩展名"), LVCFMT_CENTER, 80);
+		m_hSysDirList.InsertColumn(3, _T("状态"), LVCFMT_CENTER, 80);
+
+		//m_hSysDirList.SetItemTextColor(-1, 2, RGB(0, 0, 0));
+		//m_hSysDirList.SetItemBkColor(-1, 2, RGB(255, 255, 0));
+
+		m_nDefaultSel = 0;
+		((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
+		((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
+		m_nPrePage = m_nDefaultSel;
 
 		bRet = TRUE;
 	} while (FALSE);
@@ -498,78 +570,22 @@ BOOL CDlgTest2Wnd::CreateChildWnd()
 	return bRet;
 }
 
-BOOL CDlgTest2Wnd::InitWndSkin()
+void CDlgTest2Wnd::DestroyChildWnd()
 {
-	BOOL bRet = FALSE;
+	DWORD dwIndex = 0;
+	CDialog *pDialog = NULL;
 
-	do 
+	for (dwIndex; dwIndex<m_pArPage.GetSize(); ++dwIndex)
 	{
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
-}
-
-BOOL CDlgTest2Wnd::InitWndInfo()
-{
-	BOOL bRet = FALSE;
-
-	CString strPrompt;
-	CString strListHeader;
-
-	do 
-	{
-		if (!SetChildWnd(TRUE))
+		pDialog = (CDialog *)m_pArPage.GetAt(dwIndex);
+		if (pDialog == NULL)
 		{
-			bRet = FALSE;
-			break;
+			continue;
 		}
 
-		//TreeCtrl:
-		//m_hSysDirTree.SetFlags(SHCONTF_FOLDERS |SHCONTF_STORAGE);
-		m_hSysDirTree.ModifyStyle(NULL, TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT);
-		m_hSysDirTree.Expand(m_hSysDirTree.GetRootItem(), TVE_EXPAND);
-
-		//ListCtrl:
-		m_hSysDirList.ModifyStyle(LVS_TYPEMASK, LVS_REPORT);
-		m_hSysDirList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-		//m_hSysDirList.SetCheckboxeStyle(RC_CHKBOX_NORMAL);
-
-		m_hSysDirList.InsertColumn(1, _T("名称"), LVCFMT_LEFT, 100);
-		m_hSysDirList.InsertColumn(2, _T("扩展名"), LVCFMT_CENTER, 80);
-		m_hSysDirList.InsertColumn(3, _T("状态"), LVCFMT_CENTER, 80);
-
-		//m_hSysDirList.SetItemTextColor(-1, 2, RGB(0, 0, 0));
-		//m_hSysDirList.SetItemBkColor(-1, 2, RGB(255, 255, 0));
-		 
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
-}
-
-BOOL CDlgTest2Wnd::UpdateWndCtrl()
-{
-	BOOL bRet = FALSE;
-
-	do 
-	{
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
-}
-
-BOOL CDlgTest2Wnd::UpdateWndInfo()
-{
-	BOOL bRet = FALSE;
-
-	do 
-	{
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
+		pDialog->DestroyWindow();
+		pDialog = NULL;
+	}
 }
 
 void CDlgTest2Wnd::SetWndControlLayout()
@@ -602,58 +618,6 @@ BOOL CDlgTest2Wnd::DrawWndImage(CDC *pDC)
 
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL CDlgTest2Wnd::SetChildWnd(BOOL bFlag)
-{
-	BOOL bRet = FALSE;
-
-	int nIndex = 0;
-	CRect rcSubWnd;
-
-	do 
-	{
-		if (bFlag)
-		{
-			//1
-			m_hComboEval.InsertString(nIndex, _T("文件名添加..."));
-			m_hComboEval.SetItemData(nIndex++, CONFIG_ADDFILENAME_TYPE);
-
-			m_hComboEval.InsertString(nIndex, _T("文件名删除..."));
-			m_hComboEval.SetItemData(nIndex++, CONFIG_DELFILENAME_TYPE);
-
-			m_hComboEval.InsertString(nIndex, _T("文件扩展名..."));
-			m_hComboEval.SetItemData(nIndex++, CONFIG_EXTFILENAME_TYPE);
-
-			m_hComboEval.InsertString(nIndex, _T("文件名替换..."));
-			m_hComboEval.SetItemData(nIndex++, CONFIG_REPLACEFILENAME_TYPE);
-
-			m_hComboEval.InsertString(nIndex, _T("文件名日期..."));
-			m_hComboEval.SetItemData(nIndex++, CONFIG_DATEFILENAME_TYPE);
-
-			m_hComboEval.InsertString(nIndex, _T("文件名序号..."));
-			m_hComboEval.SetItemData(nIndex++, CONFIG_INDEXFILENAME_TYPE);
-
-			GetDlgItem(IDC_STATIC_RECT)->GetWindowRect(&rcSubWnd);
-			GetDlgItem(IDC_STATIC_RECT)->ShowWindow(SW_HIDE);
-			ScreenToClient(&rcSubWnd);
-
-			for (nIndex=0; nIndex<m_pArPage.GetSize(); nIndex++)
-			{
-				((CDialog*)m_pArPage[nIndex])->ShowWindow(SW_HIDE);
-				((CDialog*)m_pArPage[nIndex])->MoveWindow(&rcSubWnd);
-			}
-
-			m_nDefaultSel = 0;
-			((CDialog*)m_pArPage[m_nDefaultSel])->ShowWindow(TRUE);
-			((CDialog*)m_pArPage[m_nDefaultSel])->SetFocus();
-			m_nPrePage = m_nDefaultSel;
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-	
-	return bRet;
-}
-
 void CDlgTest2Wnd::ShowShellPathFile(LPCTSTR lpszShellPath)
 {
 	BOOL bRet = FALSE;
@@ -719,47 +683,8 @@ void CDlgTest2Wnd::ShowShellPathFile(LPCTSTR lpszShellPath)
 	} while (FALSE);
 }
 
-void CDlgTest2Wnd::SetButtonCtrl(BOOL bFlag)
-{
-	if (bFlag)
-	{
-	}
-	else
-	{
-
-	}
-}
-
 //////////////////////////////////////////////////////////////////////////
 //
-BOOL CDlgTest2Wnd::UpdateConfigInfo(BOOL bFlag)
-{
-	BOOL bRet = FALSE;
-	CString strPrompt;
-
-	do 
-	{
-		if (bFlag)
-		{
-			if (!UpdateWndCtrl())
-			{
-				bRet = FALSE;
-				break;
-			}
-
-			if (!UpdateWndInfo())
-			{
-				bRet = FALSE;
-				break;
-			}
-		}
-
-		bRet = TRUE;
-	} while (FALSE);
-
-	return bRet;
-}
-
 BOOL CDlgTest2Wnd::GetCurConfigData(UPDATE_FILEDATA *pUpdateData)
 {
 	BOOL bRet = FALSE;

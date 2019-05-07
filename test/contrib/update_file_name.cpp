@@ -223,6 +223,7 @@ void update_file_data::ClearFileData(std::vector<UPDATE_FILEDATA*> &vecFileData)
 		}
 
 		vecFileData.clear();
+		std::vector<UPDATE_FILEDATA*>().swap(vecFileData);
 
 		bRet = TRUE;
 	} while (FALSE);
@@ -256,6 +257,7 @@ void update_file_data::ClearFileInfo(std::vector<UPDATE_FILEINFO *> &vecFileInfo
 		}
 
 		vecFileInfo.clear();
+		std::vector<UPDATE_FILEINFO*>().swap(vecFileInfo);
 
 		bRet = TRUE;
 	} while (FALSE);
