@@ -259,17 +259,25 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	THREAD_PRIORITY_T priority = PRIORITY_NORMAL;
 
 	struct sched_param param = {0};
-	THREAD_MUTEX_T stMutex_t = {0};
+	THREAD_MUTEX_T* pMutex_t = NULL;
 
 	do 
 	{
-		pthread_attr_init(&stMutex_t.ptAttr);
+		pMutex_t = new THREAD_MUTEX_T;
+		if (pMutex_t == NULL)
+		{
+			bRet = FALSE;
+			break;
+		}
+		memset(pMutex_t, 0x0, sizeof(THREAD_MUTEX_T));
+
+		pthread_attr_init(&pMutex_t->ptAttr);
 		if (priority != PRIORITY_NORMAL)
 		{
 			if (priority != PRIORITY_IDLE)
 			{
-				pthread_attr_setschedpolicy(&stMutex_t.ptAttr, SCHED_RR);			//实时,轮转法
-				if (pthread_attr_getschedparam(&stMutex_t.ptAttr, &param) == 0)		//查询优先级
+				pthread_attr_setschedpolicy(&pMutex_t->ptAttr, SCHED_RR);			//实时,轮转法
+				if (pthread_attr_getschedparam(&pMutex_t->ptAttr, &param) == 0)		//查询优先级
 				{
 					if (priority == PRIORITY_HIGH)
 					{
@@ -280,17 +288,17 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 						param.sched_priority = 4;									//4:ABOVE_NORMAL
 					}
 
-					pthread_attr_setschedparam(&stMutex_t.ptAttr, &param);			//设置优先级
+					pthread_attr_setschedparam(&pMutex_t->ptAttr, &param);			//设置优先级
 				}
 			}
 		}
 
-		stMutex_t.pParam = this;
-		pthread_mutex_init(&stMutex_t.ptMutex, NULL);
-		pthread_condattr_init(&stMutex_t.ptCattr);
-		pthread_cond_init(&stMutex_t.ptCond, &stMutex_t.ptCattr);
+		pMutex_t->pParam = this;
+		pthread_mutex_init(&pMutex_t->ptMutex, NULL);
+		pthread_condattr_init(&pMutex_t->ptCattr);
+		pthread_cond_init(&pMutex_t->ptCond, &pMutex_t->ptCattr);
 
-		pthread_create(&ptThreadId1, &stMutex_t.ptAttr, ptThreadFunc1, &stMutex_t);
+		pthread_create(&ptThreadId1, &pMutex_t->ptAttr, ptThreadFunc1, pMutex_t);
 
 		//pthread_join(ptThreadId1, NULL);
 		//pthread_detach(ptThreadId1);
@@ -309,6 +317,7 @@ void* ptThreadFunc1(void *pParam)
 
 	do 
 	{
+		pthread_detach(pthread_self());
 		pMutex_t = (THREAD_MUTEX_T *)pParam;
 		if (pMutex_t == NULL)
 		{
@@ -319,7 +328,7 @@ void* ptThreadFunc1(void *pParam)
 		while(TRUE)
 		{
 			tv.tv_sec = time(NULL);
-			tv.tv_sec += 3;
+			tv.tv_sec += 2;
 
 			pthread_mutex_lock(&pMutex_t->ptMutex);
 			nRet = pthread_cond_timedwait(&pMutex_t->ptCond, &pMutex_t->ptMutex, &tv);
@@ -330,6 +339,12 @@ void* ptThreadFunc1(void *pParam)
 
 		bRet = TRUE;
 	} while (FALSE);
+
+	if (pMutex_t != NULL)
+	{
+		delete pMutex_t;
+		pMutex_t = NULL;
+	}
 	
 	return NULL;
 }
