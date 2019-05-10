@@ -8,7 +8,7 @@ if exist "ipch" 				(rmdir /Q /S "ipch")
 
 cd %s1%\test
 if exist "*.aps"				(del /a /q /f "*.aps")
-if exist "*.user"				(del /a /q /f "*.user")		
+::if exist "*.user"				(del /a /q /f "*.user")		
 
 cd %s1%\bin
 if exist "test.exe"				(del /a /q /f "test.exe")

@@ -14,26 +14,29 @@
 #include <sys/types.h>							//
 #include <sys/stat.h>							//_stat	
 
-//#include <regex>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+#include <cctype>
+#include <locale>
+#include <algorithm>
+#include <functional> 
+
+#include <vector>
+#include <queue> 
+#include <list>
+#include <map>
+
+#include <regex>
+#include <array>
 //#include <devguid.h>
 //#include <Dbt.h>
 
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <string>
-#include <map>
-#include <list>
-#include <queue> 
-#include <vector>
-
+#include <winsvc.h>
 #include <atlconv.h>
 #include <gdiplus.h>
-//#include "afxshelltreeCtrl.h"
-//#include <opencv2/opencv.hpp>
-
 #include <detours.h>
-#include <winsvc.h>
 
 #include "./internal.h"
 #include "../Inc/GlobalInfo.h"
@@ -43,6 +46,4 @@
 #include "../Contrib/update_file_name.h"
 
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);
-int  CALLBACK	EnumFontProc(ENUMLOGFONTEX *lpelf,NEWTEXTMETRICEX *lpntm,DWORD nFontType,long lParam);
-
 #endif

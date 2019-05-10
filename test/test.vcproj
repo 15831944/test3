@@ -31,7 +31,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if exist $(SolutionDir)\bin\opencv_core249.dll  del $(SolutionDir)bin\opencv_core249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_highgui249.dll  del $(SolutionDir)bin\opencv_highgui249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_imgproc249.dll  del $(SolutionDir)bin\opencv_imgproc249.dll /f /q&#x0D;&#x0A;"
+				CommandLine="if exist $(SolutionDir)\bin\opencv_core249.dll  del $(SolutionDir)bin\opencv_core249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_highgui249.dll  del $(SolutionDir)bin\opencv_highgui249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_imgproc249.dll  del $(SolutionDir)bin\opencv_imgproc249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\pthreadVC2.dll  del $(SolutionDir)bin\pthreadVC2.dll /f /q&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy $(OutDir)\$(ProjectName).exe	$(SolutionDir)bin /d /y&#x0D;&#x0A;xcopy $(SolutionDir)lib\opencv\*.dll 	$(SolutionDir)bin /d /y"
+				CommandLine="xcopy $(OutDir)\$(ProjectName).exe $(SolutionDir)bin /d /y&#x0D;&#x0A;xcopy $(SolutionDir)lib\opencv\*.dll  $(SolutionDir)bin /d /y&#x0D;&#x0A;xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll $(SolutionDir)bin /d /y&#x0D;&#x0A;"
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
@@ -641,6 +641,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Inc\internal.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Inc\PubClass.cpp"
 				>
 			</File>
@@ -756,6 +760,10 @@
 					</File>
 					<File
 						RelativePath=".\Inc\common\Leaf.Text\LeafChar.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.Text\String.h"
 						>
 					</File>
 				</Filter>
