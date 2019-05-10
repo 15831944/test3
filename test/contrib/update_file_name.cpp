@@ -162,19 +162,16 @@ BOOL update_file_data::EnumFileInfo(const char *pszShellPath, std::vector<UPDATE
 
 				pFileInfo->uiFileSize = (fd.nFileSizeHigh*(MAXDWORD+1)) + fd.nFileSizeLow;
 				pFileInfo->uiFileAttrib = fd.dwFileAttributes;
-				pFileInfo->time_create = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftCreationTime);
-				pFileInfo->time_access = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftLastAccessTime);
-				pFileInfo->time_write = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftLastWriteTime);
+				//pFileInfo->time_create = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftCreationTime);
+				//pFileInfo->time_access = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftLastAccessTime);
+				//pFileInfo->time_write = CGlobalInfo::CreateInstance()->FileTimeToTime(fd.ftLastWriteTime);
 
 				sprintf(pFileInfo->szFileName, _T("%s"), fd.cFileName);
 				sprintf(pFileInfo->szParentPath, _T("%s"), pszShellPath);
 				sprintf(pFileInfo->szFilePath, _T("%s\\%s"), pszShellPath, fd.cFileName);
 
 				ptr = strrchr(fd.cFileName, '.');
-				if (ptr == NULL)
-				{
-				}
-				else
+				if (ptr != NULL)
 				{
 					uiPos = ptr - fd.cFileName;
 					memcpy(pFileInfo->szFileExt, fd.cFileName+uiPos, strlen(fd.cFileName)-uiPos);
@@ -242,17 +239,12 @@ void update_file_data::ClearFileInfo(std::vector<UPDATE_FILEINFO *> &vecFileInfo
 	{
 		for (iterFileInfo=vecFileInfo.begin(); iterFileInfo!=vecFileInfo.end();)
 		{
-			pFileInfo = (UPDATE_FILEINFO *)(*iterFileInfo);
-			if (pFileInfo != NULL)
+			if (*iterFileInfo != NULL)
 			{
-				delete pFileInfo;
-				pFileInfo = NULL;
+				delete *iterFileInfo;
+				*iterFileInfo = NULL;
 
 				iterFileInfo = vecFileInfo.erase(iterFileInfo);
-			}
-			else
-			{
-				++iterFileInfo;
 			}
 		}
 

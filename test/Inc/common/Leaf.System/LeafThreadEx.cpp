@@ -8,7 +8,7 @@ using namespace Leaf::System;
 Leaf::System::CThreadEx::CThreadEx()
 {
 	m_bExit = false;
-	m_thread_t = 0;
+	m_thread_t = NULL;
 }
 
 Leaf::System::CThreadEx::~CThreadEx()
