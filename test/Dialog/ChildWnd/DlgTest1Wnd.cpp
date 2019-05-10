@@ -219,6 +219,7 @@ void* ptThreadFunc1(void *pParam)
 		{
 			tv.tv_sec = time(NULL);
 			tv.tv_sec += 2;
+			tv.tv_nsec = 0;
 
 			pthread_mutex_lock(&pMutex_t->ptMutex);
 			nRet = pthread_cond_timedwait(&pMutex_t->ptCond, &pMutex_t->ptMutex, &tv);
