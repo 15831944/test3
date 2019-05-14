@@ -9,6 +9,7 @@ Leaf::System::CThreadEx::CThreadEx()
 {
 	m_bExit = false;
 	m_thread_t = NULL;
+	memset(&m_mutext, 0x0, sizeof(THREAD_MUTEX_T));
 }
 
 Leaf::System::CThreadEx::~CThreadEx()

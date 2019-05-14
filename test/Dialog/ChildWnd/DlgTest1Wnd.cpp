@@ -140,59 +140,72 @@ typedef enum {
 	PRIORITY_HIGH = 2,
 }THREAD_PRIORITY_T;
 
+pthread_t ptThreadId;
+THREAD_MUTEX_T g_Mutext = {0};
 void* ptThreadFunc1(void *pParam);
+
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	BOOL bRet = FALSE;
-
-	pthread_t ptThreadId1;
-	THREAD_PRIORITY_T priority = PRIORITY_NORMAL;
+	
+	int nRet = 0;
 
 	struct sched_param param = {0};
-	THREAD_MUTEX_T* pMutex_t = NULL;
+	struct timespec __abstime = {0};
+	
+	THREAD_PRIORITY_T priority = PRIORITY_NORMAL;
 
 	do 
 	{
-		pMutex_t = new THREAD_MUTEX_T;
-		if (pMutex_t == NULL)
+		if (g_Mutext.ptMutex == NULL || g_Mutext.ptCond == NULL)
+		{
+			nRet = pthread_mutex_init(&g_Mutext.ptMutex, NULL);
+			pthread_condattr_init(&g_Mutext.ptCattr);
+			pthread_cond_init(&g_Mutext.ptCond, &g_Mutext.ptCattr);
+		}
+
+// 		pthread_mutex_lock(&g_Mutext.ptMutex);
+// 		nRet = pthread_cond_timedwait(&g_Mutext.ptCond, &g_Mutext.ptMutex, &__abstime);
+// 		if (nRet == ETIMEDOUT)
+// 		{
+// 			bRet = FALSE;
+// 			pthread_mutex_unlock(&g_Mutext.ptMutex);
+// 			break;
+// 		}
+// 		pthread_mutex_unlock(&g_Mutext.ptMutex);
+
+		nRet = pthread_mutex_trylock(&g_Mutext.ptMutex);
+		if (nRet == EBUSY)
 		{
 			bRet = FALSE;
 			break;
 		}
-		memset(pMutex_t, 0x0, sizeof(THREAD_MUTEX_T));
+		
+// 		pthread_attr_init(&pMutex_t->ptAttr);
+// 		if (priority != PRIORITY_NORMAL)
+// 		{
+// 			if (priority != PRIORITY_IDLE)
+// 			{
+// 				pthread_attr_setschedpolicy(&pMutex_t->ptAttr, SCHED_RR);			//实时,轮转法
+// 				if (pthread_attr_getschedparam(&pMutex_t->ptAttr, &param) == 0)		//查询优先级
+// 				{
+// 					if (priority == PRIORITY_HIGH)
+// 					{
+// 						param.sched_priority = 6;									//6:HIGH
+// 					}
+// 					else
+// 					{
+// 						param.sched_priority = 4;									//4:ABOVE_NORMAL
+// 					}
+// 
+// 					pthread_attr_setschedparam(&pMutex_t->ptAttr, &param);			//设置优先级
+// 				}
+// 			}
+// 		}
 
-		pthread_attr_init(&pMutex_t->ptAttr);
-		if (priority != PRIORITY_NORMAL)
-		{
-			if (priority != PRIORITY_IDLE)
-			{
-				pthread_attr_setschedpolicy(&pMutex_t->ptAttr, SCHED_RR);			//实时,轮转法
-				if (pthread_attr_getschedparam(&pMutex_t->ptAttr, &param) == 0)		//查询优先级
-				{
-					if (priority == PRIORITY_HIGH)
-					{
-						param.sched_priority = 6;									//6:HIGH
-					}
-					else
-					{
-						param.sched_priority = 4;									//4:ABOVE_NORMAL
-					}
-
-					pthread_attr_setschedparam(&pMutex_t->ptAttr, &param);			//设置优先级
-				}
-			}
-		}
-
-		pMutex_t->pParam = this;
-		pthread_mutex_init(&pMutex_t->ptMutex, NULL);
-		pthread_condattr_init(&pMutex_t->ptCattr);
-		pthread_cond_init(&pMutex_t->ptCond, &pMutex_t->ptCattr);
-
-		pthread_create(&ptThreadId1, &pMutex_t->ptAttr, ptThreadFunc1, pMutex_t);
-
+		//pthread_create(&ptThreadId1, &pMutex_t->ptAttr, ptThreadFunc1, pMutex_t);
 		//pthread_join(ptThreadId1, NULL);
 		//pthread_detach(ptThreadId1);
-
 		bRet = TRUE;
 	} while (FALSE);
 }
@@ -217,8 +230,7 @@ void* ptThreadFunc1(void *pParam)
 
 		while(TRUE)
 		{
-			tv.tv_sec = time(NULL);
-			tv.tv_sec += 2;
+			tv.tv_sec = time(NULL) + 2;
 			tv.tv_nsec = 0;
 
 			pthread_mutex_lock(&pMutex_t->ptMutex);

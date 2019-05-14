@@ -28,18 +28,13 @@ namespace Leaf
 			static void*	_ThreadEntry(LPVOID pParam);
 			
 		protected:
-			typedef struct {
-				void*		ptAttr;
-				void*		ptCond;
-				void*		ptMutex;
-				void*		ptCattr;
-				void*		pParam;
-			}THREAD_MUTEX_T;
+			
 			
 		private:
 			mutable volatile bool m_bExit;
 			
 			void* 			m_thread_t;
+			THREAD_MUTEX_T	m_mutext;
 		};
 	}
 }
