@@ -1,8 +1,6 @@
 #ifndef __INTERNAL_H__
 #define __INTERNAL_H__
 
-#define	SKINUI_VERSION			1
-#define GETSYSTEM_FONT			0x1000
 #define MAX_EDITCHAR_SIZE		16
 
 #define WM_TEST1WND_CTRL		WM_USER + 0x1000
@@ -139,7 +137,8 @@ typedef	v_int64_t				v_pos_t;
 		#define INCRC(x)		(__sync_add_and_fetch(x, 1))
 		#define DECRC(x)		(__sync_sub_and_fetch(x, 1))
 	#endif
-#endif	
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 //
 typedef struct{

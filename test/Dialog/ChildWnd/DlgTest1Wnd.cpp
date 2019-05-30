@@ -122,17 +122,6 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 #endif
 }
 
-#include <pthread.h>
-#pragma comment(lib, "pthreadVC2.lib")
-
-typedef struct {
-	pthread_attr_t		ptAttr;
-	pthread_cond_t		ptCond;
-	pthread_mutex_t		ptMutex;
-	pthread_condattr_t	ptCattr;
-	void*				pParam;
-}THREAD_MUTEX_T;
-
 typedef enum {
 	PRIORITY_IDLE = -1,
 	PRIORITY_NORMAL = 0,
@@ -140,47 +129,15 @@ typedef enum {
 	PRIORITY_HIGH = 2,
 }THREAD_PRIORITY_T;
 
-pthread_t ptThreadId;
-THREAD_MUTEX_T g_Mutext = {0};
-void* ptThreadFunc1(void *pParam);
-
+#include "../../Inc/common/Leaf.System/LeafEvent.h"
+using namespace Leaf::System;
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	BOOL bRet = FALSE;
-	
-	int nRet = 0;
 
-	struct sched_param param = {0};
-	struct timespec __abstime = {0};
-	
-	THREAD_PRIORITY_T priority = PRIORITY_NORMAL;
-
+	Leaf::System::CEvent event;
 	do 
 	{
-		if (g_Mutext.ptMutex == NULL || g_Mutext.ptCond == NULL)
-		{
-			nRet = pthread_mutex_init(&g_Mutext.ptMutex, NULL);
-			pthread_condattr_init(&g_Mutext.ptCattr);
-			pthread_cond_init(&g_Mutext.ptCond, &g_Mutext.ptCattr);
-		}
-
-// 		pthread_mutex_lock(&g_Mutext.ptMutex);
-// 		nRet = pthread_cond_timedwait(&g_Mutext.ptCond, &g_Mutext.ptMutex, &__abstime);
-// 		if (nRet == ETIMEDOUT)
-// 		{
-// 			bRet = FALSE;
-// 			pthread_mutex_unlock(&g_Mutext.ptMutex);
-// 			break;
-// 		}
-// 		pthread_mutex_unlock(&g_Mutext.ptMutex);
-
-		nRet = pthread_mutex_trylock(&g_Mutext.ptMutex);
-		if (nRet == EBUSY)
-		{
-			bRet = FALSE;
-			break;
-		}
-		
 // 		pthread_attr_init(&pMutex_t->ptAttr);
 // 		if (priority != PRIORITY_NORMAL)
 // 		{
@@ -203,51 +160,11 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 // 			}
 // 		}
 
-		//pthread_create(&ptThreadId1, &pMutex_t->ptAttr, ptThreadFunc1, pMutex_t);
-		//pthread_join(ptThreadId1, NULL);
-		//pthread_detach(ptThreadId1);
-		bRet = TRUE;
-	} while (FALSE);
-}
-
-void* ptThreadFunc1(void *pParam)
-{
-	BOOL bRet = FALSE;
-
-	int nRet = 0;
-	struct timespec tv;
-	THREAD_MUTEX_T *pMutex_t = NULL;
-
-	do 
-	{
-		pthread_detach(pthread_self());
-		pMutex_t = (THREAD_MUTEX_T *)pParam;
-		if (pMutex_t == NULL)
-		{
-			bRet = FALSE;
-			break;
-		}
-
-		while(TRUE)
-		{
-			tv.tv_sec = time(NULL) + 2;
-			tv.tv_nsec = 0;
-
-			pthread_mutex_lock(&pMutex_t->ptMutex);
-			nRet = pthread_cond_timedwait(&pMutex_t->ptCond, &pMutex_t->ptMutex, &tv);
-			pthread_mutex_unlock(&pMutex_t->ptMutex);
-
-			TRACE("wait:%d", nRet);
-		}
+		HEVENT hEvent = event.CreateEvent(false, false, "123");
+		TRACE("1");
+		event.WaitForEvent(hEvent, 2000);
+		TRACE("2");
 
 		bRet = TRUE;
 	} while (FALSE);
-
-	if (pMutex_t != NULL)
-	{
-		delete pMutex_t;
-		pMutex_t = NULL;
-	}
-	
-	return NULL;
 }

@@ -13,6 +13,9 @@ namespace Leaf
 
 		public:	
 			bool		DeleteSelfFile();
+			bool		SetExecPrivilege();
+
+			bool		SetExitComputer(v_uint32_t uiFlags, bool bForce);
 		};
 	}
 }
