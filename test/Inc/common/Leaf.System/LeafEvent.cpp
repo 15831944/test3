@@ -86,15 +86,40 @@ bool Leaf::System::CEvent::CloseEvent(HEVENT hEvent)
 	return bRet;
 }
 
+#ifdef _WIN_32_
+static int gettimeofday(struct timeval *tv, struct timezone *tzp)
+{
+	time_t clock;
+	struct tm tm;
+
+	SYSTEMTIME wtm;
+	GetLocalTime(&wtm);
+
+	tm.tm_year = wtm.wYear - 1900;
+	tm.tm_mon = wtm.wMonth - 1;
+	tm.tm_mday = wtm.wDay;
+
+	tm.tm_hour = wtm.wHour;
+	tm.tm_min = wtm.wMinute;
+	tm.tm_sec = wtm.wSecond;
+	tm.tm_isdst = -1;
+
+	clock = mktime(&tm);
+	tv->tv_sec = clock;
+	tv->tv_usec = wtm.wMilliseconds * 1000;
+
+	return (0);
+}
+#endif
+
 v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMilliseconds)
 {
 	bool bRet = false;
 
-	v_uint64_t sec = 0;
-	v_uint64_t usec = 0;
-
 	v_uint32_t uRet = 0;
-	struct timespec abstime;
+
+	struct timeval stTime = {0};
+	struct timespec abstime = {0};
 
 	do 
 	{
@@ -118,22 +143,9 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMillise
 			uRet = pthread_mutex_lock((pthread_mutex_t*)&hEvent->m_ptMutex);
 		}
 
-#ifdef _WIN_32_
-		SYSTEMTIME stTime = {0};
-		::GetLocalTime(&stTime);
-
-		sec = stTime.wSecond;
-		usec = stTime.wMilliseconds;
-#elif _GCC_
-		struct timeval stTime = {0};
 		gettimeofday(&stTime, NULL);
-
-		sec = stTime.tv_sec;
-		usec = stTime.tv_usec;
-#endif
-
-		abstime.tv_sec = sec + uMilliseconds/1000;
-		abstime.tv_nsec = usec*1000 + (uMilliseconds%1000)*1000000;
+		abstime.tv_sec = stTime.tv_sec + uMilliseconds/1000;
+		abstime.tv_nsec = stTime.tv_usec*1000 + (uMilliseconds%1000)*1000000;
 		if (abstime.tv_nsec >= 1000000000)
 		{
 			abstime.tv_nsec -= 1000000000;
@@ -146,16 +158,14 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMillise
 			{
 				if ((uRet = pthread_cond_timedwait((pthread_cond_t*)&hEvent->m_ptCond, (pthread_mutex_t*)&hEvent->m_ptMutex, &abstime)))
 				{
-					if (uRet == ETIMEDOUT)
-					{
-						break;
-					}
+					break;
 				}
 			}
 			else
 			{
 				if ((uRet = pthread_cond_wait((pthread_cond_t*)&hEvent->m_ptCond, (pthread_mutex_t*)&hEvent->m_ptMutex)))
 				{
+					break;
 				}
 			}
 		}

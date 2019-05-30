@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "LeafThreadEx.h"
 
+#include "LeafEvent.h"
+
 #include <pthread.h>
 #pragma comment(lib, "pthreadVC2.lib")
 
@@ -9,7 +11,8 @@ Leaf::System::CThreadEx::CThreadEx()
 {
 	m_bExit = false;
 	m_thread_t = NULL;
-	memset(&m_mutext, 0x0, sizeof(THREAD_MUTEX_T));
+	
+	
 }
 
 Leaf::System::CThreadEx::~CThreadEx()

@@ -164,6 +164,7 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 		TRACE("1");
 		event.WaitForEvent(hEvent, 2000);
 		TRACE("2");
+		event.CloseEvent(hEvent);
 
 		bRet = TRUE;
 	} while (FALSE);

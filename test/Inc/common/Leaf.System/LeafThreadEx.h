@@ -28,13 +28,12 @@ namespace Leaf
 			static void*	_ThreadEntry(LPVOID pParam);
 			
 		protected:
-			
+			void*			m_StartEvent;
+			void*			m_EndEvent;
 			
 		private:
 			mutable volatile bool m_bExit;
-			
 			void* 			m_thread_t;
-			THREAD_MUTEX_T	m_mutext;
 		};
 	}
 }
