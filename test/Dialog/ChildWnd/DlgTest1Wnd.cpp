@@ -55,14 +55,31 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 
 BOOL CDlgTest1Wnd::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_ESCAPE || pMsg->wParam == VK_RETURN || pMsg->wParam == VK_SPACE))
-	{
-		return TRUE;
-	}
+// 	if (pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_ESCAPE || pMsg->wParam == VK_RETURN || pMsg->wParam == VK_SPACE))
+// 	{
+// 		return TRUE;
+// 	}
+// 
+// 	if (pMsg->message == WM_SYSKEYDOWN && pMsg->wParam == VK_F4)
+// 	{
+// 		return TRUE;
+// 	}
 
-	if (pMsg->message == WM_SYSKEYDOWN && pMsg->wParam == VK_F4)
+	if (pMsg->message >= WM_MOUSEFIRST && pMsg->message <= WM_MOUSELAST)
 	{
-		return TRUE;
+		MSG msg;
+		::CopyMemory(&msg, pMsg, sizeof(MSG));
+		HWND hWndParent = ::GetParent(msg.hwnd);
+		while (hWndParent && hWndParent != m_hWnd)
+		{
+			msg.hwnd = hWndParent;
+			hWndParent = ::GetParent(hWndParent);
+		}
+		if (msg.hwnd)
+		{
+			m_ToolTip.UpdateTipText("11111", CWnd::FromHandle(pMsg->hwnd));
+			m_ToolTip.RelayEvent(&msg);
+		}
 	}
 
 	return CDialog::PreTranslateMessage(pMsg);
@@ -72,6 +89,16 @@ BOOL CDlgTest1Wnd::PreTranslateMessage(MSG* pMsg)
 //
 BOOL CDlgTest1Wnd::InitCtrl()
 {
+	m_ToolTip.Create(this, TTS_ALWAYSTIP );
+	m_ToolTip.Activate(TRUE);
+
+	m_ToolTip.SetTipTextColor(RGB(0, 255, 0));
+	m_ToolTip.SetTipBkColor(RGB(255, 0, 0));
+
+	//m_ToolTip.SetDelayTime(150);
+	m_ToolTip.AddTool(GetDlgItem(IDC_BTN_TEST1), "test1");
+	m_ToolTip.AddTool(GetDlgItem(IDC_BTN_TEST2), "test2");
+
 	return TRUE;
 }
 
@@ -160,11 +187,11 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 // 			}
 // 		}
 
-		HEVENT hEvent = event.CreateEvent(false, false, "123");
-		TRACE("1");
-		event.WaitForEvent(hEvent, 2000);
-		TRACE("2");
-		event.CloseEvent(hEvent);
+// 		HEVENT hEvent = event.CreateEvent(false, false, "123");
+// 		TRACE("1");
+// 		event.WaitForEvent(hEvent, 2000);
+// 		TRACE("2");
+// 		event.CloseEvent(hEvent);
 
 		bRet = TRUE;
 	} while (FALSE);

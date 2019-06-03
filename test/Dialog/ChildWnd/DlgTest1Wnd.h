@@ -24,4 +24,7 @@ protected:
 protected:
 	BOOL					InitCtrl();
 	BOOL					InitInfo();
+
+protected:
+	CToolTipCtrl			m_ToolTip;
 };
