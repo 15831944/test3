@@ -1,6 +1,13 @@
 #ifndef __LEAF_THREADEX_H__
 #define __LEAF_THREADEX_H__
 
+typedef enum {
+	PRIORITY_IDLE = -1,
+	PRIORITY_NORMAL = 0,
+	PRIORITY_ABOVE_NORMAL = 1,
+	PRIORITY_HIGH = 2,
+}THREAD_PRIORITY_T;
+
 namespace Leaf
 {
 	namespace System

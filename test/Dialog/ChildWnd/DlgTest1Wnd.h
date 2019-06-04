@@ -1,6 +1,8 @@
 #pragma once
 #include "afxwin.h"
 
+#include "../../Control/WndCtrl/TipWnd.h"
+
 using namespace std;
 class CDlgTest1Wnd : public CDialog
 {
@@ -26,5 +28,5 @@ protected:
 	BOOL					InitInfo();
 
 protected:
-	CToolTipCtrl			m_ToolTip;
+	CTipWnd					m_TipWnd;
 };

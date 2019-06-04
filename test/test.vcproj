@@ -851,6 +851,14 @@
 					RelativePath=".\Control\WndCtrl\ScrollWndMsg.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Control\WndCtrl\TipWnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Control\WndCtrl\TipWnd.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="ListCtrl"
