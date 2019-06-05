@@ -116,7 +116,7 @@ void CDlgTest1Wnd::SetWndControlLayout()
 	rcTipWnd.right  = rcClient.right;
 	rcTipWnd.bottom = rcClient.bottom;
 
-	ClientToScreen(rcTipWnd);
+	ClientToScreen(&rcTipWnd);
 	m_TipWnd.MoveWindow(rcTipWnd);
 }
 

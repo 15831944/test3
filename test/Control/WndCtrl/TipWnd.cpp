@@ -4,13 +4,14 @@
 CTipWnd::CTipWnd()
 {
 	m_strWndText = _T("");
-	
-	m_pFont = NULL;
-	m_ptOrigin = CPoint(0, 0);	
+
+	m_ptOrigin = CPoint(0, 0);
+	m_crTextColor = RGB(255, 0, 0);
 }
 
 CTipWnd::~CTipWnd()
 {
+	m_Font.DeleteObject();
 }
 
 BEGIN_MESSAGE_MAP(CTipWnd, CWnd)
@@ -18,6 +19,7 @@ BEGIN_MESSAGE_MAP(CTipWnd, CWnd)
 	ON_WM_ERASEBKGND()
 	
 	ON_WM_DESTROY()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////////
@@ -39,6 +41,12 @@ void CTipWnd::OnPaint()
 void CTipWnd::OnDestroy()
 {
 	CWnd::OnDestroy();
+}
+
+void CTipWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	PostMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));  
+	CWnd::OnLButtonDown(nFlags, point);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -67,7 +75,11 @@ BOOL CTipWnd::DrawWndBk(CDC *pDC)
 
 BOOL CTipWnd::DrawWndImage(CDC *pDC)
 {
+	CRect rcWndText;
 	CFont *pOldFont = NULL;
+
+	int iTextHeight = -1;
+
 	if (pDC == NULL)
 	{
 		return FALSE;
@@ -76,11 +88,21 @@ BOOL CTipWnd::DrawWndImage(CDC *pDC)
 	CRect rcWnd;
 	GetClientRect(&rcWnd);
 
-	pOldFont = pDC->SelectObject(m_pFont);
+	pOldFont = pDC->SelectObject(&m_Font);
 	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(m_crTextColor);
 
-	pDC->DrawText(m_strWndText, &rcWnd, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+	rcWndText = rcWnd;
+	iTextHeight = pDC->DrawText(m_strWndText, rcWndText, DT_CENTER | DT_WORDBREAK | DT_CALCRECT | DT_EDITCONTROL);
 
+	rcWndText = rcWnd;
+	if (rcWndText.Height() > iTextHeight)
+	{
+		//rcWndText.top += (rcWndText.Height() - iTextHeight)/2;
+		rcWndText.DeflateRect(0, (rcWndText.Height()-iTextHeight)/2);
+	}
+
+	pDC->DrawText(m_strWndText, rcWndText, DT_CENTER | DT_WORDBREAK | DT_EDITCONTROL);
 	pDC->SelectObject(pOldFont);
 	return TRUE;
 }
@@ -96,7 +118,7 @@ void CTipWnd::SetWndSize(CSize *pSize)
 		return;
 	}
 
-	pFont = (CFont *)pDC->SelectObject(m_pFont);
+	pFont = (CFont *)pDC->SelectObject(&m_Font);
 	pDC->DrawText(m_strWndText, &rcWnd, DT_CALCRECT);
 	pDC->SelectObject(pFont);
 
@@ -110,12 +132,23 @@ void CTipWnd::SetWndSize(CSize *pSize)
 //
 BOOL CTipWnd::Create(CWnd *pParentWnd)
 {
+	CFont *pFont = NULL;
+	LOGFONT	lfFont = {0};
+
 	if (pParentWnd == NULL)
 	{
 		return FALSE;
 	}
 	
-	m_pFont = CFont::FromHandle((HFONT)::GetStockObject(DEFAULT_GUI_FONT));
+	pFont = CFont::FromHandle((HFONT)::GetStockObject(DEFAULT_GUI_FONT));
+	if (pFont != NULL)
+	{
+		pFont->GetLogFont(&lfFont);
+		if (m_Font.m_hObject == NULL)
+		{
+			m_Font.CreateFontIndirect(&lfFont);
+		}
+	}
 	
 	return CWnd::CreateEx(NULL, 
 						AfxRegisterWndClass(0), 
@@ -136,6 +169,25 @@ void CTipWnd::RelayEvent(LPMSG lpMsg)
 		ShowWindow(SW_HIDE);
 		break;
 	}
+}
+
+void CTipWnd::SetWndFont(UINT uiFontHeight, UINT uiFontWidth, LPCTSTR lpszFaceName, COLORREF crTextColor)
+{
+	LOGFONT	lfFont = {0};
+
+	lfFont.lfHeight = uiFontHeight;
+	lfFont.lfWeight = uiFontWidth;
+
+	lfFont.lfCharSet=GB2312_CHARSET;
+	_tcscpy_s(lfFont.lfFaceName, lpszFaceName);
+
+	if (m_Font.m_hObject != NULL)
+	{
+		m_Font.DeleteObject();
+	}
+
+	m_Font.CreateFontIndirect(&lfFont);
+	m_crTextColor = crTextColor;
 }
 
 void CTipWnd::ShowWnd(LPCTSTR lpszTipInfo)
