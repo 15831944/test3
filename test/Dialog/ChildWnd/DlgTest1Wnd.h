@@ -19,6 +19,9 @@ protected:
 	virtual BOOL			OnInitDialog();
 	virtual BOOL			PreTranslateMessage(MSG* pMsg);
 
+	afx_msg void  			OnSize(UINT nType, int cx, int cy);
+	afx_msg void  			OnShowWindow(BOOL bShow, UINT nStatus);
+
 	afx_msg void			OnBnClickedButton1();
 	afx_msg void			OnBnClickedButton2();
 	DECLARE_MESSAGE_MAP()
@@ -27,6 +30,9 @@ protected:
 	BOOL					InitCtrl();
 	BOOL					InitInfo();
 
+	void					SetWndControlLayout();
+
 protected:
+	BOOL					m_bInited;
 	CTipWnd					m_TipWnd;
 };

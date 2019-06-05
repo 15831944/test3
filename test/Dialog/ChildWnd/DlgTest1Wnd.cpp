@@ -5,6 +5,7 @@ IMPLEMENT_DYNAMIC(CDlgTest1Wnd, CDialog)
 CDlgTest1Wnd::CDlgTest1Wnd(CWnd* pParent)
 	: CDialog(CDlgTest1Wnd::IDD, pParent)
 {
+	m_bInited = FALSE;
 }
 
 CDlgTest1Wnd::~CDlgTest1Wnd()
@@ -17,6 +18,9 @@ void CDlgTest1Wnd::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
+	ON_WM_SIZE()
+	ON_WM_SHOWWINDOW()
+
 	ON_BN_CLICKED(IDC_BTN_TEST1,		OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BTN_TEST2,		OnBnClickedButton2)
 END_MESSAGE_MAP()
@@ -42,6 +46,7 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 			break;
 		}
 
+		m_bInited = TRUE;
 		bRet = TRUE;
 	} while (FALSE);
 	
@@ -65,7 +70,25 @@ BOOL CDlgTest1Wnd::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 
+	m_TipWnd.RelayEvent(pMsg);
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CDlgTest1Wnd::OnSize(UINT nType, int cx, int cy)
+{
+	CDialog::OnSize(nType, cx, cy);
+
+	if (!m_bInited)
+	{
+		return;
+	}
+
+	SetWndControlLayout();
+}
+
+void CDlgTest1Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialog::OnShowWindow(bShow, nStatus);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,12 +104,30 @@ BOOL CDlgTest1Wnd::InitInfo()
 	return TRUE;
 }
 
+void CDlgTest1Wnd::SetWndControlLayout()
+{
+	CRect rcTipWnd;
+
+	CRect rcClient;
+	GetClientRect(&rcClient);
+
+	rcTipWnd.left = rcClient.left;
+	rcTipWnd.top  = rcClient.bottom - 30;
+	rcTipWnd.right  = rcClient.right;
+	rcTipWnd.bottom = rcClient.bottom;
+
+	ClientToScreen(rcTipWnd);
+	m_TipWnd.MoveWindow(rcTipWnd);
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
 	std::string str;
 	std::string s1;
+
+	CString strBtnText;
 
 #if 0
 	std::tr1::array<int, 5> arry = {1, 2, 3, 4, 5};
@@ -121,14 +162,15 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	s1 = _T("");
 	str = std::tr1::regex_replace(str2, pattern2, s1);
 #endif
+
+	GetDlgItem(IDC_BTN_TEST1)->GetWindowText(strBtnText);
+	m_TipWnd.ShowWnd(strBtnText);
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-	BOOL bRet = FALSE;
+	CString strBtnText;
 
-	do 
-	{
-		bRet = TRUE;
-	} while (FALSE);
+	GetDlgItem(IDC_BTN_TEST2)->GetWindowText(strBtnText);
+	m_TipWnd.ShowWnd(strBtnText);
 }
