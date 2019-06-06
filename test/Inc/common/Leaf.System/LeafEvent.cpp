@@ -7,83 +7,86 @@
 using namespace Leaf::System;
 Leaf::System::CEvent::CEvent()
 {
+	m_pEvent = NULL;
 }
 
 Leaf::System::CEvent::~CEvent()
 {
 }
 
-HEVENT Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, const std::string &strEventName)
+bool Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, const std::string &strEventName)
 {
 	bool bRet = false;
 
 	v_int32_t nRet = 0;
-	HEVENT pEvent = NULL;
 
 	do 
 	{
-		pEvent = new EVENT;
-		if (pEvent == NULL)
+		if (m_pEvent == NULL)
 		{
-			bRet = false;
-			break;
+			m_pEvent = new EVENT;
+			if (m_pEvent == NULL)
+			{
+				bRet = false;
+				break;
+			}
+			memset(m_pEvent, 0x0, sizeof(EVENT));
+
+			m_pEvent->bState = bInitialState;
+			m_pEvent->bAutoReset = bManualReset;
+			sprintf(m_pEvent->szEventName, "%s", strEventName.c_str());
+
+			if (pthread_mutex_init((pthread_mutex_t*)&m_pEvent->m_ptMutex, NULL) != 0)
+			{
+				bRet = false;
+				break;
+			}
+
+			if (pthread_condattr_init((pthread_condattr_t*)&m_pEvent->m_ptCattr) != 0)
+			{
+				bRet = false;
+				break;
+			}
+
+			if (pthread_cond_init((pthread_cond_t*)&m_pEvent->m_ptCond, (pthread_condattr_t*)&m_pEvent->m_ptCattr) != 0)
+			{
+				bRet = false;
+				break;
+			}
 		}
-
-		pEvent->bState = bInitialState;
-		pEvent->bAutoReset = bManualReset;
-
-		if (pthread_mutex_init((pthread_mutex_t*)&pEvent->m_ptMutex, NULL) != 0)
-		{
-			bRet = false;
-			break;
-		}
-
-		if (pthread_condattr_init((pthread_condattr_t*)&pEvent->m_ptCattr) != 0)
-		{
-			bRet = false;
-			break;
-		}
-
-		if (pthread_cond_init((pthread_cond_t*)&pEvent->m_ptCond, (pthread_condattr_t*)&pEvent->m_ptCattr) != 0)
-		{
-			bRet = false;
-			break;
-		}
-
+		
 		bRet = true;
 	} while (false);
 
 	if (!bRet)
 	{
-		CloseEvent(pEvent);
+		CloseEvent();
 	}
 
-	return pEvent;
+	return bRet;
 }
 
-bool Leaf::System::CEvent::CloseEvent(HEVENT hEvent)
+void Leaf::System::CEvent::CloseEvent()
 {
 	bool bRet = false;
 
 	do 
 	{
-		if (hEvent == NULL)
+		if (m_pEvent == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		pthread_condattr_destroy((pthread_condattr_t*)&hEvent->m_ptCattr);
-		pthread_mutex_destroy((pthread_mutex_t*)&hEvent->m_ptMutex);
-		pthread_cond_destroy((pthread_cond_t*)&hEvent->m_ptCond);
+		pthread_condattr_destroy((pthread_condattr_t*)&m_pEvent->m_ptCattr);
+		pthread_mutex_destroy((pthread_mutex_t*)&m_pEvent->m_ptMutex);
+		pthread_cond_destroy((pthread_cond_t*)&m_pEvent->m_ptCond);
 
-		delete hEvent;
-		hEvent = NULL;
+		delete m_pEvent;
+		m_pEvent = NULL;
 
 		bRet = true;
 	} while (false);
-
-	return bRet;
 }
 
 #ifdef _WIN_32_
@@ -112,7 +115,7 @@ static int gettimeofday(struct timeval *tv, struct timezone *tzp)
 }
 #endif
 
-v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMilliseconds)
+v_uint32_t Leaf::System::CEvent::WaitForEvent(v_uint64_t uMilliseconds)
 {
 	bool bRet = false;
 
@@ -123,7 +126,7 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMillise
 
 	do 
 	{
-		if (hEvent == NULL)
+		if (m_pEvent == NULL)
 		{
 			bRet = false;
 			break;
@@ -131,7 +134,7 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMillise
 
 		if (uMilliseconds == 0)
 		{
-			uRet = pthread_mutex_trylock((pthread_mutex_t*)&hEvent->m_ptMutex);
+			uRet = pthread_mutex_trylock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 			if (uRet == EBUSY)
 			{//WAIT_TIMEOUT
 				bRet = false;
@@ -140,7 +143,7 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMillise
 		}
 		else
 		{
-			uRet = pthread_mutex_lock((pthread_mutex_t*)&hEvent->m_ptMutex);
+			uRet = pthread_mutex_lock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 		}
 
 		gettimeofday(&stTime, NULL);
@@ -152,30 +155,30 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(HEVENT hEvent, v_uint64_t uMillise
 			abstime.tv_sec++;
 		}
 
-		while (!hEvent->bState)
+		while (!m_pEvent->bState)
 		{
 			if (uMilliseconds != (v_uint64_t)-1)
 			{
-				if ((uRet = pthread_cond_timedwait((pthread_cond_t*)&hEvent->m_ptCond, (pthread_mutex_t*)&hEvent->m_ptMutex, &abstime)))
+				if ((uRet = pthread_cond_timedwait((pthread_cond_t*)&m_pEvent->m_ptCond, (pthread_mutex_t*)&m_pEvent->m_ptMutex, &abstime)))
 				{
 					break;
 				}
 			}
 			else
 			{
-				if ((uRet = pthread_cond_wait((pthread_cond_t*)&hEvent->m_ptCond, (pthread_mutex_t*)&hEvent->m_ptMutex)))
+				if ((uRet = pthread_cond_wait((pthread_cond_t*)&m_pEvent->m_ptCond, (pthread_mutex_t*)&m_pEvent->m_ptMutex)))
 				{
 					break;
 				}
 			}
 		}
 
-		if (uRet == 0 && hEvent->bAutoReset)
+		if (uRet == 0 && m_pEvent->bAutoReset)
 		{
-			hEvent->bState = false;
+			m_pEvent->bState = false;
 		}
 
-		pthread_mutex_unlock((pthread_mutex_t*)&hEvent->m_ptMutex);
+		pthread_mutex_unlock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
 		bRet = true;
 	} while (false);
@@ -197,14 +200,13 @@ v_uint32_t Leaf::System::CEvent::WaitForMultipleEvent(HEVENT *hEvents, v_uint32_
 			break;
 		}
 
-
 		bRet = true;
 	} while (false);
 
 	return uRet;
 }
 
-v_uint32_t Leaf::System::CEvent::SetEvent(HEVENT hEvent)
+v_uint32_t Leaf::System::CEvent::SetEvent()
 {
 	bool bRet = false;
 
@@ -212,25 +214,25 @@ v_uint32_t Leaf::System::CEvent::SetEvent(HEVENT hEvent)
 
 	do 
 	{
-		if (hEvent == NULL)
+		if (m_pEvent == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		pthread_mutex_lock((pthread_mutex_t*)&hEvent->m_ptMutex);
+		pthread_mutex_lock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
-		hEvent->bState = true;
-		if (!hEvent->bAutoReset)
+		m_pEvent->bState = true;
+		if (!m_pEvent->bAutoReset)
 		{//
-			uRet = pthread_cond_broadcast((pthread_cond_t*)&hEvent->m_ptCond);	//pthread_cond_signal	//pthread_cond_broadcast
+			uRet = pthread_cond_broadcast((pthread_cond_t*)&m_pEvent->m_ptCond);	//pthread_cond_signal	//pthread_cond_broadcast
 		}
 		else
 		{
-			uRet = pthread_cond_signal((pthread_cond_t*)&hEvent->m_ptCond);
+			uRet = pthread_cond_signal((pthread_cond_t*)&m_pEvent->m_ptCond);
 		}
 
-		pthread_mutex_unlock((pthread_mutex_t*)&hEvent->m_ptMutex);
+		pthread_mutex_unlock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
 		bRet = true;
 	} while (false);
@@ -238,7 +240,7 @@ v_uint32_t Leaf::System::CEvent::SetEvent(HEVENT hEvent)
 	return uRet;
 }
 
-v_uint32_t Leaf::System::CEvent::ResetEvent(HEVENT hEvent)
+v_uint32_t Leaf::System::CEvent::ResetEvent()
 {
 	bool bRet = false;
 
@@ -246,17 +248,17 @@ v_uint32_t Leaf::System::CEvent::ResetEvent(HEVENT hEvent)
 
 	do 
 	{
-		if (hEvent == NULL)
+		if (m_pEvent == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		pthread_mutex_lock((pthread_mutex_t*)&hEvent->m_ptMutex);
+		pthread_mutex_lock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
-		hEvent->bState = false;
+		m_pEvent->bState = false;
 
-		pthread_mutex_unlock((pthread_mutex_t*)&hEvent->m_ptMutex);
+		pthread_mutex_unlock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
 		bRet = true;
 	} while (false);
@@ -264,7 +266,7 @@ v_uint32_t Leaf::System::CEvent::ResetEvent(HEVENT hEvent)
 	return uRet;
 }
 
-v_uint32_t Leaf::System::CEvent::PulseEvent(HEVENT hEvent)
+v_uint32_t Leaf::System::CEvent::PulseEvent()
 {
 	bool bRet = false;
 
@@ -272,13 +274,13 @@ v_uint32_t Leaf::System::CEvent::PulseEvent(HEVENT hEvent)
 
 	do 
 	{
-		if (SetEvent(hEvent) != 0)
+		if (SetEvent() != 0)
 		{
 			bRet = false;
 			break;
 		}
 
-		if (ResetEvent(hEvent) != 0)
+		if (ResetEvent() != 0)
 		{
 			bRet = false;
 			break;

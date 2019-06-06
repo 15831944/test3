@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "LeafThreadEx.h"
 
-#include "LeafEvent.h"
-
 #include <pthread.h>
 #pragma comment(lib, "pthreadVC2.lib")
 
@@ -11,10 +9,15 @@ Leaf::System::CThreadEx::CThreadEx()
 {
 	m_bExit = false;
 	m_thread_t = NULL;
+
+	m_StartEvent.CreateEvent(false, false);
+	m_EndEvent.CreateEvent(false, false);
 }
 
 Leaf::System::CThreadEx::~CThreadEx()
 {
+	m_StartEvent.CloseEvent();
+	m_EndEvent.CloseEvent();
 }
 
 void* Leaf::System::CThreadEx::_ThreadEntry(LPVOID pParam)
@@ -35,16 +38,20 @@ bool Leaf::System::CThreadEx::CreateThread()
 	
 	do
 	{
-		nRet = pthread_create(&m_thread_t, NULL, _ThreadEntry, this);
-		if (nRet != 0)
+		if (m_StartEvent.WaitForEvent(0) != 0)
 		{
-			bRet = false;
-			break;
+			m_StartEvent.SetEvent();
+			m_EndEvent.ResetEvent();
+
+			if (pthread_create((pthread_t*)&m_thread_t, NULL, _ThreadEntry, this) != 0)
+			{
+				bRet = false;
+				break;
+			}
+
+			m_bExit = false;
+			bRet = true;
 		}
-		
-		m_bExit = false;
-		
-		bRet = true;
 	} while (false);
 	
 	return bRet;
@@ -58,7 +65,7 @@ bool Leaf::System::CThreadEx::CloseThread()
 	
 	do
 	{
-		nRet = pthread_join(m_thread_t, NULL);
+		//nRet = pthread_join((pthread_t)*m_thread_t, NULL);
 		if (nRet != 0)
 		{
 			bRet = false;

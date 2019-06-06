@@ -31,7 +31,6 @@
 //
 #include "Inc/PubClass.h"
 
-#pragma comment(lib, "detours.lib")
 #pragma comment(lib, "version.lib")
 //////////////////////////////////////////////////////////////////////////
 //

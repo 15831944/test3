@@ -334,29 +334,3 @@ void CTestDlg::DestroyChildWnd()
 
 //////////////////////////////////////////////////////////////////////////
 //
-int (WINAPI *Real_Messagebox)(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)= MessageBoxA;
-extern "C" _declspec(dllexport) BOOL WINAPI MessageBox_Mine(HWND hWnd, LPCTSTR lpText, LPCTSTR lpCaption, UINT uType)
-{
-	CString temp= lpText;
-	temp+="该MessageBox已被Detours截获！";
-	return Real_Messagebox(hWnd,temp,lpCaption,uType);
-}
-
-void CTestDlg::Hook()
-{
-	DetourRestoreAfterWith();	//恢复原来状态
-	DetourTransactionBegin();	//拦截开始
-	DetourUpdateThread(GetCurrentThread());	//刷新当前线程
-	DetourAttach(&(PVOID&)Real_Messagebox,MessageBox_Mine); //设置detour
-
-	DetourTransactionCommit();	//拦截生效
-}
-
-void CTestDlg::UnHook()
-{
-	DetourTransactionBegin();	//拦截开始
-	DetourUpdateThread(GetCurrentThread());	//刷新当前线程
-	DetourDetach(&(PVOID&)Real_Messagebox,MessageBox_Mine);//卸载detour
-
-	DetourTransactionCommit();	//拦截生效
-}

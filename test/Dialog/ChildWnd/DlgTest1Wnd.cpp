@@ -52,7 +52,7 @@ BOOL CDlgTest1Wnd::OnInitDialog()
 	
 	if (!bRet)
 	{
-		::PostMessage(AfxGetMainWnd()->m_hWnd,WM_CLOSE,0,0);
+		::PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);
 	}
 
 	return bRet; 
@@ -167,10 +167,21 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	m_TipWnd.ShowWnd(strBtnText);
 }
 
+#include "../../inc/common/Leaf.System/LeafEvent.h"
+
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
 
 	GetDlgItem(IDC_BTN_TEST2)->GetWindowText(strBtnText);
 	m_TipWnd.ShowWnd(strBtnText);
+
+	Leaf::System::CEvent event;;
+	event.CreateEvent(false, false);
+
+	TRACE("event1");
+	event.WaitForEvent(0);
+
+	TRACE("event2");
+	event.CloseEvent();
 }

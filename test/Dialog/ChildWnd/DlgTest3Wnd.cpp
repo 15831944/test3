@@ -30,9 +30,20 @@ END_MESSAGE_MAP()
 //
 BOOL CDlgTest3Wnd::OnInitDialog()
 {
-	USES_CONVERSION;
+	BOOL bRet = FALSE;
 	CDialog::OnInitDialog();
-	return TRUE;  
+
+	do 
+	{
+		bRet = TRUE;
+	} while (FALSE);
+
+	if (!bRet)
+	{
+		::PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);
+	}
+
+	return bRet;  
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnTest1()

@@ -80,7 +80,7 @@ BOOL CDlgTest2Wnd::OnInitDialog()
 	
 	if (!bRet)
 	{
-		::PostMessage(AfxGetMainWnd()->m_hWnd,WM_CLOSE,0,0);
+		::PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);
 	}
 
 	return bRet;  
