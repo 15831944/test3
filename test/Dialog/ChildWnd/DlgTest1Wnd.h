@@ -31,6 +31,7 @@ protected:
 	BOOL					InitInfo();
 
 	void					SetWndControlLayout();
+	void					SetTipWndLayout();
 
 protected:
 	BOOL					m_bInited;

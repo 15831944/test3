@@ -61,6 +61,18 @@
     <Filter Include="Dialog\FuncWnd">
       <UniqueIdentifier>{53a2408a-346f-49a2-ba4e-9607d692638c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Inc\common\Leaf.Drawing">
+      <UniqueIdentifier>{adc2f69b-5941-4f75-af60-3df7a71c88d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\common\Leaf.IO">
+      <UniqueIdentifier>{3b3d6111-de8d-462b-af10-348a728673b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\common\Leaf.System">
+      <UniqueIdentifier>{78660718-53e4-47ac-9e6b-aeed10ca4f5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\common\Leaf.Text">
+      <UniqueIdentifier>{7878bf7e-ac46-4a26-9f39-654d78eb9b03}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
@@ -90,29 +102,8 @@
     <ClCompile Include="Inc\audio\waveplayer.cpp">
       <Filter>Inc\audio</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\video\gdi_wnd_draw_video.cpp">
-      <Filter>Inc\video</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\video\opengl_wnd_draw_video.cpp">
-      <Filter>Inc\video</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\Character.cpp">
-      <Filter>Inc\common</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\FileFunc.cpp">
-      <Filter>Inc\common</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\ComboBox\CustomCombox.cpp">
-      <Filter>Control\Combox</Filter>
-    </ClCompile>
     <ClCompile Include="Control\Button\DrawButton.cpp">
       <Filter>Control\Button</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\ListBox\DrawListBox.cpp">
-      <Filter>Control\ListBox</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\ListBox\UserListBox.cpp">
-      <Filter>Control\ListBox</Filter>
     </ClCompile>
     <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp">
       <Filter>Control\WndCtrl</Filter>
@@ -168,6 +159,27 @@
     <ClCompile Include="Inc\audio\waveaudio.cpp">
       <Filter>Inc\audio</Filter>
     </ClCompile>
+    <ClCompile Include="Inc\common\Leaf.Drawing\LeafMemDC.cpp">
+      <Filter>Inc\common\Leaf.Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\Leaf.IO\LeafDirectory.cpp">
+      <Filter>Inc\common\Leaf.IO</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\Leaf.IO\LeafFile.cpp">
+      <Filter>Inc\common\Leaf.IO</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\Leaf.System\LeafSystem.cpp">
+      <Filter>Inc\common\Leaf.System</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\Leaf.Text\LeafChar.cpp">
+      <Filter>Inc\common\Leaf.Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\WndCtrl\TipWnd.cpp">
+      <Filter>Control\WndCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\common\Leaf.System\LeafEvent.cpp">
+      <Filter>Inc\common\Leaf.System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -206,29 +218,8 @@
     <ClInclude Include="Inc\audio\waveplayer.h">
       <Filter>Inc\audio</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\video\gdi_wnd_draw_video.h">
-      <Filter>Inc\video</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\video\opengl_wnd_draw_video.h">
-      <Filter>Inc\video</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\Character.h">
-      <Filter>Inc\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\FileFunc.h">
-      <Filter>Inc\common</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\ComboBox\CustomCombox.h">
-      <Filter>Control\Combox</Filter>
-    </ClInclude>
     <ClInclude Include="Control\Button\DrawButton.h">
       <Filter>Control\Button</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\ListBox\DrawListBox.h">
-      <Filter>Control\ListBox</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\ListBox\UserListBox.h">
-      <Filter>Control\ListBox</Filter>
     </ClInclude>
     <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h">
       <Filter>Control\WndCtrl</Filter>
@@ -283,6 +274,30 @@
     </ClInclude>
     <ClInclude Include="Inc\audio\waveaudio.h">
       <Filter>Inc\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.Drawing\LeafMemDC.h">
+      <Filter>Inc\common\Leaf.Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.IO\LeafDirectory.h">
+      <Filter>Inc\common\Leaf.IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.IO\LeafFile.h">
+      <Filter>Inc\common\Leaf.IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.System\LeafSystem.h">
+      <Filter>Inc\common\Leaf.System</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.Text\LeafChar.h">
+      <Filter>Inc\common\Leaf.Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.Text\String.h">
+      <Filter>Inc\common\Leaf.Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\WndCtrl\TipWnd.h">
+      <Filter>Control\WndCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.System\LeafEvent.h">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

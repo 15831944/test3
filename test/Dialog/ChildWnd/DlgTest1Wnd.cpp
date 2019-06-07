@@ -106,17 +106,19 @@ BOOL CDlgTest1Wnd::InitInfo()
 
 void CDlgTest1Wnd::SetWndControlLayout()
 {
+}
+
+void CDlgTest1Wnd::SetTipWndLayout()
+{
 	CRect rcTipWnd;
 
 	CRect rcClient;
-	GetClientRect(&rcClient);
+	GetWindowRect(&rcClient);
 
 	rcTipWnd.left = rcClient.left;
-	rcTipWnd.top  = rcClient.bottom - 30;
-	rcTipWnd.right  = rcClient.right;
+	rcTipWnd.top = rcClient.bottom - 30;
+	rcTipWnd.right = rcClient.right;
 	rcTipWnd.bottom = rcClient.bottom;
-
-	ClientToScreen(&rcTipWnd);
 	m_TipWnd.MoveWindow(rcTipWnd);
 }
 
@@ -128,6 +130,9 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	std::string s1;
 
 	CString strBtnText;
+
+	GetDlgItem(IDC_BTN_TEST1)->GetWindowText(strBtnText);
+	m_TipWnd.ShowWnd(strBtnText);
 
 #if 0
 	std::tr1::array<int, 5> arry = {1, 2, 3, 4, 5};
@@ -162,9 +167,6 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 	s1 = _T("");
 	str = std::tr1::regex_replace(str2, pattern2, s1);
 #endif
-
-	GetDlgItem(IDC_BTN_TEST1)->GetWindowText(strBtnText);
-	m_TipWnd.ShowWnd(strBtnText);
 }
 
 #include "../../inc/common/Leaf.System/LeafEvent.h"
@@ -176,6 +178,7 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	GetDlgItem(IDC_BTN_TEST2)->GetWindowText(strBtnText);
 	m_TipWnd.ShowWnd(strBtnText);
 
+#if 1
 	Leaf::System::CEvent event;;
 	event.CreateEvent(false, false);
 
@@ -184,4 +187,5 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 
 	TRACE("event2");
 	event.CloseEvent();
+#endif
 }
