@@ -36,6 +36,7 @@
 #include <winsvc.h>
 #include <atlconv.h>
 #include <gdiplus.h>
+#include <tlhelp32.h>
 
 #include "./internal.h"
 #include "../Inc/GlobalInfo.h"

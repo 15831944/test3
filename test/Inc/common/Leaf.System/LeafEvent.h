@@ -1,6 +1,8 @@
 #ifndef __LEAF_EVENT_H__
 #define __LEAF_EVENT_H__
 
+#include <pthread.h>
+
 namespace Leaf
 {
 	namespace System
@@ -23,7 +25,7 @@ namespace Leaf
 			~CEvent();
 			
 		public:
-			bool			CreateEvent(bool bManualReset, bool bInitialState, const std::string &strEventName = "");
+			bool			CreateEvent(bool bManualReset, bool bInitialState, const char *pEventName = NULL);
 			void			CloseEvent();
 			
 			v_uint32_t		WaitForEvent(v_uint64_t uMilliseconds);

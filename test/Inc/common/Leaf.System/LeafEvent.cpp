@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "LeafEvent.h"
 
-#include <pthread.h>
 #pragma comment(lib, "pthreadVC2.lib")
 
 using namespace Leaf::System;
@@ -14,7 +13,7 @@ Leaf::System::CEvent::~CEvent()
 {
 }
 
-bool Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, const std::string &strEventName)
+bool Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, const char *pEventName)
 {
 	bool bRet = false;
 
@@ -34,7 +33,7 @@ bool Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, co
 
 			m_pEvent->bState = bInitialState;
 			m_pEvent->bAutoReset = bManualReset;
-			sprintf(m_pEvent->szEventName, "%s", strEventName.c_str());
+			sprintf(m_pEvent->szEventName, "%s", pEventName);
 
 			if (pthread_mutex_init((pthread_mutex_t*)&m_pEvent->m_ptMutex, NULL) != 0)
 			{

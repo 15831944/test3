@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "LeafSystem.h"
 
+#include <tlhelp32.h>
+
 using namespace Leaf::System;
 Leaf::System::CSystem::CSystem()
 {
@@ -12,12 +14,14 @@ Leaf::System::CSystem::~CSystem()
 
 }
 
+
 bool Leaf::System::CSystem::DeleteSelfFile()
 {
 	bool bRet = false;
 
 	CString strCmdLine;
 
+#if 0
 	do 
 	{
 		if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS))
@@ -40,7 +44,7 @@ bool Leaf::System::CSystem::DeleteSelfFile()
 
 		bRet = true;
 	} while (false);
-
+#endif
 	return bRet;
 }
 
@@ -51,6 +55,7 @@ bool Leaf::System::CSystem::SetExecPrivilege()
 	HANDLE hToken = NULL;
 	TOKEN_PRIVILEGES tkp;
 
+#if 0
 	do 
 	{
 		//打开当前程序的权限令牌
@@ -79,12 +84,133 @@ bool Leaf::System::CSystem::SetExecPrivilege()
 
 		bRet = true;
 	} while (false);
-
+#endif
 	if (hToken != NULL)
 	{
 		CloseHandle(hToken);
 		hToken = NULL;
 	}
+
+	return bRet;
+}
+
+v_uint32_t Leaf::System::CSystem::GetParentProcessId(v_uint32_t uiCurProcessId)
+{
+	bool bRet = false;
+	bool bProcess = false;
+
+	v_uint32_t uiParentId = -1;
+
+	HANDLE hProcess = NULL;
+	PROCESSENTRY32 pe32 = {0};
+
+	do 
+	{
+		hProcess = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+		if (hProcess == NULL || hProcess == INVALID_HANDLE_VALUE)
+		{
+			bRet = false;
+			break;
+		}
+
+		pe32.dwSize = sizeof(PROCESSENTRY32);
+		bProcess = ::Process32First(hProcess, &pe32);
+		while (bProcess)
+		{
+			if (pe32.th32ProcessID == uiCurProcessId)
+			{
+				uiParentId = pe32.th32ParentProcessID;
+				break;
+			}
+
+			bProcess = ::Process32Next(hProcess, &pe32);
+		}
+
+		bRet = true;
+	} while (false);
+
+	if (hProcess != NULL && hProcess != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(hProcess);
+		hProcess = NULL;
+	}
+
+	return uiParentId;
+}
+
+#define ProcessBasicInformation	 0 
+v_uint32_t Leaf::System::CSystem::GetParentProcessIdEx(v_uint32_t uiCurProcessId)
+{
+	bool bRet = false;
+
+	v_uint32_t uiStatus = 0;
+	v_uint32_t uiParentId = -1;
+
+	HANDLE hProcess = NULL;
+	PROCESS_BASIC_INFORMATION pbi = {0};
+	typedef LONG(__stdcall *PROCNTQSIP)(HANDLE, UINT, PVOID, ULONG, PULONG);
+
+	do 
+	{
+		PROCNTQSIP NtQueryInformationProcess = (PROCNTQSIP)GetProcAddress(GetModuleHandle("ntdll"), "NtQueryInformationProcess");
+		if (NtQueryInformationProcess == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, uiCurProcessId);
+		if (hProcess == NULL || hProcess == INVALID_HANDLE_VALUE)
+		{
+			bRet = false;
+			break;
+		}
+
+		uiStatus = NtQueryInformationProcess(hProcess, ProcessBasicInformation, (PVOID)&pbi, sizeof(PROCESS_BASIC_INFORMATION), NULL);
+		if (uiStatus != 0)
+		{
+			bRet = FALSE;
+			break;
+		}
+
+		uiParentId = pbi.InheritedFromUniqueProcessId;
+
+		bRet = true;
+	} while (false);
+
+	if (hProcess != NULL && hProcess != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(hProcess);
+		hProcess = NULL;
+	}
+
+	return uiParentId;
+}
+
+bool Leaf::System::CSystem::GetParentProcess(v_uint32_t uiCurProcessId, HANDLE &hProcess)
+{
+	bool bRet = false;
+
+	v_uint32_t uiParentId = -1;
+
+	do 
+	{
+		uiParentId = GetParentProcessId(uiCurProcessId);
+		if (uiParentId == -1)
+		{
+			bRet = false;
+			break;
+		}
+
+		hProcess = OpenProcess(PROCESS_TERMINATE | SYNCHRONIZE, FALSE, uiParentId);
+		if (hProcess == NULL || hProcess == INVALID_HANDLE_VALUE)
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
 
 	return bRet;
 }

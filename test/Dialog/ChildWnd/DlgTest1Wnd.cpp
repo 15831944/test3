@@ -21,6 +21,8 @@ BEGIN_MESSAGE_MAP(CDlgTest1Wnd, CDialog)
 	ON_WM_SIZE()
 	ON_WM_SHOWWINDOW()
 
+	ON_WM_NCHITTEST()
+
 	ON_BN_CLICKED(IDC_BTN_TEST1,		OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BTN_TEST2,		OnBnClickedButton2)
 END_MESSAGE_MAP()
@@ -88,7 +90,18 @@ void CDlgTest1Wnd::OnSize(UINT nType, int cx, int cy)
 
 void CDlgTest1Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
 {
+	if (!bShow)
+	{
+		m_TipWnd.ShowWindow(SW_HIDE);
+	}
+
 	CDialog::OnShowWindow(bShow, nStatus);
+}
+
+LRESULT CDlgTest1Wnd::OnNcHitTest(CPoint point)
+{
+	SetTipWndLayout();
+	return CDialog::OnNcHitTest(point);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -170,7 +183,6 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 }
 
 #include "../../inc/common/Leaf.System/LeafEvent.h"
-
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
@@ -178,7 +190,7 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	GetDlgItem(IDC_BTN_TEST2)->GetWindowText(strBtnText);
 	m_TipWnd.ShowWnd(strBtnText);
 
-#if 1
+#if 0
 	Leaf::System::CEvent event;;
 	event.CreateEvent(false, false);
 

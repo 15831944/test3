@@ -22,6 +22,8 @@ protected:
 	afx_msg void  			OnSize(UINT nType, int cx, int cy);
 	afx_msg void  			OnShowWindow(BOOL bShow, UINT nStatus);
 
+	afx_msg LRESULT			OnNcHitTest(CPoint point);
+
 	afx_msg void			OnBnClickedButton1();
 	afx_msg void			OnBnClickedButton2();
 	DECLARE_MESSAGE_MAP()

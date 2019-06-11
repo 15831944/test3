@@ -14,6 +14,14 @@ namespace Leaf
 			PRIORITY_HIGH = 2,
 		}THREAD_PRIORITY_T;
 
+		#ifdef WIN32
+			#define STACKFLAG	v_uint32_t WINAPI
+			#define STACKRETURN	0
+		#elif POSIX
+			#define STACKFLAG	void*
+			#define STACKRETURN	NULL
+		#endif
+
 		class CThreadEx
 		{
 		public:
@@ -21,28 +29,30 @@ namespace Leaf
 			~CThreadEx();
 			
 		public:
-			bool			CreateThread();
-			virtual bool	CloseThread();
+			bool				CreateThread(v_uint32_t uiCreateFlags, v_uint32_t uiStackSize, void *pSecurityAttrs);
+			virtual bool		CloseThread();
 			
-			virtual int		Run() = 0;
-			bool			IsRunning();
+			virtual v_int32_t	Run() = 0;
+			bool				IsRunning();
 			
-			unsigned int	ResumeThread();
-			unsigned int	SuspendThread();
+			v_uint32_t			ResumeThread();
+			v_uint32_t			SuspendThread();
 			
-			bool			SetThreadPriority(int nPriority);
-			int				GetThreadPriority();			
-			
-		protected:
-			static void*	_ThreadEntry(LPVOID pParam);
+			bool				SetThreadPriority(v_int32_t uiPriority);
+			v_int32_t			GetThreadPriority();			
 			
 		protected:
-			CEvent			m_StartEvent;
-			CEvent			m_EndEvent;
+			static STACKFLAG	_ThreadEntry(LPVOID pParam);
 			
 		private:
-			mutable volatile bool m_bExit;
-			void* 			m_thread_t;
+			#ifdef WIN32
+				HANDLE			m_thread;
+				v_uint32_t		m_thread_t;
+			#elif POSIX
+				pthread_t 		m_thread_t;
+			#endif
+
+			v_uint32_t			m_suspend;
 		};
 	}
 }

@@ -31,7 +31,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="if exist $(SolutionDir)\bin\opencv_core249.dll  del $(SolutionDir)bin\opencv_core249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_highgui249.dll  del $(SolutionDir)bin\opencv_highgui249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\opencv_imgproc249.dll  del $(SolutionDir)bin\opencv_imgproc249.dll /f /q&#x0D;&#x0A;if exist $(SolutionDir)\bin\pthreadVC2.dll  del $(SolutionDir)bin\pthreadVC2.dll /f /q&#x0D;&#x0A;"
+				CommandLine="if exist $(SolutionDir)\bin\$(ProjectName).exe  del $(SolutionDir)bin\$(ProjectName).exe /f /q&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\openssl&quot;;&quot;$(SolutionDir)Include\pthread&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\pthread&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				GeneratePreprocessedFile="0"
 				KeepComments="false"
@@ -93,7 +93,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opencv&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\pthread&quot;;&quot;$(SolutionDir)lib\openssl\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opencv&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\pthread&quot;"
 				UACExecutionLevel="0"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy $(OutDir)\$(ProjectName).exe $(SolutionDir)bin /d /y&#x0D;&#x0A;xcopy $(SolutionDir)lib\opencv\*.dll  $(SolutionDir)bin /d /y&#x0D;&#x0A;xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll $(SolutionDir)bin /d /y&#x0D;&#x0A;"
+				CommandLine="xcopy $(OutDir)\$(ProjectName).exe $(SolutionDir)bin /d /y&#x0D;&#x0A;&#x0D;&#x0A;if not exist $(SolutionDir)bin\pthreadVC2.dll  xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll $(SolutionDir)bin /d /y&#x0D;&#x0A;if not exist $(SolutionDir)bin\opencv_core249.dll               xcopy $(SolutionDir)lib\opencv\opencv_core249.dll $(SolutionDir)bin /d /y&#x0D;&#x0A;if not exist $(SolutionDir)bin\opencv_highgui249.dll xcopy $(SolutionDir)lib\opencv\opencv_highgui249.dll $(SolutionDir)bin /d /y&#x0D;&#x0A;if not exist $(SolutionDir)bin\opencv_imgproc249.dll xcopy $(SolutionDir)lib\opencv\opencv_imgproc249.dll $(SolutionDir)bin /d /y&#x0D;&#x0A;"
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
@@ -758,6 +758,14 @@
 						RelativePath=".\Inc\common\Leaf.System\LeafSystem.h"
 						>
 					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.System\LeafThreadEx.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\common\Leaf.System\LeafThreadEx.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Leaf.Text"
@@ -843,14 +851,6 @@
 			<Filter
 				Name="WndCtrl"
 				>
-				<File
-					RelativePath=".\Control\WndCtrl\ScrollWndMsg.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Control\WndCtrl\ScrollWndMsg.h"
-					>
-				</File>
 				<File
 					RelativePath=".\Control\WndCtrl\TipWnd.cpp"
 					>
