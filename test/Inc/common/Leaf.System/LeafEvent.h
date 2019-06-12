@@ -9,12 +9,18 @@ namespace Leaf
 	{
 		typedef struct {
 			bool		bState;
-			bool		bAutoReset;			
-			void		*m_ptAttr;
-			void		*m_ptCond;
-			void		*m_ptCattr;
-			void		*m_ptMutex;
+			bool		bAutoReset;
 			char		szEventName[MAX_PATH];
+
+			union {
+				struct {
+					void	*ptAttr;
+					void	*ptCond;
+					void	*ptCattr;
+					void	*ptMutex;
+				}Event, *pEvent;
+				void	*pHandle;
+			};			
 		}EVENT;
 
 		typedef EVENT *HEVENT;

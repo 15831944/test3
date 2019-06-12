@@ -35,6 +35,8 @@ bool Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, co
 			m_pEvent->bAutoReset = bManualReset;
 			sprintf(m_pEvent->szEventName, "%s", pEventName);
 
+#ifdef WIN32
+#elif POSIX
 			if (pthread_mutex_init((pthread_mutex_t*)&m_pEvent->m_ptMutex, NULL) != 0)
 			{
 				bRet = false;
@@ -52,6 +54,7 @@ bool Leaf::System::CEvent::CreateEvent(bool bManualReset, bool bInitialState, co
 				bRet = false;
 				break;
 			}
+#endif	
 		}
 		
 		bRet = true;
@@ -77,10 +80,12 @@ void Leaf::System::CEvent::CloseEvent()
 			break;
 		}
 
+#ifdef WIN32
+#elif POSIX
 		pthread_condattr_destroy((pthread_condattr_t*)&m_pEvent->m_ptCattr);
 		pthread_mutex_destroy((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 		pthread_cond_destroy((pthread_cond_t*)&m_pEvent->m_ptCond);
-
+#endif
 		delete m_pEvent;
 		m_pEvent = NULL;
 
@@ -88,7 +93,7 @@ void Leaf::System::CEvent::CloseEvent()
 	} while (false);
 }
 
-#ifdef _WIN_32_
+#ifdef WIN32
 static int gettimeofday(struct timeval *tv, struct timezone *tzp)
 {
 	time_t clock;
@@ -131,6 +136,9 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(v_uint64_t uMilliseconds)
 			break;
 		}
 
+#ifdef WIN32
+
+#elif POSIX
 		if (uMilliseconds == 0)
 		{
 			uRet = pthread_mutex_trylock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
@@ -148,6 +156,7 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(v_uint64_t uMilliseconds)
 		gettimeofday(&stTime, NULL);
 		abstime.tv_sec = stTime.tv_sec + uMilliseconds/1000;
 		abstime.tv_nsec = stTime.tv_usec*1000 + (uMilliseconds%1000)*1000000;
+
 		if (abstime.tv_nsec >= 1000000000)
 		{
 			abstime.tv_nsec -= 1000000000;
@@ -178,7 +187,7 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(v_uint64_t uMilliseconds)
 		}
 
 		pthread_mutex_unlock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
-
+#endif
 		bRet = true;
 	} while (false);
 
@@ -198,6 +207,10 @@ v_uint32_t Leaf::System::CEvent::WaitForMultipleEvent(HEVENT *hEvents, v_uint32_
 			bRet = false;
 			break;
 		}
+
+#ifdef WIN32
+#elif POSIX
+#endif
 
 		bRet = true;
 	} while (false);
@@ -219,6 +232,8 @@ v_uint32_t Leaf::System::CEvent::SetEvent()
 			break;
 		}
 
+#ifdef WIN32
+#elif POSIX
 		pthread_mutex_lock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
 		m_pEvent->bState = true;
@@ -232,7 +247,7 @@ v_uint32_t Leaf::System::CEvent::SetEvent()
 		}
 
 		pthread_mutex_unlock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
-
+#endif
 		bRet = true;
 	} while (false);
 
@@ -252,13 +267,16 @@ v_uint32_t Leaf::System::CEvent::ResetEvent()
 			bRet = false;
 			break;
 		}
+#ifdef WIN32
+#elif POSIX
 
 		pthread_mutex_lock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
 
 		m_pEvent->bState = false;
 
 		pthread_mutex_unlock((pthread_mutex_t*)&m_pEvent->m_ptMutex);
-
+#endif
+		
 		bRet = true;
 	} while (false);
 
@@ -273,18 +291,22 @@ v_uint32_t Leaf::System::CEvent::PulseEvent()
 
 	do 
 	{
-		if (SetEvent() != 0)
+#ifdef WIN32
+#elif POSIX
+		uRet = SetEvent();
+		if (uRet != 0)
 		{
 			bRet = false;
 			break;
 		}
 
-		if (ResetEvent() != 0)
+		uRet = ResetEvent();
+		if (uRet != 0)
 		{
 			bRet = false;
 			break;
 		}
-
+#endif
 		bRet = true;
 	} while (false);
 
