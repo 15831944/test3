@@ -92,7 +92,7 @@ void CDlgTest1Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	if (!bShow)
 	{
-		m_TipWnd.ShowWindow(SW_HIDE);
+		//m_TipWnd.ShowWindow(SW_HIDE);
 	}
 
 	CDialog::OnShowWindow(bShow, nStatus);
