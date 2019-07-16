@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\pthread&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Include&quot;;&quot;$(SolutionDir)Include\json&quot;;&quot;$(SolutionDir)Include\zlog&quot;;&quot;$(SolutionDir)Include\skinUI&quot;;&quot;$(SolutionDir)Include\opengl&quot;;&quot;$(SolutionDir)Include\opencv&quot;;&quot;$(SolutionDir)Include\opencv2&quot;;&quot;$(SolutionDir)Include\bignum&quot;;&quot;$(SolutionDir)Include\pthread&quot;;&quot;$(SolutionDir)Include\vcloger&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				GeneratePreprocessedFile="0"
 				KeepComments="false"
@@ -89,11 +89,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib user32.lib "
+				AdditionalDependencies="ws2_32.lib user32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opencv&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\pthread&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)lib\json&quot;;&quot;$(SolutionDir)lib\zlog&quot;;&quot;$(SolutionDir)lib\skinUI&quot;;&quot;$(SolutionDir)lib\opencv&quot;;&quot;$(SolutionDir)lib\opengl&quot;;&quot;$(SolutionDir)lib\bignum&quot;;&quot;$(SolutionDir)lib\pthread&quot;;&quot;$(SolutionDir)lib\vcloger&quot;"
 				UACExecutionLevel="0"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
