@@ -707,6 +707,22 @@
 					RelativePath=".\Inc\audio\waveoutdevice.hpp"
 					>
 				</File>
+				<Filter
+					Name="interface"
+					>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioInterface.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioWasApi.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioWasApi.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="video"
