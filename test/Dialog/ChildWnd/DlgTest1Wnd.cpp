@@ -183,6 +183,8 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 }
 
 #include "../../inc/common/Leaf.System/LeafEvent.h"
+
+#include "../../inc/audio/interface/AudioWasApi.h"
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
@@ -200,4 +202,9 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
+
+	std::vector<CDevData> vecAudioDev;
+
+	CAudioWasApi audioWasApi;
+	audioWasApi.audio_enumDevice(vecAudioDev);
 }

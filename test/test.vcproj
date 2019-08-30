@@ -711,6 +711,10 @@
 					Name="interface"
 					>
 					<File
+						RelativePath=".\Inc\audio\interface\AudioInterface.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\Inc\audio\interface\AudioInterface.h"
 						>
 					</File>
