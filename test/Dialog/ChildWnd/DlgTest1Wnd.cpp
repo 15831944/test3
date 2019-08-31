@@ -183,6 +183,8 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 }
 
 #include "../../inc/common/Leaf.System/LeafEvent.h"
+
+#include "../../inc/audio/interface/AudioWasApi.h"
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
@@ -201,6 +203,7 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	event.CloseEvent();
 #endif
 
+<<<<<<< HEAD
 
 	LPCSTR psz;
 	WSAData data;
@@ -221,4 +224,10 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 
 		TRACE("%s", psz);
 	}
+=======
+	std::vector<CDevData> vecAudioDev;
+
+	CAudioWasApi audioWasApi;
+	audioWasApi.audio_enumDevice(vecAudioDev);
+>>>>>>> da4fdcdf764a0b984bb37092de2e83ca79403a29
 }
