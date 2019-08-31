@@ -157,7 +157,7 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\$(ProjectName).exe 		$(SolutionDir)bin /d /y
+      <Command>xcopy $(OutDir)$(ProjectName).exe 		$(SolutionDir)bin /d /y
 xcopy $(SolutionDir)lib\opencv\*.dll  		$(SolutionDir)bin /d /y
 xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll 	$(SolutionDir)bin /d /y</Command>
     </PostBuildEvent>

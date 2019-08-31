@@ -200,4 +200,25 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
+
+
+	LPCSTR psz;
+	WSAData data;
+	WSAStartup(MAKEWORD(1, 1), &data);
+
+	char PCnameBuffer[128];
+	gethostname(PCnameBuffer, 128);
+
+	string m_PCname;
+	m_PCname = PCnameBuffer;
+
+	struct hostent* pHost;
+	int i;
+	pHost = gethostbyname(PCnameBuffer);//pHost返回的是指向主机的列表 
+	for (i = 0; pHost != NULL&&pHost->h_addr_list[i] != NULL; i++)
+	{
+		psz = inet_ntoa(*(struct in_addr *)pHost->h_addr_list[i]);//得到指向ip的psz变量
+
+		TRACE("%s", psz);
+	}
 }
