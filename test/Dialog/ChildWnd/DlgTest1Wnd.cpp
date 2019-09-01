@@ -182,9 +182,6 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 #endif
 }
 
-#include "../../inc/common/Leaf.System/LeafEvent.h"
-
-#include "../../inc/audio/interface/AudioWasApi.h"
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
@@ -202,32 +199,4 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
-
-<<<<<<< HEAD
-
-	LPCSTR psz;
-	WSAData data;
-	WSAStartup(MAKEWORD(1, 1), &data);
-
-	char PCnameBuffer[128];
-	gethostname(PCnameBuffer, 128);
-
-	string m_PCname;
-	m_PCname = PCnameBuffer;
-
-	struct hostent* pHost;
-	int i;
-	pHost = gethostbyname(PCnameBuffer);//pHost返回的是指向主机的列表 
-	for (i = 0; pHost != NULL&&pHost->h_addr_list[i] != NULL; i++)
-	{
-		psz = inet_ntoa(*(struct in_addr *)pHost->h_addr_list[i]);//得到指向ip的psz变量
-
-		TRACE("%s", psz);
-	}
-=======
-	std::vector<CDevData> vecAudioDev;
-
-	CAudioWasApi audioWasApi;
-	audioWasApi.audio_enumDevice(vecAudioDev);
->>>>>>> da4fdcdf764a0b984bb37092de2e83ca79403a29
 }

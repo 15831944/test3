@@ -39,11 +39,8 @@
 #include <tlhelp32.h>
 
 #include "./internal.h"
-#include "../Inc/GlobalInfo.h"
-#include "../Inc/audio/waveplayer.h"
-
-#include "../Contrib/CheckLinkThread.h"
-#include "../Contrib/update_file_name.h"
+#include "./GlobalInfo.h"
+#include "./DeviceData.h"
 
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);
 #endif

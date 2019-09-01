@@ -1,8 +1,6 @@
 #ifndef __LEAF_EVENT_H__
 #define __LEAF_EVENT_H__
 
-#include <pthread.h>
-
 namespace Leaf
 {
 	namespace System

@@ -22,7 +22,6 @@
     <ProjectGuid>{3C0E867A-52BF-4C15-A318-E67221F03E0B}</ProjectGuid>
     <RootNamespace>test</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -93,10 +92,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>if exist $(SolutionDir)\bin\opencv_core249.dll        	del $(SolutionDir)bin\opencv_core249.dll /f /q
-if exist $(SolutionDir)\bin\opencv_highgui249.dll    	del $(SolutionDir)bin\opencv_highgui249.dll /f /q
-if exist $(SolutionDir)\bin\opencv_imgproc249.dll   	del $(SolutionDir)bin\opencv_imgproc249.dll /f /q
-if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\pthreadVC2.dll /f /q</Command>
+      <Command>if exist $(SolutionDir)\bin\$(ProjectName).exe  del $(SolutionDir)bin\$(ProjectName).exe /f /q
+</Command>
     </PreBuildEvent>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -109,24 +106,24 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
     <ClCompile>
       <AdditionalOptions>/wd4430 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Include;$(SolutionDir)Include\bignum;$(SolutionDir)Include\pthread;$(SolutionDir)Include\opencv;$(SolutionDir)Include\opencv2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;HAVE_STRUCT_TIMESPEC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Include;$(SolutionDir)Include\json;$(SolutionDir)Include\zlog;$(SolutionDir)Include\skinUI;$(SolutionDir)Include\opengl;$(SolutionDir)Include\opencv;$(SolutionDir)Include\opencv2;$(SolutionDir)Include\bignum;$(SolutionDir)Include\pthread;$(SolutionDir)Include\vcloger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <PreprocessKeepComments>false</PreprocessKeepComments>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <AssemblerListingLocation />
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <ResourceCompile>
@@ -139,7 +136,7 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
       <AdditionalDependencies>ws2_32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\pthread;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\json;$(SolutionDir)lib\zlog;$(SolutionDir)lib\skinUI;$(SolutionDir)lib\opencv;$(SolutionDir)lib\opengl;$(SolutionDir)lib\bignum;$(SolutionDir)lib\pthread;$(SolutionDir)lib\vcloger;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
@@ -157,9 +154,13 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)$(ProjectName).exe 		$(SolutionDir)bin /d /y
-xcopy $(SolutionDir)lib\opencv\*.dll  		$(SolutionDir)bin /d /y
-xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll 	$(SolutionDir)bin /d /y</Command>
+      <Command>xcopy $(OutDir)$(ProjectName).exe $(SolutionDir)bin /d /y
+
+if not exist $(SolutionDir)bin\pthreadVC2.dll  xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll $(SolutionDir)bin /d /y
+if not exist $(SolutionDir)bin\opencv_core249.dll               xcopy $(SolutionDir)lib\opencv\opencv_core249.dll $(SolutionDir)bin /d /y
+if not exist $(SolutionDir)bin\opencv_highgui249.dll xcopy $(SolutionDir)lib\opencv\opencv_highgui249.dll $(SolutionDir)bin /d /y
+if not exist $(SolutionDir)bin\opencv_imgproc249.dll xcopy $(SolutionDir)lib\opencv\opencv_imgproc249.dll $(SolutionDir)bin /d /y
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -222,10 +223,7 @@ del $(SolutionDir)bin\$(TargetFileName)
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>if exist $(SolutionDir)\bin\opencv_core249.dll        	del $(SolutionDir)bin\opencv_core249.dll /f /q
-if exist $(SolutionDir)\bin\opencv_highgui249.dll    	del $(SolutionDir)bin\opencv_highgui249.dll /f /q
-if exist $(SolutionDir)\bin\opencv_imgproc249.dll   	del $(SolutionDir)bin\opencv_imgproc249.dll /f /q
-if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\pthreadVC2.dll /f /q</Command>
+      <Command />
     </PreBuildEvent>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -239,7 +237,7 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Include;$(SolutionDir)Include\bignum;$(SolutionDir)Include\pthread;$(SolutionDir)Include\opencv;$(SolutionDir)Include\opencv2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Include;$(SolutionDir)Include\json;$(SolutionDir)Include\zxing;$(SolutionDir)Include\opencv;$(SolutionDir)Include\opencv2;$(SolutionDir)Include\bignum;$(SolutionDir)Include\detours;$(SolutionDir)Include\leptonica;$(SolutionDir)Include\tesseract;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -265,7 +263,7 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
       <AdditionalDependencies>ws2_32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\pthread;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\json;$(SolutionDir)lib\detours;$(SolutionDir)lib\leptonica;$(SolutionDir)lib\tesseract;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
@@ -283,9 +281,8 @@ if exist $(SolutionDir)\bin\pthreadVC2.dll               	del $(SolutionDir)bin\
       <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\$(ProjectName).exe 		$(SolutionDir)bin /d /y
-xcopy $(SolutionDir)lib\opencv\*.dll  		$(SolutionDir)bin /d /y
-xcopy $(SolutionDir)lib\pthread\pthreadVC2.dll 	$(SolutionDir)bin /d /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -349,9 +346,7 @@ del $(SolutionDir)bin\$(TargetFileName)
   <ItemGroup>
     <ClCompile Include="Contrib\update_file_name.cpp" />
     <ClCompile Include="contrib\variable_test.cpp" />
-    <ClCompile Include="Control\Button\DrawButton.cpp" />
     <ClCompile Include="Control\ListCtrl\ReportCtrl.cpp" />
-    <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp" />
     <ClCompile Include="Control\WndCtrl\TipWnd.cpp" />
     <ClCompile Include="Dialog\ChildWnd\DlgTest1Wnd.cpp" />
     <ClCompile Include="Dialog\ChildWnd\DlgTest2Wnd.cpp" />
@@ -366,20 +361,19 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Dialog\FuncWnd\DlgFileNameReplace.cpp" />
     <ClCompile Include="Dialog\FuncWnd\DlgShowLogoWnd.cpp" />
     <ClCompile Include="Dialog\testDlg.cpp" />
-    <ClCompile Include="Inc\audio\MixerDevice.cpp" />
-    <ClCompile Include="Inc\audio\multimediastream.cpp" />
-    <ClCompile Include="Inc\audio\waveaudio.cpp" />
-    <ClCompile Include="Inc\audio\waveindevice.cpp" />
-    <ClCompile Include="Inc\audio\waveoutdevice.cpp" />
-    <ClCompile Include="Inc\audio\waveplayer.cpp" />
+    <ClCompile Include="Inc\audio\interface\AudioInterface.cpp" />
     <ClCompile Include="Inc\common\Leaf.Drawing\LeafMemDC.cpp" />
     <ClCompile Include="Inc\common\Leaf.IO\LeafDirectory.cpp" />
     <ClCompile Include="Inc\common\Leaf.IO\LeafFile.cpp" />
     <ClCompile Include="Inc\common\Leaf.System\LeafEvent.cpp" />
     <ClCompile Include="Inc\common\Leaf.System\LeafSystem.cpp" />
+    <ClCompile Include="Inc\common\Leaf.System\LeafThreadEx.cpp" />
     <ClCompile Include="Inc\common\Leaf.Text\LeafChar.cpp" />
-    <ClCompile Include="Inc\GlobalInfo.cpp" />
-    <ClCompile Include="Inc\PubClass.cpp" />
+    <ClCompile Include="Inc\data\DeviceData.cpp" />
+    <ClCompile Include="Inc\data\GlobalInfo.cpp" />
+    <ClCompile Include="Inc\data\PubClass.cpp" />
+    <ClCompile Include="Inc\network\HttpServer.cpp" />
+    <ClCompile Include="Inc\video\videoServerControl.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -391,9 +385,7 @@ del $(SolutionDir)bin\$(TargetFileName)
   <ItemGroup>
     <ClInclude Include="Contrib\update_file_name.h" />
     <ClInclude Include="contrib\variable_test.h" />
-    <ClInclude Include="Control\Button\DrawButton.h" />
     <ClInclude Include="Control\ListCtrl\ReportCtrl.h" />
-    <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h" />
     <ClInclude Include="Control\WndCtrl\TipWnd.h" />
     <ClInclude Include="Dialog\ChildWnd\DlgTest1Wnd.h" />
     <ClInclude Include="Dialog\ChildWnd\DlgTest2Wnd.h" />
@@ -409,22 +401,22 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Dialog\FuncWnd\DlgShowLogoWnd.h" />
     <ClInclude Include="Dialog\testDlg.h" />
     <ClInclude Include="Inc\algorithm\thread_queue.h" />
-    <ClInclude Include="Inc\audio\MixerDevice.hpp" />
-    <ClInclude Include="Inc\audio\multimediastream.hpp" />
-    <ClInclude Include="Inc\audio\waveaudio.h" />
-    <ClInclude Include="Inc\audio\wavebase.hpp" />
-    <ClInclude Include="Inc\audio\waveindevice.hpp" />
-    <ClInclude Include="Inc\audio\waveoutdevice.hpp" />
-    <ClInclude Include="Inc\audio\waveplayer.h" />
+    <ClInclude Include="Inc\audio\interface\AudioInterface.h" />
     <ClInclude Include="Inc\common\Leaf.Drawing\LeafMemDC.h" />
     <ClInclude Include="Inc\common\Leaf.IO\LeafDirectory.h" />
     <ClInclude Include="Inc\common\Leaf.IO\LeafFile.h" />
     <ClInclude Include="Inc\common\Leaf.System\LeafEvent.h" />
     <ClInclude Include="Inc\common\Leaf.System\LeafSystem.h" />
+    <ClInclude Include="Inc\common\Leaf.System\LeafThreadEx.h" />
     <ClInclude Include="Inc\common\Leaf.Text\LeafChar.h" />
     <ClInclude Include="Inc\common\Leaf.Text\String.h" />
-    <ClInclude Include="Inc\GlobalInfo.h" />
-    <ClInclude Include="Inc\PubClass.h" />
+    <ClInclude Include="Inc\data\DeviceData.h" />
+    <ClInclude Include="Inc\data\GlobalInfo.h" />
+    <ClInclude Include="Inc\data\internal.h" />
+    <ClInclude Include="Inc\data\PubClass.h" />
+    <ClInclude Include="Inc\network\HttpServer.h" />
+    <ClInclude Include="Inc\video\interface\videoInterface.h" />
+    <ClInclude Include="Inc\video\videoServerControl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="test.h" />

@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "LeafEvent.h"
 
+#ifdef POSIX
+#include <pthread.h>
 #pragma comment(lib, "pthreadVC2.lib")
+#endif
 
 using namespace Leaf::System;
 Leaf::System::CEvent::CEvent()

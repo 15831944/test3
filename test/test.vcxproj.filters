@@ -2,76 +2,88 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{57960c46-f8c6-4635-bec1-34119e783a04}</UniqueIdentifier>
+      <UniqueIdentifier>{a27b2018-873a-4fc5-a09d-5e7d513f231e}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{03e536af-4d6f-4789-89f5-8c5c115572f8}</UniqueIdentifier>
+      <UniqueIdentifier>{f5667a52-0de8-41f0-aa1d-cf0e5374e62e}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{47a9cd09-1221-4efd-9a4a-877cd48dbcb1}</UniqueIdentifier>
+      <UniqueIdentifier>{513e2b04-fad8-4710-a9d4-be2e02de8754}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
     <Filter Include="Inc">
-      <UniqueIdentifier>{6bc6073d-f256-496d-ba29-d8f2f5f4d748}</UniqueIdentifier>
+      <UniqueIdentifier>{ae4289c4-4475-4ac2-b0bc-6142e6d4b2b3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\algorithm">
-      <UniqueIdentifier>{4cd21ec2-98e8-4b3e-a3c6-c8892a0192b1}</UniqueIdentifier>
+      <UniqueIdentifier>{066f672e-f89a-47dc-98df-23dd5b30a1b0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\audio">
-      <UniqueIdentifier>{4c1afc9a-9f64-4ae0-a73a-6f314fe05a1e}</UniqueIdentifier>
+      <UniqueIdentifier>{32bd04a0-4b69-46c6-a460-8feffb96229c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\audio\interface">
+      <UniqueIdentifier>{ef264b99-b2a8-45e2-a195-4d7e36ed4f6c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\video">
-      <UniqueIdentifier>{102050d3-d888-440a-8033-88c022a9244b}</UniqueIdentifier>
+      <UniqueIdentifier>{68eca2f8-c7ce-4c43-9d6b-3a674a3c277f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\video\interface">
+      <UniqueIdentifier>{ce9d0369-7406-4e82-b16f-78e3b17554d4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\common">
-      <UniqueIdentifier>{a2009dba-5fb1-4813-9c81-b076d862cdf4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control">
-      <UniqueIdentifier>{8d9099ee-b531-4a68-bf2e-fdfca0c762cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control\Combox">
-      <UniqueIdentifier>{8821eeb3-cbd1-44c7-8aec-9b7a84043eae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control\Button">
-      <UniqueIdentifier>{c305df74-04fe-49f1-9b2e-dca47662c5fd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control\ListBox">
-      <UniqueIdentifier>{65c54716-c4c0-4045-a5df-6220144f571e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control\TreeCtrl">
-      <UniqueIdentifier>{7bd05dd3-fdab-4157-bd03-538075bedb73}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control\WndCtrl">
-      <UniqueIdentifier>{3350ac89-d473-4a33-9226-877cfa4b12a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Control\ListCtrl">
-      <UniqueIdentifier>{d18b8710-9d6e-4a91-9fec-cc69c55e7ca4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Contrib">
-      <UniqueIdentifier>{e9026ae6-f45b-4fdd-9461-5174c2cb1864}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Dialog">
-      <UniqueIdentifier>{d062e76b-692c-4004-8cf5-4cbdec4a3508}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Dialog\ChildWnd">
-      <UniqueIdentifier>{529c5780-a48b-4039-ac91-ac8e0ca49aaa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Dialog\FuncWnd">
-      <UniqueIdentifier>{53a2408a-346f-49a2-ba4e-9607d692638c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Inc\common\Leaf.Drawing">
-      <UniqueIdentifier>{adc2f69b-5941-4f75-af60-3df7a71c88d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Inc\common\Leaf.IO">
-      <UniqueIdentifier>{3b3d6111-de8d-462b-af10-348a728673b0}</UniqueIdentifier>
+      <UniqueIdentifier>{1ed3fde9-e67b-412e-b53f-9a0acd54a7bc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\common\Leaf.System">
-      <UniqueIdentifier>{78660718-53e4-47ac-9e6b-aeed10ca4f5e}</UniqueIdentifier>
+      <UniqueIdentifier>{36dfbffd-058c-4bd8-b487-ff8f6a7261b5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Inc\common\Leaf.Text">
-      <UniqueIdentifier>{7878bf7e-ac46-4a26-9f39-654d78eb9b03}</UniqueIdentifier>
+      <UniqueIdentifier>{75375053-b5f9-4f0b-9c00-f738f6341e5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\common\Leaf.IO">
+      <UniqueIdentifier>{b750792c-5dd3-4a0d-af48-c8d038e8f756}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\common\Leaf.Drawing">
+      <UniqueIdentifier>{014f732c-a2f0-4e9d-a040-1466c7eb3095}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\network">
+      <UniqueIdentifier>{9a487485-ef5e-4c9a-9d40-406a5276b59a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control">
+      <UniqueIdentifier>{6772e170-789d-4df5-81f5-a2c51599cecd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\Combox">
+      <UniqueIdentifier>{8ae30efc-808d-48a6-8286-4b31714c979c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\Button">
+      <UniqueIdentifier>{415acf4c-ef8e-4832-98bf-61d844f72a63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\ListBox">
+      <UniqueIdentifier>{94ef488e-22dc-4882-8a39-c02aa0d61483}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\TreeCtrl">
+      <UniqueIdentifier>{5584845a-3678-48ff-a335-dfeb43004e39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\WndCtrl">
+      <UniqueIdentifier>{da99ecbf-fc3f-4b5e-b432-094c342ef6e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Control\ListCtrl">
+      <UniqueIdentifier>{16a1760d-6634-40d6-a362-5d9c9558bc55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contrib">
+      <UniqueIdentifier>{b866f1f4-e019-437a-b7f5-2907d325b673}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dialog">
+      <UniqueIdentifier>{11fec514-1891-48a8-a5a9-252cd04c1e7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dialog\ChildWnd">
+      <UniqueIdentifier>{627f1633-51c4-465d-b42f-1db8a62a968a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dialog\FuncWnd">
+      <UniqueIdentifier>{18c6b559-51df-40c1-ba8f-c305c6fd8d32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\data">
+      <UniqueIdentifier>{5f5d0dc3-3ff3-4e4e-a5b2-961fae810dbb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -81,31 +93,37 @@
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\GlobalInfo.cpp">
-      <Filter>Inc</Filter>
+    <ClCompile Include="Inc\audio\interface\AudioInterface.cpp">
+      <Filter>Inc\audio\interface</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\PubClass.cpp">
-      <Filter>Inc</Filter>
+    <ClCompile Include="Inc\video\videoServerControl.cpp">
+      <Filter>Inc\video</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\audio\MixerDevice.cpp">
-      <Filter>Inc\audio</Filter>
+    <ClCompile Include="Inc\common\Leaf.System\LeafEvent.cpp">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\audio\multimediastream.cpp">
-      <Filter>Inc\audio</Filter>
+    <ClCompile Include="Inc\common\Leaf.System\LeafSystem.cpp">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\audio\waveindevice.cpp">
-      <Filter>Inc\audio</Filter>
+    <ClCompile Include="Inc\common\Leaf.System\LeafThreadEx.cpp">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\audio\waveoutdevice.cpp">
-      <Filter>Inc\audio</Filter>
+    <ClCompile Include="Inc\common\Leaf.Text\LeafChar.cpp">
+      <Filter>Inc\common\Leaf.Text</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\audio\waveplayer.cpp">
-      <Filter>Inc\audio</Filter>
+    <ClCompile Include="Inc\common\Leaf.IO\LeafDirectory.cpp">
+      <Filter>Inc\common\Leaf.IO</Filter>
     </ClCompile>
-    <ClCompile Include="Control\Button\DrawButton.cpp">
-      <Filter>Control\Button</Filter>
+    <ClCompile Include="Inc\common\Leaf.IO\LeafFile.cpp">
+      <Filter>Inc\common\Leaf.IO</Filter>
     </ClCompile>
-    <ClCompile Include="Control\WndCtrl\ScrollWndMsg.cpp">
+    <ClCompile Include="Inc\common\Leaf.Drawing\LeafMemDC.cpp">
+      <Filter>Inc\common\Leaf.Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Inc\network\HttpServer.cpp">
+      <Filter>Inc\network</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\WndCtrl\TipWnd.cpp">
       <Filter>Control\WndCtrl</Filter>
     </ClCompile>
     <ClCompile Include="Control\ListCtrl\ReportCtrl.cpp">
@@ -156,29 +174,14 @@
     <ClCompile Include="Dialog\FuncWnd\DlgShowLogoWnd.cpp">
       <Filter>Dialog\FuncWnd</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\audio\waveaudio.cpp">
-      <Filter>Inc\audio</Filter>
+    <ClCompile Include="Inc\data\DeviceData.cpp">
+      <Filter>Inc\data</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\common\Leaf.Drawing\LeafMemDC.cpp">
-      <Filter>Inc\common\Leaf.Drawing</Filter>
+    <ClCompile Include="Inc\data\GlobalInfo.cpp">
+      <Filter>Inc\data</Filter>
     </ClCompile>
-    <ClCompile Include="Inc\common\Leaf.IO\LeafDirectory.cpp">
-      <Filter>Inc\common\Leaf.IO</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\Leaf.IO\LeafFile.cpp">
-      <Filter>Inc\common\Leaf.IO</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\Leaf.System\LeafSystem.cpp">
-      <Filter>Inc\common\Leaf.System</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\Leaf.Text\LeafChar.cpp">
-      <Filter>Inc\common\Leaf.Text</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\WndCtrl\TipWnd.cpp">
-      <Filter>Control\WndCtrl</Filter>
-    </ClCompile>
-    <ClCompile Include="Inc\common\Leaf.System\LeafEvent.cpp">
-      <Filter>Inc\common\Leaf.System</Filter>
+    <ClCompile Include="Inc\data\PubClass.cpp">
+      <Filter>Inc\data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,37 +194,46 @@
     <ClInclude Include="test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\GlobalInfo.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\PubClass.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\algorithm\thread_queue.h">
       <Filter>Inc\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\MixerDevice.hpp">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\audio\interface\AudioInterface.h">
+      <Filter>Inc\audio\interface</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\multimediastream.hpp">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\video\videoServerControl.h">
+      <Filter>Inc\video</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\wavebase.hpp">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\video\interface\videoInterface.h">
+      <Filter>Inc\video\interface</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\waveindevice.hpp">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\common\Leaf.System\LeafEvent.h">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\waveoutdevice.hpp">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\common\Leaf.System\LeafSystem.h">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\waveplayer.h">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\common\Leaf.System\LeafThreadEx.h">
+      <Filter>Inc\common\Leaf.System</Filter>
     </ClInclude>
-    <ClInclude Include="Control\Button\DrawButton.h">
-      <Filter>Control\Button</Filter>
+    <ClInclude Include="Inc\common\Leaf.Text\LeafChar.h">
+      <Filter>Inc\common\Leaf.Text</Filter>
     </ClInclude>
-    <ClInclude Include="Control\WndCtrl\ScrollWndMsg.h">
+    <ClInclude Include="Inc\common\Leaf.Text\String.h">
+      <Filter>Inc\common\Leaf.Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.IO\LeafDirectory.h">
+      <Filter>Inc\common\Leaf.IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.IO\LeafFile.h">
+      <Filter>Inc\common\Leaf.IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\common\Leaf.Drawing\LeafMemDC.h">
+      <Filter>Inc\common\Leaf.Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\network\HttpServer.h">
+      <Filter>Inc\network</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\WndCtrl\TipWnd.h">
       <Filter>Control\WndCtrl</Filter>
     </ClInclude>
     <ClInclude Include="Control\ListCtrl\ReportCtrl.h">
@@ -272,32 +284,17 @@
     <ClInclude Include="Dialog\FuncWnd\DlgShowLogoWnd.h">
       <Filter>Dialog\FuncWnd</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\audio\waveaudio.h">
-      <Filter>Inc\audio</Filter>
+    <ClInclude Include="Inc\data\DeviceData.h">
+      <Filter>Inc\data</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.Drawing\LeafMemDC.h">
-      <Filter>Inc\common\Leaf.Drawing</Filter>
+    <ClInclude Include="Inc\data\GlobalInfo.h">
+      <Filter>Inc\data</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.IO\LeafDirectory.h">
-      <Filter>Inc\common\Leaf.IO</Filter>
+    <ClInclude Include="Inc\data\internal.h">
+      <Filter>Inc\data</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.IO\LeafFile.h">
-      <Filter>Inc\common\Leaf.IO</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.System\LeafSystem.h">
-      <Filter>Inc\common\Leaf.System</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.Text\LeafChar.h">
-      <Filter>Inc\common\Leaf.Text</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.Text\String.h">
-      <Filter>Inc\common\Leaf.Text</Filter>
-    </ClInclude>
-    <ClInclude Include="Control\WndCtrl\TipWnd.h">
-      <Filter>Control\WndCtrl</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\common\Leaf.System\LeafEvent.h">
-      <Filter>Inc\common\Leaf.System</Filter>
+    <ClInclude Include="Inc\data\PubClass.h">
+      <Filter>Inc\data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
