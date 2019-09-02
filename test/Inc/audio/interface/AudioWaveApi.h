@@ -14,7 +14,7 @@ public:
 	virtual bool	audio_init();
 	virtual void	audio_uninit();
 
-	virtual bool	audio_enumDevice(std::vector<CDevData> &vecAudioDev);
+	virtual bool	audio_enumDevice(std::vector<CDeviceData> &vecAudioDev);
 	virtual bool	audio_openDevice();
 	virtual void	audio_closeDevice();
 
@@ -27,7 +27,7 @@ protected:
 	static DWORD WINAPI audio_waveApiThread(void *pWaveApiPtr);
 	
 protected:
-	bool			audio_getDevInfo();
+	bool			audio_getDevInfo(std::vector<CDeviceData> &vecAudioDev);
 	void			audio_waveApiProc();
 	
 protected:

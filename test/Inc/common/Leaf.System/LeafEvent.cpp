@@ -128,9 +128,6 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(v_uint64_t uMilliseconds)
 
 	v_uint32_t uRet = 0;
 
-	struct timeval stTime = {0};
-	struct timespec abstime = {0};
-
 	do 
 	{
 		if (m_pEvent == NULL)
@@ -142,6 +139,9 @@ v_uint32_t Leaf::System::CEvent::WaitForEvent(v_uint64_t uMilliseconds)
 #ifdef WIN32
 
 #elif POSIX
+		struct timeval stTime = {0};
+		struct timespec abstime = {0};
+
 		if (uMilliseconds == 0)
 		{
 			uRet = pthread_mutex_trylock((pthread_mutex_t*)&m_pEvent->m_ptMutex);

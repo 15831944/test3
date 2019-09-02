@@ -632,26 +632,6 @@
 		<Filter
 			Name="Inc"
 			>
-			<File
-				RelativePath=".\Inc\GlobalInfo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\GlobalInfo.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\internal.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\PubClass.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Inc\PubClass.h"
-				>
-			</File>
 			<Filter
 				Name="algorithm"
 				>
@@ -663,50 +643,6 @@
 			<Filter
 				Name="audio"
 				>
-				<File
-					RelativePath=".\Inc\audio\MixerDevice.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\MixerDevice.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\multimediastream.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\multimediastream.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\waveaudio.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\waveaudio.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\wavebase.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\waveindevice.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\waveindevice.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\waveoutdevice.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\waveoutdevice.hpp"
-					>
-				</File>
 				<Filter
 					Name="interface"
 					>
@@ -719,11 +655,11 @@
 						>
 					</File>
 					<File
-						RelativePath=".\Inc\audio\interface\AudioWasApi.cpp"
+						RelativePath=".\Inc\audio\interface\AudioWaveApi.cpp"
 						>
 					</File>
 					<File
-						RelativePath=".\Inc\audio\interface\AudioWasApi.h"
+						RelativePath=".\Inc\audio\interface\AudioWaveApi.h"
 						>
 					</File>
 				</Filter>
@@ -742,14 +678,6 @@
 				<Filter
 					Name="interface"
 					>
-					<File
-						RelativePath=".\Inc\video\interface\opencvVideoInterface.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\Inc\video\interface\opencvVideoInterface.h"
-						>
-					</File>
 					<File
 						RelativePath=".\Inc\video\interface\videoInterface.h"
 						>
@@ -845,6 +773,38 @@
 				</File>
 				<File
 					RelativePath=".\Inc\network\HttpServer.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="data"
+				>
+				<File
+					RelativePath=".\Inc\data\DeviceData.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\DeviceData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\GlobalInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\GlobalInfo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\internal.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\PubClass.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\PubClass.h"
 					>
 				</File>
 			</Filter>

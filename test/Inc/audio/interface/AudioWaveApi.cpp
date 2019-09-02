@@ -22,7 +22,7 @@ void CAudioWaveAPi::audio_uninit()
 {
 }
 
-bool CAudioWaveAPi::audio_enumDevice(std::vector<CDevData> &vecAudioDev)
+bool CAudioWaveAPi::audio_enumDevice(std::vector<CDeviceData> &vecAudioDev)
 {
 }
 
@@ -62,7 +62,7 @@ DWORD WINAPI CAudioWaveAPi::audio_wasApiThread(void *pWaveApiPtr)
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool CAudioWaveAPi::audio_getDevInfo(std::vector<CDevData> &vecAudioDev)
+bool CAudioWaveAPi::audio_getDevInfo(std::vector<CDeviceData> &vecAudioDev)
 {
 }
 
