@@ -182,6 +182,7 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 #endif
 }
 
+#include "../../inc/audio/interface/AudioWaveApi.h"
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
@@ -199,4 +200,8 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
+ 	std::vector<CDeviceData> vecAudioDev;
+
+ 	CAudioWaveAPi waveApi;
+ 	waveApi.audio_enumDevice(vecAudioDev);
 }

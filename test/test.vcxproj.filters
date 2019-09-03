@@ -183,6 +183,9 @@
     <ClCompile Include="Inc\data\PubClass.cpp">
       <Filter>Inc\data</Filter>
     </ClCompile>
+    <ClCompile Include="Inc\audio\interface\AudioWaveApi.cpp">
+      <Filter>Inc\audio\interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="Inc\data\PubClass.h">
       <Filter>Inc\data</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\audio\interface\AudioWaveApi.h">
+      <Filter>Inc\audio\interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

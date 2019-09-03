@@ -22,6 +22,7 @@
     <ProjectGuid>{3C0E867A-52BF-4C15-A318-E67221F03E0B}</ProjectGuid>
     <RootNamespace>test</RootNamespace>
     <Keyword>MFCProj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -70,8 +71,8 @@
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)Temp\Link\$(ProjectName)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Temp\Compile\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)temp\Link\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)temp\Compile\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
@@ -81,8 +82,8 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Temp\Link\$(ProjectName)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Temp\Compile\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)temp\Link\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)temp\Compile\$(ProjectName)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -106,7 +107,7 @@
     <ClCompile>
       <AdditionalOptions>/wd4430 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Include;$(SolutionDir)Include\json;$(SolutionDir)Include\zlog;$(SolutionDir)Include\skinUI;$(SolutionDir)Include\opengl;$(SolutionDir)Include\opencv;$(SolutionDir)Include\opencv2;$(SolutionDir)Include\bignum;$(SolutionDir)Include\pthread;$(SolutionDir)Include\vcloger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\json;$(SolutionDir)include\zlog;$(SolutionDir)include\skinUI;$(SolutionDir)include\opengl;$(SolutionDir)include\opencv;$(SolutionDir)include\opencv2;$(SolutionDir)include\bignum;$(SolutionDir)include\pthread;$(SolutionDir)include\vcloger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -237,7 +238,7 @@ del $(SolutionDir)bin\$(TargetFileName)
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Include;$(SolutionDir)Include\json;$(SolutionDir)Include\zxing;$(SolutionDir)Include\opencv;$(SolutionDir)Include\opencv2;$(SolutionDir)Include\bignum;$(SolutionDir)Include\detours;$(SolutionDir)Include\leptonica;$(SolutionDir)Include\tesseract;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\json;$(SolutionDir)include\zxing;$(SolutionDir)include\opencv;$(SolutionDir)include\opencv2;$(SolutionDir)include\bignum;$(SolutionDir)include\detours;$(SolutionDir)include\leptonica;$(SolutionDir)include\tesseract;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -362,6 +363,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Dialog\FuncWnd\DlgShowLogoWnd.cpp" />
     <ClCompile Include="Dialog\testDlg.cpp" />
     <ClCompile Include="Inc\audio\interface\AudioInterface.cpp" />
+    <ClCompile Include="Inc\audio\interface\AudioWaveApi.cpp" />
     <ClCompile Include="Inc\common\Leaf.Drawing\LeafMemDC.cpp" />
     <ClCompile Include="Inc\common\Leaf.IO\LeafDirectory.cpp" />
     <ClCompile Include="Inc\common\Leaf.IO\LeafFile.cpp" />
@@ -402,6 +404,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Dialog\testDlg.h" />
     <ClInclude Include="Inc\algorithm\thread_queue.h" />
     <ClInclude Include="Inc\audio\interface\AudioInterface.h" />
+    <ClInclude Include="Inc\audio\interface\AudioWaveApi.h" />
     <ClInclude Include="Inc\common\Leaf.Drawing\LeafMemDC.h" />
     <ClInclude Include="Inc\common\Leaf.IO\LeafDirectory.h" />
     <ClInclude Include="Inc\common\Leaf.IO\LeafFile.h" />

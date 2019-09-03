@@ -1,6 +1,7 @@
 #ifndef __AUDIO_WAVEAPI_H__
 #define __AUDIO_WAVEAPI_H__
 
+#include "AudioInterface.h"
 
 class CAudioWaveAPi : public CAudioInterface
 {
