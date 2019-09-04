@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "AudioWaveApi.h"
 
+#include <sstream>
+
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
@@ -69,35 +71,71 @@ DWORD WINAPI CAudioWaveAPi::audio_waveApiThread(void *pWaveApiPtr)
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool CAudioWaveAPi::audio_getDevInfo(std::vector<CDeviceData> &vecAudioDev)
+static void getInputDevice(std::vector<CDeviceData> &vecAudioDev)
 {
-	bool bRet = false;
-
 	UINT uiIndex = 0;
 	UINT uiDevCount = 0;
 
 	MMRESULT hr;
+	WAVEINCAPS waveIncaps;
+	std::ostringstream ostr;
 
-	do 
+	uiDevCount = waveInGetNumDevs();
+	for (uiIndex=0; uiIndex<uiDevCount; ++uiIndex)
 	{
-		uiDevCount = waveInGetNumDevs();
-
-		for (uiIndex=0; uiIndex<uiDevCount; ++uiIndex)
+		hr = waveInGetDevCaps(uiIndex, &waveIncaps, sizeof(WAVEINCAPS));
+		if (hr != MMSYSERR_NOERROR)
 		{
-			WAVEINCAPS waveIncaps;
-			hr = waveInGetDevCaps(uiIndex, &waveIncaps, sizeof(WAVEINCAPS));
-			if (hr != MMSYSERR_NOERROR )
-			{
-				continue;
-			}
-
-			CDeviceData audioDev;
+			continue;
 		}
 
-		bRet = true;
-	} while (false);
+		CDeviceData audioDev;
+		audioDev.SetDevType(DEV_AUDIOTYPE);
+		audioDev.SetDataType(DATA_CAPTURETYPE);
 
-	return bRet;
+		ostr << uiIndex << endl;
+		audioDev.SetDevId(ostr.str());
+		audioDev.SetDevName(waveIncaps.szPname);
+
+		vecAudioDev.push_back(audioDev);
+	}
+}
+
+static void getOutputDevice(std::vector<CDeviceData> &vecAudioDev)
+{
+	UINT uiIndex = 0;
+	UINT uiDevCount = 0;
+
+	MMRESULT hr;
+	std::ostringstream ostr;
+
+	uiDevCount = waveOutGetNumDevs();
+	for (uiIndex=0; uiIndex<uiDevCount; ++uiIndex)
+	{
+		WAVEOUTCAPS waveOutcaps;
+		hr = waveOutGetDevCaps(uiIndex, &waveOutcaps, sizeof(WAVEOUTCAPS));
+		if (hr != MMSYSERR_NOERROR)
+		{
+			continue;
+		}
+
+		CDeviceData audioDev;
+		audioDev.SetDevType(DEV_AUDIOTYPE);
+		audioDev.SetDataType(DATA_RENDERTYPE);
+
+		ostr << uiIndex << endl;
+		audioDev.SetDevId(ostr.str());
+		audioDev.SetDevName(waveOutcaps.szPname);
+
+		vecAudioDev.push_back(audioDev);
+	}
+}
+
+bool CAudioWaveAPi::audio_getDevInfo(std::vector<CDeviceData> &vecAudioDev)
+{
+	getInputDevice(vecAudioDev);
+	getOutputDevice(vecAudioDev);
+	return true;
 }
 
 void CAudioWaveAPi::audio_waveApiProc()

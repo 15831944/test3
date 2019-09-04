@@ -4,7 +4,6 @@
 
 CDeviceData::CDeviceData()
 {
-	memset(&m_stAudioDev, 0x0, sizeof(DevHandle));
 }
 
 CDeviceData::~CDeviceData()
@@ -13,68 +12,89 @@ CDeviceData::~CDeviceData()
 
 CDeviceData::CDeviceData(const CDeviceData& audioDev)
 {
-	memcpy(&m_stAudioDev, &audioDev.m_stAudioDev, sizeof(DevHandle));
+	m_stAudioDev.nDevType = audioDev.m_stAudioDev.nDevType;
+	m_stAudioDev.nDevState = audioDev.m_stAudioDev.nDevState;
+	m_stAudioDev.nDataType = audioDev.m_stAudioDev.nDataType;
+	
+	m_stAudioDev.strDevId = audioDev.m_stAudioDev.strDevId;
+	m_stAudioDev.strDevName = audioDev.m_stAudioDev.strDevName;
+	memcpy(&m_stAudioDev.stWavFormat, &audioDev.m_stAudioDev.stWavFormat, sizeof(WavFormat));
 }
 
 CDeviceData &CDeviceData::operator = (const CDeviceData& audioDev)
 {
-	memcpy(&m_stAudioDev, &audioDev.m_stAudioDev, sizeof(DevHandle));
+	m_stAudioDev.nDevType = audioDev.m_stAudioDev.nDevType;
+	m_stAudioDev.nDevState = audioDev.m_stAudioDev.nDevState;
+	m_stAudioDev.nDataType = audioDev.m_stAudioDev.nDataType;
+
+	m_stAudioDev.strDevId = audioDev.m_stAudioDev.strDevId;
+	m_stAudioDev.strDevName = audioDev.m_stAudioDev.strDevName;
+	memcpy(&m_stAudioDev.stWavFormat, &audioDev.m_stAudioDev.stWavFormat, sizeof(WavFormat));
+
 	return *this;
 }
 
-void CDeviceData::SetDevType(UINT uiDevType)
+void CDeviceData::SetDevType(int nDevType)
 {
-	m_stAudioDev.uiDevType = uiDevType;
+	m_stAudioDev.nDevType = nDevType;
 }
 
-UINT CDeviceData::GetDevType()
+int CDeviceData::GetDevType()
 {
-	return m_stAudioDev.uiDevType;
+	return m_stAudioDev.nDevType;
 }
 
-void CDeviceData::SetDevId(LPCTSTR lpszDevId)
+void CDeviceData::SetDevState(int nDevState)
 {
-	sprintf(m_stAudioDev.szDeviceId, "%s", lpszDevId);
+	m_stAudioDev.nDevState = nDevState;
+}
+
+int CDeviceData::GetDevState()
+{
+	return m_stAudioDev.nDevState;
+}
+
+void CDeviceData::SetDataType(int nDataType)
+{
+	m_stAudioDev.nDataType = nDataType;
+}
+
+int CDeviceData::GetDataType()
+{
+	return m_stAudioDev.nDataType;
+}
+
+void CDeviceData::SetDevId(std::string strDevId)
+{
+	m_stAudioDev.strDevId = strDevId;
 }
 
 std::string CDeviceData::GetDevId()
 {
-	return m_stAudioDev.szDeviceId;
+	return m_stAudioDev.strDevId;
 }
 
-void CDeviceData::SetDevFriendName(LPCTSTR lpszDevName)
+void CDeviceData::SetDevName(std::string strDevName)
 {
-	sprintf(m_stAudioDev.szFriendlyName, "%s", lpszDevName);
+	m_stAudioDev.strDevName = strDevName;
 }
 
-std::string CDeviceData::GetDevFriendName()
+std::string CDeviceData::GetDevName()
 {
-	return m_stAudioDev.szFriendlyName;
+	return m_stAudioDev.strDevName;
 }
 
-void CDeviceData::SetDevState(UINT uiDevState)
-{
-	m_stAudioDev.uiDevState = uiDevState;
-}
-
-UINT CDeviceData::GetDevState()
-{
-	return m_stAudioDev.uiDevState;
-}
-
-/*
-void CDeviceData::SetDevFormat(WAVEFORMATEX *pWavFormat)
+void CDeviceData::SetWavFormat(WavFormat *pWavFormat)
 {
 	if (pWavFormat == NULL)
 	{
 		return;
 	}
 	
-	memcpy(&m_stAudioDev.stDevFormat, pWavFormat, sizeof(WAVEFORMATEX));
+	memcpy(&m_stAudioDev.stWavFormat, pWavFormat, sizeof(WavFormat));
 }
 
-WAVEFORMATEX* CDeviceData::GetDevFormat()
+WavFormat* CDeviceData::GetWavFormat()
 {
-	return &m_stAudioDev.stDevFormat;
+	return &m_stAudioDev.stWavFormat;
 }
-*/
