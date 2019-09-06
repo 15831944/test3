@@ -68,7 +68,7 @@ void CAudioWasApi::audio_uninit()
 	}
 }
 
-bool CAudioWasApi::audio_enumDevice(std::vector<CDevData> &vecAudioDev)
+bool CAudioWasApi::audio_enumDevice(std::vector<CDeviceData> &vecAudioDev)
 {
 	if (m_pDevEnumerator == NULL)
 	{
@@ -197,7 +197,7 @@ static WAVEFORMATEX* getDeviceFormat(IMMDevice* pDevPtr)
 	return deviceFormat;
 }
 
-bool CAudioWasApi::audio_getDevInfo(EDataFlow emdataFlow, UINT uiDevState, std::vector<CDevData> &vecAudioDev)
+bool CAudioWasApi::audio_getDevInfo(EDataFlow emdataFlow, UINT uiDevState, std::vector<CDeviceData> &vecAudioDev)
 {
 	bool bRet = false;
 
@@ -234,12 +234,15 @@ bool CAudioWasApi::audio_getDevInfo(EDataFlow emdataFlow, UINT uiDevState, std::
 			}
 
 			CDevData audioDev;
+			audioDev.SetDevType(DEV_AUDIOTYPE);
+			audioDev.SetDevMode(DEVICE_CAPTUREMODE);
 			audioDev.SetDevState(getDeviceState(pDevPtr));
+			
 			audioDev.SetDevId(getDeviceId(pDevPtr).c_str());
+			audioDev.SetDevName(getPropString(pDevPtr, PKEY_Device_FriendlyName).c_str());
 			
 			WAVEFORMATEX* pDevFormat = NULL;
-			audioDev.SetDevFormat(pDevFormat=getDeviceFormat(pDevPtr));
-			audioDev.SetDevFriendName(getPropString(pDevPtr, PKEY_Device_FriendlyName).c_str());
+			//audioDev.SetDevFormat(pDevFormat=getDeviceFormat(pDevPtr));
 
 			CoTaskMemFree(pDevFormat);
 			vecAudioDev.push_back(audioDev);

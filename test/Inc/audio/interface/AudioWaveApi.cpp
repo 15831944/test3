@@ -91,7 +91,7 @@ static void getInputDevice(std::vector<CDeviceData> &vecAudioDev)
 
 		CDeviceData audioDev;
 		audioDev.SetDevType(DEV_AUDIOTYPE);
-		audioDev.SetDataType(DATA_CAPTURETYPE);
+		audioDev.SetDevMode(DEVICE_CAPTUREMODE);
 
 		ostr << uiIndex << endl;
 		audioDev.SetDevId(ostr.str());
@@ -121,7 +121,7 @@ static void getOutputDevice(std::vector<CDeviceData> &vecAudioDev)
 
 		CDeviceData audioDev;
 		audioDev.SetDevType(DEV_AUDIOTYPE);
-		audioDev.SetDataType(DATA_RENDERTYPE);
+		audioDev.SetDevMode(DEVICE_CAPTUREMODE);
 
 		ostr << uiIndex << endl;
 		audioDev.SetDevId(ostr.str());

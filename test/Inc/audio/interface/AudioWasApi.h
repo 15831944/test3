@@ -16,7 +16,7 @@ public:
 	virtual bool	audio_init();
 	virtual void	audio_uninit();
 
-	virtual bool	audio_enumDevice(std::vector<CDevData> &vecAudioDev);
+	virtual bool	audio_enumDevice(std::vector<CDeviceData> &vecAudioDev);
 	virtual bool	audio_openDevice();
 	virtual void	audio_closeDevice();
 
@@ -29,13 +29,12 @@ protected:
 	static DWORD WINAPI audio_wasApiThread(void *pWasApiPtr);
 
 protected:
-	bool			audio_getDevInfo(EDataFlow emdataFlow, UINT uiDevState, std::vector<CDevData> &vecAudioDev);
+	bool			audio_getDevInfo(EDataFlow emdataFlow, UINT uiDevState, std::vector<CDeviceData> &vecAudioDev);
 	void			audio_wasApiProc();
 
 protected:
 	HANDLE			m_hHandle;
 	
-
 private:
 	bool	m_bInitialized;
 	IMMDeviceEnumerator* m_pDevEnumerator;
