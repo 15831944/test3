@@ -40,7 +40,6 @@
 
 #include "./internal.h"
 #include "./GlobalInfo.h"
-#include "./DeviceData.h"
 
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);
 #endif

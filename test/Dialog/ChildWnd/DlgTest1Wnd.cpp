@@ -200,8 +200,11 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
- 	std::vector<CDeviceData> vecAudioDev;
+ 	std::vector<CDeviceInfo> vecDevInfo;
 
  	CAudioWaveAPi waveApi;
- 	waveApi.audio_enumDevice(vecAudioDev);
+	waveApi.audio_enumDevice(DEVICE_RENDERMODE, vecDevInfo);
+
+	CDeviceHandle devHandle;
+	waveApi.audio_openDevice(vecDevInfo[0], devHandle);
 }

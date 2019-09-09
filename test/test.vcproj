@@ -643,6 +643,10 @@
 			<Filter
 				Name="audio"
 				>
+				<File
+					RelativePath=".\Inc\audio\audio.h"
+					>
+				</File>
 				<Filter
 					Name="interface"
 					>
@@ -667,6 +671,10 @@
 			<Filter
 				Name="video"
 				>
+				<File
+					RelativePath=".\Inc\video\video.h"
+					>
+				</File>
 				<File
 					RelativePath=".\Inc\video\videoServerControl.cpp"
 					>
@@ -780,11 +788,19 @@
 				Name="data"
 				>
 				<File
-					RelativePath=".\Inc\data\DeviceData.cpp"
+					RelativePath=".\Inc\data\AutoLock.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\DeviceData.h"
+					RelativePath=".\Inc\data\DataQueue.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\DeviceInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\DeviceInfo.h"
 					>
 				</File>
 				<File
