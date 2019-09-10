@@ -23,6 +23,8 @@ CDeviceInfo::CDeviceInfo(const CDeviceInfo &devInfo)
 
 	m_strDeviceId = devInfo.m_strDeviceId;
 	m_strDeviceName = devInfo.m_strDeviceName;
+
+	m_audioData = devInfo.m_audioData;
 }
 
 CDeviceInfo &CDeviceInfo::operator = (const CDeviceInfo& devInfo)
@@ -34,6 +36,7 @@ CDeviceInfo &CDeviceInfo::operator = (const CDeviceInfo& devInfo)
 	m_strDeviceId = devInfo.m_strDeviceId;
 	m_strDeviceName = devInfo.m_strDeviceName;
 
+	m_audioData = devInfo.m_audioData;
 	return *this;
 }
 
@@ -82,9 +85,14 @@ void CDeviceInfo::SetDeviceName(std::string strDeviceName)
 	m_strDeviceName = strDeviceName;
 }
 
-std::string CDeviceInfo:: GetDeviceName()
+std::string CDeviceInfo::GetDeviceName()
 {
 	return m_strDeviceName;
+}
+
+CAudioData* CDeviceInfo::GetDeviceAudio()
+{
+	return &m_audioData;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -132,51 +140,12 @@ void* CDeviceHandle::GetApiHandle()
 	return m_pApiHandle;
 }
 
-void CDeviceHandle::SetDevData(DeviceType emDevType, void *pDevData)
-{
-	// 	if (emDevType == DEVICE_EMPTYTYPE)
-	// 	{
-	// 		return;
-	// 	}
-	// 	
-	// 	if (emDevType == DEVICE_AUDIOTYPE)
-	// 	{
-	// 		memcpy(&m_stDevInfo.stAudioDev, (AudioDev*)pDevData, sizeof(AudioDev));
-	// 	}
-	// 	else if (emDevType == DEVICE_VIDEOTYPE)
-	// 	{
-	// 		memcpy(&m_stDevInfo.stVideoDev, (VideoDev*)pDevData, sizeof(VideoDev));
-	// 	}
-}
-
-void* CDeviceHandle::GetDevData(DeviceType emDevType)
-{
-	void *pDevData = NULL;
-	// 	if (emDevType == DEVICE_EMPTYTYPE)
-	// 	{
-	// 		return NULL;
-	// 	}
-	// 	
-	// 	if (emDevType == DEVICE_AUDIOTYPE)
-	// 	{
-	// 		pDevData = &m_stDevInfo.stAudioDev;
-	// 	}
-	// 	else if (emDevType == DEVICE_VIDEOTYPE)
-	// 	{
-	// 		pDevData = &m_stDevInfo.stVideoDev;
-	// 	}
-	// 	
-	return pDevData;
-}
-
 void CDeviceHandle::SetDataQueue(CDataFrame *pDataFrame)
 {
 	if (pDataFrame == NULL)
 	{
 		return;
 	}
-
-
 }
 
 CDataFrame*	CDeviceHandle::GetDataQueue()

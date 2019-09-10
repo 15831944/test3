@@ -13,10 +13,10 @@ enum DeviceType {
 
 enum DeviceState {
 	DEVICE_EMPTYSTATE = 0,
-	DEVICE_ACTIVESTATE = 1,
-	DEVICE_DISABLEDSTATE = 2,
-	DEVICE_NOTPRESENTSTATE = 3,
-	DEVICE_UNPLUGGEDSTATE = 4,
+	DEVICE_ACTIVESTATE = 1,		//激活
+	DEVICE_DISABLEDSTATE = 2,	//禁用
+	DEVICE_NOTPRESENTSTATE = 3,	//不存在
+	DEVICE_UNPLUGGEDSTATE = 4,	//未上电
 };
 
 enum DeviceMode {
@@ -50,6 +50,11 @@ public:
 	void		SetDeviceName(std::string strDeviceName);
 	std::string GetDeviceName();
 
+	CAudioData*	GetDeviceAudio();
+
+protected:
+	CAudioData	m_audioData;
+
 private:
 	DeviceType	m_emDeviceType;
 	DeviceState	m_emDeviceState;
@@ -78,9 +83,6 @@ public:
 
 	void			SetApiHandle(void *pApiHandle);
 	void*			GetApiHandle();
-
-	void			SetDevData(DeviceType emDevType, void *pDevData);
-	void*			GetDevData(DeviceType emDevType);
 
 	void			SetDataQueue(CDataFrame *pDataFrame);
 	CDataFrame*		GetDataQueue();

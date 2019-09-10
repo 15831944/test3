@@ -200,11 +200,37 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
+
+	CAudioWaveAPi waveApi;
  	std::vector<CDeviceInfo> vecDevInfo;
 
- 	CAudioWaveAPi waveApi;
 	waveApi.audio_enumDevice(DEVICE_RENDERMODE, vecDevInfo);
+	if (vecDevInfo.size() == 0)
+	{
+		return;
+	}
+
+	CDeviceInfo *pDevInfo = &vecDevInfo[0];
+	if (pDevInfo == NULL)
+	{
+		return;
+	}
+
+	WavFormat stWavFormat = {0};
+	CAudioData *pAudioData = pDevInfo->GetDeviceAudio();
+	if (pAudioData != NULL)
+	{
+		stWavFormat.wFormatTag = WAVE_FORMAT_PCM;
+		stWavFormat.wChannels = 2;
+		stWavFormat.wSize = 0;
+		stWavFormat.wBitsPerSample = 16;
+		stWavFormat.dwSamplesPerSec = 44100;
+		stWavFormat.wBlockAlign = (stWavFormat.wBitsPerSample*stWavFormat.wChannels) >> 3;
+		stWavFormat.dwAvgBytesPerSec = stWavFormat.wBlockAlign*stWavFormat.dwSamplesPerSec;
+	}
 
 	CDeviceHandle devHandle;
-	waveApi.audio_openDevice(vecDevInfo[0], devHandle);
+	pAudioData->SetWaveFormat(&stWavFormat);
+	
+	waveApi.audio_openDevice(pDevInfo);
 }

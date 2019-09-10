@@ -11,12 +11,31 @@ struct WavFormat {
 	WORD wSize;
 };
 
-struct AudioDev {
-	WavFormat  stWavFormat;
+class CAudioData 
+{
+public:
+	CAudioData()
+	{
+		memset(&m_stWavFormat, 0x0, sizeof(WavFormat));
+	}
 	
-	struct AudioDev() {
-		memset(&stWavFormat, 0x0, sizeof(WavFormat));
-	};
-};
+	~CAudioData() {}
+
+private:
+	WavFormat m_stWavFormat;
+	
+public:
+	WavFormat* GetWaveFormat() { return &m_stWavFormat; }
+	
+	void SetWaveFormat(const WavFormat *pWaveFormat)
+	{
+		if (pWaveFormat == NULL)
+		{
+			return;
+		}
+		
+		memcpy(&m_stWavFormat, pWaveFormat, sizeof(WavFormat));
+	}
+};	
 
 #endif
