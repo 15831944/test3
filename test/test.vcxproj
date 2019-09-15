@@ -371,7 +371,7 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClCompile Include="Inc\common\Leaf.System\LeafSystem.cpp" />
     <ClCompile Include="Inc\common\Leaf.System\LeafThreadEx.cpp" />
     <ClCompile Include="Inc\common\Leaf.Text\LeafChar.cpp" />
-    <ClCompile Include="Inc\data\DeviceData.cpp" />
+    <ClCompile Include="Inc\data\DeviceInfo.cpp" />
     <ClCompile Include="Inc\data\GlobalInfo.cpp" />
     <ClCompile Include="Inc\data\PubClass.cpp" />
     <ClCompile Include="Inc\network\HttpServer.cpp" />
@@ -413,10 +413,13 @@ del $(SolutionDir)bin\$(TargetFileName)
     <ClInclude Include="Inc\common\Leaf.System\LeafThreadEx.h" />
     <ClInclude Include="Inc\common\Leaf.Text\LeafChar.h" />
     <ClInclude Include="Inc\common\Leaf.Text\String.h" />
-    <ClInclude Include="Inc\data\DeviceData.h" />
+    <ClInclude Include="Inc\data\AutoLock.h" />
+    <ClInclude Include="Inc\data\DataQueue.h" />
+    <ClInclude Include="Inc\data\DeviceInfo.h" />
     <ClInclude Include="Inc\data\GlobalInfo.h" />
     <ClInclude Include="Inc\data\internal.h" />
     <ClInclude Include="Inc\data\PubClass.h" />
+    <ClInclude Include="Inc\data\StreamInfo.h" />
     <ClInclude Include="Inc\network\HttpServer.h" />
     <ClInclude Include="Inc\video\interface\videoInterface.h" />
     <ClInclude Include="Inc\video\videoServerControl.h" />

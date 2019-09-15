@@ -26,6 +26,10 @@ public:
 	virtual void	audio_closeStream();
 	virtual void	audio_stopStream();
 	virtual void	audio_abortStream();
+	
+	virtual	void	audio_addBuffer(const char *pszDataBuff, int nBuffSize);
+	virtual	void	audio_openBuffer();
+	virtual void	audio_closeBuffer();
 
 	virtual void	audio_waveProcEvent(UINT uiMsg, DWORD dwParam1, DWORD dwParam2);
 
