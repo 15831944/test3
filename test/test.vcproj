@@ -762,14 +762,6 @@
 				<Filter
 					Name="Leaf.Drawing"
 					>
-					<File
-						RelativePath=".\Inc\common\Leaf.Drawing\LeafMemDC.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\Inc\common\Leaf.Drawing\LeafMemDC.h"
-						>
-					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -789,6 +781,14 @@
 				>
 				<File
 					RelativePath=".\Inc\data\AutoLock.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\DataBuffer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\data\DataBuffer.h"
 					>
 				</File>
 				<File

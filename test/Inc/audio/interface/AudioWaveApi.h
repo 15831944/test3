@@ -31,13 +31,19 @@ public:
 	virtual	void	audio_openBuffer();
 	virtual void	audio_closeBuffer();
 
-	virtual void	audio_waveProcEvent(UINT uiMsg, DWORD dwParam1, DWORD dwParam2);
+	virtual void	audio_setNotifyHandler(IAudioNotifyHandler *pNotify);
 
 protected:
 	static void CALLBACK audio_waveInProc(HWAVEIN hWaveIn, UINT uiMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
 	static void CALLBACK audio_waveOutProc(HWAVEOUT hWaveOut, UINT uiMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
 	
+	virtual void	audio_waveProcEvent(UINT uiDevMode, UINT uiMsg, DWORD dwParam1, DWORD dwParam2);
+
+	void			audio_waveProcData(HWAVEIN hWaveIn, WAVEHDR *pWaveHdr);
 	bool			audio_getDevInfo(DeviceMode emDevMode, std::vector<CDeviceInfo> &vecDevInfo);
+
+private:
+	IAudioNotifyHandler *m_pAudioNotifyHandler;
 };
 
 #endif

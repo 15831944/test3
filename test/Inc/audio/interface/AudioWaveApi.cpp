@@ -18,7 +18,9 @@ struct WaveApiHandle {
 CAudioWaveAPi::CAudioWaveAPi()
 {
 	m_nError = 0;
+
 	m_pDevHandle = NULL;
+	m_pAudioNotifyHandler = NULL;
 }
 
 CAudioWaveAPi::~CAudioWaveAPi()
@@ -459,7 +461,7 @@ void CAudioWaveAPi::audio_addBuffer(const char *pszDataBuff, int nBuffSize)
 			memset(pWaveApiHandle->pWaveHdrBuff, 0x0, sizeof(WAVEHDR));
 		}
 
-		pWaveApiHandle->pWaveHdrBuff->lpData = pszDataBuff;
+		pWaveApiHandle->pWaveHdrBuff->lpData = (LPSTR)pszDataBuff;
 		pWaveApiHandle->pWaveHdrBuff->dwBufferLength = nBuffSize;
 		pWaveApiHandle->pWaveHdrBuff->dwFlags = 0;
 		pWaveApiHandle->pWaveHdrBuff->dwBytesRecorded = 0;
@@ -621,7 +623,7 @@ void CAudioWaveAPi::audio_closeBuffer()
 				break;
 			}
 			
-			mmr = waveInPrepareHeader(pWaveApiHandle->hWaveIn, pWaveApiHandle->pWaveHdrBuff, sizeof(WAVEHDR));
+			mmr = waveInUnprepareHeader(pWaveApiHandle->hWaveIn, pWaveApiHandle->pWaveHdrBuff, sizeof(WAVEHDR));
 			if (mmr != MMSYSERR_NOERROR)
 			{
 				bRet = false;
@@ -633,9 +635,19 @@ void CAudioWaveAPi::audio_closeBuffer()
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_waveProcEvent(UINT uiMsg, DWORD dwParam1, DWORD dwParam2)
+void CAudioWaveAPi::audio_setNotifyHandler(IAudioNotifyHandler *pNotify)
 {
-
+	if (pNotify != NULL)
+	{
+		if (m_pAudioNotifyHandler == NULL)
+		{
+			::InterlockedExchangePointer(reinterpret_cast<void**>(&m_pAudioNotifyHandler), pNotify);
+		}
+	}
+	else
+	{
+		::InterlockedExchangePointer(reinterpret_cast<void**>(&m_pAudioNotifyHandler), NULL);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -645,7 +657,7 @@ void CAudioWaveAPi::audio_waveInProc(HWAVEIN hWaveIn, UINT uiMsg, DWORD dwInstan
 	CAudioWaveAPi *pAudioWaveApi = reinterpret_cast<CAudioWaveAPi*>(dwInstance);
 	if (pAudioWaveApi)
 	{
-		pAudioWaveApi->audio_waveProcEvent(uiMsg, dwParam1, dwParam2);
+		pAudioWaveApi->audio_waveProcEvent(DEVICE_CAPTUREMODE, uiMsg, dwParam1, dwParam2);
 	}
 }
 
@@ -654,11 +666,51 @@ void CAudioWaveAPi::audio_waveOutProc(HWAVEOUT hWaveOut, UINT uiMsg, DWORD dwIns
 	CAudioWaveAPi *pAudioWaveApi = reinterpret_cast<CAudioWaveAPi*>(dwInstance);
 	if (pAudioWaveApi)
 	{
-		pAudioWaveApi->audio_waveProcEvent(uiMsg, dwParam1, dwParam2);
+		pAudioWaveApi->audio_waveProcEvent(DEVICE_RENDERMODE, uiMsg, dwParam1, dwParam2);
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
+void CAudioWaveAPi::audio_waveProcEvent(UINT uiDevMode, UINT uiMsg, DWORD dwParam1, DWORD dwParam2)
+{
+	switch (uiMsg)
+	{
+	case MM_WIM_OPEN:
+		break;
+
+	case MM_WIM_CLOSE:
+		break;
+
+	case MM_WIM_DATA:
+		break;
+
+	default:
+		break;
+	}
+}
+
+void CAudioWaveAPi::audio_waveProcData(HWAVEIN hWaveIn, WAVEHDR *pWaveHdr)
+{
+	bool bRet = false;
+
+	do 
+	{
+		waveInUnprepareHeader(hWaveIn, pWaveHdr, sizeof(WAVEHDR));
+		if (hWaveIn == NULL || pWaveHdr == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		if (pWaveHdr->lpData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		bRet = true;
+	} while (false);
+}
+
 bool CAudioWaveAPi::audio_getDevInfo(DeviceMode emDevMode, std::vector<CDeviceInfo> &vecDevInfo)
 {
 	bool bRet = false;

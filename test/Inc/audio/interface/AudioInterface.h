@@ -3,6 +3,7 @@
 
 #include "../../data/DeviceInfo.h"
 
+class IAudioNotifyHandler;
 class CAudioInterface
 {
 public:
@@ -19,7 +20,13 @@ public:
 	virtual void	audio_closeStream() = 0;
 	virtual void	audio_stopStream()  = 0;
 	virtual void	audio_abortStream() = 0;
-	
+
+	virtual	void	audio_addBuffer(const char *pszDataBuff, int nBuffSize) = 0;
+	virtual	void	audio_openBuffer()  = 0;
+	virtual void	audio_closeBuffer() = 0;
+
+	virtual void	audio_setNotifyHandler(IAudioNotifyHandler *pNotify) = 0;
+
 protected:
 	int	m_nError;
 	CDeviceHandle*	m_pDevHandle;
@@ -28,11 +35,7 @@ protected:
 class IAudioNotifyHandler
 {
 public:
-	IAudioNotifyHandler();
-	~IAudioNotifyHandler();
-
-public:
-	virtual void	NotifyEvent(CAudioInterface *pAudioInterface, int nMsg);
+	virtual void	NotifyEvent(CAudioInterface *pAudioInterface, int nMsg, int iBuffSize, char *pDataBuff) = 0;
 };
 
 #endif
