@@ -2,6 +2,7 @@
 #define __AUDIO_INTERFACE_H__
 
 #include "../../data/DeviceInfo.h"
+#include "../../data/DataBuffer.h"
 
 class IAudioNotifyHandler;
 class CAudioInterface
@@ -21,9 +22,9 @@ public:
 	virtual void	audio_stopStream()  = 0;
 	virtual void	audio_abortStream() = 0;
 
-	virtual	void	audio_addBuffer(const char *pszDataBuff, int nBuffSize) = 0;
-	virtual	void	audio_openBuffer()  = 0;
-	virtual void	audio_closeBuffer() = 0;
+	virtual	void	audio_addBuffer(CDataBuffer &dataBuff) = 0;
+	virtual	void	audio_openBuffer(CDataBuffer &dataBuff)  = 0;
+	virtual void	audio_closeBuffer(CDataBuffer &dataBuff) = 0;
 
 	virtual void	audio_setNotifyHandler(IAudioNotifyHandler *pNotify) = 0;
 
@@ -35,7 +36,7 @@ protected:
 class IAudioNotifyHandler
 {
 public:
-	virtual void	NotifyEvent(CAudioInterface *pAudioInterface, int nMsg, int iBuffSize, char *pDataBuff) = 0;
+	virtual void	NotifyEvent(CAudioInterface *pAudioInterface, int nEventMsg, CDataBuffer *pDataBuff) = 0;
 };
 
 #endif

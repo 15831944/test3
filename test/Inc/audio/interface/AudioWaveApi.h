@@ -27,9 +27,9 @@ public:
 	virtual void	audio_stopStream();
 	virtual void	audio_abortStream();
 	
-	virtual	void	audio_addBuffer(const char *pszDataBuff, int nBuffSize);
-	virtual	void	audio_openBuffer();
-	virtual void	audio_closeBuffer();
+	virtual	void	audio_addBuffer(CDataBuffer &dataBuff);
+	virtual	void	audio_openBuffer(CDataBuffer &dataBuff);
+	virtual void	audio_closeBuffer(CDataBuffer &dataBuff);
 
 	virtual void	audio_setNotifyHandler(IAudioNotifyHandler *pNotify);
 

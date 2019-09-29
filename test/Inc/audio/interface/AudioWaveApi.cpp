@@ -414,7 +414,7 @@ void CAudioWaveAPi::audio_abortStream()
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_addBuffer(const char *pszDataBuff, int nBuffSize)
+void CAudioWaveAPi::audio_addBuffer(CDataBuffer &dataBuff)
 {
 	bool bRet = false;
 
@@ -425,12 +425,6 @@ void CAudioWaveAPi::audio_addBuffer(const char *pszDataBuff, int nBuffSize)
 	do
 	{
 		if (m_pDevHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		if (pszDataBuff == NULL || nBuffSize <= 0)
 		{
 			bRet = false;
 			break;
@@ -461,14 +455,14 @@ void CAudioWaveAPi::audio_addBuffer(const char *pszDataBuff, int nBuffSize)
 			memset(pWaveApiHandle->pWaveHdrBuff, 0x0, sizeof(WAVEHDR));
 		}
 
-		pWaveApiHandle->pWaveHdrBuff->lpData = (LPSTR)pszDataBuff;
-		pWaveApiHandle->pWaveHdrBuff->dwBufferLength = nBuffSize;
-		pWaveApiHandle->pWaveHdrBuff->dwFlags = 0;
-		pWaveApiHandle->pWaveHdrBuff->dwBytesRecorded = 0;
-		pWaveApiHandle->pWaveHdrBuff->dwUser = 0;
-		pWaveApiHandle->pWaveHdrBuff->dwLoops = 0;
-		pWaveApiHandle->pWaveHdrBuff->lpNext = NULL;
-		pWaveApiHandle->pWaveHdrBuff->reserved = NULL;
+// 		pWaveApiHandle->pWaveHdrBuff->lpData = (LPSTR)pszDataBuff;
+// 		pWaveApiHandle->pWaveHdrBuff->dwBufferLength = nBuffSize;
+// 		pWaveApiHandle->pWaveHdrBuff->dwFlags = 0;
+// 		pWaveApiHandle->pWaveHdrBuff->dwBytesRecorded = 0;
+// 		pWaveApiHandle->pWaveHdrBuff->dwUser = 0;
+// 		pWaveApiHandle->pWaveHdrBuff->dwLoops = 0;
+// 		pWaveApiHandle->pWaveHdrBuff->lpNext = NULL;
+// 		pWaveApiHandle->pWaveHdrBuff->reserved = NULL;
 
 		if (pDevInfo->GetDeviceMode() == DEVICE_RENDERMODE)
 		{
@@ -505,7 +499,7 @@ void CAudioWaveAPi::audio_addBuffer(const char *pszDataBuff, int nBuffSize)
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_openBuffer()
+void CAudioWaveAPi::audio_openBuffer(CDataBuffer &dataBuff)
 {
 	bool bRet = false;
 
@@ -570,7 +564,7 @@ void CAudioWaveAPi::audio_openBuffer()
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_closeBuffer()
+void CAudioWaveAPi::audio_closeBuffer(CDataBuffer &dataBuff)
 {
 	bool bRet = false;
 
