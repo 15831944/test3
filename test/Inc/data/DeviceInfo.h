@@ -11,6 +11,12 @@ enum DeviceType {
 	DEVICE_VIDEOTYPE = 2,
 };
 
+enum DeviceMode {
+	DEVICE_EMPTYMODE = 0,
+	DEVICE_RENDERMODE = 1,		//播放
+	DEVICE_CAPTUREMODE = 2,		//采集
+};
+
 enum DeviceState {
 	DEVICE_EMPTYSTATE = 0,
 	DEVICE_ACTIVESTATE = 1,		//激活
@@ -19,79 +25,73 @@ enum DeviceState {
 	DEVICE_UNPLUGGEDSTATE = 4,	//未上电
 };
 
-enum DeviceMode {
-	DEVICE_EMPTYMODE = 0,
-	DEVICE_RENDERMODE = 1,		//播放
-	DEVICE_CAPTUREMODE = 2,		//采集
-};
-
-class CDeviceInfo
+class IDeviceInfo
 {
 public:
-	CDeviceInfo();
-	~CDeviceInfo();
+	IDeviceInfo();
+	~IDeviceInfo();
 
-	CDeviceInfo(const CDeviceInfo& devInfo);
-	CDeviceInfo& operator=(const CDeviceInfo& devInfo);
+	IDeviceInfo(const IDeviceInfo& devInfo);
+	IDeviceInfo& operator=(const IDeviceInfo& devInfo);
 
 public:
-	void		SetDeviceType(DeviceType emDeviceType);
+	void		SetDeviceType(DeviceType devType);
 	DeviceType	GetDeviceType();
 
-	void		SetDeviceState(DeviceState emDeviceState);
-	DeviceState	GetDeviceState();
-
-	void		SetDeviceMode(DeviceMode emDeviceMode);
+	void		SetDeviceMode(DeviceMode devMode);
 	DeviceMode	GetDeviceMode();
 
-	void		SetDeviceId(std::string strDeviceId);
+	void		SetDeviceState(DeviceState devState);
+	DeviceState	GetDeviceState();
+
+	void		SetDeviceId(std::string strDevId);
 	std::string	GetDeviceId();
 
-	void		SetDeviceName(std::string strDeviceName);
+	void		SetDeviceName(std::string strDevName);
 	std::string GetDeviceName();
 
-	CAudioData*	GetDeviceAudio();
+	IAudioData&	GetDeviceAudio();
 
 protected:
-	CAudioData	m_audioData;
+	IAudioData	m_audioData;
 
 private:
-	DeviceType	m_emDeviceType;
-	DeviceState	m_emDeviceState;
-	DeviceMode  m_emDeviceMode;
+	DeviceType	m_devType;
+	DeviceState	m_devState;
+	DeviceMode  m_devMode;
 
-	std::string	m_strDeviceId;
-	std::string m_strDeviceName;
+	std::string	m_strDevId;
+	std::string m_strDevName;
 };
 
-class CDataFrame
+class IDataFrame
 {
 public:
-	CDataFrame();
-	~CDataFrame();
+	IDataFrame();
+	~IDataFrame();
 };
 
-class CDeviceHandle
+class IDeviceHandle
 {
 public:
-	CDeviceHandle();	
-	~CDeviceHandle();
+	IDeviceHandle();	
+	~IDeviceHandle();
 
 public:	
-	void			SetDevInfo(CDeviceInfo *pDevInfo);
-	CDeviceInfo*	GetDevInfo();
+	void			SetDevInfo(IDeviceInfo devInfo);
+	IDeviceInfo&	GetDevInfo();
 
 	void			SetApiHandle(void *pApiHandle);
 	void*			GetApiHandle();
 
-	void			SetDataQueue(CDataFrame *pDataFrame);
-	CDataFrame*		GetDataQueue();
+	void			SetDataQueue(IDataFrame *pDataFrame);
+	IDataFrame*		GetDataQueue();
 
 private:
 	void*			m_pApiHandle;
 
-	CDeviceInfo		m_deviceInfo;
-	CDataQueue<CDataFrame> m_dataQueue;
+	IDeviceInfo		m_devInfo;
+	CDataQueue<IDataFrame> m_dataQueue;
 };
 
 #endif

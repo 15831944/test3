@@ -1,11 +1,11 @@
 #ifndef __DATA_BUFFER_H__
 #define __DATA_BUFFER_H__
 
-class CDataBuffer
+class IDataBuffer
 {
 public:
-	CDataBuffer();
-	~CDataBuffer();
+	IDataBuffer();
+	~IDataBuffer();
 	
 public:
 	int		GetDataLength() const { return m_nDataLen; }

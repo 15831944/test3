@@ -6,7 +6,7 @@
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
-class CAudioWaveAPi : public CAudioInterface
+class CAudioWaveAPi : public IAudioInterface
 {
 public:
 	CAudioWaveAPi();
@@ -18,8 +18,8 @@ public:
 	virtual bool	audio_init();
 	virtual void	audio_uninit();
 
-	virtual bool	audio_enumDevice(DeviceMode emDevMode, std::vector<CDeviceInfo> &vecDevInfo);
-	virtual bool	audio_openDevice(CDeviceInfo *pDevInfo);
+	virtual bool	audio_enumDevice(DeviceMode devMode, std::vector<IDeviceInfo> &vecDevInfo);
+	virtual bool	audio_openDevice(IDeviceInfo devInfo);
 	virtual void	audio_closeDevice();
 
 	virtual void	audio_startStream();
@@ -27,9 +27,9 @@ public:
 	virtual void	audio_stopStream();
 	virtual void	audio_abortStream();
 	
-	virtual	void	audio_addBuffer(CDataBuffer &dataBuff);
-	virtual	void	audio_openBuffer(CDataBuffer &dataBuff);
-	virtual void	audio_closeBuffer(CDataBuffer &dataBuff);
+	virtual	void	audio_addBuffer(IDataBuffer &dataBuff);
+	virtual	void	audio_openBuffer(IDataBuffer &dataBuff);
+	virtual void	audio_closeBuffer(IDataBuffer &dataBuff);
 
 	virtual void	audio_setNotifyHandler(IAudioNotifyHandler *pNotify);
 
@@ -40,10 +40,10 @@ protected:
 	virtual void	audio_waveProcEvent(UINT uiDevMode, UINT uiMsg, DWORD dwParam1, DWORD dwParam2);
 
 	void			audio_waveProcData(HWAVEIN hWaveIn, WAVEHDR *pWaveHdr);
-	bool			audio_getDevInfo(DeviceMode emDevMode, std::vector<CDeviceInfo> &vecDevInfo);
+	bool			audio_getDevInfo(DeviceMode devMode, std::vector<IDeviceInfo> &vecDevInfo);
 
 private:
-	IAudioNotifyHandler *m_pAudioNotifyHandler;
+	IAudioNotifyHandler *m_audioNotifyHandler;
 };
 
 #endif

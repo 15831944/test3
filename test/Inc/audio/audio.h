@@ -11,15 +11,15 @@ struct WavFormat {
 	WORD wSize;
 };
 
-class CAudioData 
+class IAudioData 
 {
 public:
-	CAudioData()
+	IAudioData()
 	{
 		memset(&m_stWavFormat, 0x0, sizeof(WavFormat));
 	}
 	
-	~CAudioData() {}
+	~IAudioData() {}
 
 private:
 	WavFormat m_stWavFormat;

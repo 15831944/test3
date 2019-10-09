@@ -1,18 +1,18 @@
 #include "stdafx.h"
 #include "DataBuffer.h"
 
-CDataBuffer::CDataBuffer()
+IDataBuffer::IDataBuffer()
 {
 	m_nDataLen = -1;
 	m_pDataBuffer = NULL;
 }
 
-CDataBuffer::~CDataBuffer()
+IDataBuffer::~IDataBuffer()
 {
 	FreeMemory();
 }
 
-bool CDataBuffer::AllocDataBuffer(int nDataSize)
+bool IDataBuffer::AllocDataBuffer(int nDataSize)
 {
 	if (nDataSize <= 0)
 	{
@@ -36,7 +36,7 @@ bool CDataBuffer::AllocDataBuffer(int nDataSize)
 	return true;
 }
 
-void CDataBuffer::FreeMemory()
+void IDataBuffer::FreeMemory()
 {
 	m_nDataLen = -1;
 	if (m_pDataBuffer != NULL)

@@ -1,127 +1,122 @@
 #include "stdafx.h"
 #include "DeviceInfo.h"
 
-CDeviceInfo::CDeviceInfo()
+IDeviceInfo::IDeviceInfo()
 {
-	m_emDeviceType = DEVICE_EMPTYTYPE;
-	m_emDeviceState = DEVICE_EMPTYSTATE;
-	m_emDeviceMode = DEVICE_EMPTYMODE;
+	m_devType = DEVICE_EMPTYTYPE;
+	m_devState = DEVICE_EMPTYSTATE;
+	m_devMode = DEVICE_EMPTYMODE;
 
-	m_strDeviceId = "";
-	m_strDeviceName = "";
+	m_strDevId = "";
+	m_strDevName = "";
 }
 
-CDeviceInfo::~CDeviceInfo()
+IDeviceInfo::~IDeviceInfo()
 {
 }
 
-CDeviceInfo::CDeviceInfo(const CDeviceInfo &devInfo)
+IDeviceInfo::IDeviceInfo(const IDeviceInfo &devInfo)
 {
-	m_emDeviceType = devInfo.m_emDeviceType;
-	m_emDeviceState = devInfo.m_emDeviceState;
-	m_emDeviceMode = devInfo.m_emDeviceMode;
-
-	m_strDeviceId = devInfo.m_strDeviceId;
-	m_strDeviceName = devInfo.m_strDeviceName;
+	m_devType = devInfo.m_devType;
+	m_devMode = devInfo.m_devMode;
+	m_devState = devInfo.m_devState;
+	
+	m_strDevId = devInfo.m_strDevId;
+	m_strDevName = devInfo.m_strDevName;
 
 	m_audioData = devInfo.m_audioData;
 }
 
-CDeviceInfo &CDeviceInfo::operator = (const CDeviceInfo& devInfo)
+IDeviceInfo &IDeviceInfo::operator = (const IDeviceInfo& devInfo)
 {
-	m_emDeviceType = devInfo.m_emDeviceType;
-	m_emDeviceState = devInfo.m_emDeviceState;
-	m_emDeviceMode = devInfo.m_emDeviceMode;
-
-	m_strDeviceId = devInfo.m_strDeviceId;
-	m_strDeviceName = devInfo.m_strDeviceName;
+	m_devType = devInfo.m_devType;
+	m_devMode = devInfo.m_devMode;
+	m_devState = devInfo.m_devState;
+	
+	m_strDevId = devInfo.m_strDevId;
+	m_strDevName = devInfo.m_strDevName;
 
 	m_audioData = devInfo.m_audioData;
 	return *this;
 }
 
-void CDeviceInfo::SetDeviceType(DeviceType emDeviceType)
+void IDeviceInfo::SetDeviceType(DeviceType devType)
 {
-	m_emDeviceType = emDeviceType;
+	m_devType = devType;
 }
 
-DeviceType CDeviceInfo::GetDeviceType()
+DeviceType IDeviceInfo::GetDeviceType()
 {
-	return m_emDeviceType;
+	return m_devType;
 }
 
-void CDeviceInfo::SetDeviceState(DeviceState emDeviceState)
+void IDeviceInfo::SetDeviceMode(DeviceMode devMode)
 {
-	m_emDeviceState = emDeviceState;
+	m_devMode = devMode;
 }
 
-DeviceState CDeviceInfo::GetDeviceState()
+DeviceMode IDeviceInfo::GetDeviceMode()
 {
-	return m_emDeviceState;
+	return m_devMode;
 }
 
-void CDeviceInfo::SetDeviceMode(DeviceMode emDeviceMode)
+void IDeviceInfo::SetDeviceState(DeviceState devState)
 {
-	m_emDeviceMode = emDeviceMode;
+	m_devState = devState;
 }
 
-DeviceMode CDeviceInfo::GetDeviceMode()
+DeviceState IDeviceInfo::GetDeviceState()
 {
-	return m_emDeviceMode;
+	return m_devState;
 }
 
-void CDeviceInfo::SetDeviceId(std::string strDeviceId)
+void IDeviceInfo::SetDeviceId(std::string strDevId)
 {
-	m_strDeviceId = strDeviceId;
+	m_strDevId = strDevId;
 }
 
-std::string	CDeviceInfo::GetDeviceId()
+std::string	IDeviceInfo::GetDeviceId()
 {
-	return m_strDeviceId;
+	return m_strDevId;
 }
 
-void CDeviceInfo::SetDeviceName(std::string strDeviceName)
+void IDeviceInfo::SetDeviceName(std::string strDevName)
 {
-	m_strDeviceName = strDeviceName;
+	m_strDevName = strDevName;
 }
 
-std::string CDeviceInfo::GetDeviceName()
+std::string IDeviceInfo::GetDeviceName()
 {
-	return m_strDeviceName;
+	return m_strDevName;
 }
 
-CAudioData* CDeviceInfo::GetDeviceAudio()
+IAudioData& IDeviceInfo::GetDeviceAudio()
 {
-	return &m_audioData;
+	return m_audioData;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
-CDeviceHandle::CDeviceHandle()
+IDeviceHandle::IDeviceHandle()
 {
 	m_pApiHandle = NULL;
 }
 
-CDeviceHandle::~CDeviceHandle()
+IDeviceHandle::~IDeviceHandle()
 {
 }
 
-void CDeviceHandle::SetDevInfo(CDeviceInfo *pDevInfo)
+void IDeviceHandle::SetDevInfo(IDeviceInfo devInfo)
 {
-	if (pDevInfo == NULL)
-	{
-		return;
-	}
-
-	m_deviceInfo = *pDevInfo;
+	m_devInfo = devInfo;
 }
 
-CDeviceInfo* CDeviceHandle::GetDevInfo()
+IDeviceInfo& IDeviceHandle::GetDevInfo()
 {
-	return &m_deviceInfo;
+	return m_devInfo;
 }
 
-void CDeviceHandle::SetApiHandle(void *pApiHandle)
+void IDeviceHandle::SetApiHandle(void *pApiHandle)
 {
 	if (m_pApiHandle != NULL)
 	{
@@ -135,12 +130,12 @@ void CDeviceHandle::SetApiHandle(void *pApiHandle)
 	}
 }
 
-void* CDeviceHandle::GetApiHandle()
+void* IDeviceHandle::GetApiHandle()
 {
 	return m_pApiHandle;
 }
 
-void CDeviceHandle::SetDataQueue(CDataFrame *pDataFrame)
+void IDeviceHandle::SetDataQueue(IDataFrame *pDataFrame)
 {
 	if (pDataFrame == NULL)
 	{
@@ -148,7 +143,7 @@ void CDeviceHandle::SetDataQueue(CDataFrame *pDataFrame)
 	}
 }
 
-CDataFrame*	CDeviceHandle::GetDataQueue()
+IDataFrame*	IDeviceHandle::GetDataQueue()
 {
 	return NULL;
 }
