@@ -1,11 +1,19 @@
 #include "stdafx.h"
 #include "AudioProcAPi.h"
 
-CAudioProc::CAudioProc()
+CAudioProc::CAudioProc(AudioApi emAudioApi)
 {
 }
 
 CAudioProc::~CAudioProc()
+{
+}
+
+void CAudioProc::initApi(AudioApi emAudioApi)
+{
+}
+
+void CAudioProc::unInitApi()
 {
 }
 

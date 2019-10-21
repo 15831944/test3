@@ -1,13 +1,27 @@
 #ifndef __AUDIOPROC_API_H__
 #define __AUDIOPROC_API_H__
 
+enum AudioApi {
+	UNSPECIFIED,
+	WINDOWS_WAVE,
+	WINDOWS_WASAPI,
+	WINDOWS_ASIO,
+	WINDOWS_DS,
+	LINUX_PULSE,
+	LINUX_ALSA,
+	LINUX_OSS,
+};
+
 class IAudioProcApi
 {
 public:
-	virtual void	getCurrentApi() = 0;
-	virtual void	getEnumDevice() = 0;
+	virtual void	initApi(AudioApi emAudioApi) = 0
+	virtual void	unInitApi() = 0;
 	
 	virtual bool	isStreamOpen()  = 0;
+	
+	virtual void	getCurrentApi() = 0;
+	virtual void	getEnumDevice() = 0;
 	
 	virtual void	openStream() = 0;
 	virtual void	closeStream() = 0;
@@ -20,14 +34,17 @@ public:
 class CAudioProc : public IAudioProcApi
 {
 public:
-	CAudioProc();
+	CAudioProc(AudioApi emAudioApi);
 	~CAudioProc();
 	
 public:
-	virtual void	getCurrentApi();
-	virtual void	getEnumDevice();
+	virtual void	initApi(AudioApi emAudioApi);
+	virtual void	unInitApi();
 	
 	virtual bool	isStreamOpen();
+	
+	virtual void	getCurrentApi();
+	virtual void	getEnumDevice();
 	
 	virtual void	openStream();
 	virtual void 	closeStream();
