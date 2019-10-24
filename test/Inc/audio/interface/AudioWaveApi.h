@@ -18,8 +18,8 @@ public:
 	virtual bool	audio_init();
 	virtual void	audio_uninit();
 
-	virtual bool	audio_enumDevice(DeviceMode devMode, std::vector<IDeviceInfo> &vecDevInfo);
-	virtual bool	audio_openDevice(IDeviceInfo devInfo);
+	virtual bool	audio_enumDevice(DevMode devMode, std::vector<CDevData> &vecDevData);
+	virtual bool	audio_openDevice(CDevData devInfo);
 	virtual void	audio_closeDevice();
 
 	virtual void	audio_startStream();
@@ -40,7 +40,7 @@ protected:
 	virtual void	audio_waveProcEvent(UINT uiDevMode, UINT uiMsg, DWORD dwParam1, DWORD dwParam2);
 
 	void			audio_waveProcData(HWAVEIN hWaveIn, WAVEHDR *pWaveHdr);
-	bool			audio_getDevInfo(DeviceMode devMode, std::vector<IDeviceInfo> &vecDevInfo);
+	bool			audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vecDevInfo);
 
 private:
 	IAudioNotifyHandler *m_audioNotifyHandler;

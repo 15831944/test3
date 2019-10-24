@@ -13,8 +13,8 @@ public:
 	virtual bool	audio_init() = 0;
 	virtual void	audio_uninit() = 0;
 
-	virtual bool	audio_enumDevice(DeviceMode devMode, std::vector<IDeviceInfo> &vecDevInfo) = 0;
-	virtual bool	audio_openDevice(IDeviceInfo devInfo) = 0;
+	virtual bool	audio_enumDevice(DevMode devMode, std::vector<CDevData> &vecDevInfo) = 0;
+	virtual bool	audio_openDevice(CDevData devInfo) = 0;
 	virtual void	audio_closeDevice() = 0;
 
 	virtual void	audio_startStream() = 0;
@@ -30,7 +30,7 @@ public:
 
 protected:
 	int	m_nError;
-	IDeviceHandle*	m_devHandle;
+	CDevHandle*	m_devHandle;
 };
 
 class IAudioNotifyHandler

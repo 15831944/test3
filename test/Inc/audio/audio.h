@@ -1,6 +1,17 @@
 #ifndef __AUDIO_H__
 #define __AUDIO_H__
 
+enum AudioApi {
+	UNSPECIFIED,
+	WINDOWS_WAVE,
+	WINDOWS_WASAPI,
+	WINDOWS_ASIO,
+	WINDOWS_DS,
+	LINUX_PULSE,
+	LINUX_ALSA,
+	LINUX_OSS,
+};
+
 struct WavFormat {
 	WORD wFormatTag;
 	WORD wChannels;
@@ -11,31 +22,24 @@ struct WavFormat {
 	WORD wSize;
 };
 
-class IAudioData 
+class IAudioProcApi
 {
 public:
-	IAudioData()
-	{
-		memset(&m_stWavFormat, 0x0, sizeof(WavFormat));
-	}
-	
-	~IAudioData() {}
+	virtual void	initApi(AudioApi emAudioApi) = 0
+	virtual void	unInitApi() = 0;
 
-private:
-	WavFormat m_stWavFormat;
-	
-public:
-	WavFormat* GetWaveFormat() { return &m_stWavFormat; }
-	
-	void SetWaveFormat(const WavFormat *pWaveFormat)
-	{
-		if (pWaveFormat == NULL)
-		{
-			return;
-		}
-		
-		memcpy(&m_stWavFormat, pWaveFormat, sizeof(WavFormat));
-	}
-};	
+	virtual bool	isStreamOpen()  = 0;
+
+	virtual void	getCurrentApi() = 0;
+	virtual void	getEnumDevice() = 0;
+
+	virtual void	openStream() = 0;
+	virtual void	closeStream() = 0;
+
+	virtual void	startStream() = 0;
+	virtual void	stopStream()  = 0;
+	virtual void	abortStream() = 0;
+};
+
 
 #endif

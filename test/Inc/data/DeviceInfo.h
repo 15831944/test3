@@ -5,60 +5,55 @@
 #include "../audio/audio.h"
 #include "../video/video.h"
 
-enum DeviceType {
-	DEVICE_EMPTYTYPE = 0,
-	DEVICE_AUDIOTYPE = 1,
-	DEVICE_VIDEOTYPE = 2,
+enum DevType {
+	DEV_EMPTYTYPE = 0,
+	DEV_AUDIOTYPE = 1,
+	DEV_VIDEOTYPE = 2,
 };
 
-enum DeviceMode {
-	DEVICE_EMPTYMODE = 0,
-	DEVICE_RENDERMODE = 1,		//播放
-	DEVICE_CAPTUREMODE = 2,		//采集
+enum DevMode {
+	DEV_EMPTYMODE = 0,
+	DEV_RENDERMODE = 1,			//播放
+	DEV_CAPTUREMODE = 2,		//采集
 };
 
-enum DeviceState {
-	DEVICE_EMPTYSTATE = 0,
-	DEVICE_ACTIVESTATE = 1,		//激活
-	DEVICE_DISABLEDSTATE = 2,	//禁用
-	DEVICE_NOTPRESENTSTATE = 3,	//不存在
-	DEVICE_UNPLUGGEDSTATE = 4,	//未上电
+enum DevState {
+	DEV_EMPTYSTATE = 0,
+	DEV_ACTIVESTATE = 1,		//激活
+	DEV_DISABLEDSTATE = 2,		//禁用
+	DEV_NOTPRESENTSTATE = 3,	//不存在
+	DEV_UNPLUGGEDSTATE = 4,		//未上电
 };
 
-class IDeviceInfo
+class CDevData
 {
 public:
-	IDeviceInfo();
-	~IDeviceInfo();
+	CDevData();
+	~CDevData();
 
-	IDeviceInfo(const IDeviceInfo& devInfo);
-	IDeviceInfo& operator=(const IDeviceInfo& devInfo);
+	CDevData(const CDevData& devData);
+	CDevData& operator=(const CDevData& devData);
 
 public:
-	void		SetDeviceType(DeviceType devType);
-	DeviceType	GetDeviceType();
+	void		SetDevType(DevType devType);
+	DevType		GetDevType();
 
-	void		SetDeviceMode(DeviceMode devMode);
-	DeviceMode	GetDeviceMode();
+	void		SetDevMode(DevMode devMode);
+	DevMode		GetDevMode();
 
-	void		SetDeviceState(DeviceState devState);
-	DeviceState	GetDeviceState();
+	void		SetDevState(DevState devState);
+	DevState	GetDevState();
 
-	void		SetDeviceId(std::string strDevId);
-	std::string	GetDeviceId();
+	void		SetDevId(std::string strDevId);
+	std::string	GetDevId();
 
-	void		SetDeviceName(std::string strDevName);
-	std::string GetDeviceName();
-
-	IAudioData&	GetDeviceAudio();
-
-protected:
-	IAudioData	m_audioData;
+	void		SetDevName(std::string strDevName);
+	std::string GetDevName();
 
 private:
-	DeviceType	m_devType;
-	DeviceState	m_devState;
-	DeviceMode  m_devMode;
+	DevType		m_devType;
+	DevState	m_devState;
+	DevMode		m_devMode;
 
 	std::string	m_strDevId;
 	std::string m_strDevName;
@@ -71,15 +66,15 @@ public:
 	~IDataFrame();
 };
 
-class IDeviceHandle
+class CDevHandle
 {
 public:
-	IDeviceHandle();	
-	~IDeviceHandle();
+	CDevHandle();	
+	~CDevHandle();
 
 public:	
-	void			SetDevInfo(IDeviceInfo devInfo);
-	IDeviceInfo&	GetDevInfo();
+	void			SetDevData(CDevData devData);
+	CDevData&		GetDevData();
 
 	void			SetApiHandle(void *pApiHandle);
 	void*			GetApiHandle();
@@ -90,7 +85,7 @@ public:
 private:
 	void*			m_pApiHandle;
 
-	IDeviceInfo		m_devInfo;
+	CDevData		m_devData;
 	CDataQueue<IDataFrame> m_dataQueue;
 };
 

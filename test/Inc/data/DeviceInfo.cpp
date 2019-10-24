@@ -1,122 +1,121 @@
+/**
+ *	@brief		
+ *	@author		wanglei
+ *	@date		2019.10.24
+ */
+
 #include "stdafx.h"
 #include "DeviceInfo.h"
 
-IDeviceInfo::IDeviceInfo()
+CDevData::CDevData()
 {
-	m_devType = DEVICE_EMPTYTYPE;
-	m_devState = DEVICE_EMPTYSTATE;
-	m_devMode = DEVICE_EMPTYMODE;
+	m_devType = DEV_EMPTYTYPE;
+	m_devState = DEV_EMPTYSTATE;
+	m_devMode = DEV_EMPTYMODE;
 
 	m_strDevId = "";
 	m_strDevName = "";
 }
 
-IDeviceInfo::~IDeviceInfo()
+CDevData::~CDevData()
 {
 }
 
-IDeviceInfo::IDeviceInfo(const IDeviceInfo &devInfo)
+//
+CDevData::CDevData(const CDevData &devData)
 {
-	m_devType = devInfo.m_devType;
-	m_devMode = devInfo.m_devMode;
-	m_devState = devInfo.m_devState;
+	m_devType = devData.m_devType;
+	m_devMode = devData.m_devMode;
+	m_devState = devData.m_devState;
 	
-	m_strDevId = devInfo.m_strDevId;
-	m_strDevName = devInfo.m_strDevName;
-
-	m_audioData = devInfo.m_audioData;
+	m_strDevId = devData.m_strDevId;
+	m_strDevName = devData.m_strDevName;
 }
 
-IDeviceInfo &IDeviceInfo::operator = (const IDeviceInfo& devInfo)
+CDevData &CDevData::operator = (const CDevData& devData)
 {
-	m_devType = devInfo.m_devType;
-	m_devMode = devInfo.m_devMode;
-	m_devState = devInfo.m_devState;
+	m_devType = devData.m_devType;
+	m_devMode = devData.m_devMode;
+	m_devState = devData.m_devState;
 	
-	m_strDevId = devInfo.m_strDevId;
-	m_strDevName = devInfo.m_strDevName;
+	m_strDevId = devData.m_strDevId;
+	m_strDevName = devData.m_strDevName;
 
-	m_audioData = devInfo.m_audioData;
 	return *this;
 }
 
-void IDeviceInfo::SetDeviceType(DeviceType devType)
+void CDevData::SetDevType(DevType devType)
 {
 	m_devType = devType;
 }
 
-DeviceType IDeviceInfo::GetDeviceType()
+DevType CDevData::GetDevType()
 {
 	return m_devType;
 }
 
-void IDeviceInfo::SetDeviceMode(DeviceMode devMode)
+void CDevData::SetDevMode(DevMode devMode)
 {
 	m_devMode = devMode;
 }
 
-DeviceMode IDeviceInfo::GetDeviceMode()
+DevMode CDevData::GetDevMode()
 {
 	return m_devMode;
 }
 
-void IDeviceInfo::SetDeviceState(DeviceState devState)
+void CDevData::SetDevState(DevState devState)
 {
 	m_devState = devState;
 }
 
-DeviceState IDeviceInfo::GetDeviceState()
+DevState CDevData::GetDevState()
 {
 	return m_devState;
 }
 
-void IDeviceInfo::SetDeviceId(std::string strDevId)
+void CDevData::SetDevId(std::string strDevId)
 {
 	m_strDevId = strDevId;
 }
 
-std::string	IDeviceInfo::GetDeviceId()
+std::string	CDevData::GetDevId()
 {
 	return m_strDevId;
 }
 
-void IDeviceInfo::SetDeviceName(std::string strDevName)
+void CDevData::SetDevName(std::string strDevName)
 {
 	m_strDevName = strDevName;
 }
 
-std::string IDeviceInfo::GetDeviceName()
+std::string CDevData::GetDevName()
 {
 	return m_strDevName;
 }
 
-IAudioData& IDeviceInfo::GetDeviceAudio()
-{
-	return m_audioData;
-}
-
 //////////////////////////////////////////////////////////////////////////
 //
-IDeviceHandle::IDeviceHandle()
+CDevHandle::CDevHandle()
 {
 	m_pApiHandle = NULL;
 }
 
-IDeviceHandle::~IDeviceHandle()
+CDevHandle::~CDevHandle()
 {
 }
 
-void IDeviceHandle::SetDevInfo(IDeviceInfo devInfo)
+void CDevHandle::SetDevData(CDevData devData)
 {
-	m_devInfo = devInfo;
+	m_devData = devData;
 }
 
-IDeviceInfo& IDeviceHandle::GetDevInfo()
+CDevData& CDevHandle::GetDevData()
 {
-	return m_devInfo;
+	return m_devData;
 }
 
-void IDeviceHandle::SetApiHandle(void *pApiHandle)
+void CDevHandle::SetApiHandle(void *pApiHandle)
 {
 	if (m_pApiHandle != NULL)
 	{
@@ -130,12 +129,12 @@ void IDeviceHandle::SetApiHandle(void *pApiHandle)
 	}
 }
 
-void* IDeviceHandle::GetApiHandle()
+void* CDevHandle::GetApiHandle()
 {
 	return m_pApiHandle;
 }
 
-void IDeviceHandle::SetDataQueue(IDataFrame *pDataFrame)
+void CDevHandle::SetDataQueue(IDataFrame *pDataFrame)
 {
 	if (pDataFrame == NULL)
 	{
@@ -143,7 +142,7 @@ void IDeviceHandle::SetDataQueue(IDataFrame *pDataFrame)
 	}
 }
 
-IDataFrame*	IDeviceHandle::GetDataQueue()
+IDataFrame*	CDevHandle::GetDataQueue()
 {
 	return NULL;
 }

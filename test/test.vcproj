@@ -647,6 +647,14 @@
 					RelativePath=".\Inc\audio\audio.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Inc\audio\AudioProcApi.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\AudioProcApi.h"
+					>
+				</File>
 				<Filter
 					Name="interface"
 					>
