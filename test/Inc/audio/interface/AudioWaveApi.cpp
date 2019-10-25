@@ -3,12 +3,12 @@
 
 #include <sstream>
 
-struct WaveApiHandle {
+struct WaveHandle {
 	HWAVEIN		hWaveIn;
 	HWAVEOUT	hWaveOut;
 	PWAVEHDR	WaveHdrBuff;
 
-	struct WaveApiHandle() {
+	struct WaveHandle() {
 		hWaveIn = NULL;
 		hWaveOut = NULL;
 		WaveHdrBuff = NULL;
@@ -46,12 +46,12 @@ bool CAudioWaveAPi::audio_enumDevice(DevMode devMode, std::vector<CDevData> &vec
 	return audio_getDevInfo(devMode, vecDevData);
 }
 
-bool CAudioWaveAPi::audio_openDevice(CDevData devInfo)
+bool CAudioWaveAPi::audio_openDevice(CDevData devData)
 {
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -62,20 +62,20 @@ bool CAudioWaveAPi::audio_openDevice(CDevData devInfo)
 			break;
 		}
 
-		pWaveApiHandle = new WaveApiHandle;
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = new WaveHandle;
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
 		WAVEFORMATEX stWaveFormat = {0};
-		UINT uiDevId = atol(devInfo.GetDevId().c_str());
+		UINT uiDevId = atol(devData.GetDevId().c_str());
 
-		IAudioData audioData = devInfo.GetDeviceAudio();
-		memcpy(&stWaveFormat, audioData.GetWaveFormat(), sizeof(WAVEFORMATEX));
+		//IAudioData audioData = devData.GetDeviceAudio();
+		//memcpy(&stWaveFormat, audioData.GetWaveFormat(), sizeof(WAVEFORMATEX));
 
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{//²¥·Å
 			HWAVEOUT hWaveOut;
 			mmr = waveOutOpen(&hWaveOut, uiDevId, const_cast<WAVEFORMATEX*>(&stWaveFormat), reinterpret_cast<DWORD_PTR>(CAudioWaveAPi::audio_waveOutProc), reinterpret_cast<DWORD_PTR>(this), CALLBACK_FUNCTION);
@@ -85,9 +85,9 @@ bool CAudioWaveAPi::audio_openDevice(CDevData devInfo)
 				break;
 			}
 
-			pWaveApiHandle->hWaveOut = hWaveOut;
+			pWaveHandle->hWaveOut = hWaveOut;
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{//²É¼¯
 			HWAVEIN hWaveIn;
 			mmr = waveInOpen(&hWaveIn, uiDevId, const_cast<WAVEFORMATEX*>(&stWaveFormat), reinterpret_cast<DWORD_PTR>(CAudioWaveAPi::audio_waveInProc), reinterpret_cast<DWORD_PTR>(this), CALLBACK_FUNCTION);
@@ -97,24 +97,24 @@ bool CAudioWaveAPi::audio_openDevice(CDevData devInfo)
 				break;
 			}
 
-			pWaveApiHandle->hWaveIn = hWaveIn;
+			pWaveHandle->hWaveIn = hWaveIn;
 		}
 
 		LONG lDeviceState = 0;
 		::InterlockedExchange(&lDeviceState, 1);
 
-		m_devHandle->SetDevData(devInfo);
-		m_devHandle->SetApiHandle(pWaveApiHandle);
+		m_devHandle->SetDevData(devData);
+		m_devHandle->SetApiHandle(pWaveHandle);
 
 		bRet = true;
 	} while (false);
 
 	if (!bRet)
 	{
-		if (pWaveApiHandle != NULL)
+		if (pWaveHandle != NULL)
 		{
-			delete pWaveApiHandle;
-			pWaveApiHandle = NULL;
+			delete pWaveHandle;
+			pWaveHandle = NULL;
 		}
 
 		if (m_devHandle != NULL)
@@ -132,7 +132,7 @@ void CAudioWaveAPi::audio_closeDevice()
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -142,14 +142,14 @@ void CAudioWaveAPi::audio_closeDevice()
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devInfo = m_devHandle->GetDevData();
+		CDevData devData = m_devHandle->GetDevData();
 
 		bRet = true;
 	} while (false);
@@ -160,7 +160,7 @@ void CAudioWaveAPi::audio_startStream()
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -170,19 +170,19 @@ void CAudioWaveAPi::audio_startStream()
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutRestart(pWaveApiHandle->hWaveOut);
+				mmr = waveOutRestart(pWaveHandle->hWaveOut);
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -190,11 +190,11 @@ void CAudioWaveAPi::audio_startStream()
 				}
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInStart(pWaveApiHandle->hWaveIn);
+				mmr = waveInStart(pWaveHandle->hWaveIn);
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -212,7 +212,7 @@ void CAudioWaveAPi::audio_closeStream()
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -222,40 +222,40 @@ void CAudioWaveAPi::audio_closeStream()
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
- 		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+ 		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutClose(pWaveApiHandle->hWaveOut); 
+				mmr = waveOutClose(pWaveHandle->hWaveOut); 
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
 					break;
 				}
 
-				pWaveApiHandle->hWaveOut = NULL;
+				pWaveHandle->hWaveOut = NULL;
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInClose(pWaveApiHandle->hWaveIn);
+				mmr = waveInClose(pWaveHandle->hWaveIn);
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
 					break;
 				}
 
-				pWaveApiHandle->hWaveIn = NULL;
+				pWaveHandle->hWaveIn = NULL;
 			}
 		}
 
@@ -268,7 +268,7 @@ void CAudioWaveAPi::audio_stopStream()
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -278,33 +278,33 @@ void CAudioWaveAPi::audio_stopStream()
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutReset(pWaveApiHandle->hWaveOut);
+				mmr = waveOutReset(pWaveHandle->hWaveOut);
 				if (mmr == MMSYSERR_NOERROR)
 				{
-					mmr = waveOutPause(pWaveApiHandle->hWaveOut);
+					mmr = waveOutPause(pWaveHandle->hWaveOut);
 				}
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInReset(pWaveApiHandle->hWaveIn);
+				mmr = waveInReset(pWaveHandle->hWaveIn);
 				if (mmr == MMSYSERR_NOERROR)
 				{
-					mmr = waveInStop(pWaveApiHandle->hWaveIn);
+					mmr = waveInStop(pWaveHandle->hWaveIn);
 				}
 			}
 		}
@@ -318,7 +318,7 @@ void CAudioWaveAPi::audio_abortStream()
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -328,19 +328,19 @@ void CAudioWaveAPi::audio_abortStream()
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutReset(pWaveApiHandle->hWaveOut);
+				mmr = waveOutReset(pWaveHandle->hWaveOut);
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -348,11 +348,11 @@ void CAudioWaveAPi::audio_abortStream()
 				}
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInReset(pWaveApiHandle->hWaveIn);
+				mmr = waveInReset(pWaveHandle->hWaveIn);
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -370,7 +370,7 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 	
 	do
 	{
@@ -380,22 +380,22 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		if (pWaveApiHandle->WaveHdrBuff == NULL)
+		if (pWaveHandle->WaveHdrBuff == NULL)
 		{
-			pWaveApiHandle->WaveHdrBuff = new WAVEHDR;
-			if (pWaveApiHandle->WaveHdrBuff == NULL)
+			pWaveHandle->WaveHdrBuff = new WAVEHDR;
+			if (pWaveHandle->WaveHdrBuff == NULL)
 			{
 				bRet = false;
 				break;
 			}
-			memset(pWaveApiHandle->WaveHdrBuff, 0x0, sizeof(WAVEHDR));
+			memset(pWaveHandle->WaveHdrBuff, 0x0, sizeof(WAVEHDR));
 		}
 
 // 		pWaveApiHandle->pWaveHdrBuff->lpData = (LPSTR)pszDataBuff;
@@ -407,12 +407,12 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 // 		pWaveApiHandle->pWaveHdrBuff->lpNext = NULL;
 // 		pWaveApiHandle->pWaveHdrBuff->reserved = NULL;
 
-		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutPrepareHeader(pWaveApiHandle->hWaveOut, pWaveApiHandle->WaveHdrBuff, sizeof(WAVEHDR));
+				mmr = waveOutPrepareHeader(pWaveHandle->hWaveOut, pWaveHandle->WaveHdrBuff, sizeof(WAVEHDR));
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -420,11 +420,11 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 				}
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInPrepareHeader(pWaveApiHandle->hWaveIn, pWaveApiHandle->WaveHdrBuff, sizeof(WAVEHDR));
+				mmr = waveInPrepareHeader(pWaveHandle->hWaveIn, pWaveHandle->WaveHdrBuff, sizeof(WAVEHDR));
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -442,7 +442,7 @@ void CAudioWaveAPi::audio_openBuffer(IDataBuffer &dataBuff)
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 
 	do 
 	{
@@ -452,19 +452,19 @@ void CAudioWaveAPi::audio_openBuffer(IDataBuffer &dataBuff)
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutWrite(pWaveApiHandle->hWaveOut, pWaveApiHandle->WaveHdrBuff, sizeof(WAVEHDR));
+				mmr = waveOutWrite(pWaveHandle->hWaveOut, pWaveHandle->WaveHdrBuff, sizeof(WAVEHDR));
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -472,11 +472,11 @@ void CAudioWaveAPi::audio_openBuffer(IDataBuffer &dataBuff)
 				}
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInAddBuffer(pWaveApiHandle->hWaveIn, pWaveApiHandle->WaveHdrBuff, sizeof(WAVEHDR));
+				mmr = waveInAddBuffer(pWaveHandle->hWaveIn, pWaveHandle->WaveHdrBuff, sizeof(WAVEHDR));
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -494,7 +494,7 @@ void CAudioWaveAPi::audio_closeBuffer(IDataBuffer &dataBuff)
 	bool bRet = false;
 
 	MMRESULT mmr;
-	WaveApiHandle *pWaveApiHandle = NULL;
+	WaveHandle *pWaveHandle = NULL;
 	
 	do
 	{
@@ -504,19 +504,19 @@ void CAudioWaveAPi::audio_closeBuffer(IDataBuffer &dataBuff)
 			break;
 		}
 
-		pWaveApiHandle = (WaveApiHandle*)m_devHandle->GetApiHandle();
-		if (pWaveApiHandle == NULL)
+		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devInfo = m_devHandle->GetDevData();
-		if (devInfo.GetDevMode() == DEV_RENDERMODE)
+		CDevData devData = m_devHandle->GetDevData();
+		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{
-			if (pWaveApiHandle->hWaveOut != NULL)
+			if (pWaveHandle->hWaveOut != NULL)
 			{
-				mmr = waveOutUnprepareHeader(pWaveApiHandle->hWaveOut, pWaveApiHandle->WaveHdrBuff, sizeof(WAVEHDR));
+				mmr = waveOutUnprepareHeader(pWaveHandle->hWaveOut, pWaveHandle->WaveHdrBuff, sizeof(WAVEHDR));
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -524,11 +524,11 @@ void CAudioWaveAPi::audio_closeBuffer(IDataBuffer &dataBuff)
 				}
 			}
 		}
-		else if (devInfo.GetDevMode() == DEV_CAPTUREMODE)
+		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
 		{
-			if (pWaveApiHandle->hWaveIn != NULL)
+			if (pWaveHandle->hWaveIn != NULL)
 			{
-				mmr = waveInUnprepareHeader(pWaveApiHandle->hWaveIn, pWaveApiHandle->WaveHdrBuff, sizeof(WAVEHDR));
+				mmr = waveInUnprepareHeader(pWaveHandle->hWaveIn, pWaveHandle->WaveHdrBuff, sizeof(WAVEHDR));
 				if (mmr != MMSYSERR_NOERROR)
 				{
 					bRet = false;
@@ -673,16 +673,16 @@ bool CAudioWaveAPi::audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vec
 				strDevName = waveIncaps.szPname;
 			}
 
-			CDevData devInfo;
-			devInfo.SetDevType(DEV_AUDIOTYPE);
-			devInfo.SetDevState(DEV_ACTIVESTATE);
-			devInfo.SetDevMode(devMode);
+			CDevData devData;
+			devData.SetDevType(DEV_AUDIOTYPE);
+			devData.SetDevState(DEV_ACTIVESTATE);
+			devData.SetDevMode(devMode);
 
 			
-			devInfo.SetDevId(strDevId);
-			devInfo.SetDevName(strDevName);
+			devData.SetDevId(strDevId);
+			devData.SetDevName(strDevName);
 
-			vecDevInfo.push_back(devInfo);
+			vecDevInfo.push_back(devData);
 		}
 
 		bRet = true;

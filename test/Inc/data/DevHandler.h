@@ -1,5 +1,5 @@
-#ifndef __DEVICE_INFO_H__
-#define __DEVICE_INFO_H__
+#ifndef __DEV_HANDLER_H__
+#define __DEV_HANDLER_H__
 
 #include "./DataQueue.h"
 #include "../audio/audio.h"
@@ -66,11 +66,14 @@ public:
 	~IDataFrame();
 };
 
-class CDevHandle
+class CDevHandler
 {
 public:
-	CDevHandle();	
-	~CDevHandle();
+	CDevHandler();	
+	virtual ~CDevHandler();
+	
+public:
+	void			registerDevObj();
 
 public:	
 	void			SetDevData(CDevData devData);

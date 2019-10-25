@@ -43,6 +43,9 @@ protected:
 	bool			audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vecDevInfo);
 
 private:
+	int	m_nError;
+
+	CDevHandle*	m_devHandle;
 	IAudioNotifyHandler *m_audioNotifyHandler;
 };
 

@@ -27,10 +27,6 @@ public:
 	virtual void	audio_closeBuffer(IDataBuffer &dataBuff) = 0;
 
 	virtual void	audio_setNotifyHandler(IAudioNotifyHandler *pNotify) = 0;
-
-protected:
-	int	m_nError;
-	CDevHandle*	m_devHandle;
 };
 
 class IAudioNotifyHandler

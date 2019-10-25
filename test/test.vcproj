@@ -804,14 +804,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\DeviceInfo.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\data\DeviceInfo.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Inc\data\GlobalInfo.cpp"
 					>
 				</File>
