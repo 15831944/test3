@@ -7,13 +7,16 @@ CImageButtonEx::CImageButtonEx()
 	m_bIsHovering = FALSE;
 	m_bHaveBitmaps = FALSE;
 
-	m_pCurBtnDC = NULL;
+	m_pPreBtnDC = NULL;
+
 	m_pStdImage = NULL;
+	m_pStdHImage = NULL;
 	m_pStdPImage = NULL;
 	m_pStdDImage = NULL;
 
 	m_strBtnText = _T("");
 	m_rcText.SetRectEmpty();
+
 	m_crTextColor = GetSysColor(COLOR_WINDOW);
 }
 
@@ -21,9 +24,10 @@ CImageButtonEx::~CImageButtonEx()
 {
 	m_Font.DeleteObject();
 
-	if (m_pStdImage)  delete m_pStdImage;
-	if (m_pStdPImage) delete m_pStdPImage;
-	if (m_pStdDImage) delete m_pStdDImage;
+	SafeDelete(m_pStdImage);
+	SafeDelete(m_pStdHImage);
+	SafeDelete(m_pStdPImage);
+	SafeDelete(m_pStdDImage);
 }
 
 BEGIN_MESSAGE_MAP(CImageButtonEx, CButton)
@@ -89,7 +93,14 @@ void CImageButtonEx::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 		}
 		else
 		{
-			pCurBtnDC = &m_dcStand;
+			if (m_bIsHovering)
+			{//»¬¹ý
+				pCurBtnDC = &m_dcStandH;
+			}
+			else
+			{//Õý³£
+				pCurBtnDC = &m_dcStand;
+			}
 		}
 	}
 
@@ -129,7 +140,10 @@ void CImageButtonEx::OnMouseMove(UINT nFlags, CPoint point)
 		tme.dwFlags = TME_LEAVE;
 		tme.dwHoverTime = 1;
 
-		m_bIsTracking = ::_TrackMouseEvent(&tme);
+		if (::_TrackMouseEvent(&tme))
+		{
+			m_bIsTracking = TRUE;
+		}
 	}
 	
 	CButton::OnMouseMove(nFlags, point);
@@ -139,10 +153,25 @@ void CImageButtonEx::OnMouseMove(UINT nFlags, CPoint point)
 //
 void CImageButtonEx::GetParentWndBk()
 {
+	CRect rect;
+	GetClientRect(&rect);
+
 	if (m_dcWndBkDC.m_hDC == NULL)
 	{
 		CClientDC clDC(GetParent());
-		SetBkGnd(&clDC);
+
+		CRect rcParentRect;
+		GetWindowRect(&rcParentRect);
+		GetParent()->ScreenToClient(rcParentRect);
+
+		m_dcWndBkDC.CreateCompatibleDC(&clDC);
+
+		CBitmap bitmap;
+		bitmap.CreateCompatibleBitmap(&clDC, rect.Width(), rect.Height());
+
+		CBitmap *pOldBitmap = m_dcWndBkDC.SelectObject(&bitmap);
+		m_dcWndBkDC.BitBlt(0, 0, rect.Width(), rect.Height(), &clDC, rcParentRect.left, rcParentRect.top, SRCCOPY);
+		bitmap.DeleteObject();
 
 #if 0
 		Bitmap*	pWndBkImage = ::new Bitmap((HBITMAP)::GetCurrentObject(m_dcWndBkDC, OBJ_BITMAP),NULL);
@@ -157,39 +186,95 @@ void CImageButtonEx::GetParentWndBk()
 	}
 }
 
+void CImageButtonEx::DrawParentWndBk(CDC *pDC, CDC *pWndBkDC, Bitmap* pSrcImage, CDC &dcDrawImage)
+{
+	if (pDC == NULL || pSrcImage == NULL)
+	{
+		return;
+	}
+
+	CRect rect;
+	GetClientRect(&rect);
+
+	CMemDC MemDC(pDC, rect);
+	Graphics graphics(MemDC.GetSafeHdc());
+
+	//»­¸¸´°¿Ú±³¾°
+	MemDC.BitBlt(0, 0, rect.Width(), rect.Height(), pWndBkDC, 0, 0, SRCCOPY);
+
+	//»­Í¼Æ¬ÐÅÏ¢
+	graphics.DrawImage(pSrcImage, 0, 0, pSrcImage->GetWidth(), pSrcImage->GetHeight());
+
+	dcDrawImage.CreateCompatibleDC(MemDC);
+
+	CBitmap bitmap;
+	bitmap.CreateCompatibleBitmap(MemDC, rect.Width(), rect.Height());
+
+	CBitmap *pOldBitmap = dcDrawImage.SelectObject(&bitmap);
+	dcDrawImage.BitBlt(0, 0, rect.Width(), rect.Height(), MemDC, 0, 0, SRCCOPY);
+	bitmap.DeleteObject();
+}
+
 void CImageButtonEx::SetImageWndBk(CDC *pDC)
 {
+	Bitmap* pImage = NULL;
 	if (pDC == NULL)
 	{
 		return;
 	}
-	
-	CRect rect;
-	GetClientRect(&rect);
-	
-	CMemDC MemDC(pDC, rect);
 
 	//Õý³£×´Ì¬
 	if (m_dcStand.m_hDC == NULL)
 	{
-		DrawStdWndBk(&MemDC, &m_dcWndBkDC);
+		pImage = m_pStdImage;
+		DrawParentWndBk(pDC, &m_dcWndBkDC, pImage, m_dcStand);
 	}
 
-	//°´ÏÂ×´Ì¬
 	if (m_dcStandP.m_hDC == NULL)
 	{
-		DrawStdPWndBk(&MemDC, &m_dcWndBkDC);
+		if (m_pStdPImage != NULL)
+		{
+			pImage = m_pStdPImage;
+		}
+		else
+		{
+			pImage = m_pStdImage;
+		}
+
+		DrawParentWndBk(pDC, &m_dcWndBkDC, pImage, m_dcStandP);
 	}
 
-	//½ûÓÃ×´Ì¬
+	if (m_dcStandH.m_hDC == NULL)
+	{
+		if (m_pStdHImage != NULL)
+		{
+			pImage = m_pStdHImage;
+		}
+		else
+		{
+			pImage = m_pStdImage;
+		}
+
+		DrawParentWndBk(pDC, &m_dcWndBkDC, pImage, m_dcStandH);
+	}
+
 	if (m_dcStandD.m_hDC == NULL)
 	{
-		DrawStdDWndBk(&MemDC, &m_dcWndBkDC);
+		if (m_pStdDImage != NULL)
+		{
+			pImage = m_pStdDImage;
+		}
+		else
+		{
+			pImage = m_pStdImage;
+		}
+
+		DrawParentWndBk(pDC, &m_dcWndBkDC, pImage, m_dcStandD);
 	}
 
-	if (m_pCurBtnDC == NULL)
+	if (m_pPreBtnDC == NULL)
 	{
-		m_pCurBtnDC = &m_dcStand;
+		m_pPreBtnDC = &m_dcStand;
 	}
 }
 
@@ -236,152 +321,7 @@ void CImageButtonEx::DrawImageWndBk(CDC *pDC, CDC *pCurBtnDC)
 		graphics.DrawString(strText.GetBuffer(0), strText.GetLength(), &font1, RectF(rcText.left, rcText.top, rcText.Width(), rcText.Height()), &stringformat1, &SolidBrush(Color::White));
 	}
 
-	m_pCurBtnDC = pCurBtnDC;
-}
-
-BOOL CImageButtonEx::LoadStdImage(LPCTSTR lpszImage)
-{
-	if (lpszImage == NULL)
-	{
-		return FALSE;
-	}
-	
-	m_pStdImage = new CGdiPlusBitmap;
-	if ( m_pStdImage != NULL )
-	{
-		USES_CONVERSION;
-		m_pStdImage->Load(A2CW(lpszImage));
-	}
-	
-	return TRUE;
-}
-
-BOOL CImageButtonEx::LoadStdPImage(LPCTSTR lpszImage)
-{
-	if (lpszImage == NULL)
-	{
-		return FALSE;
-	}
-	
-	m_pStdPImage = new CGdiPlusBitmap;
-	if ( m_pStdPImage != NULL )
-	{
-		USES_CONVERSION;
-		m_pStdPImage->Load(A2CW(lpszImage));
-	}
-	
-	return TRUE;
-}
-
-BOOL CImageButtonEx::LoadStdDImage(LPCTSTR lpszImage)
-{
-	if (lpszImage == NULL)
-	{
-		return FALSE;
-	}
-	
-	m_pStdDImage = new CGdiPlusBitmap;
-	if ( m_pStdDImage != NULL )
-	{
-		USES_CONVERSION;
-		m_pStdDImage->Load(A2CW(lpszImage));
-	}
-	
-	return TRUE;
-}
-
-void CImageButtonEx::DrawStdWndBk(CDC *pDC, CDC *pWndBkDC)
-{
-	CRect rect;
-	GetClientRect(&rect);
-	
-	//»­¸¸´°¿Ú±³¾°
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(), pWndBkDC, 0, 0, SRCCOPY);
-	
-	//»­Í¼Æ¬ÐÅÏ¢
-	Graphics graphics(pDC->GetSafeHdc());
-	graphics.DrawImage(*m_pStdImage, 0, 0, m_pStdImage->m_pBitmap->GetWidth(), m_pStdImage->m_pBitmap->GetHeight());
-	
-	m_dcStand.CreateCompatibleDC(pDC);
-	CBitmap bitmap;
-	bitmap.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	CBitmap *pOldBitmap = m_dcStand.SelectObject(&bitmap);
-	
-	m_dcStand.BitBlt(0, 0, rect.Width(), rect.Height(), pDC, 0, 0, SRCCOPY);
-	bitmap.DeleteObject();
-}
-
-void CImageButtonEx::DrawStdPWndBk(CDC *pDC, CDC *pWndBkDC)
-{
-	CRect rect;
-	GetClientRect(&rect);
-	
-	//»­¸¸´°¿Ú±³¾°
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(), pWndBkDC, 0, 0, SRCCOPY);
-	
-	//»­Í¼Æ¬ÐÅÏ¢
-	Graphics graphics(pDC->GetSafeHdc());
-	if (m_pStdPImage != NULL)
-	{
-		graphics.DrawImage(*m_pStdPImage, 0, 0, m_pStdPImage->m_pBitmap->GetWidth(), m_pStdPImage->m_pBitmap->GetHeight());
-	}
-	else
-	{
-		graphics.DrawImage(*m_pStdImage, 1, 1, m_pStdImage->m_pBitmap->GetWidth(), m_pStdImage->m_pBitmap->GetHeight());
-	}
-	
-	m_dcStandP.CreateCompatibleDC(pDC);
-	CBitmap bitmap;
-	bitmap.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	CBitmap *pOldBitmap = m_dcStandP.SelectObject(&bitmap);
-	
-	m_dcStandP.BitBlt(0, 0, rect.Width(), rect.Height(), pDC, 0, 0, SRCCOPY);
-	bitmap.DeleteObject();
-}
-
-void CImageButtonEx::DrawStdDWndBk(CDC *pDC, CDC *pWndBkDC)
-{
-	CRect rect;
-	GetClientRect(&rect);
-	
-	//»­¸¸´°¿Ú±³¾°
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(), pWndBkDC, 0, 0, SRCCOPY);
-	
-	//»­Í¼Æ¬ÐÅÏ¢
-	Graphics graphics(pDC->GetSafeHdc());
-	if (m_pStdDImage != NULL)
-	{
-		graphics.DrawImage(*m_pStdDImage, 0, 0, m_pStdDImage->m_pBitmap->GetWidth(), m_pStdDImage->m_pBitmap->GetHeight());
-	}
-	else
-	{
-		ColorMatrix GrayMat = {	0.30f, 0.30f, 0.30f, 0.00f, 0.00f,
-								0.59f, 0.59f, 0.59f, 0.00f, 0.00f,
-								0.11f, 0.11f, 0.11f, 0.00f, 0.00f,
-								0.00f, 0.00f, 0.00f, 1.00f, 0.00f,
-								0.00f, 0.00f, 0.00f, 0.00f, 1.00f	};
-								
-		ImageAttributes ia;
-		ia.SetColorMatrix(&GrayMat);
-
-		float width = (float)m_pStdImage->m_pBitmap->GetWidth();
-		float height = (float)m_pStdImage->m_pBitmap->GetHeight();
-
-		RectF grect; 
-		grect.X=0, grect.Y=0; 
-		grect.Width = width; 
-		grect.Height = height;
-		
-		graphics.DrawImage(*m_pStdImage, grect, 0, 0, width, height, UnitPixel, &ia);
-	}
-	
-	m_dcStandD.CreateCompatibleDC(pDC);
-	CBitmap bitmap;
-	bitmap.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	CBitmap *pOldBitmap = m_dcStandD.SelectObject(&bitmap);
-	
-	m_dcStandD.BitBlt(0, 0, rect.Width(), rect.Height(), pDC, 0, 0, SRCCOPY);
-	bitmap.DeleteObject();
+	m_pPreBtnDC = pCurBtnDC;
 }
 
 int CImageButtonEx::GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
@@ -417,42 +357,42 @@ int CImageButtonEx::GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-void CImageButtonEx::SetBkGnd(CDC* pDC)
+void CImageButtonEx::SetImage(LPCTSTR lpszStdImage, LPCTSTR lpszStdHImage, LPCTSTR lpszStdPImage, LPCTSTR lpszStdDImage)
 {
-	CRect rect;
-	GetClientRect(rect);
-	
-	CRect rcParentRect;
-	GetWindowRect(rcParentRect);
-	GetParent()->ScreenToClient(rcParentRect);
-	
-	m_dcWndBkDC.DeleteDC();
-	m_dcWndBkDC.CreateCompatibleDC(pDC);
-	
-	CBitmap bitmap;
-	bitmap.CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
-	CBitmap *pOldBitmap = m_dcWndBkDC.SelectObject(&bitmap);
-	
-	m_dcWndBkDC.BitBlt(0, 0, rect.Width(), rect.Height(), pDC, rcParentRect.left, rcParentRect.top, SRCCOPY);
-	bitmap.DeleteObject();
-}
+	int iWidth = -1;
+	int iHeight = -1;
 
-void CImageButtonEx::SetImageEx(LPCTSTR lpszStdImage, LPCTSTR lpszStdPImage, LPCTSTR lpszStdDImage)
-{
-	if (!LoadStdImage(lpszStdImage))
+	USES_CONVERSION;
+	if (lpszStdImage != NULL && *lpszStdImage != '\0')
 	{
-		return;
+		m_pStdImage = Bitmap::FromFile(A2CW(lpszStdImage));
 	}
-	
-	LoadStdPImage(lpszStdPImage);
-	LoadStdDImage(lpszStdDImage);
-	
-	int iWidth = m_pStdImage->m_pBitmap->GetWidth();
-	int iHeight = m_pStdImage->m_pBitmap->GetHeight();
-	MoveWindow(0, 0, iWidth, iHeight);
+
+	if (lpszStdHImage != NULL && *lpszStdHImage != '\0')
+	{
+		m_pStdHImage = Bitmap::FromFile(A2CW(lpszStdHImage));
+	}
+
+	if (lpszStdPImage != NULL && *lpszStdPImage != '\0')
+	{
+		m_pStdPImage = Bitmap::FromFile(A2CW(lpszStdPImage));
+	}
+
+	if (lpszStdDImage != NULL && *lpszStdDImage != '\0')
+	{
+		m_pStdDImage = Bitmap::FromFile(A2CW(lpszStdDImage));
+	}
+
+	if (m_pStdImage != NULL)
+	{
+		iWidth = m_pStdImage->GetWidth();
+		iHeight = m_pStdImage->GetHeight();
+
+		MoveWindow(0, 0, iWidth, iHeight);
+	}
 }
 
-void CImageButtonEx::SetTextEx(UINT uiFontSize, UINT uiWeight, LPCTSTR lpszBtnText, LPCTSTR lpszFaceName, COLORREF crTextColor, CRect rcText)
+void CImageButtonEx::SetText(UINT uiFontSize, UINT uiWeight, LPCTSTR lpszBtnText, LPCTSTR lpszFaceName, COLORREF crTextColor, CRect rcText)
 {
 	if (lpszBtnText == NULL)
 	{
@@ -460,14 +400,24 @@ void CImageButtonEx::SetTextEx(UINT uiFontSize, UINT uiWeight, LPCTSTR lpszBtnTe
 	}
 
 	memset(&m_lfFont, 0x0, sizeof(LOGFONT));
+
 	m_lfFont.lfHeight = uiFontSize;
 	m_lfFont.lfWeight = uiWeight;
 	m_lfFont.lfCharSet=GB2312_CHARSET;
 	_tcscpy_s(m_lfFont.lfFaceName, lpszFaceName);
 
+// 	if (m_Font.m_hObject == NULL)
+// 	{
+// 		m_Font.CreateFontIndirect(&lfFont);
+// 		if (m_Font.m_hObject == NULL)
+// 		{
+// 			return;
+// 		}
+// 	}
+
 	m_strBtnText = lpszBtnText;
 	m_crTextColor = crTextColor;
+
 	m_rcText.CopyRect(rcText);
-	
 	Invalidate(TRUE);
 }

@@ -1,6 +1,43 @@
 #pragma once
 
+//////////////////////////////////////////////////////////////////////////
+//
 using namespace Gdiplus;
+class CGdiPlusBitmap
+{
+public:
+	Gdiplus::Bitmap* m_pBitmap;
+	
+public:
+	CGdiPlusBitmap()				{ m_pBitmap = NULL; }
+	CGdiPlusBitmap(LPCWSTR pFile)	
+	{ 
+		Load(pFile);
+	}
+	
+	virtual ~CGdiPlusBitmap()		{ Empty(); }
+	operator Gdiplus::Bitmap*() const { return m_pBitmap; }
+	
+public:
+	void Empty()					
+	{
+		if ( m_pBitmap != NULL )
+		{
+			delete m_pBitmap;
+			m_pBitmap = NULL;
+		}
+	}
+	
+	bool Load(LPCWSTR pFile)
+	{
+		Empty();
+		m_pBitmap = Gdiplus::Bitmap::FromFile(pFile);
+		return m_pBitmap->GetLastStatus() == Gdiplus::Ok;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////
+//
 class CImageButtonEx : public CButton
 {
 public:
@@ -8,8 +45,11 @@ public:
 	virtual ~CImageButtonEx();
 
 public:
-	void			SetImage(LPCTSTR lpszStdImage, LPCTSTR lpszStdHImage, LPCTSTR lpszStdPImage, LPCTSTR lpszStdDImage);
-	void			SetText(UINT uiFontSize, UINT uiWeight, LPCTSTR lpszBtnText, LPCTSTR lpszFaceName, COLORREF crTextColor, CRect rcText = CRect(0,0,0,0));
+	void SetBkGnd(CDC* pDC);
+	
+	void SetImageEx(LPCTSTR lpszStdImage, LPCTSTR lpszStdPImage, LPCTSTR lpszStdDImage);
+	
+	void SetTextEx(UINT uiFontSize, UINT uiWeight, LPCTSTR lpszBtnText, LPCTSTR lpszFaceName, COLORREF crTextColor, CRect rcText = CRect(0,0,0,0));
 
 protected:
 	virtual void 	PreSubclassWindow();
@@ -26,35 +66,41 @@ protected:
 
 protected:
 	void			GetParentWndBk();
-	void			DrawParentWndBk(CDC *pDC);
-
 	void			SetImageWndBk(CDC *pDC);
 	void			DrawImageWndBk(CDC *pDC, CDC *pCurBtnDC);
 
-protected:
-	CDC				m_dcWndBkDC;
+	BOOL			LoadStdImage(LPCTSTR lpszImage);
+	BOOL			LoadStdPImage(LPCTSTR lpszImage);
+	BOOL			LoadStdDImage(LPCTSTR lpszImage);
 	
-	CDC				m_dcStand;
-	CDC				m_dcStandP;
-	CDC				m_dcStandH;
-	CDC				m_dcStandD;
+	void			DrawStdWndBk(CDC *pDC, CDC *pWndBkDC);
+	void			DrawStdPWndBk(CDC *pDC, CDC *pWndBkDC);
+	void			DrawStdDWndBk(CDC *pDC, CDC *pWndBkDC);
+	
+	int				GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
 
+protected:
 	CFont			m_Font;
+	LOGFONT			m_lfFont;
+	
+	CRect			m_rcText;
+	CDC*			m_pCurBtnDC;
+
+	CGdiPlusBitmap*	m_pStdImage;
+	CGdiPlusBitmap* m_pStdPImage;
+	CGdiPlusBitmap*	m_pStdDImage;
 	
 private:
 	BOOL			m_bIsTracking;
 	BOOL			m_bIsHovering;
 	BOOL			m_bHaveBitmaps;
 	
-	CRect			m_rcText;
-
 	CString			m_strBtnText;
 	COLORREF		m_crTextColor;
-
-	Bitmap*			m_pStdImage;
-	Bitmap*			m_pStdHImage;
-	Bitmap*			m_pStdPImage;
-	Bitmap*			m_pStdDImage;
-
-	CDC*			m_pPreBtnDC;
+	
+	CDC				m_dcWndBkDC;	// button background
+	
+	CDC				m_dcStand;		// standard button
+	CDC				m_dcStandP;		// standard button pressed
+	CDC				m_dcStandD;		// grayscale button
 };
