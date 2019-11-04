@@ -17,7 +17,7 @@ public:
 	virtual bool	isStreamOpen();
 	
 	virtual void	getCurrentApi();
-	virtual void	getEnumDevice();
+	virtual void	getEnumDevice(DevMode devMode, std::vector<CDevData> &vecDevData);
 	
 	virtual void	openStream();
 	virtual void 	closeStream();
