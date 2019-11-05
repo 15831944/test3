@@ -1,6 +1,8 @@
 #ifndef __UPDATE_FILE_NAME_H__
 #define __UPDATE_FILE_NAME_H__
 
+#define MAX_EDITCHAR_SIZE		16
+
 typedef enum {
 	CONFIG_EMPTYTYPE = 0,									//空类型
 	CONFIG_ADDFILENAME_TYPE,								//文件名添加字符串信息

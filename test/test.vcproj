@@ -632,6 +632,26 @@
 		<Filter
 			Name="Inc"
 			>
+			<File
+				RelativePath=".\Inc\GlobalInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\GlobalInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\internal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\PubClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Inc\PubClass.h"
+				>
+			</File>
 			<Filter
 				Name="algorithm"
 				>
@@ -643,37 +663,9 @@
 			<Filter
 				Name="audio"
 				>
-				<File
-					RelativePath=".\Inc\audio\audio.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\AudioProcApi.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\audio\AudioProcApi.h"
-					>
-				</File>
 				<Filter
 					Name="interface"
 					>
-					<File
-						RelativePath=".\Inc\audio\interface\AudioInterface.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\Inc\audio\interface\AudioInterface.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Inc\audio\interface\AudioWaveApi.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\Inc\audio\interface\AudioWaveApi.h"
-						>
-					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -788,39 +780,31 @@
 				Name="data"
 				>
 				<File
-					RelativePath=".\Inc\data\AutoLock.h"
+					RelativePath=".\Inc\data\DataFrameMgr.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\DataBuffer.cpp"
+					RelativePath=".\Inc\data\DataFrameMgr.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\DataBuffer.h"
+					RelativePath=".\Inc\data\DevDataMgr.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\DataQueue.h"
+					RelativePath=".\Inc\data\DevDataMgr.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\GlobalInfo.cpp"
+					RelativePath=".\Inc\data\DevHandler.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\GlobalInfo.h"
+					RelativePath=".\Inc\data\DevHandler.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Inc\data\internal.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\data\PubClass.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\data\PubClass.h"
+					RelativePath=".\Inc\data\ObjectPtr.h"
 					>
 				</File>
 			</Filter>

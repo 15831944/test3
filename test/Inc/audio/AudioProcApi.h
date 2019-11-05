@@ -1,28 +1,27 @@
 #ifndef __AUDIOPROC_API_H__
 #define __AUDIOPROC_API_H__
 
-#include "audio.h"
 #include "./interface/AudioInterface.h"
 
-class CAudioProc : public IAudioProcApi
+class CAudioProc : public IAudioProcApi, public IAudioNotifyHandler
 {
 public:
 	CAudioProc(AudioApi emAudioApi);
 	~CAudioProc();
 	
 public:
-	virtual void	initApi(AudioApi emAudioApi);
+	virtual AudioApi getCurrentApi();
+	
+	virtual bool	initApi(AudioApi emAudioApi);
 	virtual void	unInitApi();
 	
+	virtual bool	getEnumDevice(DevMode devMode, std::vector<CDevData> &vecDevData);
+	
 	virtual bool	isStreamOpen();
-	
-	virtual void	getCurrentApi();
-	virtual void	getEnumDevice(DevMode devMode, std::vector<CDevData> &vecDevData);
-	
-	virtual void	openStream();
+	virtual bool	openStream(AudioPcmFormat stAudioFormat, CDevData devData);
 	virtual void 	closeStream();
 	
-	virtual void 	startStream();
+	virtual bool 	startStream();
 	virtual void 	stopStream();
 	virtual void 	abortStream();
 	

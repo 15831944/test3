@@ -123,11 +123,10 @@ void CDlgTest1Wnd::SetWndControlLayout()
 
 void CDlgTest1Wnd::SetTipWndLayout()
 {
-	CRect rcTipWnd;
-
 	CRect rcClient;
 	GetWindowRect(&rcClient);
 
+	CRect rcTipWnd;
 	rcTipWnd.left = rcClient.left;
 	rcTipWnd.top = rcClient.bottom - 30;
 	rcTipWnd.right = rcClient.right;
@@ -182,7 +181,6 @@ void CDlgTest1Wnd::OnBnClickedButton1()
 #endif
 }
 
-#include "../../inc/audio/interface/AudioWaveApi.h"
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
 	CString strBtnText;
@@ -200,30 +198,4 @@ void CDlgTest1Wnd::OnBnClickedButton2()
 	TRACE("event2");
 	event.CloseEvent();
 #endif
-
-	CAudioWaveAPi waveApi;
- 	std::vector<CDevData> vecDevInfo;
-
-	waveApi.audio_enumDevice(DEV_RENDERMODE, vecDevInfo);
-	if (vecDevInfo.size() == 0)
-	{
-		return;
-	}
-
-	CDevData devInfo = vecDevInfo[0];
-	IAudioData audioData = devInfo.GetDeviceAudio();
-	
-	WavFormat stWavFormat = {0};
-	stWavFormat.wFormatTag = WAVE_FORMAT_PCM;
-	stWavFormat.wChannels = 2;
-	stWavFormat.wSize = 0;
-	stWavFormat.wBitsPerSample = 16;
-	stWavFormat.dwSamplesPerSec = 44100;
-	stWavFormat.wBlockAlign = (stWavFormat.wBitsPerSample*stWavFormat.wChannels) >> 3;
-	stWavFormat.dwAvgBytesPerSec = stWavFormat.wBlockAlign*stWavFormat.dwSamplesPerSec;
-
-	CDevHandle devHandle;
-	audioData.SetWaveFormat(&stWavFormat);
-	
-	//waveApi.audio_openDevice(pDevInfo);
 }

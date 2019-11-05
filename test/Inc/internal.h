@@ -1,14 +1,6 @@
 #ifndef __INTERNAL_H__
 #define __INTERNAL_H__
 
-#define MAX_EDITCHAR_SIZE		16
-
-#define WM_TEST1WND_CTRL		WM_USER + 0x1000
-#define WM_TEST2WND_CTRL		WM_USER + 0x1001
-#define WM_TEST3WND_CTRL		WM_USER + 0x1002
-#define WM_TEST4WND_CTRL		WM_USER + 0x1003
-
-//////////////////////////////////////////////////////////////////////////
 //
 #if defined _WIN64 || __x86_64 || __LP64__
 	#define _VER_64_
@@ -139,21 +131,4 @@ typedef	v_int64_t				v_pos_t;
 	#endif
 #endif
 
-//////////////////////////////////////////////////////////////////////////
-//
-typedef struct{
-	HWND			hWnd;
-	DWORD			dwProcessID;
-}HT_ENUM_WNDINFO;
-
-typedef struct{
-	USHORT			usTransId;
-	USHORT			usFlag;
-	USHORT			usQuestionCount;
-	USHORT			usAnswerCount;
-	USHORT			usAuthorityCount;
-	USHORT			usAdditionalCount;
-}HT_DNS_HEADER;
-
-typedef int (_stdcall *CALLRING_CALLBACK_FUNC)(const char* pszFilePath, int nAudioCard);
 #endif

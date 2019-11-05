@@ -27,14 +27,16 @@
 #include "resource.h"
 #include <afxcontrolbars.h>
 #include <afxshelltreectrl.h>
+
 //////////////////////////////////////////////////////////////////////////
 //
-#include "./Inc/data/PubClass.h"
+#include "./Inc/PubClass.h"
 
 #include "./Contrib/CheckLinkThread.h"
 #include "./Contrib/update_file_name.h"
 
 #pragma comment(lib, "version.lib")
+
 //////////////////////////////////////////////////////////////////////////
 //
 #ifndef _UNICODE

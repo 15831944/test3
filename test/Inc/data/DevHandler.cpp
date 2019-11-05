@@ -5,144 +5,73 @@
  */
 
 #include "stdafx.h"
-#include "DeviceInfo.h"
+#include "DevHandler.h"
 
-CDevData::CDevData()
-{
-	m_devType = DEV_EMPTYTYPE;
-	m_devState = DEV_EMPTYSTATE;
-	m_devMode = DEV_EMPTYMODE;
-
-	m_strDevId = "";
-	m_strDevName = "";
-}
-
-CDevData::~CDevData()
-{
-}
+#include "./DevDataMgr.h"
+#include "./DataFrameMgr.h"
 
 //
-CDevData::CDevData(const CDevData &devData)
+CDevHandler::CDevHandler()
 {
-	m_devType = devData.m_devType;
-	m_devMode = devData.m_devMode;
-	m_devState = devData.m_devState;
-	
-	m_strDevId = devData.m_strDevId;
-	m_strDevName = devData.m_strDevName;
 }
 
-CDevData &CDevData::operator = (const CDevData& devData)
+CDevHandler::~CDevHandler()
 {
-	m_devType = devData.m_devType;
-	m_devMode = devData.m_devMode;
-	m_devState = devData.m_devState;
-	
-	m_strDevId = devData.m_strDevId;
-	m_strDevName = devData.m_strDevName;
-
-	return *this;
 }
 
-void CDevData::SetDevType(DevType devType)
+CDevHandler& CDevHandler::Instance()
 {
-	m_devType = devType;
-}
-
-DevType CDevData::GetDevType()
-{
-	return m_devType;
-}
-
-void CDevData::SetDevMode(DevMode devMode)
-{
-	m_devMode = devMode;
-}
-
-DevMode CDevData::GetDevMode()
-{
-	return m_devMode;
-}
-
-void CDevData::SetDevState(DevState devState)
-{
-	m_devState = devState;
-}
-
-DevState CDevData::GetDevState()
-{
-	return m_devState;
-}
-
-void CDevData::SetDevId(std::string strDevId)
-{
-	m_strDevId = strDevId;
-}
-
-std::string	CDevData::GetDevId()
-{
-	return m_strDevId;
-}
-
-void CDevData::SetDevName(std::string strDevName)
-{
-	m_strDevName = strDevName;
-}
-
-std::string CDevData::GetDevName()
-{
-	return m_strDevName;
+	static CDevHandler inst;
+	return inst;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
-CDevHandle::CDevHandle()
+void CDevHandler::insertObjectHandler(unsigned int uiMsgId, CObjectPtr *pObjectPtr)
 {
-	m_pApiHandle = NULL;
-}
-
-CDevHandle::~CDevHandle()
-{
-}
-
-void CDevHandle::SetDevData(CDevData devData)
-{
-	m_devData = devData;
-}
-
-CDevData& CDevHandle::GetDevData()
-{
-	return m_devData;
-}
-
-void CDevHandle::SetApiHandle(void *pApiHandle)
-{
-	if (m_pApiHandle != NULL)
-	{
-		delete m_pApiHandle;
-		m_pApiHandle = NULL;
-	}
-
-	if (pApiHandle != NULL)
-	{
-		m_pApiHandle = pApiHandle;
-	}
-}
-
-void* CDevHandle::GetApiHandle()
-{
-	return m_pApiHandle;
-}
-
-void CDevHandle::SetDataQueue(IDataFrame *pDataFrame)
-{
-	if (pDataFrame == NULL)
+	if (uiMsgId == 0 || pObjectPtr == NULL)
 	{
 		return;
 	}
+
+	std::map<unsigned int, CObjectPtr>::iterator iterObject = m_mapData.find(uiMsgId);
+	if (iterObject == m_mapData.end())
+	{
+		m_mapData.insert(make_pair(uiMsgId, *pObjectPtr));
+	}
+	else
+	{
+		iterObject->second = *pObjectPtr;
+	}
 }
 
-IDataFrame*	CDevHandle::GetDataQueue()
+//
+void CDevHandler::regDevObj()
 {
+}
+
+CObjectPtr* CDevHandler::getDevObj(unsigned int uiMsgId)
+{
+	if (uiMsgId == 0)
+	{
+		return NULL;
+	}
+
+	std::map<unsigned int, CObjectPtr>::iterator iterObject = m_mapData.find(uiMsgId);
+	if (iterObject == m_mapData.end())
+	{
+		return NULL;
+	}
+
+	return &iterObject->second;
 	return NULL;
+}
+
+void CDevHandler::clearDevObj()
+{
+	std::map<unsigned int, CObjectPtr>::iterator iterObject = m_mapData.begin();
+	for (iterObject; iterObject != m_mapData.end();)
+	{
+
+	}
 }

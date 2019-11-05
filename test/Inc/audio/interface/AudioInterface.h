@@ -1,6 +1,7 @@
 #ifndef __AUDIO_INTERFACE_H__
 #define __AUDIO_INTERFACE_H__
 
+#include "../audio.h"
 #include "../../data/DeviceInfo.h"
 #include "../../data/DataBuffer.h"
 
@@ -13,8 +14,8 @@ public:
 	virtual bool	audio_init() = 0;
 	virtual void	audio_uninit() = 0;
 
-	virtual bool	audio_enumDevice(DevMode devMode, std::vector<CDevData> &vecDevInfo) = 0;
-	virtual bool	audio_openDevice(CDevData devInfo) = 0;
+	virtual bool	audio_enumDevice(DevMode devMode, std::vector<CDevData> &vecDevData) = 0;
+	virtual bool	audio_openDevice(AudioPcmFormat stAudioFormat, CDevData devData) = 0;
 	virtual void	audio_closeDevice() = 0;
 
 	virtual void	audio_startStream() = 0;

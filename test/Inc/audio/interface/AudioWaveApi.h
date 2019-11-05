@@ -19,7 +19,7 @@ public:
 	virtual void	audio_uninit();
 
 	virtual bool	audio_enumDevice(DevMode devMode, std::vector<CDevData> &vecDevData);
-	virtual bool	audio_openDevice(CDevData devInfo);
+	virtual bool	audio_openDevice(AudioPcmFormat stAudioFormat, CDevData devData);
 	virtual void	audio_closeDevice();
 
 	virtual void	audio_startStream();

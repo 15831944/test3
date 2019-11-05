@@ -46,7 +46,7 @@ bool CAudioWaveAPi::audio_enumDevice(DevMode devMode, std::vector<CDevData> &vec
 	return audio_getDevInfo(devMode, vecDevData);
 }
 
-bool CAudioWaveAPi::audio_openDevice(CDevData devData)
+bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevData devData)
 {
 	bool bRet = false;
 
