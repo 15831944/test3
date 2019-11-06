@@ -72,7 +72,6 @@ BOOL CDlgTest1Wnd::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 
-	m_TipWnd.RelayEvent(pMsg);
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
@@ -92,7 +91,6 @@ void CDlgTest1Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	if (!bShow)
 	{
-		//m_TipWnd.ShowWindow(SW_HIDE);
 	}
 
 	CDialog::OnShowWindow(bShow, nStatus);
@@ -108,7 +106,6 @@ LRESULT CDlgTest1Wnd::OnNcHitTest(CPoint point)
 //
 BOOL CDlgTest1Wnd::InitCtrl()
 {
-	m_TipWnd.Create(this);
 	return TRUE;
 }
 
@@ -123,79 +120,14 @@ void CDlgTest1Wnd::SetWndControlLayout()
 
 void CDlgTest1Wnd::SetTipWndLayout()
 {
-	CRect rcClient;
-	GetWindowRect(&rcClient);
-
-	CRect rcTipWnd;
-	rcTipWnd.left = rcClient.left;
-	rcTipWnd.top = rcClient.bottom - 30;
-	rcTipWnd.right = rcClient.right;
-	rcTipWnd.bottom = rcClient.bottom;
-	m_TipWnd.MoveWindow(rcTipWnd);
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
-	std::string str;
-	std::string s1;
-
-	CString strBtnText;
-
-	GetDlgItem(IDC_BTN_TEST1)->GetWindowText(strBtnText);
-	m_TipWnd.ShowWnd(strBtnText);
-
-#if 0
-	std::tr1::array<int, 5> arry = {1, 2, 3, 4, 5};
-	string str1("1994 is my birth year");
-
-	string regex_str1("\\d{4}");
-	std::tr1::regex pattern1(regex_str1, std::tr1::regex::icase);
-
-	string s1;
-	std::tr1::match_results<string::const_iterator> result;
-
-	string::const_iterator iter = str1.begin();
-	string::const_iterator iterEnd= str1.end();
-
-	while (std::tr1::regex_search(iter, iterEnd, result, pattern))
-	{
-		s1=result[0];
-
-		cout<<s1<<endl;
-		iter = result[0].second; //更新搜索起始位置
-	}
-#endif
-
-#if 0
-	std::string str2 = _T("this is?#( a #@#test!");
-	std::string regex_str2 = _T("((?=[\x21-\x7e]+)[^A-Za-z0-9])");	//(( )+|(\n)+)	//((?=[\x21-\x7e]+)[^A-Za-z0-9])
-	std::tr1::regex pattern2(regex_str2, std::tr1::regex::icase);
-	
-	//ltrim(str2);
-	//rtrim(str2);
-
-	s1 = _T("");
-	str = std::tr1::regex_replace(str2, pattern2, s1);
-#endif
 }
 
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
-	CString strBtnText;
-
-	GetDlgItem(IDC_BTN_TEST2)->GetWindowText(strBtnText);
-	m_TipWnd.ShowWnd(strBtnText);
-
-#if 0
-	Leaf::System::CEvent event;;
-	event.CreateEvent(false, false);
-
-	TRACE("event1");
-	event.WaitForEvent(0);
-
-	TRACE("event2");
-	event.CloseEvent();
-#endif
 }

@@ -1,6 +1,9 @@
 #ifndef __AUDIO_H__
 #define __AUDIO_H__
 
+#include "../data/DevDataMgr.h"
+#include "../data/DataFrameMgr.h"
+
 enum AudioApi {
 	UNSPECIFIED,
 	WINDOWS_WAVE,
@@ -10,6 +13,13 @@ enum AudioApi {
 	LINUX_PULSE,
 	LINUX_ALSA,
 	LINUX_OSS,
+};
+
+enum AudioMsgId {
+	MSG_PTR_EMPTY_ID,
+	MSG_DEV_DATA_ID,
+	MSG_FRAME_DATA_ID,
+	MSG_API_HANDLE_ID,
 };
 
 enum AudioSampleFormat {
@@ -37,10 +47,10 @@ public:
 	virtual bool	initApi(AudioApi emAudioApi) = 0;
 	virtual void	unInitApi() = 0;
 
-	virtual bool	getEnumDevice(DevMode devMode, std::vector<CDevData> &vecDevData) = 0;
+	virtual bool	getEnumDevice(DevMode devMode, std::vector<CDevDataMgr> &vecDevData) = 0;
 	
 	virtual bool	isStreamOpen()  = 0;
-	virtual bool	openStream(AudioPcmFormat stAudioFormat, CDevData devData) = 0;
+	virtual bool	openStream(AudioPcmFormat stAudioFormat, CDevDataMgr devData) = 0;
 	virtual void	closeStream() = 0;
 
 	virtual bool	startStream() = 0;

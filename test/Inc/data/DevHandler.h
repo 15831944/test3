@@ -1,8 +1,6 @@
 #ifndef __DEV_HANDLER_H__
 #define __DEV_HANDLER_H__
 
-#include "./ObjectPtr.h"
-
 //DevHandler
 class CDevHandler
 {
@@ -13,16 +11,14 @@ public:
 	static CDevHandler&	Instance();
 	
 public:
-	void			regDevObj();
-	CObjectPtr*		getDevObj(unsigned int uiMsgId);
+	void*		getDevObj(unsigned int uiMsgId);
+	void		regDevObj(unsigned int uiMsgId, void *pObjectPtr);
 
-	void			clearDevObj();
-
-protected:
-	void			insertObjectHandler(unsigned int uiMsgId, CObjectPtr *pObjectPtr);
+	void		removeDevObj(unsigned int uiMsgId);
+	void		clearDevObj();
 
 private:
-	std::map<unsigned int, CObjectPtr> m_mapData;
+	std::map<unsigned int, void*> m_mapData;
 };
 
 #endif

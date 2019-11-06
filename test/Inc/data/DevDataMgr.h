@@ -1,8 +1,6 @@
 #ifndef __DEVDATA_MGR_H__
 #define __DEVDATA_MGR_H__
 
-#include "./ObjectPtr.h"
-
 enum DevType {
 	DEV_EMPTYTYPE = 0,
 	DEV_AUDIOTYPE = 1,
@@ -23,7 +21,7 @@ enum DevState {
 	DEV_UNPLUGGEDSTATE = 4,		//Œ¥…œµÁ
 };
 
-class CDevDataMgr : public CObjectPtr
+class CDevDataMgr
 {
 public:
 	CDevDataMgr();

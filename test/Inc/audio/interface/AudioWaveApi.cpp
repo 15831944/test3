@@ -2,6 +2,7 @@
 #include "AudioWaveApi.h"
 
 #include <sstream>
+#include "../../data/DevHandler.h"
 
 struct WaveHandle {
 	HWAVEIN		hWaveIn;
@@ -19,7 +20,6 @@ CAudioWaveAPi::CAudioWaveAPi()
 {
 	m_nError = 0;
 
-	m_devHandle = NULL;
 	m_audioNotifyHandler = NULL;
 }
 
@@ -34,6 +34,7 @@ int CAudioWaveAPi::audio_geterror()
 
 bool CAudioWaveAPi::audio_init()
 {
+	CDevHandler::Instance().regDevObj(MSG_API_HANDLE_ID, new WaveHandle);
 	return true;
 }
 
@@ -41,28 +42,18 @@ void CAudioWaveAPi::audio_uninit()
 {
 }
 
-bool CAudioWaveAPi::audio_enumDevice(DevMode devMode, std::vector<CDevData> &vecDevData)
+bool CAudioWaveAPi::audio_enumDevice(DevMode devMode, std::vector<CDevDataMgr> &vecDevData)
 {
 	return audio_getDevInfo(devMode, vecDevData);
 }
 
-bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevData devData)
+bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevDataMgr devData)
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		m_devHandle = new CDevHandle;
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = new WaveHandle;
+		WaveHandle *pWaveHandle = (WaveHandle*)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
@@ -75,6 +66,7 @@ bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevData devD
 		//IAudioData audioData = devData.GetDeviceAudio();
 		//memcpy(&stWaveFormat, audioData.GetWaveFormat(), sizeof(WAVEFORMATEX));
 
+		MMRESULT mmr;
 		if (devData.GetDevMode() == DEV_RENDERMODE)
 		{//²¥·Å
 			HWAVEOUT hWaveOut;
@@ -103,27 +95,11 @@ bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevData devD
 		LONG lDeviceState = 0;
 		::InterlockedExchange(&lDeviceState, 1);
 
-		m_devHandle->SetDevData(devData);
-		m_devHandle->SetApiHandle(pWaveHandle);
+		CDevHandler::Instance().regDevObj(MSG_DEV_DATA_ID, &devData);
 
 		bRet = true;
 	} while (false);
 
-	if (!bRet)
-	{
-		if (pWaveHandle != NULL)
-		{
-			delete pWaveHandle;
-			pWaveHandle = NULL;
-		}
-
-		if (m_devHandle != NULL)
-		{
-			delete m_devHandle;
-			m_devHandle = NULL;
-		}
-	}
-	
 	return bRet;
 }
 
@@ -131,25 +107,25 @@ void CAudioWaveAPi::audio_closeDevice()
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devData = m_devHandle->GetDevData();
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+
+		CDevHandler::Instance().removeDevObj(MSG_DEV_DATA_ID);
 
 		bRet = true;
 	} while (false);
@@ -159,26 +135,24 @@ void CAudioWaveAPi::audio_startStream()
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -190,7 +164,7 @@ void CAudioWaveAPi::audio_startStream()
 				}
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -211,26 +185,24 @@ void CAudioWaveAPi::audio_closeStream()
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
- 		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -244,7 +216,7 @@ void CAudioWaveAPi::audio_closeStream()
 				pWaveHandle->hWaveOut = NULL;
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -267,26 +239,24 @@ void CAudioWaveAPi::audio_stopStream()
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -297,7 +267,7 @@ void CAudioWaveAPi::audio_stopStream()
 				}
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -317,26 +287,24 @@ void CAudioWaveAPi::audio_abortStream()
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -348,7 +316,7 @@ void CAudioWaveAPi::audio_abortStream()
 				}
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -365,23 +333,21 @@ void CAudioWaveAPi::audio_abortStream()
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
+void CAudioWaveAPi::audio_addBuffer(CDataFrameMgr &dataBuff)
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-	
 	do
 	{
-		if (m_devHandle == NULL)
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
-		if (pWaveHandle == NULL)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
 		{
 			bRet = false;
 			break;
@@ -407,8 +373,8 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 // 		pWaveApiHandle->pWaveHdrBuff->lpNext = NULL;
 // 		pWaveApiHandle->pWaveHdrBuff->reserved = NULL;
 
-		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -420,7 +386,7 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 				}
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -437,30 +403,28 @@ void CAudioWaveAPi::audio_addBuffer(IDataBuffer &dataBuff)
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_openBuffer(IDataBuffer &dataBuff)
+void CAudioWaveAPi::audio_openBuffer(CDataFrameMgr &dataBuff)
 {
 	bool bRet = false;
 
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
-
 	do 
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -472,7 +436,7 @@ void CAudioWaveAPi::audio_openBuffer(IDataBuffer &dataBuff)
 				}
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -489,30 +453,28 @@ void CAudioWaveAPi::audio_openBuffer(IDataBuffer &dataBuff)
 	} while (false);
 }
 
-void CAudioWaveAPi::audio_closeBuffer(IDataBuffer &dataBuff)
+void CAudioWaveAPi::audio_closeBuffer(CDataFrameMgr &dataBuff)
 {
 	bool bRet = false;
-
-	MMRESULT mmr;
-	WaveHandle *pWaveHandle = NULL;
 	
 	do
 	{
-		if (m_devHandle == NULL)
-		{
-			bRet = false;
-			break;
-		}
-
-		pWaveHandle = (WaveHandle*)m_devHandle->GetApiHandle();
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevData devData = m_devHandle->GetDevData();
-		if (devData.GetDevMode() == DEV_RENDERMODE)
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		if (pDevData == NULL)
+		{
+			bRet = false;
+			break;
+		}
+
+		MMRESULT mmr;
+		if (pDevData->GetDevMode() == DEV_RENDERMODE)
 		{
 			if (pWaveHandle->hWaveOut != NULL)
 			{
@@ -524,7 +486,7 @@ void CAudioWaveAPi::audio_closeBuffer(IDataBuffer &dataBuff)
 				}
 			}
 		}
-		else if (devData.GetDevMode() == DEV_CAPTUREMODE)
+		else if (pDevData->GetDevMode() == DEV_CAPTUREMODE)
 		{
 			if (pWaveHandle->hWaveIn != NULL)
 			{
@@ -617,12 +579,9 @@ void CAudioWaveAPi::audio_waveProcData(HWAVEIN hWaveIn, WAVEHDR *pWaveHdr)
 	} while (false);
 }
 
-bool CAudioWaveAPi::audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vecDevInfo)
+bool CAudioWaveAPi::audio_getDevInfo(DevMode devMode, std::vector<CDevDataMgr> &vecDevData)
 {
 	bool bRet = false;
-
-	MMRESULT mmr;
-	std::ostringstream ostr;
 
 	do 
 	{
@@ -644,7 +603,9 @@ bool CAudioWaveAPi::audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vec
 
 		std::string strDevId;
 		std::string strDevName;
+		std::ostringstream ostr;
 
+		MMRESULT mmr;
 		for (UINT uiIndex=0; uiIndex<uiDevCount; ++uiIndex)
 		{
 			ostr << uiIndex << endl;
@@ -673,7 +634,7 @@ bool CAudioWaveAPi::audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vec
 				strDevName = waveIncaps.szPname;
 			}
 
-			CDevData devData;
+			CDevDataMgr devData;
 			devData.SetDevType(DEV_AUDIOTYPE);
 			devData.SetDevState(DEV_ACTIVESTATE);
 			devData.SetDevMode(devMode);
@@ -682,7 +643,7 @@ bool CAudioWaveAPi::audio_getDevInfo(DevMode devMode, std::vector<CDevData> &vec
 			devData.SetDevId(strDevId);
 			devData.SetDevName(strDevName);
 
-			vecDevInfo.push_back(devData);
+			vecDevData.push_back(devData);
 		}
 
 		bRet = true;

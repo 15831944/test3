@@ -15,10 +15,10 @@ public:
 	virtual bool	initApi(AudioApi emAudioApi);
 	virtual void	unInitApi();
 	
-	virtual bool	getEnumDevice(DevMode devMode, std::vector<CDevData> &vecDevData);
+	virtual bool	getEnumDevice(DevMode devMode, std::vector<CDevDataMgr> &vecDevData);
 	
 	virtual bool	isStreamOpen();
-	virtual bool	openStream(AudioPcmFormat stAudioFormat, CDevData devData);
+	virtual bool	openStream(AudioPcmFormat stAudioFormat, CDevDataMgr devData);
 	virtual void 	closeStream();
 	
 	virtual bool 	startStream();

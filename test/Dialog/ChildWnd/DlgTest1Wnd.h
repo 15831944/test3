@@ -37,5 +37,4 @@ protected:
 
 protected:
 	BOOL					m_bInited;
-	CTipWnd					m_TipWnd;
 };

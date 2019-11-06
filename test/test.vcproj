@@ -663,9 +663,37 @@
 			<Filter
 				Name="audio"
 				>
+				<File
+					RelativePath=".\Inc\audio\audio.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\AudioProcApi.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Inc\audio\AudioProcApi.h"
+					>
+				</File>
 				<Filter
 					Name="interface"
 					>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioInterface.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioInterface.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioWaveApi.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Inc\audio\interface\AudioWaveApi.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter
@@ -801,10 +829,6 @@
 				</File>
 				<File
 					RelativePath=".\Inc\data\DevHandler.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Inc\data\ObjectPtr.h"
 					>
 				</File>
 			</Filter>

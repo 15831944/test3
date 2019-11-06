@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "AudioProcAPi.h"
 
+#include "./interface/AudioWaveApi.h"
+
 CAudioProc::CAudioProc(AudioApi emAudioApi)
 {
 	m_audioInterface = NULL;
@@ -69,7 +71,7 @@ void CAudioProc::unInitApi()
 	}
 }
 
-bool CAudioProc::getEnumDevice(DevMode devMode, std::vector<CDevData> &vecDevData)
+bool CAudioProc::getEnumDevice(DevMode devMode, std::vector<CDevDataMgr> &vecDevData)
 {
 	if (m_audioInterface == NULL || devMode == DEV_EMPTYMODE)
 	{
@@ -89,7 +91,7 @@ bool CAudioProc::isStreamOpen()
 	return true;
 }
 
-bool CAudioProc::openStream(AudioPcmFormat stAudioFormat, CDevData devData)
+bool CAudioProc::openStream(AudioPcmFormat stAudioFormat, CDevDataMgr devData)
 {
 	if (m_audioInterface == NULL)
 	{
