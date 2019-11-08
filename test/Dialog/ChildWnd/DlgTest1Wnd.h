@@ -1,9 +1,8 @@
 #pragma once
 #include "afxwin.h"
 
-#include "../../Control/WndCtrl/TipWnd.h"
-
 using namespace std;
+using namespace Gdiplus;
 class CDlgTest1Wnd : public CDialog
 {
 	DECLARE_DYNAMIC(CDlgTest1Wnd)
@@ -33,7 +32,6 @@ protected:
 	BOOL					InitInfo();
 
 	void					SetWndControlLayout();
-	void					SetTipWndLayout();
 
 protected:
 	BOOL					m_bInited;

@@ -30,20 +30,9 @@ END_MESSAGE_MAP()
 //
 BOOL CDlgTest3Wnd::OnInitDialog()
 {
-	BOOL bRet = FALSE;
 	CDialog::OnInitDialog();
 
-	do 
-	{
-		bRet = TRUE;
-	} while (FALSE);
-
-	if (!bRet)
-	{
-		::PostMessage(AfxGetMainWnd()->m_hWnd, WM_CLOSE, 0, 0);
-	}
-
-	return bRet;  
+	return FALSE;  
 }
 
 void CDlgTest3Wnd::OnBnClickedBtnTest1()
@@ -61,6 +50,3 @@ void CDlgTest3Wnd::OnBnClickedBtnTest3()
 void CDlgTest3Wnd::OnCbnSelchangeComboEnumdevice()
 {
 }
-
-//////////////////////////////////////////////////////////////////////////
-//

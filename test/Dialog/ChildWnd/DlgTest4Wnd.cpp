@@ -29,7 +29,6 @@ END_MESSAGE_MAP()
 //
 BOOL CDlgTest4Wnd::OnInitDialog()
 {
-	USES_CONVERSION;
 	CDialog::OnInitDialog();
 
 	if (!InitCtrl())
@@ -47,7 +46,6 @@ BOOL CDlgTest4Wnd::OnInitDialog()
 
 void CDlgTest4Wnd::OnPaint()
 {
-	CPaintDC dc(this);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,34 +76,3 @@ BOOL CDlgTest4Wnd::InitInfo()
 {
 	return TRUE;
 }
-
-/*
-BOOL CDlgTest4Wnd::DrawRectFrameLine(CDC *pDC)
-{
-	CRect rcClient;
-	GetClientRect(&rcClient);
-
-	if (pDC == NULL)
-	{
-		return FALSE;
-	}
-
- 	CMemDCEx MemDCEx(pDC, NULL);
- 	Graphics graphics(MemDCEx->GetSafeHdc());
-
-	Pen pen(Color(255, 0, 255, 0), 3);
-	graphics.SetSmoothingMode(SmoothingModeAntiAlias);
-
-	PointF ptLeftTop(rcClient.left, rcClient.top);
-	PointF ptRightTop(rcClient.right, rcClient.top);
-
-	PointF ptLeftBottom(rcClient.left, rcClient.bottom);
-	PointF ptRightBottom(rcClient.right, rcClient.bottom);
-
-	graphics.DrawLine(&pen, ptLeftTop,    ptRightTop);
-	graphics.DrawLine(&pen, ptLeftTop,    ptLeftBottom);
-	graphics.DrawLine(&pen, ptLeftBottom, ptRightBottom);
-	graphics.DrawLine(&pen, ptRightTop,   ptRightBottom);
-	return TRUE;
-}
-*/

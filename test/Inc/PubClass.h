@@ -41,5 +41,6 @@
 #include "./internal.h"
 #include "./GlobalInfo.h"
 
+#pragma comment(lib, "gdiplus.lib")
 BOOL CALLBACK	EnumWindowsProc(HWND hwnd, LPARAM lParam);
 #endif

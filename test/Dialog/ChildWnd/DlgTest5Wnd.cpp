@@ -24,7 +24,6 @@ END_MESSAGE_MAP()
 //
 BOOL CDlgTest5Wnd::OnInitDialog()
 {
-	USES_CONVERSION;
 	CDialog::OnInitDialog();
 
 	if (!InitCtrl())
@@ -42,7 +41,6 @@ BOOL CDlgTest5Wnd::OnInitDialog()
 
 void CDlgTest5Wnd::OnPaint()
 {
-	CPaintDC dc(this);
 }
 
 //////////////////////////////////////////////////////////////////////////

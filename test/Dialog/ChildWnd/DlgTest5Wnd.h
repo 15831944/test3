@@ -2,7 +2,6 @@
 #include "afxwin.h"
 
 using namespace std;
-using namespace Gdiplus;
 class CDlgTest5Wnd : public CDialog
 {
 	DECLARE_DYNAMIC(CDlgTest5Wnd)
@@ -23,6 +22,4 @@ protected:
 protected:
 	BOOL							InitCtrl();
 	BOOL							InitInfo();
-
-protected:
 };

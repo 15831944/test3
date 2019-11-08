@@ -2,7 +2,6 @@
 #include "afxwin.h"
 
 using namespace std;
-using namespace Gdiplus;
 class CDlgTest4Wnd : public CDialog
 {
 	DECLARE_DYNAMIC(CDlgTest4Wnd)
@@ -28,7 +27,4 @@ protected:
 protected:
 	BOOL							InitCtrl();
 	BOOL							InitInfo();
-	
-protected:
-	//WavePlayer					m_WavePlayer;
 };

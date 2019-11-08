@@ -98,7 +98,6 @@ void CDlgTest1Wnd::OnShowWindow(BOOL bShow, UINT nStatus)
 
 LRESULT CDlgTest1Wnd::OnNcHitTest(CPoint point)
 {
-	SetTipWndLayout();
 	return CDialog::OnNcHitTest(point);
 }
 
@@ -118,16 +117,35 @@ void CDlgTest1Wnd::SetWndControlLayout()
 {
 }
 
-void CDlgTest1Wnd::SetTipWndLayout()
-{
-}
-
 //////////////////////////////////////////////////////////////////////////
 //
 void CDlgTest1Wnd::OnBnClickedButton1()
 {
 }
 
+#include "../../MemDC.hpp"
 void CDlgTest1Wnd::OnBnClickedButton2()
 {
+	for (int i=0; i<100000; ++i)
+	{
+		CDC *pdcScreen = CDC::FromHandle(::GetDC(NULL));
+
+		CBitmap bmpMem;
+		bmpMem.CreateCompatibleBitmap(pdcScreen, 1280, 800);
+
+		CDC dcMem;
+		dcMem.CreateCompatibleDC(pdcScreen);
+		CBitmap *pbmpOld = dcMem.SelectObject(&bmpMem);
+
+		dcMem.BitBlt(0, 0, 1280, 800, pdcScreen, 0, 0, SRCCOPY);
+
+		dcMem.SelectObject(pbmpOld);
+
+		HBITMAP hBmpScreenBkg = (HBITMAP)bmpMem.GetSafeHandle();
+		::DeleteObject(hBmpScreenBkg);
+
+		dcMem.DeleteDC();
+		bmpMem.DeleteObject();
+		::ReleaseDC(NULL, pdcScreen->m_hDC);
+	}
 }
