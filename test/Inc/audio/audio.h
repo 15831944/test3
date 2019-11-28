@@ -16,10 +16,10 @@ enum AudioApi {
 };
 
 enum AudioMsgId {
-	MSG_PTR_EMPTY_ID,
-	MSG_DEV_DATA_ID,
+	MSG_EMPTY_PTR_ID,
+	MSG_HANDLE_API_ID,
+	MSG_DEVICE_DATA_ID,
 	MSG_FRAME_DATA_ID,
-	MSG_API_HANDLE_ID,
 };
 
 enum AudioSampleFormat {

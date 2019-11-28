@@ -34,7 +34,7 @@ int CAudioWaveAPi::audio_geterror()
 
 bool CAudioWaveAPi::audio_init()
 {
-	CDevHandler::Instance().regDevObj(MSG_API_HANDLE_ID, new WaveHandle);
+	CDevHandler::Instance().regDevObj(MSG_HANDLE_API_ID, new WaveHandle);
 	return true;
 }
 
@@ -53,7 +53,7 @@ bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevDataMgr d
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle*)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle*)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
@@ -95,7 +95,7 @@ bool CAudioWaveAPi::audio_openDevice(AudioPcmFormat stAudioFormat, CDevDataMgr d
 		LONG lDeviceState = 0;
 		::InterlockedExchange(&lDeviceState, 1);
 
-		CDevHandler::Instance().regDevObj(MSG_DEV_DATA_ID, &devData);
+		CDevHandler::Instance().regDevObj(MSG_DEVICE_DATA_ID, &devData);
 
 		bRet = true;
 	} while (false);
@@ -109,14 +109,14 @@ void CAudioWaveAPi::audio_closeDevice()
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -125,7 +125,7 @@ void CAudioWaveAPi::audio_closeDevice()
 
 		MMRESULT mmr;
 
-		CDevHandler::Instance().removeDevObj(MSG_DEV_DATA_ID);
+		CDevHandler::Instance().removeDevObj(MSG_DEVICE_DATA_ID);
 
 		bRet = true;
 	} while (false);
@@ -137,14 +137,14 @@ void CAudioWaveAPi::audio_startStream()
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -187,14 +187,14 @@ void CAudioWaveAPi::audio_closeStream()
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -241,14 +241,14 @@ void CAudioWaveAPi::audio_stopStream()
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -289,14 +289,14 @@ void CAudioWaveAPi::audio_abortStream()
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -339,14 +339,14 @@ void CAudioWaveAPi::audio_addBuffer(CDataFrameMgr &dataBuff)
 
 	do
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -409,14 +409,14 @@ void CAudioWaveAPi::audio_openBuffer(CDataFrameMgr &dataBuff)
 
 	do 
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
@@ -459,14 +459,14 @@ void CAudioWaveAPi::audio_closeBuffer(CDataFrameMgr &dataBuff)
 	
 	do
 	{
-		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_API_HANDLE_ID);
+		WaveHandle *pWaveHandle = (WaveHandle *)CDevHandler::Instance().getDevObj(MSG_HANDLE_API_ID);
 		if (pWaveHandle == NULL)
 		{
 			bRet = false;
 			break;
 		}
 
-		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEV_DATA_ID);
+		CDevDataMgr *pDevData = (CDevDataMgr *)CDevHandler::Instance().getDevObj(MSG_DEVICE_DATA_ID);
 		if (pDevData == NULL)
 		{
 			bRet = false;
